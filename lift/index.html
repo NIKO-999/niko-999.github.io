@@ -7065,17 +7065,16 @@ function bdMake(b, m, n, pre) {
   }
   return g;
 }
-/* GIANT SLAYER IS A SWORD OVER A GALAXY. A medal of dark glass with a
-   spiral galaxy turning in it, set in lavender chrome ticked like a dial,
-   and standing proud of it a blade: bevelled steel, a fuller that glows, a
+/* GIANT SLAYER IS A SWORD OVER A GALAXY. No medal and no rim: a spiral
+   galaxy turning in the sky behind, and in front of it a blade: bevelled steel, a fuller that glows, a
    winged guard with a gem in it, a bound grip and a pommel. Round all of it
    the sky bdSpace gives, and meteorites: rough rocks on three tilted orbits,
-   each tumbling, each dragging a tail of light. The back is engraved. */
+   each tumbling, each dragging a tail of light. */
 function bdSword(b, n, pre) {
   var T = BD3, g = new T.Group(), hi = n > 600, N = hi ? 1024 : 384, R = N / 2, i, sd = 11;
   function rnd() { sd = (sd * 16807) % 2147483647; return sd / 2147483647; }
   var cc = document.createElement('canvas'); cc.width = cc.height = N; var x = cc.getContext('2d');
-  var bg = x.createRadialGradient(R, R, 0, R, R, R); bg.addColorStop(0, '#2a1a5e'); bg.addColorStop(.55, '#120a30'); bg.addColorStop(1, '#05030f'); x.fillStyle = bg; x.fillRect(0, 0, N, N);
+  var bg = x.createRadialGradient(R, R, 0, R, R, R); bg.addColorStop(0, '#2a1a5e'); bg.addColorStop(.6, '#0c0722'); bg.addColorStop(1, '#000000'); x.fillStyle = bg; x.fillRect(0, 0, N, N);
   x.globalCompositeOperation = 'lighter';
   for (i = 0; i < (hi ? 5200 : 1500); i++) {
     var arm = i % 2, u = Math.pow(rnd(), .7), th = u * 9.5 + arm * Math.PI + (rnd() - .5) * (.5 + u * .7), rr = (u * .46 + (rnd() - .5) * .05) * N, px = R + rr * Math.cos(th), py = R + rr * Math.sin(th) * .92, pr = (.0015 + rnd() * rnd() * .012) * N;
@@ -7085,19 +7084,12 @@ function bdSword(b, n, pre) {
   var core = x.createRadialGradient(R, R, 0, R, R, N * .16); core.addColorStop(0, 'rgba(255,244,225,.95)'); core.addColorStop(.4, 'rgba(210,170,255,.4)'); core.addColorStop(1, 'rgba(120,90,255,0)'); x.fillStyle = core; x.fillRect(0, 0, N, N);
   for (i = 0; i < (hi ? 500 : 160); i++) { x.fillStyle = 'rgba(255,255,255,' + (.3 + rnd() * .7) + ')'; var ss = rnd() < .08 ? 2.2 : 1; x.fillRect(rnd() * N, rnd() * N, ss, ss); }
   var ct = new T.CanvasTexture(cc); ct.encoding = T.sRGBEncoding; ct.center.set(.5, .5);
-  var circ = function (r0) { var sh = new T.Shape(); sh.absarc(0, 0, r0, 0, Math.PI * 2, false); return sh; };
-  var face = new T.Mesh(bdPolar(circ(.9), .06), new T.MeshPhysicalMaterial({ color: 0xffffff, map: ct, emissive: 0xffffff, emissiveMap: ct, emissiveIntensity: .75, roughness: .12, metalness: 0, clearcoat: 1, clearcoatRoughness: .03, envMapIntensity: .5 })); face.position.z = .05; g.add(face);
+  /* NO MEDAL: the sword stands alone, and the galaxy is the sky behind it,
+     turned to face you however the sword is spun. */
+  var gal = new T.Mesh(new T.PlaneGeometry(2.7, 2.7), new T.MeshBasicMaterial({ map: ct, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); gal.renderOrder = 1; g.add(gal);
   var chrome = new T.MeshPhysicalMaterial({ color: 0xb9b0ee, metalness: 1, roughness: .18, envMapIntensity: 1.15 }), bright = new T.MeshPhysicalMaterial({ color: 0xf2e6ff, metalness: 1, roughness: .1, envMapIntensity: 1.3 });
-  var rs = circ(1); rs.holes.push(new T.Path(circ(.89).getPoints(hi ? 96 : 48).reverse()));
-  var rim = new T.Mesh(new T.ExtrudeGeometry(rs, { depth: .1, bevelEnabled: true, bevelThickness: .04, bevelSize: .035, bevelSegments: hi ? 6 : 3, curveSegments: hi ? 96 : 48 }), chrome); rim.position.z = -.05; g.add(rim);
-  var inner = new T.Mesh(new T.TorusGeometry(.895, .014, 10, hi ? 160 : 80), bright); inner.position.z = .09; g.add(inner);
-  var stud = new T.SphereGeometry(.017, 10, 8), tick = new T.BoxGeometry(.008, .05, .012);
-  for (i = 0; i < 60; i++) { var a = i / 60 * Math.PI * 2, mk = new T.Mesh(i % 5 ? tick : stud, i % 5 ? chrome : bright); mk.position.set(.955 * Math.cos(a), .955 * Math.sin(a), .092); mk.rotation.z = a + Math.PI / 2; g.add(mk); }
-  var bm = (pre && pre.b) || (bdSetFace(n), bdBack(b, '#cfc8f2'));
-  var back = new T.Mesh(bdPolar(circ(.9), .06, true), new T.MeshPhysicalMaterial({ color: 0xffffff, map: bm.col, metalness: 1, roughness: 1, metalnessMap: bm.orm, roughnessMap: bm.orm, bdNorm: bm.n, envMapIntensity: 1.15, reflectivity: .2 }));
-  back.rotation.y = Math.PI; back.position.z = -.05; g.add(back);
   /* THE SWORD */
-  var sw = new T.Group(); sw.position.z = .12; g.add(sw);
+  var sw = new T.Group(); sw.position.y = -.2; sw.scale.setScalar(1.18); g.add(sw);
   var steel = new T.MeshPhysicalMaterial({ color: 0xe6ebff, metalness: 1, roughness: .07, envMapIntensity: 1.5 }), dark = new T.MeshPhysicalMaterial({ color: 0x241c44, metalness: .6, roughness: .45 });
   var glowM = new T.MeshBasicMaterial({ color: 0xa48bff, toneMapped: false }), gemM = new T.MeshPhysicalMaterial({ color: 0x7c5cff, emissive: 0x7c5cff, emissiveIntensity: 1.1, roughness: .05, metalness: 0, clearcoat: 1 });
   var bl = new T.Shape(); bl.moveTo(0, 1.22); bl.lineTo(.105, .98); bl.lineTo(.092, -.26); bl.lineTo(-.092, -.26); bl.lineTo(-.105, .98); bl.closePath();
@@ -7124,9 +7116,9 @@ function bdSword(b, n, pre) {
     }
   });
   bdSpace(g);
-  var sky = g.userData.cr;
+  var sky = g.userData.cr, gq = new T.Quaternion(), gz = new T.Quaternion(), zA = new T.Vector3(0, 0, 1), gp = new T.Vector3();
   g.userData.cr = function (t) {
-    sky(t); ct.rotation = t * .05; gemM.emissiveIntensity = 1 + Math.sin(t * 2.1) * .35; bladeGlow.intensity = 1.2 + Math.sin(t * 1.7) * .35;
+    sky(t); g.getWorldQuaternion(gq); gq.invert(); gp.set(0, 0, -.28).applyQuaternion(gq); gal.quaternion.copy(gq).multiply(gz.setFromAxisAngle(zA, t * .05)); gal.position.copy(gp); gemM.emissiveIntensity = 1 + Math.sin(t * 2.1) * .35; bladeGlow.intensity = 1.2 + Math.sin(t * 1.7) * .35;
     rocks.forEach(function (q) { var a = q.p + t * q.w, d = q.w > 0 ? 1 : -1; q.m.position.set(q.r * Math.cos(a), q.r * Math.sin(a), 0); q.m.rotation.set(t * q.sx, t * q.sy, 0);
       var ab = a - d * .125; q.t.position.set(q.r * Math.cos(ab), q.r * Math.sin(ab), 0); q.t.rotation.z = ab + d * Math.PI / 2; });
   };
