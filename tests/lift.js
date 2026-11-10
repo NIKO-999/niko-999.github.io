@@ -1530,6 +1530,11 @@ const freeze = (at) => `(() => {
     await top(page).locator('#lfWsDone').click(); await settle(page);
     await page.reload(); await page.waitForTimeout(1800);
     ok('so it comes once a week, not every open', await page.locator('#lfWeekSum').count() === 0);
+    ok('but Home keeps a way back into it, named for the week', await page.locator('#lfLastWeek').count() === 1 && /2–8 Nov/.test(await page.textContent('#lfLastWeek')));
+    await page.click('#lfLastWeek'); await settle(page);
+    ok('and pressing it plays that week again, whenever you like', await top(page).locator('#lfWeekSum').count() === 1 && /2–8 Nov/.test(await top(page).locator('#lfWeekSum').textContent()));
+    ok('with only the one week offered: there is no list of older ones', await page.locator('.lf-lw').count() === 1 && (await store(page)).wkSum === '2026-11-02');
+    await top(page).locator('#lfWsDone').click(); await settle(page);
     await c.close();
   }
   /* a week that fell short: red, one line, and what was missed */

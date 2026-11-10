@@ -336,6 +336,9 @@ body.lf-v-home .lf-glow { opacity: 1; }
   border-radius: 999px; background: var(--card2); font-weight: 600; font-size: 14px;
 }
 .lf-btn.is-full { width: 100%; }
+.lf-lw { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; margin-top: 12px; }
+.lf-lw b { margin-left: auto; font-weight: 600; color: var(--dim); font-size: 13px; }
+.lf-lw .lf-ic { width: 16px; height: 16px; color: var(--dim); }
 .lf-btn.is-ink { background: var(--ink); color: var(--on-ink); }
 .lf-btn.is-log { background: var(--log-g, var(--log)); color: var(--on-log); }
 .lf-btn.is-bad { color: var(--bad); }
@@ -2178,7 +2181,20 @@ function lfRenderHome() {
   root.appendChild(lfLegCard());
   var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard()); setTimeout(lfWeekDone, 0);
   root.appendChild(r);
+  var lw = lfLastWeekBtn(); if (lw) root.appendChild(lw);
   root.appendChild(lfBwCard());
+}
+/* LAST WEEK, AGAIN. The week in review comes up once and was then gone for
+   good. This opens it whenever you like, for the one week it is about: the
+   week just finished. When the next one finishes it takes its place, and
+   the older one is not offered anywhere. A week with no workout has none. */
+function lfLastWeekOf() { var k = lfWeekKey(), m = k ? parseYmd(k) : addDays(monday(today()), -7); return windowStats(m, addDays(m, 6)).wo ? m : null; }
+function lfLastWeekBtn() {
+  var m = lfLastWeekOf(); if (!m) return null;
+  var e = addDays(m, 6), b = el('<button type="button" class="lf-card lf-tap lf-lw" id="lfLastWeek"><span class="lf-lab">Last week in review</span><b></b>' + IC.chev + '</button>');
+  $('b', b).textContent = m.getDate() + (m.getMonth() !== e.getMonth() ? ' ' + MON[m.getMonth()].slice(0, 3) : '') + '\u2013' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
+  b.addEventListener('click', function () { var mm = lfLastWeekOf(); if (mm) lfWeekSheet(mm); });
+  return b;
 }
 
 /* The four ways a choice day can go, as one press each. */
