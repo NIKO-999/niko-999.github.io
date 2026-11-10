@@ -1768,11 +1768,12 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(600);
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="prestige"]').click()); await page.waitForTimeout(500);
-    const pr = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), e = s.querySelector('.fm-em'); return e ? { w: e.getBoundingClientRect().width, h: e.getBoundingClientRect().height, anim: getComputedStyle(e).animationName, ring: getComputedStyle(s.querySelector('.fr-ban-av'), '::before').display, name: (e.querySelector('text') || {}).textContent, big: s.querySelector('.fr-ban').classList.contains('has-emblem') } : null; });
-    ok('the Prestige frame is an emblem, not a ring: far bigger than the picture, with your name on its ribbon, building in, and no circle drawn', pr && pr.h >= 160 && /fm-in/.test(pr.anim) && pr.ring === 'none' && pr.name === 'YOU' && pr.big, pr);
+    const pr = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { big: s.querySelector('.fr-ban').classList.contains('has-emblem') || s.querySelector('.fr-ban-av').classList.contains('em-fall'), ring: getComputedStyle(s.querySelector('.fr-ban-av'), '::before').display, cls: s.querySelector('.fr-ban-av').className }; });
+    const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('the Prestige frame is a 3D emblem, not a ring: forged iron, lava moving through it, lit by the accent, no banner and no text', pr && pr.big && /is-fm-prestige/.test(pr.cls) && /ShaderMaterial/.test(src) && /function lfEmblem3/.test(src) && !/lfEmblem\(/.test(src) && !/ToUpperCase\(\)\.slice\(0, 10\)/.test(src), pr);
     await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="sovereign"]').click()); await page.waitForTimeout(500);
-    ok('and there is a second, gold one', await page.locator('.fm-em.is-sovereign').count() === 1 && await page.locator('.fm-em.is-prestige').count() === 0);
+    ok('and there is a second, the obsidian spade', await page.locator('.fr-ban-av.is-fm-sovereign').count() === 1 && await page.locator('.fr-ban-av.is-fm-prestige').count() === 0);
     const st = await store(page);
     ok('and the last choice is kept', st.ti === 'none', st.ti);
     await c.close();
