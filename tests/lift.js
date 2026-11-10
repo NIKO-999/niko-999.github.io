@@ -1559,7 +1559,7 @@ const freeze = (at) => `(() => {
     ok('but Home keeps a way back into it, named for the week', await page.locator('#lfLastWeek').count() === 1 && /2–8 Nov/.test(await page.textContent('#lfLastWeek')));
     await page.click('#lfLastWeek'); await settle(page);
     ok('and pressing it plays that week again, whenever you like', await top(page).locator('#lfWeekSum').count() === 1 && /2–8 Nov/.test(await top(page).locator('#lfWeekSum').textContent()));
-    ok('with only the one week offered: there is no list of older ones', await page.locator('.lf-lw').count() === 1 && (await store(page)).wkSum === '2026-11-02');
+    ok('with only the one week offered: there is no list of older ones', await page.locator('#lfLastWeek').count() === 1 && (await store(page)).wkSum === '2026-11-02');
     await top(page).locator('#lfWsDone').click(); await settle(page);
     await c.close();
   }
@@ -1734,6 +1734,32 @@ const freeze = (at) => `(() => {
     ok('a week that goes past its goal gets a moment of its own', await o.page.evaluate(() => window.lfOvers) === 1 && await o.page.locator('.lf-gol').count() === 1 && /Overtime/.test(await o.page.textContent('.lf-gol')) && (await store(o.page)).wkOver === '2026-10-26');
     await o.c.close();
     ok('Two-a-Day pays a title and a flair as well as its badge', /\['twice', 'Double Time', 'Earn Two-a-Day'/.test(src2) && /\['twice', 'Double', 'Earn Two-a-Day'/.test(src2) && /var BD_HALO = \{ twice: 1/.test(src2) && /function wkDays/.test(src2));
+    /* THE MONTH IN REVIEW, and the card that goes in a story */
+    const oct = ['2026-10-02', '2026-10-09', '2026-10-16', '2026-10-23'].map((d, k) => W('mo' + k, d, '07'));
+    o = await ctx({ unit: 'kg', goal: 1, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: oct }, '2026-11-01T10:00:00');
+    await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
+    ok('on the first the month just gone comes up by itself, named, with what you moved', await o.page.locator('#lfMonthSum').count() === 1 && /October/.test(await o.page.textContent('#lfMonthSum')) && /4 sessions/.test(await o.page.textContent('#lfMonthSum')) && (await store(o.page)).moSum === '2026-10');
+    ok('and it never says red: a month is not graded', await o.page.evaluate(() => !document.querySelector('.lf-wsh.is-miss')));
+    await o.page.click('#lfMoShare'); await settle(o.page);
+    ok('the card is a 1080 by 1920 picture, shown as it will go out, with Share and Save', await o.page.locator('.lf-card-pv img').count() === 1 && JSON.stringify(await o.page.evaluate(() => window.lfCardLast)) === '{"w":1080,"h":1920}' && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 1);
+    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfMoDone'); await settle(o.page);
+    await o.page.reload(); await o.page.waitForTimeout(4500);
+    ok('once: a reload does not bring it back', await o.page.locator('#lfMonthSum').count() === 0);
+    await o.c.close();
+    o = await ctx({ unit: 'kg', goal: 1, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: oct }, '2026-11-05T10:00:00');
+    await o.page.waitForTimeout(4200);
+    ok('after the first days it does not come up by itself, but last month is one press away on Home', await o.page.locator('#lfMonthSum').count() === 0 && await o.page.locator('#lfLastMonth').count() === 1 && /October/.test(await o.page.textContent('#lfLastMonth')));
+    await o.page.click('#lfLastMonth'); await settle(o.page);
+    ok('and pressing it plays it, with the weeks on goal and the best week', await o.page.locator('#lfMonthSum').count() === 1 && /4 of 5 weeks on goal|weeks on goal/.test(await o.page.textContent('#lfMonthSum')) && /Best week/.test(await o.page.textContent('#lfMonthSum')));
+    await o.c.close();
+    o = await ctx({ unit: 'kg', goal: 1, wo: [W('t1', '2026-10-30', '07')] }, '2026-10-30T18:00:00');
+    ok('a month with no workouts in it is not offered', await o.page.locator('#lfLastMonth').count() === 0);
+    await o.page.click('#lfPick'); await settle(o.page);
+    ok('a finished workout offers its card, weights and all', await top(o.page).locator('#lfFinShare').count() === 1);
+    await top(o.page).locator('#lfFinShare').click(); await settle(o.page);
+    ok('and the card is made at story size', JSON.stringify(await o.page.evaluate(() => window.lfCardLast)) === '{"w":1080,"h":1920}');
+    await o.c.close();
+    ok('the card keeps to the middle of a story and shows every set: the weights are on it', /bottom = 1670/.test(src2) && /function lfCardWorkout/.test(src2) && /navigator\.canShare\(\{ files: \[f\] \}\)/.test(src2) && /fmtWS\(q\.w\)/.test(src2));
   }
   /* ── RANK: a level, a title, a flair, a frame and a backdrop, worn and seen by friends ── */
   {
