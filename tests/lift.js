@@ -837,8 +837,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 106 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 106/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 122 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 122/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -875,9 +875,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 106/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 122/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 106);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 122);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -917,9 +917,9 @@ const freeze = (at) => `(() => {
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
     ok('ten Stairmaster sessions earn Step Up, and its hours count toward Summit', shelf.includes('Step Up:28 Oct') && shelf.includes('Summit:5 / 10 h'), shelf);
     ok('ten on the incline treadmill earn Uphill', shelf.includes('Uphill:30 Oct') && shelf.includes('Mountain Goat:5 / 10 h'), shelf);
-    ok('reaching the goal weight earns Dialled In, on the day it was logged', shelf.includes('Dialled In:20 Oct'), shelf);
+    ok('nothing on the shelf is about your body weight', !shelf.some((t) => /Dialled In|Weigh-In|Double Bodyweight/.test(t)), shelf);
     ok('abs in ten workouts earn Core Ready, counting toward the Six-Pack Club', shelf.includes('Core Ready:10 Oct') && shelf.includes('Six-Pack Club:20 / 50'), shelf);
-    ok('each has its own colour', ['stair10', 'bwgoal', 'abs10'].every(Boolean) && await page.getAttribute('#lfBadges .lf-coin[data-b="stair10"]', 'data-m') === 'cardio' && await page.getAttribute('#lfBadges .lf-coin[data-b="bwgoal"]', 'data-m') === 'body' && await page.getAttribute('#lfBadges .lf-coin[data-b="abs10"]', 'data-m') === 'core');
+    ok('each has its own colour', await page.getAttribute('#lfBadges .lf-coin[data-b="stair10"]', 'data-m') === 'cardio' && await page.getAttribute('#lfBadges .lf-coin[data-b="abs10"]', 'data-m') === 'core');
     await c.close();
   }
   /* the target badges read the sets you log against your own weekly targets */
@@ -1322,6 +1322,20 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── COLLECTIONS: the shelf in sections, and rarity climbing with how long a badge takes ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'k0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 5 }] }] }] });
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const cols = await page.$$eval('#lfBadges .lf-bcol h4', (x) => x.map((e) => e.textContent));
+    ok('the badges are in collections', cols.join('|') === 'Sessions|Consistency|Volume|Sets & reps|Strength|Exercises|Body parts|Cardio|Friends', cols.join('|'));
+    ok('each says how much of it is earned', /^\d+ \/ \d+$/.test(await page.textContent('#lfBadges .lf-bcol[data-col="vol"] .lf-bcol-t span')));
+    const src = require('fs').readFileSync(require('path').join(__dirname, '../lift/index.html'), 'utf8');
+    const mythS = (src.match(/var BD_MYTH = \{([^}]*)\}/) || [])[1] || '', haloS = (src.match(/var BD_HALO = \{([^}]*)\}/) || [])[1] || '';
+    ok('a million moved is exotic, five million and ten mythic', /\bv1m: 1/.test(haloS) && !/\bv1m: 1/.test(mythS) && /\bv5m: 1/.test(mythS) && /\bv10m: 1/.test(mythS) && /\bwo500: 1/.test(mythS) && /\bwo250: 1/.test(haloS));
+    ok('volume has its own collection with the big ones in it', await page.locator('#lfBadges .lf-bcol[data-col="vol"] + .lf-bdg .lf-coin[data-b="v5m"]').count() === 1);
+    await c.close();
+  }
+
   /* ── MYTHIC: the longest counts, struck past the halo ── */
   {
     const wo = []; for (let i = 0; i < 366; i++) { const d = new Date(2025, 9, 1 + i, 7); wo.push({ id: 'y' + i, d: d.toISOString().slice(0, 10), s: d.getTime(), e: d.getTime() + 3600e3, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }); }
@@ -1372,7 +1386,7 @@ const freeze = (at) => `(() => {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 106);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 122);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
     ok('the link is spent: the hash leaves the address bar', await page.evaluate(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || '')));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
