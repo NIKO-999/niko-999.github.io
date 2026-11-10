@@ -1065,6 +1065,37 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-lv-q.is-drop { background: rgba(150,120,255,.16); }
 .fr-lv-q.is-left { width: 30px; height: 26px; padding: 0; background: none; box-shadow: inset 0 0 0 1.5px var(--line); }
 @media (prefers-reduced-motion: reduce) { .fr-lv * { transition: none; animation: none; } }
+/* what you wear: a title beside the name, a flair, a frame round the picture */
+.fr-ti { margin: 3px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--dim); }
+.fr-ti[hidden] { display: none; }
+.fr-t b[data-tt]::after { content: attr(data-tt); margin-left: 8px; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; -webkit-text-fill-color: var(--dim); color: var(--dim); }
+.lf-fl { display: inline-block; width: .82em; height: .82em; margin-left: .38em; vertical-align: -.05em; color: var(--fc); filter: drop-shadow(0 0 4px var(--fc)); animation: lf-flp 3.4s ease-in-out infinite; }
+.lf-fl svg { display: block; width: 100%; height: 100%; fill: var(--fc); stroke: none; overflow: visible; }
+.lf-fl.is-st svg { fill: none; stroke: var(--fc); stroke-width: 2.2; stroke-linecap: round; }
+@keyframes lf-flp { 0%, 100% { transform: scale(1); opacity: .92; } 50% { transform: scale(1.14); opacity: 1; } }
+.fr-ban-av[class*="is-fm-"] { position: relative; }
+.fr-ban-av[class*="is-fm-"]::before { content: ''; position: absolute; inset: -7px; border-radius: 50%; background: var(--fm); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); pointer-events: none; }
+.fr-ban-av.is-fm-ring { --fm: conic-gradient(#fff, #8a8a93, #fff, #8a8a93, #fff); }
+.fr-ban-av.is-fm-ember { --fm: conic-gradient(#ff6a00, #ffd000, #ff3d00, #ffb020, #ff6a00); }
+.fr-ban-av.is-fm-frost { --fm: conic-gradient(#7dd3fc, #e0f2fe, #38bdf8, #bae6fd, #7dd3fc); }
+.fr-ban-av.is-fm-aurora { --fm: conic-gradient(#34d399, #60a5fa, #a78bfa, #f472b6, #34d399); }
+.fr-ban-av.is-fm-prism { --fm: conic-gradient(#ff5f6d, #ffc371, #7bed9f, #4facfe, #c471ed, #ff5f6d); }
+.fr-ban-av.is-fm-molten { --fm: conic-gradient(#ff5a1f, #ffc46b, #7a1500, #ff8a1c, #ff5a1f); }
+.fr-ban-av.is-fm-aurora::before, .fr-ban-av.is-fm-prism::before { animation: lf-fmr 7s linear infinite; }
+.fr-ban-av.is-fm-molten::before { animation: lf-fmr 4.5s linear infinite; filter: drop-shadow(0 0 5px #ff5a1f); }
+.fr-ban-av.is-fm-ember::before { filter: drop-shadow(0 0 4px #ff6a00); }
+@keyframes lf-fmr { to { transform: rotate(360deg); } }
+.rk-opts { margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
+.rk-o { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 46px; padding: 6px 12px; border-radius: 12px; text-align: left; background: var(--card2); box-shadow: inset 0 0 0 1.5px transparent; }
+.rk-o b { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
+.rk-o span { font-size: 11.5px; color: var(--dim); }
+.rk-o[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px var(--log); }
+.rk-o.is-lock { opacity: .5; cursor: default; }
+.rk-set { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; }
+.rk-set b { font-weight: 600; color: var(--dim); display: inline-flex; align-items: center; }
+.rk-rows { margin-top: 6px; }
+
+@media (prefers-reduced-motion: reduce) { .lf-fl, .fr-ban-av::before { animation: none !important; } }
 .fr-row.is-gone { opacity: .6; }
 .fr-wk { display: grid; justify-items: end; gap: 1px; }
 .fr-wk b { font-size: 17px; font-weight: 700; }
@@ -1704,6 +1735,13 @@ function lfClean(o) {
   }
   if (typeof o.wkDone === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkDone)) d.wkDone = o.wkDone;
   if (typeof o.wkSum === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkSum)) d.wkSum = o.wkSum;
+  /* what you wear (a title, a flair, a frame) and what has been celebrated */
+  ['ti', 'fl', 'fm'].forEach(function (k) { if (typeof o[k] === 'string' && /^[a-z0-9]{2,10}$/.test(o[k])) d[k] = o[k]; });
+  if (o.mseen && typeof o.mseen === 'object') {
+    var ms = { u: [] }; ['wo', 'vol', 'pr'].forEach(function (k) { ms[k] = Math.max(0, Math.round(+o.mseen[k]) || 0); });
+    if (Array.isArray(o.mseen.u)) ms.u = o.mseen.u.filter(function (x) { return typeof x === 'string' && /^[a-z]{2}:[a-z0-9]{2,10}$/.test(x); }).slice(0, 120);
+    d.mseen = ms;
+  }
   if (Array.isArray(o.show)) d.show = o.show.filter(function (k, i, a) { return typeof k === 'string' && /^[a-z0-9]{2,8}$/.test(k) && a.indexOf(k) === i; }).slice(0, 3);
   if (o.bseen && typeof o.bseen === 'object') { d.bseen = {}; Object.keys(o.bseen).forEach(function (k) { if (/^[a-z0-9]{2,8}$/.test(k)) d.bseen[k] = 1; }); }
   /* A REST DAY taken on purpose, a date and nothing else. */
@@ -2493,8 +2531,16 @@ function lfGoalRun() {
   return n;
 }
 function lfGoalHit() {
-  var g = S.goal, run = lfGoalRun(), segT = Math.min(220, 1300 / g), land = g * segT + 250;
-  var v = el('<div class="lf-gol" role="dialog" aria-modal="true" aria-label="Weekly goal hit"><div class="lf-gol-fx" aria-hidden="true"></div><div class="lf-gol-c">'
+  var g = S.goal, run = lfGoalRun();
+  var v = lfMoment({ g: g, num: g, k: 'Weekly goal', h: 'Goal hit', aria: 'Weekly goal hit', s: g + ' of ' + g + (g === 1 ? ' workout' : ' workouts') + (run > 1 ? ' · ' + run + ' weeks in a row' : ' this week') });
+  window.lfGoalHits = (window.lfGoalHits || 0) + 1;
+  return v;
+}
+/* ONE FULL-SCREEN MOMENT, for anything worth stopping for: the weekly goal, a
+   milestone, a level, a duel won. `g` is how many pieces the ring closes in. */
+function lfMoment(o) {
+  var g = o.g || 1, segT = Math.min(220, 1300 / g), land = g * segT + 250;
+  var v = el('<div class="lf-gol" role="dialog" aria-modal="true" aria-label="Moment"><div class="lf-gol-fx" aria-hidden="true"></div><div class="lf-gol-c">'
     + '<div class="lf-gol-ring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="lf-gol-tr" cx="60" cy="60" r="50"/></svg><b class="lf-num"></b></div>'
     + '<div class="lf-gol-k">Weekly goal</div><h2>Goal hit</h2><p class="lf-gol-s"></p><span class="lf-gol-tap">Tap to keep going</span></div></div>');
   var svg = $('svg', v), C = 2 * Math.PI * 50, gap = g > 1 ? Math.min(6, C / g * .18) : 0, seg = C / g - gap;
@@ -2505,8 +2551,10 @@ function lfGoalHit() {
     c.style.setProperty('--len', seg.toFixed(2)); c.style.animationDelay = (150 + i * segT) + 'ms';
     svg.appendChild(c);
   }
-  $('.lf-num', v).textContent = g; $('.lf-num', v).style.animationDelay = land + 'ms';
-  $('.lf-gol-s', v).textContent = g + ' of ' + g + (g === 1 ? ' workout' : ' workouts') + (run > 1 ? ' · ' + run + ' weeks in a row' : ' this week');
+  $('.lf-num', v).textContent = o.num; $('.lf-num', v).style.animationDelay = land + 'ms';
+  if (String(o.num).length > 3) $('.lf-num', v).style.fontSize = '50px';
+  v.setAttribute('aria-label', o.aria || o.h); $('.lf-gol-k', v).textContent = o.k; $('h2', v).textContent = o.h;
+  $('.lf-gol-s', v).textContent = o.s || '';
   v.style.setProperty('--land', land + 'ms');
   /* the fireworks: rockets climb from the foot of the screen and break into sparks */
   var fx = $('.lf-gol-fx', v), shots = [[.5, .3, 0], [.2, .22, 260], [.8, .26, 420], [.32, .5, 760], [.7, .46, 900]];
@@ -2525,12 +2573,12 @@ function lfGoalHit() {
   function close() {
     if (done) return; done = true; document.removeEventListener('keydown', esc); clearTimeout(tm);
     v.classList.add('is-out'); setTimeout(function () { v.remove(); }, 420);
+    if (o.done) setTimeout(o.done, 460);
   }
   function esc(e) { if (e.key === 'Escape') close(); }
   v.addEventListener('click', close); document.addEventListener('keydown', esc);
   var tm = setTimeout(close, land + 4200);
   document.body.appendChild(v);
-  window.lfGoalHits = (window.lfGoalHits || 0) + 1;
   buzz([20, 50, 20, 50, 20, 120, 60]);
   setTimeout(function () { buzz([40, 40, 80]); }, land);
   return v;
@@ -3062,6 +3110,7 @@ function lfFinish() {
   if (sessSheet) sessSheet.close(true); sessSheet = null;
   lfWkHold = 1; lfRender(); buzz([15, 50, 15]);
   setTimeout(function () { lfSummary(w, prs); }, 260);
+  setTimeout(lfMomentsRun, 1500);
 }
 /* THE FINISH SCREEN: the one screen made to be looked at. A check in the
    accent, the volume counting up to what you moved, set against the last
@@ -3899,6 +3948,7 @@ function lfRenderYou() {
     g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
     $('#lfGoal', c).appendChild(g);
   }
+  c.appendChild(el('<span class="lf-flab">Name and profile</span>')); c.appendChild(lfRkRows());
   if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfThemeCard());
@@ -4175,6 +4225,7 @@ function frStats() {
   for (var q = 7; q >= 0; q--) { var wa = addDays(mon, -7 * q); v8.push(Math.round(windowStats(wa, addDays(wa, 6)).vol)); }
   var got = lfMuscleSets(mon, addDays(mon, 6));
   var mu = lfTargets().slice(0, 16).map(function (x) { return [x[0], got[x[0]] || 0, x[1]]; });
+  var rk = lfRkSt();
   return { wo30: in30.length, sets30: in30.reduce(function (a, w) { return a + woSets(w); }, 0), pr30: pr30, wk: wk, goal: S.goal,
     streak: streak, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8,
     /* what friends see of your badges: the three you showcase, or your latest three */
@@ -4189,6 +4240,8 @@ function frStats() {
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol),
     /* the accent you chose, as a hue, so your page is your colour to friends */
     ac: lfAccent(),
+    /* what you wear: a title, a flair, a frame and a backdrop, as ids */
+    ti: rk.ti, fl: rk.fl, fm: rk.fm,
     /* TRAINING NOW: when the workout in progress started, or nothing */
     lv: act ? act.s : 0,
     /* AND UNTIL WHEN TO BELIEVE IT: a short way ahead while the app is up and
@@ -4420,6 +4473,155 @@ function frStrip(dstr) {
 function lfShow() { var got = {}; lfBadgesCache().forEach(function (x) { if (x.d) got[x.b.id] = x.d; }); return (S.show || []).filter(function (id) { return got[id]; }).slice(0, 3); }
 var lfBC = null, lfBCk = '';
 function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.length - 1].id : '') + ':' + JSON.stringify(S.fx || '').length + ':' + (S.bw || []).length; if (k !== lfBCk) { lfBC = lfBadges(); lfBCk = k; } return lfBC; }
+/* ── WHAT YOU WEAR ──────────────────────────────────────────────────────
+   A title, a flair beside the name, a frame round the picture and a
+   backdrop behind the page, each earned from what you have done and worn
+   from Settings. Friends see what you chose. Never anything about weight. */
+function lfRkCtx() {
+  var got = lfBadgesCache().filter(function (x) { return x.d; });
+  var has = {}; got.forEach(function (x) { has[x.b.id] = 1; });
+  return { has: has, wo: S.wo.length, run: lfGoalRun(), bd: got.length, myth: got.some(function (x) { return x.b.t === 4; }), own: !!lfOwner() };
+}
+var RK = {
+  ti: [['rookie', 'Rookie', 'Where it starts', function () { return 1; }], ['regular', 'Regular', '10 workouts', function (c) { return c.wo >= 10; }],
+    ['adept', 'Adept', '25 workouts', function (c) { return c.wo >= 25; }], ['steady', 'Steady', '4 weeks on goal', function (c) { return c.run >= 4; }],
+    ['grinder', 'Grinder', '50 workouts', function (c) { return c.wo >= 50; }], ['lifer', 'Lifer', '100 workouts', function (c) { return c.wo >= 100; }],
+    ['collector', 'Collector', '25 badges', function (c) { return c.bd >= 25; }], ['elite', 'Elite', '150 workouts', function (c) { return c.wo >= 150; }],
+    ['relentless', 'Relentless', '12 weeks on goal', function (c) { return c.run >= 12; }], ['veteran', 'Veteran', '250 workouts', function (c) { return c.wo >= 250; }],
+    ['curator', 'Curator', '60 badges', function (c) { return c.bd >= 60; }], ['master', 'Master', '400 workouts', function (c) { return c.wo >= 400; }],
+    ['mythic', 'Mythic', 'Earn a mythic badge', function (c) { return c.myth; }], ['legend', 'Living Legend', '500 workouts', function (c) { return c.wo >= 500; }],
+    ['owner', 'Owner', 'One of one', function (c) { return c.own; }]],
+  fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
+    ['heart', 'Heart', '15 workouts', function (c) { return c.wo >= 15; }, 'M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z', '#f43f5e'],
+    ['drop', 'Drop', '20 workouts', function (c) { return c.wo >= 20; }, 'M12 2.5c3.5 4.4 6 7.4 6 10.7a6 6 0 0 1-12 0c0-3.3 2.5-6.3 6-10.7z', '#22d3ee'],
+    ['leaf', 'Leaf', '2 weeks on goal', function (c) { return c.run >= 2; }, 'M20 4C10 4 4 9 4 16c0 1.7.4 3 1 4 1-5 4-8 9-10-4 3-6 6-6.5 11C16 20 20 14 20 4z', '#4ade80'],
+    ['sun', 'Sun', 'Earn Early Bird', function (c) { return !!c.has.early; }, 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2', '#fdba74', 1],
+    ['flame', 'Flame', '40 workouts', function (c) { return c.wo >= 40; }, 'M12 2.5c.7 3.2 5.5 5.3 5.5 10.3a5.5 5.5 0 0 1-11 0c0-2.2 1-3.6 2.3-4.8.1 2 .9 3.1 2 3.4C10.3 8.5 10.6 5.6 12 2.5z', '#fb923c'],
+    ['wave', 'Wave', '45 workouts', function (c) { return c.wo >= 45; }, 'M2 14c3-5 5-5 8 0s5 5 8 0c1-1.6 2-2.6 4-3', '#2dd4bf', 1],
+    ['moon', 'Moon', 'Earn Night Owl', function (c) { return !!c.has.owl; }, 'M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z', '#c4b5fd'],
+    ['bolt', 'Bolt', '4 weeks on goal', function (c) { return c.run >= 4; }, 'M13.5 2L5 13.5h6L10 22l9-12.2h-6.3z', '#38bdf8'],
+    ['crown', 'Crown', '75 workouts', function (c) { return c.wo >= 75; }, 'M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z', '#fbbf24'],
+    ['shield', 'Shield', '8 weeks on goal', function (c) { return c.run >= 8; }, 'M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z', '#60a5fa'],
+    ['star', 'Star', '100 workouts', function (c) { return c.wo >= 100; }, 'M12 2.8l2.8 5.8 6.3.9-4.6 4.4 1.1 6.3L12 17.2l-5.6 3 1.1-6.3L2.9 9.5l6.3-.9z', '#fde047'],
+    ['trophy', 'Trophy', '125 workouts', function (c) { return c.wo >= 125; }, 'M7 3h10v5a5 5 0 0 1-10 0zM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3M12 13v4M8 21h8M9 17h6', '#fcd34d', 1],
+    ['infinity', 'Infinity', '16 weeks on goal', function (c) { return c.run >= 16; }, 'M7 8a4 4 0 1 0 0 8c4 0 6-8 10-8a4 4 0 1 1 0 8c-4 0-6-8-10-8z', '#a3e635', 1],
+    ['target', 'Bullseye', '200 workouts', function (c) { return c.wo >= 200; }, 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z', '#f87171', 1],
+    ['rocket', 'Rocket', '300 workouts', function (c) { return c.wo >= 300; }, 'M12 2c3 2 5 5.5 5 9.500l2 3.5-3.5-.5L12 22l-3.5-7.5L5 15l2-3.5C7 7.5 9 4 12 2z', '#e879f9'],
+    ['link', 'Link', 'Earn In Sync', function (c) { return !!c.has.duo1; }, 'M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1', '#818cf8', 1],
+    ['duo', 'Duo', 'Earn Gym Buddies', function (c) { return !!c.has.duo10; }, 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c0-3.5 2.800-6 6.500-6s6.500 2.500 6.500 6M17 10a3 3 0 1 0 0-6M18.500 14.200c2 .6 3.500 2.600 3.500 5.800', '#38bdf8', 1],
+    ['flag', 'Flag', 'Earn Squad Goals', function (c) { return !!c.has.squad; }, 'M5 21V4M5 4h11l-2 4 2 4H5', '#22c55e', 1],
+    ['medal', 'Medal', 'Earn Crowned', function (c) { return !!c.has.lead1; }, 'M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM8.500 13.500L7 21l5-2.500 5 2.500-1.500-7.500', '#f59e0b', 1],
+    ['pack', 'Paw', 'Earn Pack Leader', function (c) { return !!c.has.pack; }, 'M12 21c-3.300 0-5.500-1.800-5.500-4 0-2.700 3.200-5 5.500-5s5.500 2.300 5.500 5c0 2.200-2.200 4-5.500 4zM5 11.500a1.700 2.300 0 1 0 .01 0zM9 6.500a1.700 2.300 0 1 0 .01 0zM15 6.500a1.700 2.300 0 1 0 .01 0zM19 11.500a1.700 2.300 0 1 0 .01 0z', '#fb923c'],
+    ['gem', 'Gem', 'Earn a mythic badge', function (c) { return c.myth; }, 'M6.5 3.5h11l4 6L12 21 2.5 9.5z', '#a78bfa'],
+    ['barbell', 'Barbell', 'One of one', function (c) { return c.own; }, 'M3 9v6M6.5 6.5v11M17.5 6.5v11M21 9v6M6.5 12h11', '#ff7a1a', 1]],
+  fm: [['ring', 'Ring', '5 workouts', function (c) { return c.wo >= 5; }], ['ember', 'Ember', '30 workouts', function (c) { return c.wo >= 30; }],
+    ['frost', 'Frost', '12 weeks on goal', function (c) { return c.run >= 12; }], ['aurora', 'Aurora', '150 workouts', function (c) { return c.wo >= 150; }],
+    ['prism', 'Prism', '250 workouts', function (c) { return c.wo >= 250; }], ['molten', 'Molten', 'One of one', function (c) { return c.own; }]]
+};
+var RK_HEAD = { ti: 'Title', fl: 'Flair', fm: 'Frame' };
+function lfRkItem(kind, id) { return (RK[kind] || []).filter(function (x) { return x[0] === id; })[0] || null; }
+function lfRkName(kind, id) { var x = lfRkItem(kind, id); return x ? x[1] : ''; }
+function lfRkHas(kind, id) { return !!lfRkItem(kind, id); }
+function lfRkOk(kind, id, c) { var x = lfRkItem(kind, id); return !!x && !!x[3](c || lfRkCtx()); }
+/* the title worn: the one picked if it is still earned, else the best earned */
+function lfRkTitle(c) {
+  c = c || lfRkCtx(); if (S.ti && lfRkOk('ti', S.ti, c)) return S.ti;
+  var best = 'rookie'; RK.ti.forEach(function (x) { if (x[3](c)) best = x[0]; }); return best;
+}
+function lfRkWorn(kind, c) { return S[kind] && lfRkOk(kind, S[kind], c) ? S[kind] : undefined; }
+/* what goes out to friends about it: ids, nothing else */
+function lfRkSt() {
+  var c = lfRkCtx(), o = { ti: lfRkTitle(c) }, f = lfRkWorn('fl', c), m = lfRkWorn('fm', c);
+  if (f) o.fl = f; if (m) o.fm = m; return o;
+}
+function lfRkAll(c) { var out = []; ['ti', 'fl', 'fm'].forEach(function (k) { RK[k].forEach(function (x) { if (x[3](c)) out.push(k + ':' + x[0]); }); }); return out; }
+function lfFlairEl(id) {
+  var x = lfRkItem('fl', id); if (!x) return null;
+  var i = el('<i class="lf-fl" aria-hidden="true"><svg viewBox="0 0 24 24"><path></path></svg></i>');
+  $('path', i).setAttribute('d', x[4]); i.style.setProperty('--fc', x[5]); if (x[6]) i.classList.add('is-st'); i.dataset.fl = id; return i;
+}
+/* a profile banner, dressed: frame and title; the banner itself is always the accent */
+function frDress(b, st) {
+  var av = $('.fr-ban-av', b), ti = $('.fr-ti', b);
+  av.className = av.className.replace(/ ?is-fm-[a-z0-9]+/g, '');
+  if (st.fm && lfRkHas('fm', st.fm)) av.classList.add('is-fm-' + st.fm);
+  ti.textContent = st.ti ? lfRkName('ti', st.ti) : ''; ti.hidden = !ti.textContent;
+}
+/* ONE PICKER, small: what a kind of thing could be, what it takes, and which is on */
+function lfRkPick(kind, onPick) {
+  var b = el('<div class="rk"><div class="fr-dash"><div class="fr-ban"><div class="fr-ban-h"><span class="fr-ban-av"></span><div class="fr-ban-t"><b></b><p class="fr-ti"></p></div></div></div></div><div class="rk-opts"></div></div>');
+  var nm = FRS.name || 'You', c;
+  function paint() {
+    c = lfRkCtx(); var st = lfRkSt(); st.ac = lfAccent(); b.style.setProperty('--rc', frColOf(st));
+    $('.fr-ban-av', b).textContent = (nm.trim()[0] || '?').toUpperCase(); $('.fr-ban-t b', b).textContent = nm; lfNameOn($('.fr-ban-t b', b), st); frDress(b, st);
+    var host = $('.rk-opts', b); host.textContent = '';
+    var cur = kind === 'ti' ? lfRkTitle(c) : lfRkWorn(kind, c) || '';
+    var opts = RK[kind].map(function (x) { return { id: x[0], n: x[1], q: x[2], ok: !!x[3](c) }; });
+    if (kind !== 'ti') opts.unshift({ id: '', n: 'None', q: '', ok: true });
+    opts.forEach(function (x) {
+      var o = el('<button type="button" class="rk-o"><b></b><span></span></button>');
+      $('b', o).textContent = x.n; $('span', o).textContent = x.ok ? (x.q || '') : 'Locked · ' + x.q;
+      if (kind === 'fl' && x.id) { var fe = lfFlairEl(x.id); if (fe) $('b', o).appendChild(fe); }
+      o.dataset.k = kind; o.dataset.id = x.id; o.setAttribute('aria-pressed', x.id === cur ? 'true' : 'false');
+      if (!x.ok) { o.classList.add('is-lock'); o.setAttribute('aria-disabled', 'true'); }
+      o.addEventListener('click', function () {
+        if (!x.ok) { lfToast('Locked · ' + x.q); return; }
+        if (x.id) S[kind] = x.id; else delete S[kind];
+        lfSave(); paint(); buzz(8); if (onPick) onPick();
+      });
+      host.appendChild(o);
+    });
+  }
+  paint();
+  return lfSheet({ title: RK_HEAD[kind], body: b });
+}
+/* the four rows in Settings, each saying what is worn */
+function lfRkRows() {
+  var w = el('<div class="rk-rows"></div>');
+  ['ti', 'fl', 'fm'].forEach(function (k) {
+    var c = lfRkCtx(), id = k === 'ti' ? lfRkTitle(c) : lfRkWorn(k, c);
+    var b = el('<button type="button" class="lf-btn is-full rk-set"><span></span><b></b></button>'); b.dataset.k = k;
+    $('span', b).textContent = RK_HEAD[k]; $('b', b).textContent = id ? lfRkName(k, id) : 'None';
+    if (k === 'fl' && id) { var fe = lfFlairEl(id); if (fe) $('b', b).appendChild(fe); }
+    b.addEventListener('click', function () { lfRkPick(k, function () { var y = $('#lfYou'); if (!y) return; var nw = lfRkRows(); w.replaceWith(nw); }); });
+    w.appendChild(b);
+  });
+  return w;
+}
+
+/* ── MILESTONES: the moments that are worth stopping for, said once ── */
+var MS_WO = [1, 10, 25, 50, 100, 150, 200, 250, 365, 500, 750, 1000], MS_VOL = [1e4, 5e4, 1e5, 2.5e5, 5e5, 1e6, 2.5e6, 5e6, 1e7], MS_PR = [1, 10, 25, 50, 100, 250, 500];
+function lfPrTotal() {
+  var best = {}, n = 0, pf = lfPrFrom();
+  S.wo.slice().sort(function (a, b) { return a.s - b.s; }).forEach(function (w) { w.x.forEach(function (e) { e.sets.forEach(function (st) {
+    if (!(st.r > 0)) return; var v = +st.w || 0, b0 = best[e.id];
+    if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && lfPrOk(w.d, v, b0, pf)) n++; best[e.id] = v; }
+  }); }); });
+  return n;
+}
+function lfMsTop(list, v) { var t = 0; list.forEach(function (x) { if (v >= x) t = x; }); return t; }
+function lfMsNow() {
+  var vol = 0; S.wo.forEach(function (w) { vol += woVol(w); }); var c = lfRkCtx();
+  return { wo: lfMsTop(MS_WO, S.wo.length), vol: lfMsTop(MS_VOL, vol), pr: lfMsTop(MS_PR, lfPrTotal()), u: lfRkAll(c) };
+}
+function lfMsList() {
+  var now = lfMsNow(), was = S.mseen || { wo: 0, vol: 0, pr: 0, u: [] }, out = [];
+  var fresh = now.u.filter(function (x) { return was.u.indexOf(x) < 0; }).map(function (x) { var q = x.split(':'); return { k: q[0], id: q[1], n: lfRkName(q[0], q[1]) }; });
+  var kindN = { ti: 'title', fl: 'flair', fm: 'frame' };
+  if (now.wo > (was.wo || 0)) out.push({ g: 1, num: now.wo, k: 'Milestone', h: now.wo === 1 ? 'First workout' : now.wo + ' workouts', s: now.wo === 1 ? 'It starts here' : 'Logged, every one' });
+  if (now.pr > (was.pr || 0)) out.push({ g: 1, num: now.pr, k: 'Milestone', h: now.pr === 1 ? 'First record' : now.pr + ' personal records', s: 'Heavier than ever' });
+  if (now.vol > (was.vol || 0)) out.push({ g: 1, num: fmtBig(toDisp(now.vol)), k: 'Milestone', h: fmtBig(toDisp(now.vol)) + ' ' + S.unit + ' moved', s: 'All told' });
+  if (fresh.length) out.push({ g: 1, num: fresh.length, k: 'Unlocked', h: fresh[0].n + (fresh.length > 1 ? ' and ' + (fresh.length - 1) + ' more' : ''), s: 'New ' + kindN[fresh[0].k] + ' to wear, in Settings' });
+  S.mseen = now; lfSave();
+  return out;
+}
+var lfMsBusy = false;
+function lfMomentsRun() {
+  if (lfMsBusy) return; var q = lfMsList(); if (!q.length) return;
+  lfMsBusy = true; q = q.slice(0, 3);
+  (function next() { var m = q.shift(); if (!m) { lfMsBusy = false; return; } m.aria = m.k + ': ' + m.h; m.done = next; lfMoment(m); })();
+}
+
 function frBadges(st) {
   return (Array.isArray(st && st.bg) ? st.bg : []).filter(function (x) { return Array.isArray(x) && BADGE[x[0]]; }).slice(0, 3).map(function (x) { return { b: BADGE[x[0]], d: x[1], p: null, fr: 1 }; });
 }
@@ -4427,9 +4629,9 @@ function frSheet(f) {
   var st = f.s || {}, col = frColOf(st), nm = f.me ? (FRS.name || 'You') : (f.n || 'Friend');
   /* THE BANNER: their colour, their initial, their name, and the three
      badges they chose to show turning slowly in the light */
-  var b = el('<div class="fr-dash"><div class="fr-ban"><div class="fr-ban-h"><span class="fr-ban-av"></span><div class="fr-ban-t"><b></b><p class="lf-lab fr-ago"></p></div></div></div></div>');
+  var b = el('<div class="fr-dash"><div class="fr-ban"><div class="fr-ban-h"><span class="fr-ban-av"></span><div class="fr-ban-t"><b></b><p class="fr-ti" hidden></p><p class="lf-lab fr-ago"></p></div></div></div></div>');
   b.style.setProperty('--rc', col);
-  $('.fr-ban-av', b).textContent = (nm.trim()[0] || '?').toUpperCase(); $('.fr-ban-t b', b).textContent = nm; lfNameOn($('.fr-ban-t b', b), st);
+  $('.fr-ban-av', b).textContent = (nm.trim()[0] || '?').toUpperCase(); $('.fr-ban-t b', b).textContent = nm; lfNameOn($('.fr-ban-t b', b), st); frDress(b, st);
   if (frLive(st)) $('.fr-ban', b).classList.add('is-live');
   $('.fr-ago', b).textContent = f.gone ? 'This code has gone — they turned friends off.' : frAgo(st.last) + ' · ' + (st.pr30 || 0) + (st.pr30 === 1 ? ' PR' : ' PRs') + ' in 30 days';
   var row = el('<div class="lf-row" style="--n:3"></div>');
@@ -4536,6 +4738,7 @@ function frSheet(f) {
   b.appendChild(lc);
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
+
   var s = lfSheet({ title: '', body: b, foot: foot, full: true, cls: 'fr-prof' });
   s.el.setAttribute('aria-label', nm); s.el.style.setProperty('--rc', col);
   lfAccOn(s.el, frHue(st));
@@ -4765,6 +4968,7 @@ function frRings(rows) {
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
     $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend'); lfNameOn($('.fr-t b', row), st);
+    { var rtt = st.ti ? lfRkName('ti', st.ti) : ''; if (rtt) $('.fr-t b', row).dataset.tt = rtt; }
     var sub = $('.fr-t span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
     else if (frLive(st)) {
@@ -6680,6 +6884,11 @@ function lfApplyAccent() {
    a custom property inherits, so a sheet that does not SAY its gradient
    would wear the page's. Every sheet writes both, flat when it is flat */
 function lfNameOn(node, st) {
+  lfNameCol(node, st);
+  var old = $('.lf-fl', node); if (old) old.remove();
+  var fe = st && st.fl && lfFlairEl(st.fl); if (fe) node.appendChild(fe);
+}
+function lfNameCol(node, st) {
   var th = lfTheme(frHue(st));
   node.classList.toggle('lf-ng', !!th);
   if (!th) { node.style.removeProperty('--ng'); node.style.removeProperty('--ngc'); return; }
@@ -6779,6 +6988,7 @@ setInterval(function () { if (act && !sessSheet) lfTick(); }, 1000);
 
 /* BADGES ARRIVING ON A RECORD THAT ALREADY HAS HISTORY are not a dozen
    announcements: whatever was won before is counted as seen, quietly. */
+if (!S.mseen) { S.mseen = lfMsNow(); lfSave(); }
 if (!S.bseen) { S.bseen = { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1, v7: 1, v8: 1, v9: 1, v10: 1 }; var bsN = 0; lfBadges().concat(lfMedals()).forEach(function (x) { if (x.d) { S.bseen[x.b.id] = 1; bsN++; } }); if (bsN) lfSave(); }
 /* AND THE SAME FOR BADGES A LATER BUILD ADDED: the week goal and the four
    target badges arrived after people had already earned them, and a goal

@@ -440,6 +440,8 @@ function liftClean(b) {
   }
   /* the accent they chose, a hue on the wheel, or none for lime */
   if (Number.isInteger(b.s.ac) && ((b.s.ac >= 0 && b.s.ac < 360) || (b.s.ac >= 1000 && b.s.ac < 1040) || (b.s.ac >= 1200 && b.s.ac < 1240) || b.s.ac === 1299)) s.ac = b.s.ac; /* a hue, a neutral (1000 up), or an earned colour (1200 up, the owner's 1299) */
+  /* what they wear: a title, a flair, a frame: ids, nothing else */
+  for (const k of ['ti', 'fl', 'fm']) if (typeof b.s[k] === 'string' && /^[a-z0-9]{2,10}$/.test(b.s[k])) s[k] = b.s[k];
   /* training now: when the workout in progress started, a time in ms */
   if (Number.isInteger(b.s.lv) && b.s.lv > 1e12 && b.s.lv < 1e14) s.lv = b.s.lv;
   /* and until when to believe it: a phone that stops answering must not read as training for ever */

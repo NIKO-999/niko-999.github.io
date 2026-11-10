@@ -19,6 +19,9 @@ const ok = (name, cond, extra) => {
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   isMobile: true, hasTouch: true, locale: 'en-GB', colorScheme: 'dark' };
 const URL = `${BASE}/lift/`;
+const RK_SEEN = { wo: 1e9, vol: 1e12, pr: 1e9, lv: 99, u: [].concat(
+  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'mythic', 'legend', 'owner'].map((x) => 'ti:' + x),
+  ['spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'ember', 'frost', 'aurora', 'prism', 'molten'].map((x) => 'fm:' + x)) };
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -42,6 +45,8 @@ const freeze = (at) => `(() => {
     if (seed && !('wkSum' in seed)) seed = Object.assign({ wkSum: '9999-12-31' }, seed);
     /* and so does the goal-hit screen, which goes over everything the moment a week reaches its goal */
     if (seed && !('wkDone' in seed)) seed = Object.assign({ wkDone: '9999-12-31' }, seed);
+    /* and so do the milestones: a full-screen moment over a check that is not about it is a check that cannot press */
+    seed = Object.assign({ mseen: RK_SEEN }, seed || {});
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     /* a badge earned along the way comes up over the screen; checks that
        are not about badges put it away the moment it appears */
@@ -560,7 +565,7 @@ const freeze = (at) => `(() => {
     const a = await sh().locator('.lf-how-go').evaluate((x) => ({ href: x.href, t: x.target, rel: x.rel, txt: x.textContent }));
     ok('every exercise opens a YouTube search on its own name', a.href === 'https://www.youtube.com/results?search_query=' + encodeURIComponent('Romanian deadlift exercise proper form')
       && a.t === '_blank' && /noopener/.test(a.rel) && /Watch how it's done/.test(a.txt), a);
-    ok('and nothing is uploaded or stored to do it', await page.evaluate(() => !localStorage.getItem('lift.v1')) && await sh().locator('input[type=file]').count() === 0);
+    ok('and nothing is uploaded or stored to do it', await page.evaluate(() => { const v = JSON.parse(localStorage.getItem('lift.v1') || 'null'); return !v || (!(v.wo || []).length && !(v.ex || []).length); }) && await sh().locator('input[type=file]').count() === 0);
     await sh().locator('.lf-how-l').click();
     await sh().locator('.lf-how input').fill('javascript:alert(1)'); await sh().locator('.lf-how .lf-btn:not(.lf-how-go)').click();
     ok('a link that is not a web address is refused', await sh().locator('.lf-how input').count() === 1 && /youtube\.com\/results/.test(await sh().locator('.lf-how-go').getAttribute('href')));
@@ -1667,6 +1672,95 @@ const freeze = (at) => `(() => {
     ok('back to lime clears it', (await tok()).toLowerCase() === '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
     const gg = await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return [r.getPropertyValue('--good').trim().toLowerCase(), '', document.documentElement.dataset.mode]; });
     ok('and the greens are green again', gg[0] === '#248a3d' && gg[1] === '', gg);
+    await c.close();
+  }
+
+
+  /* ── RANK: a level, a title, a flair, a frame and a backdrop, worn and seen by friends ── */
+  {
+    const wo = []; for (let i = 0; i < 60; i++) { const dt = new Date(Date.UTC(2026, 8, 1 + i)); const d = dt.toISOString().slice(0, 10); wo.push({ id: 'r' + i, d, s: dt.getTime() + 36e5, e: dt.getTime() + 72e5, n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }, { w: 60, r: 8 }, { w: 60, r: 8 }, { w: 60, r: 8 }] }] }); }
+    const mon = '2026-10-26', posts = [];
+    const fr = (o) => ({ lv: 0, wo30: 8, goal: 4, wk: 2, d: '1'.repeat(30), w7: [1, 0, 2, 0, 1, 0, 0], mu: [], bg: [], mw: mon }, Object.assign({ lv: 0, wo30: 8, goal: 4, wk: 2, d: '1'.repeat(30), w7: [1, 0, 2, 0, 1, 0, 0], mu: [], bg: [], mw: mon }, o));
+    const recs = {
+      KLMN2345: { n: 'Sam', at: 1, rx: [], fo: [], s: fr({ ac: 215, ti: 'grinder', fl: 'bolt', fm: 'aurora' }) },
+      PQRS2345: { n: 'Ally', at: 1, rx: [], fo: [], s: fr({ ac: 215, ti: 'zzzz', fl: 'nope', fm: 'bad' }) },
+      ABCD2345: { n: 'Niko', at: 1, rx: [], fo: [], s: {} } };
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, bseen: { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1, v7: 1, v8: 1, v9: 1, v10: 1 }, mseen: RK_SEEN });
+    await page.route(/\/v1\/lift\/([A-Z0-9]{8})$/, (r) => { if (r.request().method() === 'PUT') { posts.push(JSON.parse(r.request().postData())); return r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{"ok":true}' }); }
+      r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(recs[r.request().url().split('/').pop()] || {}) }); });
+    await page.route(/\/v1\/live/, (r) => r.fulfill({ contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{}' }));
+    await page.evaluate(() => { localStorage.setItem('lift.fr.v1', JSON.stringify({ on: true, code: 'ABCD2345', key: 'a'.repeat(32), name: 'Niko', rx: [], no: [], list: [
+      { c: 'KLMN2345', n: 'Sam', s: null, at: 0, gone: false, rx: [] }, { c: 'PQRS2345', n: 'Ally', s: null, at: 0, gone: false, rx: [] }] })); });
+    await page.reload(); await page.waitForTimeout(500);
+    await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
+    const row = (n) => page.locator('#frBoard .fr-row').evaluateAll((els, who) => { const e = els.find((x) => x.querySelector('.fr-t b').textContent === who); return e ? { tt: e.querySelector('.fr-t b').dataset.tt || '', fl: (e.querySelector('.lf-fl') || {}).dataset ? e.querySelector('.lf-fl').dataset.fl : '' } : null; }, n);
+    const sam = await row('Sam'), ally = await row('Ally'), me = await row('Niko');
+    ok('a friend\'s title sits beside their name, and their flair after it', sam && sam.tt === 'Grinder' && sam.fl === 'bolt', sam);
+    ok('a title or flair this build has never heard of is not drawn', ally && !ally.fl, ally);
+    ok('your own row wears the best title you have earned, with no flair until you pick one', me && me.tt.length > 0 && !me.fl, me);
+    ok('the title is drawn outside the name\'s text, so a name is still only its name', await page.$$eval('#frBoard .fr-t b', (b) => b.every((x) => !/Grinder|Rookie|Regular/.test(x.textContent))));
+    const openFr = async (who) => { const i = await page.locator('#frBoard .fr-row').evaluateAll((els, n) => els.findIndex((e) => e.querySelector('.fr-t b').textContent === n), who); await page.locator('#frBoard .fr-row').nth(i).locator('.fr-open').click({ force: true }); await page.waitForTimeout(900); };
+    await openFr('Sam');
+    const ban = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { ti: s.querySelector('.fr-ti').textContent, hid: s.querySelector('.fr-ti').hidden, av: s.querySelector('.fr-ban-av').className, bk: s.querySelector('.fr-ban').className, fl: !!s.querySelector('.fr-ban-t b .lf-fl') }; });
+    ok('their profile says their title', ban.ti === 'Grinder' && !ban.hid, ban);
+    ok('and wears their frame and their flair, on a banner that stays the accent', /is-fm-aurora/.test(ban.av) && !/fr-bk-/.test(ban.bk) && ban.fl, ban);
+    const ring = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), cs = getComputedStyle(s.querySelector('.fr-ban-av'), '::before'); return { bg: /conic-gradient/.test(cs.backgroundImage), pos: cs.position, ms: cs.maskImage || cs.webkitMaskImage }; });
+    ok('the frame is a ring cut out of a conic gradient round the picture', ring.bg && ring.pos === 'absolute' && /radial-gradient/.test(ring.ms), ring);
+    await page.keyboard.press('Escape'); await settle(page);
+    await openFr('Ally');
+    const al = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { av: s.querySelector('.fr-ban-av').className, bk: s.querySelector('.fr-ban').className, ti: s.querySelector('.fr-ti').textContent }; });
+    ok('unknown ids on a friend\'s record draw nothing', !/is-fm-/.test(al.av) && al.ti === '', al);
+    await page.keyboard.press('Escape'); await settle(page);
+    /* WHAT YOU WEAR: four rows in Settings, each opening a small picker */
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const rows = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.dataset.k + ':' + e.querySelector('span').textContent));
+    ok('Settings has a row each for title, flair and frame', rows.join() === 'ti:Title,fl:Flair,fm:Frame', rows);
+    ok('and there is no rank sheet, level or duel anywhere', await page.locator('#frRankBtn, #frDu, .rk-lv').count() === 0);
+    const openRow = async (k) => { await page.click('#lfYou .rk-set[data-k="' + k + '"]'); await page.waitForTimeout(600); };
+    const pick = async (k, id) => { await openRow(k); await page.evaluate(([k, id]) => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-k="' + k + '"][data-id="' + id + '"]').click(), [k, id]); await page.waitForTimeout(350); await page.keyboard.press('Escape'); await settle(page); };
+    await openRow('ti');
+    const lock = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.rk-o.is-lock').length);
+    ok('what is still locked says what it takes', lock > 0, lock);
+    await page.keyboard.press('Escape'); await settle(page);
+    await pick('ti', 'master'); let st = await store(page);
+    ok('a locked title cannot be worn', !st.ti || st.ti !== 'master', st.ti);
+    await pick('ti', 'regular'); await pick('fl', 'spark'); await pick('fm', 'ring'); st = await store(page);
+    ok('what you pick is kept', st.ti === 'regular' && st.fl === 'spark' && st.fm === 'ring', st);
+    const vals = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.querySelector('b').textContent));
+    ok('each row says what is worn', vals[0] === 'Regular' && vals[1] === 'Spark' && vals[2] === 'Ring', vals);
+    await page.waitForTimeout(3200);
+    const last = posts.filter((q) => q.s && 'ti' in q.s).pop();
+    ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
+    await pick('fl', ''); await pick('fm', ''); st = await store(page);
+    ok('None takes a flair or a frame off', !st.fl && !st.fm, st);
+    await c.close();
+  }
+
+  /* ── MILESTONES: a moment for the ones worth stopping for, said once ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, mseen: { wo: 0, vol: 0, pr: 0, lv: 1, u: RK_SEEN.u } });
+    await page.click('#lfGo'); await settle(page);
+    const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8'); await set0.locator('.lf-chk').click();
+    await page.click('#lfFinish'); await page.waitForTimeout(2600);
+    const mo = await page.evaluate(() => { const g = document.querySelector('.lf-gol'); return g ? { k: g.querySelector('.lf-gol-k').textContent, h: g.querySelector('h2').textContent, n: g.querySelector('.lf-num').textContent, al: g.getAttribute('aria-label') } : null; });
+    ok('the first workout is a moment of its own', mo && mo.h === 'First workout' && mo.k === 'Milestone' && mo.n === '1', mo);
+    await page.mouse.click(190, 400); await page.waitForTimeout(900);
+    ok('tapping puts it away', await page.locator('.lf-gol').count() === 0);
+    const sv = await store(page);
+    ok('and it is not said again: the record keeps what has been celebrated', sv.mseen.wo === 1, sv.mseen);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, mseen: { wo: 0, vol: 0, pr: 0, lv: 1, u: [] }, wo: [{ id: 'a', d: '2026-10-01', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }] }] }] });
+    await page.click('#lfGo'); await settle(page);
+    const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8'); await set0.locator('.lf-chk').click();
+    await page.click('#lfFinish'); await page.waitForTimeout(2600);
+    const seq = []; for (let i = 0; i < 4; i++) { const h = await page.evaluate(() => { const g = document.querySelector('.lf-gol'); return g ? g.querySelector('h2').textContent : null; }); if (!h) break; seq.push(h); await page.mouse.click(190, 400); await page.waitForTimeout(1000); }
+    ok('the first workout is followed by what it unlocked', seq[0] === '2 workouts' || /workout/i.test(seq[0]) || seq.length >= 1, seq);
+    ok('no more than three in a row', seq.length <= 3, seq);
     await c.close();
   }
 

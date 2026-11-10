@@ -515,6 +515,14 @@ const kv = () => {
     ok('badges come through as ids and dates, three at most', JSON.stringify(q.s.bg) === '[["wo10","2026-10-26"],["st4","2026-10-19"],["first","2026-10-05"]]', JSON.stringify(q.s.bg));
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
     /* LIVE: the small read the app asks every few seconds */
+    /* WHAT THEY WEAR: ids, clamped like everything else */
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, ti: 'grinder', fl: 'bolt', fm: 'Bad!', xl: 14, du: ['KLMN2345', '2026-11-02'] } } });
+    q = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('a title and a flair come through', q.s.ti === 'grinder' && q.s.fl === 'bolt', q.s);
+    ok('an id that is not one is dropped, and no level or duel is kept', !('fm' in q.s) && !('xl' in q.s) && !('du' in q.s), q.s);
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, ti: '<b>x</b>', fl: 'a'.repeat(40) } } });
+    q = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('markup and a long id are dropped', !('ti' in q.s) && !('fl' in q.s), q.s);
     q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, lv: 1800000000000, lx: 1800000090000 } } });
     let lq = await (await hit('GET', '/v1/live?c=' + C + ',ZZZZZZZZ,not-a-code')).json();
     ok('a live read returns only the start, the expiry and when it was written, for each code asked', lq[C].lv === 1800000000000 && lq[C].lx === 1800000090000 && lq[C].at > 0 && Object.keys(lq[C]).sort().join() === 'at,lv,lx' && lq.ZZZZZZZZ === null && !('not-a-code' in lq), JSON.stringify(lq));
