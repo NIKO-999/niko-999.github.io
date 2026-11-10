@@ -20,8 +20,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   isMobile: true, hasTouch: true, locale: 'en-GB', colorScheme: 'dark' };
 const URL = `${BASE}/lift/`;
 const RK_SEEN = { wo: 1e9, vol: 1e12, pr: 1e9, lv: 99, u: [].concat(
-  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator', 'hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart', 'slayer', 'eye'].map((x) => 'ti:' + x),
-  ['slayer', 'spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign', 'laurel', 'verdant', 'regal', 'silvern', 'amethyst', 'inferno', 'glacier', 'rosegold', 'winged', 'sapphire', 'ruby', 'aurelian', 'phoenix', 'imperial', 'eclipse', 'prismatic', 'creator'].map((x) => 'fm:' + x)) };
+  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator', 'hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart', 'slayer', 'eye', 'twice'].map((x) => 'ti:' + x),
+  ['twice', 'slayer', 'spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign', 'laurel', 'verdant', 'regal', 'silvern', 'amethyst', 'inferno', 'glacier', 'rosegold', 'winged', 'sapphire', 'ruby', 'aurelian', 'phoenix', 'imperial', 'eclipse', 'prismatic', 'creator'].map((x) => 'fm:' + x)) };
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -1684,6 +1684,31 @@ const freeze = (at) => `(() => {
   }
 
 
+  /* ── TWO SESSIONS IN A DAY, AND A WEEK PAST ITS GOAL ── */
+  {
+    const W = (id, d, h) => ({ id, d, s: new Date(d + 'T' + h + ':00:00').getTime(), e: new Date(d + 'T' + h + ':50:00').getTime(), n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }] }] });
+    const src2 = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    /* two sessions on one day are one day: a goal of two is not met by them */
+    let o = await ctx({ unit: 'kg', goal: 2, wkDone: '2026-10-19', wo: [W('a1', '2026-10-30', '07'), W('a2', '2026-10-30', '16')] }, '2026-10-30T18:00:00');
+    await o.page.waitForTimeout(2500);
+    ok('two sessions in one day count as one day toward the weekly goal', await o.page.locator('.lf-gol').count() === 0 && !(await o.page.evaluate(() => window.lfGoalHits)) && (await store(o.page)).wkDone === '2026-10-19');
+    ok('and with two done there is no third to start', await o.page.locator('#lfAgain').count() === 0);
+    await o.c.close();
+    /* one session done: a second can be asked for, and it is asked for */
+    o = await ctx({ unit: 'kg', goal: 5, wo: [W('b1', '2026-10-30', '07')] }, '2026-10-30T18:00:00');
+    ok('a trained day offers a second session, by name', await o.page.locator('#lfAgain').count() === 1 && await o.page.locator('#lfGo').count() === 0);
+    await o.page.click('#lfAgain'); await settle(o.page);
+    ok('it asks first, and says it is not another day toward the goal', /does not count as another day/.test(await top(o.page).textContent()));
+    await top(o.page).locator('button', { hasText: 'Start' }).click(); await settle(o.page);
+    ok('and then the second workout is open', await o.page.locator('.lf-session').count() === 1);
+    await o.c.close();
+    /* a day more than the goal asked for has its own moment, once */
+    o = await ctx({ unit: 'kg', goal: 2, wkDone: '2026-10-26', wo: [W('c1', '2026-10-27', '07'), W('c2', '2026-10-28', '07'), W('c3', '2026-10-30', '07')] }, '2026-10-30T18:00:00');
+    await o.page.waitForFunction(() => window.lfOvers === 1, null, { timeout: 8000 }).catch(() => {});
+    ok('a week that goes past its goal gets a moment of its own', await o.page.evaluate(() => window.lfOvers) === 1 && await o.page.locator('.lf-gol').count() === 1 && /Overtime/.test(await o.page.textContent('.lf-gol')) && (await store(o.page)).wkOver === '2026-10-26');
+    await o.c.close();
+    ok('Two-a-Day pays a title and a flair as well as its badge', /\['twice', 'Double Time', 'Earn Two-a-Day'/.test(src2) && /\['twice', 'Double', 'Earn Two-a-Day'/.test(src2) && /var BD_HALO = \{ twice: 1/.test(src2) && /function wkDays/.test(src2));
+  }
   /* ── RANK: a level, a title, a flair, a frame and a backdrop, worn and seen by friends ── */
   {
     const wo = []; for (let i = 0; i < 60; i++) { const dt = new Date(Date.UTC(2026, 8, 1 + i)); const d = dt.toISOString().slice(0, 10); wo.push({ id: 'r' + i, d, s: dt.getTime() + 36e5, e: dt.getTime() + 72e5, n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }, { w: 60, r: 8 }, { w: 60, r: 8 }, { w: 60, r: 8 }] }] }); }

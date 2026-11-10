@@ -336,6 +336,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
   border-radius: 999px; background: var(--card2); font-weight: 600; font-size: 14px;
 }
 .lf-btn.is-full { width: 100%; }
+.lf-again { margin-top: 12px; width: 100%; }
 .lf-lw { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; margin-top: 12px; }
 .lf-lw b { margin-left: auto; font-weight: 600; color: var(--dim); font-size: 13px; }
 .lf-lw .lf-ic { width: 16px; height: 16px; color: var(--dim); }
@@ -1836,6 +1837,7 @@ function lfClean(o) {
   }
   if (typeof o.wkDone === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkDone)) d.wkDone = o.wkDone;
   if (typeof o.wkSum === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkSum)) d.wkSum = o.wkSum;
+  if (typeof o.wkOver === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkOver)) d.wkOver = o.wkOver;
   /* what you wear (a title, a flair, a frame) and what has been celebrated */
   ['ti', 'fl', 'fm'].forEach(function (k) { if (typeof o[k] === 'string' && /^[a-z0-9]{2,10}$/.test(o[k])) d[k] = o[k]; });
   if (typeof o.slay === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.slay)) d.slay = o.slay;
@@ -2009,6 +2011,11 @@ function fmtBig(n) {
 }
 function e1rm(w, r) { return r <= 1 ? w : w * (1 + r / 30); }
 function woSets(w) { return w.x.reduce(function (a, e) { return a + e.sets.length; }, 0); }
+/* THE WEEKLY GOAL COUNTS DAYS, NOT SESSIONS. A second workout on a day you
+   already trained is extra work and is logged as such, but a goal of six
+   days is six days: two sessions on Monday are still one of them. */
+function wkDays(m) { var a = ymd(m), b = ymd(addDays(m, 6)), d = {}; S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) d[w.d] = 1; }); return Object.keys(d).length; }
+function dayFirst(ws) { var d = {}; return ws.filter(function (w) { if (d[w.d]) return false; d[w.d] = 1; return true; }); }
 function woReps(w) { return w.x.reduce(function (a, e) { return a + e.sets.reduce(function (b, s) { return b + s.r; }, 0); }, 0); }
 function woVol(w) { return w.x.reduce(function (a, e) { return a + e.sets.reduce(function (b, s) { return b + s.w * s.r; }, 0); }, 0); }
 /* the time of day, written out: 6:42 pm */
@@ -2217,7 +2224,7 @@ function lfChoiceGrid(after) {
    goal. Only good news is tagged; a quiet week simply has none. */
 function lfWeekStreak() {
   var mon = monday(today());
-  function n(m) { var a = ymd(m), b = ymd(addDays(m, 6)); return S.wo.filter(function (w) { return w.d >= a && w.d <= b; }).length; }
+  function n(m) { return wkDays(m); }
   var st = n(mon) >= S.goal ? 1 : 0;
   for (var m = addDays(mon, -7), g = 0; g < 104 && n(m) >= S.goal; m = addDays(m, -7), g++) st++;
   return st;
@@ -2234,7 +2241,7 @@ function lfTags() {
     var w0 = ws[ws.length - 1], prev = woSorted().filter(function (w) { return w.d < tk && w.n === w0.n; }).pop();
     if (prev && woVol(prev) > 0) { var p = Math.round((woVol(w0) - woVol(prev)) / woVol(prev) * 100); if (p > 0) out.push(['up', '+' + p + '% today']); }
   }
-  var mon = monday(today()), wk = S.wo.filter(function (w) { return w.d >= ymd(mon) && w.d <= tk; }).length;
+  var mon = monday(today()), wk = wkDays(mon);
   if (S.goal && wk >= S.goal) out.push(['goal', 'Week goal hit']);
   var st = lfWeekStreak();
   if (st >= 2) out.push(['streak', st + '-week streak']);
@@ -2295,6 +2302,11 @@ function lfTodayCard() {
   if (doneWs.length) {
     c.classList.add('is-done');
     c.insertBefore(el('<span class="lf-done" id="lfDone">' + IC.check + 'Completed</span>'), c.firstChild);
+    if (doneWs.length === 1) {
+      var ag = el('<button type="button" class="lf-btn lf-again" id="lfAgain">Second session</button>');
+      ag.addEventListener('click', function (ev) { ev.stopPropagation(); lfAsk('Train again today?', 'A second session is logged in full. It does not count as another day toward your weekly goal.', 'Start', function () { lfAgainOk = 1; lfStart(null); }); });
+      c.appendChild(ag);
+    }
   }
   $('#lfPick', c).setAttribute('aria-label', 'Today: ' + title + (last ? '. Open the workout' : '. Choose a routine'));
   if (last && !rt) $('.lf-sub', c).textContent = last.x.slice(0, 3).map(function (e) { return e.n; }).join(', ');
@@ -2638,9 +2650,21 @@ function lfScrub(box, pts, lab) {
    and says so, once a week, after the finish screen and any badge have had
    their moment */
 var lfWkHold = 0;
+/* PAST THE GOAL. A day more than you asked of yourself gets its own moment,
+   once a week, the first time the week goes over. */
+function lfWeekOver() {
+  var m = monday(today()), k = ymd(m), d = wkDays(m);
+  if ((S.wkOver && S.wkOver >= k) || !(S.goal > 0) || d <= S.goal || !(S.wkDone && S.wkDone >= k)) return true;
+  if (lfWkHold || stack.length || $('.lf-cv') || $('.lf-gol') || view !== 'home') return false;
+  S.wkOver = k; lfSave();
+  lfMoment({ g: d, num: d, k: 'Past the goal', h: 'Overtime', aria: 'Past the weekly goal', s: d + ' days on a goal of ' + S.goal + '. More than you asked of yourself' });
+  window.lfOvers = (window.lfOvers || 0) + 1;
+  return true;
+}
 function lfWeekDone() {
   var m = monday(today()), k = ymd(m);
-  if ((S.wkDone && S.wkDone >= k) || !(S.goal > 0) || windowStats(m, addDays(m, 6)).wo < S.goal) return true;
+  if (S.wkDone && S.wkDone >= k) { var no = 0; (function go() { if (!lfWeekOver() && ++no < 24) setTimeout(go, 500); })(); }
+  if ((S.wkDone && S.wkDone >= k) || !(S.goal > 0) || wkDays(m) < S.goal) return true;
   if (lfWkHold || stack.length || $('.lf-cv') || view !== 'home') return false;
   S.wkDone = k; lfSave();
   var wk = $('#lfWeek'); if (wk) { wk.classList.remove('is-wkdone'); void wk.offsetWidth; wk.classList.add('is-wkdone'); }
@@ -2653,7 +2677,7 @@ function lfWeekDone() {
    throws fireworks. Tap anywhere, or it goes by itself. */
 function lfGoalRun() {
   var m = monday(today()), n = 0;
-  for (var i = 0; i < 104; i++) { var a = addDays(m, -7 * i); if (windowStats(a, addDays(a, 6)).wo >= S.goal) n++; else break; }
+  for (var i = 0; i < 104; i++) { var a = addDays(m, -7 * i); if (wkDays(a) >= S.goal) n++; else break; }
   return n;
 }
 function lfGoalHit() {
@@ -2811,10 +2835,17 @@ function lfSum(rows) {
 /* ═══════════ THE SESSION ═══════════ */
 var sessSheet = null, tick = null, lfPopAt = '', lfPbWas = {};
 
+/* A SECOND SESSION IN A DAY is asked for on purpose, from the finished
+   card, and never by a stray press on a routine: the flag is set by the one
+   button that asks, and spent by the start it allows. */
+var lfAgainOk = 0;
 function lfStart(rt) {
   /* ONE WORKOUT A DAY: a press on another session after you have trained
      must not stack a second one over it. Delete today's first. */
-  if (!act && woOn(ymd(today())).length) { lfToast('You trained today. Delete that workout first'); return; }
+  var nToday = act ? 0 : woOn(ymd(today())).length;
+  if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
+  if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
+  lfAgainOk = 0;
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() === 1 && lfIsLegDay(rt);
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -3399,15 +3430,16 @@ function lfWeekSheet(m) {
   var a = ymd(m), e = addDays(m, 6), z = ymd(e), st = windowStats(m, e), prv = windowStats(addDays(m, -7), addDays(m, -1));
   var ws = S.wo.filter(function (w) { return w.d >= a && w.d <= z; }), mins = 0;
   ws.forEach(function (w) { if (w.s > 1e11 && w.e > w.s) mins += (w.e - w.s) / 60000; });
-  function inWeek(mm) { var x = ymd(mm), y = ymd(addDays(mm, 6)); return S.wo.filter(function (w) { return w.d >= x && w.d <= y; }).length; }
+  function inWeek(mm) { return wkDays(mm); }
+  var gd = wkDays(m);
   var streak = 0; for (var q = m, g = 0; g < 104 && S.goal > 0 && inWeek(q) >= S.goal; q = addDays(q, -7), g++) streak++;
-  var hit = S.goal > 0 && st.wo >= S.goal;
+  var hit = S.goal > 0 && gd >= S.goal;
   /* THE WEEK'S TARGETS: the workouts a week, and the sets each muscle in
      focus asked for (the priority ones, or all of them if none is). Met, the
      whole review glows; missed, it goes red and says only what fell short */
   var mu = lfMuscleSets(m, e), fpri = S.focus.filter(function (f) { return f.p; }); if (!fpri.length) fpri = S.focus;
   var miss = [];
-  if (S.goal > 0 && st.wo < S.goal) miss.push(['Workouts', st.wo, S.goal]);
+  if (S.goal > 0 && gd < S.goal) miss.push(['Workouts', gd, S.goal]);
   fpri.forEach(function (f) { if ((mu[f.m] || 0) < f.lo) miss.push([f.m + ' sets', mu[f.m] || 0, f.lo]); });
   var met = !miss.length;
   var range = m.getDate() + (m.getMonth() !== e.getMonth() ? ' ' + MON[m.getMonth()].slice(0, 3) : '') + '–' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
@@ -3418,9 +3450,9 @@ function lfWeekSheet(m) {
   $('h3', b).textContent = range;
   $('.lf-ws-verdict', b).textContent = met ? 'Every target hit' : 'Targets weren\'t met';
   /* the goal as a ring, filled to how much of it the week closed */
-  var k = S.goal > 0 ? Math.min(1, st.wo / S.goal) : 1, len = 2 * Math.PI * 52, arc = $('.lf-ws-arc', b);
+  var k = S.goal > 0 ? Math.min(1, gd / S.goal) : 1, len = 2 * Math.PI * 52, arc = $('.lf-ws-arc', b);
   arc.style.strokeDasharray = '0 ' + len; arc.dataset.to = (len * k).toFixed(1) + ' ' + len;
-  $('.lf-ws-in b', b).textContent = st.wo + (S.goal > 0 ? '/' + S.goal : '');
+  $('.lf-ws-in b', b).textContent = (S.goal > 0 ? gd : st.wo) + (S.goal > 0 ? '/' + S.goal : '');
   $('.lf-ws-in span', b).textContent = hit && met ? 'goal hit' : (st.wo === 1 ? 'workout' : 'workouts');
   if (hit) $('.lf-ws-ring', b).classList.add('is-hit');
   $('.lf-fin-vol small', b).textContent = S.unit + ' this week';
@@ -3450,7 +3482,7 @@ function lfWeekSheet(m) {
       else if (t && Array.isArray(t.w8)) { var ix = t.m === thisMon ? 6 : t.m === a ? 7 : -1; n = ix >= 0 && Array.isArray(t.w8[ix]) ? +t.w8[ix][0] || 0 : 0; }
       return n / gg;
     };
-    var mine = S.goal > 0 ? st.wo / S.goal : 0, all = [mine].concat(FRS.list.filter(function (f) { return !f.gone; }).map(kOf));
+    var mine = S.goal > 0 ? gd / S.goal : 0, all = [mine].concat(FRS.list.filter(function (f) { return !f.gone; }).map(kOf));
     var place = all.filter(function (x) { return x > mine + 1e-9; }).length + 1;
     line(TAG_IC.goal, (place === 1 ? 'First' : place === 2 ? 'Second' : place === 3 ? 'Third' : place + 'th') + ' of ' + all.length + ' on the friends rings', place === 1 ? 'is-crown' : '');
   }
@@ -3958,7 +3990,7 @@ function lfRenderCal() {
     }
     root.appendChild(wc);
     var goal = el('<div class="lf-lab" style="margin:0 4px"></div>');
-    goal.textContent = st.wo + ' of ' + S.goal + ' this week';
+    goal.textContent = dayFirst(S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); })).length + ' of ' + S.goal + ' this week';
     root.appendChild(rdl); root.appendChild(sum); root.appendChild(goal);
   }
   /* Every workout in the range, newest first. */
@@ -4400,7 +4432,7 @@ function frStats() {
     }); });
   });
   var mon = monday(t), wkFrom = ymd(mon);
-  function inWeek(m) { var a = ymd(m), b = ymd(addDays(m, 6)); return S.wo.filter(function (w) { return w.d >= a && w.d <= b; }).length; }
+  function inWeek(m) { return wkDays(m); }
   var wk = inWeek(mon), streak = wk >= S.goal ? 1 : 0;
   for (var m = addDays(mon, -7), g = 0; g < 104 && inWeek(m) >= S.goal; m = addDays(m, -7), g++) streak++;
   var last = S.wo.reduce(function (a, w) { return w.d > a ? w.d : a; }, '');
@@ -4696,6 +4728,7 @@ var RK = {
     ['collector', 'Collector', '25 badges', function (c) { return c.bd >= 25; }], ['elite', 'Elite', '150 workouts', function (c) { return c.wo >= 150; }],
     ['relentless', 'Relentless', '12 weeks on goal', function (c) { return c.run >= 12; }], ['veteran', 'Veteran', '250 workouts', function (c) { return c.wo >= 250; }],
     ['curator', 'Curator', '60 badges', function (c) { return c.bd >= 60; }], ['master', 'Master', '400 workouts', function (c) { return c.wo >= 400; }],
+    ['twice', 'Double Time', 'Earn Two-a-Day', function (c) { return !!c.has.twice; }],
     ['engine', 'Engine', 'Earn Engine', function (c) { return !!c.has.cardio100; }],
     ['mythic', 'Mythic', 'Earn a mythic badge', function (c) { return c.myth; }], ['legend', 'Living Legend', '500 workouts', function (c) { return c.wo >= 500; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
@@ -4724,6 +4757,7 @@ var RK = {
     ['flag', 'Flag', 'Earn Squad Goals', function (c) { return !!c.has.squad; }, 'M5 21V4M5 4h11l-2 4 2 4H5', '#22c55e', 1],
     ['medal', 'Medal', 'Earn Crowned', function (c) { return !!c.has.lead1; }, 'M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM8.500 13.500L7 21l5-2.500 5 2.500-1.500-7.500', '#f59e0b', 1],
     ['slayer', 'Slayer', 'Beat the creator', function (c) { return c.slay; }, 'M12 2l2.2 3.2V14H17v2.2h-3.6V21h-2.800v-4.800H7V14h2.800V5.200z', '#e11d48'],
+    ['twice', 'Double', 'Earn Two-a-Day', function (c) { return !!c.has.twice; }, 'M8 2 3 12h4l-1.500 8L11 10H7.200zM17 2l-5 10h4l-1.500 8L20 10h-3.800z', '#2ee68a'],
     ['pack', 'Paw', 'Earn Pack Leader', function (c) { return !!c.has.pack; }, 'M12 21c-3.300 0-5.500-1.800-5.500-4 0-2.700 3.200-5 5.500-5s5.500 2.300 5.500 5c0 2.200-2.200 4-5.500 4zM5 11.500a1.700 2.300 0 1 0 .01 0zM9 6.500a1.700 2.300 0 1 0 .01 0zM15 6.500a1.700 2.300 0 1 0 .01 0zM19 11.500a1.700 2.300 0 1 0 .01 0z', '#fb923c'],
     ['pulse', 'Pulse', 'Earn Cardio Heart', function (c) { return !!c.has.cardio25; }, 'M2 12h4l2.5-6 4 12 2.5-6H22', '#f43f5e', 1],
     ['stairs', 'Stairs', 'Earn Step Up', function (c) { return !!c.has.stair10; }, 'M3 20h5v-4h4v-4h4V8h5', '#06b6d4', 1],
@@ -4743,7 +4777,7 @@ var RK = {
 };
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
-  ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'mythic']],
+  ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'twice', 'mythic']],
   ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
@@ -5439,7 +5473,7 @@ function frRxBar(w, f) {
    of weeks on it, counted the way frStats counts them for friends */
 function frMyRun() {
   var mon = monday(today());
-  function inWeek(m) { var a = ymd(m), b = ymd(addDays(m, 6)); return S.wo.filter(function (w) { return w.d >= a && w.d <= b; }).length; }
+  function inWeek(m) { return wkDays(m); }
   var wk = inWeek(mon), streak = wk >= S.goal ? 1 : 0;
   for (var m = addDays(mon, -7), g = 0; g < 104 && inWeek(m) >= S.goal; m = addDays(m, -7), g++) streak++;
   return { wk: wk, goal: S.goal, streak: streak };
@@ -5912,7 +5946,7 @@ var BD_FX = { slayer: 'nebula', night: 'galaxy', dawn: 'sunrise', onfire: 'lava'
    a prism ring turning round it and sparks in orbit, crazy on purpose */
 var BD_MYTH = { slayer: 1, wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
 /* EXOTIC: the halo tier, for what takes many months */
-var BD_HALO = { wo250: 1, v1m: 1, ton25: 1, hr100: 1, sets2k: 1, rp50k: 1, mo6: 1, tgt12: 1, allmus4: 1, ex80: 1, sig100: 1, cdh50: 1, wo100: 1, st26: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
+var BD_HALO = { twice: 1, wo250: 1, v1m: 1, ton25: 1, hr100: 1, sets2k: 1, rp50k: 1, mo6: 1, tgt12: 1, allmus4: 1, ex80: 1, sig100: 1, cdh50: 1, wo100: 1, st26: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
 var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
   explore: 1, wkend: 1, cardio25: 1, sets40: 1, pr25: 1, post50: 1, cdwk: 1, leg50: 1, sets30: 1, plate3: 1, week: 1, squad: 1, long: 1, pr3: 1,
   chest50: 1, bk50: 1, sh50: 1, arm50: 1, sets500: 1, hr25: 1, rp10k: 1, mo3: 1 };
@@ -6019,7 +6053,7 @@ var BADGES = [
   ['zero', 'Zero Days Off', 'rare', 'Fourteen days in a row, a workout on every one.', '#ff3df2'],
   ['newyear', 'First Rep of the Year', 'rare', 'A workout on the first of January.', '#8b7cff'],
   ['century', 'Century Set', 'rare', 'A hundred reps of one exercise in a single workout.', '#7aa2ff'],
-  ['twice', 'Two-a-Day', 'rare', 'Two workouts in one day.', '#2ee68a'],
+  ['twice', 'Two-a-Day', 'rare', 'Two sessions in one day.', '#2ee68a'],
   ['allmus', 'Complete', 'rare', 'Every muscle group trained in one week.', '#c084fc'],
   ['dec31', 'Last Rep of the Year', 'rare', 'A workout on the thirty-first of December.', '#8b7cff'],
   ['friday13', 'Friday the 13th', 'rare', 'A workout on a Friday the thirteenth.', '#ff8a2a'],
@@ -6094,6 +6128,7 @@ function lfBadges() {
       var a = ymd(m), b = ymd(addDays(m, 6)), wk = ws.filter(function (w) { return w.d >= a && w.d <= b; });
       var days = {}; wk.forEach(function (w) { days[w.d] = 1; });
       if (planned && Object.keys(days).length >= planned) won('week', wk[wk.length - 1].d);
+      wk = dayFirst(wk);
       if (wk.length >= S.goal) { won('goal', wk[S.goal - 1].d); streak++; var dd = wk[S.goal - 1].d; if (streak === 4) won('st4', dd); if (streak === 12) won('st12', dd); if (streak === 26) won('st26', dd); }
       else if (b < ymd(today())) streak = 0;
       /* the sets add up through the week; the day a target is reached is the day the badge is won */
@@ -6242,6 +6277,7 @@ function lfBadges() {
   var stBest = 0, stRun = 0;
   if (ws.length && S.goal > 0) for (var mq = monday(parseYmd(ws[0].d)); mq <= today(); mq = addDays(mq, 7)) {
     var aq = ymd(mq), bq = ymd(addDays(mq, 6)), wq = ws.filter(function (w) { return w.d >= aq && w.d <= bq; });
+    wq = dayFirst(wq);
     if (wq.length >= S.goal) { stRun++; if (stRun > stBest) stBest = stRun; if (stRun === 52) won('st52', wq[S.goal - 1].d); } else if (bq < ymd(today())) stRun = 0;
   }
   /* THE NEWEST RUNS */
@@ -7492,6 +7528,7 @@ function lfMedals() {
     var met = 0, done = 0, last = '', cur = y === t.getFullYear() && mo === t.getMonth();
     weeks.forEach(function (wk) {
       var a = ymd(wk), b = ymd(addDays(wk, 6)), these = ws.filter(function (w) { return w.d >= a && w.d <= b; });
+      these = dayFirst(these);
       if (these.length >= S.goal) { met++; last = these[S.goal - 1].d; }
       if (b < ymd(t)) done++;
     });
