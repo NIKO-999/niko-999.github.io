@@ -514,6 +514,16 @@ const kv = () => {
     ok('and when a workout in progress started', q.s.lv === 1800000000000, q.s.lv);
     ok('badges come through as ids and dates, three at most', JSON.stringify(q.s.bg) === '[["wo10","2026-10-26"],["st4","2026-10-19"],["first","2026-10-05"]]', JSON.stringify(q.s.bg));
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
+    /* LIVE: the small read the app asks every few seconds */
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, lv: 1800000000000, lx: 1800000090000 } } });
+    let lq = await (await hit('GET', '/v1/live?c=' + C + ',ZZZZZZZZ,not-a-code')).json();
+    ok('a live read returns only the start, the expiry and when it was written, for each code asked', lq[C].lv === 1800000000000 && lq[C].lx === 1800000090000 && lq[C].at > 0 && Object.keys(lq[C]).sort().join() === 'at,lv,lx' && lq.ZZZZZZZZ === null && !('not-a-code' in lq), JSON.stringify(lq));
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12 } } });
+    lq = await (await hit('GET', '/v1/live?c=' + C)).json();
+    ok('and ending a workout clears both at once: no start, no expiry', lq[C].lv === 0 && lq[C].lx === 0, JSON.stringify(lq));
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { lx: 1800000090000 } } });
+    lq = await (await hit('GET', '/v1/live?c=' + C)).json();
+    ok('an expiry with no start is dropped', lq[C].lx === 0, JSON.stringify(lq));
     const raw = env.SCHED.m.get('lift:' + C);
     ok('the key is stored only as its hash', raw.indexOf(KEY) < 0 && JSON.parse(raw).kh.length === 64);
     q = await hit('PUT', '/v1/lift/' + C, { key: K2, body: { n: 'Imposter', s: {} } });

@@ -393,6 +393,8 @@ function liftClean(b) {
   if (Number.isInteger(b.s.ac) && ((b.s.ac >= 0 && b.s.ac < 360) || (b.s.ac >= 1000 && b.s.ac < 1040) || (b.s.ac >= 1200 && b.s.ac < 1240) || b.s.ac === 1299)) s.ac = b.s.ac; /* a hue, a neutral (1000 up), or an earned colour (1200 up, the owner's 1299) */
   /* training now: when the workout in progress started, a time in ms */
   if (Number.isInteger(b.s.lv) && b.s.lv > 1e12 && b.s.lv < 1e14) s.lv = b.s.lv;
+  /* and until when to believe it: a phone that stops answering must not read as training for ever */
+  if (s.lv && Number.isInteger(b.s.lx) && b.s.lx > 1e12 && b.s.lx < 1e14) s.lx = b.s.lx;
   s.last = typeof b.s.last === 'string' && /^\d{4}-\d\d-\d\d$/.test(b.s.last) ? b.s.last : '';
   /* THE WORKOUTS THEMSELVES, asked for so friends can see the sets: at
      most twenty, each a date, a name and up to fifteen exercises of up
@@ -706,6 +708,19 @@ export default {
       return json(req, { ok: true });
     }
 
+    /* WHO IS TRAINING NOW, for a list of codes: nothing but the start, the
+       expiry and when it was written, one small read each, so the app can
+       ask every few seconds without fetching whole records */
+    if (p === '/v1/live' && req.method === 'GET') {
+      const codes = (new URL(req.url).searchParams.get('c') || '').split(',').filter((c) => /^[A-HJ-NP-Z2-9]{8}$/.test(c)).slice(0, 24);
+      const out = {};
+      await Promise.all(codes.map(async (c) => {
+        const raw = await env.SCHED.get('lift:' + c, { cacheTtl: 30 });
+        const rec = raw ? JSON.parse(raw) : null;
+        out[c] = rec && rec.s ? { lv: rec.s.lv || 0, lx: rec.s.lx || 0, at: rec.at || 0 } : null;
+      }));
+      return json(req, out);
+    }
     const lf = p.match(/^\/v1\/lift\/([A-HJ-NP-Z2-9]{8})$/);
     if (lf) {
       const lk = 'lift:' + lf[1];

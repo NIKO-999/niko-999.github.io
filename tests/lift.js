@@ -1126,6 +1126,17 @@ const freeze = (at) => `(() => {
     await A.page.fill('#frCode', codeB.toLowerCase()); await top(A.page).locator('button', { hasText: /^Add$/ }).click(); await settle(A.page);
     ok('a friend mid-workout shows as training now', /Training now · since/.test(await A.page.textContent('#frBoard .fr-row:not(.is-me)')), await A.page.textContent('#frBoard'));
     ok('and you are not', !/Training now/.test(await A.page.textContent('#frBoard .fr-row.is-me')));
+    /* LIVE, WITHOUT LEAVING THE TAB: she ends her workout and it says so within seconds; both start and it says so again */
+    { const rec = JSON.parse(m.get('lift:' + codeB)); rec.s.lv = 0; rec.s.lx = 0; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    const gone = await A.page.waitForFunction(() => !/Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).then(() => true, () => false);
+    ok('a friend who ends her workout stops reading as training within seconds, with no reload', gone);
+    { const rec = JSON.parse(m.get('lift:' + codeB)), now = await A.page.evaluate(() => Date.now()); rec.s.lv = now - 60e3; rec.s.lx = now + 90e3; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    const back = await A.page.waitForFunction(() => /Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).then(() => true, () => false);
+    ok('and one who starts reads as training within seconds', back);
+    { const rec = JSON.parse(m.get('lift:' + codeB)), now = await A.page.evaluate(() => Date.now()); rec.s.lv = now - 3600e3; rec.s.lx = now - 1000; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    ok('and a phone that stopped answering does not read as training for ever: its expiry has passed', await A.page.waitForFunction(() => !/Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).then(() => true, () => false));
+    { const rec = JSON.parse(m.get('lift:' + codeB)), now = await A.page.evaluate(() => Date.now()); rec.s.lv = now - 20 * 60e3; delete rec.s.lx; m.set('lift:' + codeB, JSON.stringify(rec)); }
+    await A.page.waitForFunction(() => /Training now/.test(document.querySelector('#frBoard .fr-row:not(.is-me)').textContent), null, { timeout: 9000 }).catch(() => {});
     ok('the week is rings, one each, toward their own goal, and the names under them are the board', await A.page.locator('#frRings svg circle').count() >= 2 && await A.page.locator('#frRings #frBoard .fr-row').count() === 2 && (await A.page.$$eval('#frRings .fr-row', (r) => r.map((x) => x.style.getPropertyValue('--rc')))).every((c) => c));
     ok('their ring says it too: a glow and a light at its tip', await A.page.locator('#frRings .fr-rg-h').count() === 1 && await A.page.locator('#frRings .fr-rg-a.is-live, #frRings .fr-rg-p').count() >= 1);
     ok('and the middle crowns who is in front, by your own name', (await A.page.textContent('#frRgLead')).trim() === 'Niko' && await A.page.locator('#frRgLead .fr-rg-cr').count() === 1, await A.page.textContent('#frRings'));

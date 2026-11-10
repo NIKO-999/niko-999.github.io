@@ -1783,7 +1783,7 @@ function lfSaveAct() {
   try { if (act) localStorage.setItem(ACTK, JSON.stringify(act)); else localStorage.removeItem(ACTK); } catch (e) {}
   /* starting and ending a workout tell friends; a set ticked does not */
   var lv = act ? act.s : 0;
-  if (lv !== lfLvSent) { lfLvSent = lv; if (typeof frQueue === 'function') frQueue(); }
+  if (lv !== lfLvSent) { lfLvSent = lv; if (typeof frPushNow === 'function') frPushNow(); if (typeof frLiveSoon === 'function') frLiveSoon(); if (typeof frSyncNow === 'function') setTimeout(frSyncNow, 400); }
   /* a workout that ends takes its pending lock-screen alert with it */
   if (!act && typeof lfRestPushClear === 'function') lfRestPushClear();
 }
@@ -4164,6 +4164,10 @@ function frStats() {
     ac: lfAccent(),
     /* TRAINING NOW: when the workout in progress started, or nothing */
     lv: act ? act.s : 0,
+    /* AND UNTIL WHEN TO BELIEVE IT: a short way ahead while the app is up and
+       beating, longer when it has gone to the background between sets, so a
+       phone that stops answering stops reading as training */
+    lx: act ? Date.now() + (document.hidden ? 15 * 60000 : 90000) : 0,
     /* THE TREND SHEETS, for friends: the same windows yours are drawn from,
        each as [workouts, sets, reps, kg]. Totals only, never a single lift
        — bar the heaviest set of the month, which your own sheet names. */
@@ -4178,16 +4182,64 @@ function frStats() {
    every keystroke of it. */
 var frT = 0, frSig = '';
 function frQueue() { if (!FRS.on) return; clearTimeout(frT); frT = setTimeout(frPush, 2500); }
+/* STARTING AND ENDING A WORKOUT ARE TOLD AT ONCE, never after the beat
+   the rest wait for, and a push that did not land is tried again until it
+   does: a friend who ended hers and still reads as training was a push
+   that was late, or lost, with nothing to send it again */
+var frRetryT = 0, frRetryN = 0;
+function frPushNow() { if (!FRS.on) return; clearTimeout(frT); frPush(); }
 function frPush() {
   if (!FRS.on) return;
   var body = { n: FRS.name || 'Lifter', s: frStats() };
   /* with notifications on, the server is told where to reach this phone
      when a friend reacts — the address and its public keys, nothing else */
   if (LPU && LPU.rx !== false) body.pu = { ep: LPU.ep, pk: LPU.pk, au: LPU.au };
-  var sig = JSON.stringify(body);
-  if (sig === frSig) return;
-  frApi('PUT', '/v1/lift/' + FRS.code, body).then(function (r) { if (r.st === 200) frSig = sig; }).catch(function () {});
+  /* the expiry moves every beat; whether it changed what a friend sees does not */
+  var sig = JSON.stringify(body, function (k, v) { return k === 'lx' ? !!v : v; }), beat = !!(act && frBeatDue);
+  if (sig === frSig && !beat) return;
+  frBeatDue = false;
+  frApi('PUT', '/v1/lift/' + FRS.code, body).then(function (r) { if (r.st === 200) { frSig = sig; frRetryN = 0; } else throw 0; })
+    .catch(function () { clearTimeout(frRetryT); frRetryT = setTimeout(frPush, Math.min(15000, 1000 * Math.pow(2, frRetryN++))); });
 }
+var frBeatDue = false;
+/* WHILE TRAINING THE PHONE BEATS EVERY 30 SECONDS, and tells the server the
+   moment it goes to the background or comes back */
+setInterval(function () { if (act && FRS.on && !document.hidden) { frBeatDue = true; frPush(); } }, 30000);
+document.addEventListener('visibilitychange', function () { if (FRS.on) { frBeatDue = !!act; frPush(); if (!document.hidden) frLiveSoon(); } });
+addEventListener('pagehide', function () { if (FRS.on && act) { frBeatDue = true; frPush(); } });
+addEventListener('online', function () { if (FRS.on) { frSig = ''; frPush(); frLiveSoon(); } });
+/* WHO IS TRAINING, ASKED OFTEN AND ASKED SMALL. Every few seconds while the
+   Friends tab is up or a workout of yours is going, a list of codes goes
+   to the server and only the starts and expiries come back; a change
+   repaints the tab and, when you are both training, says so on any screen */
+var frLiveT = 0, frLiveBusy = false, frLiveSeen = '';
+function frLiveSoon() { clearTimeout(frLiveT); frLiveT = setTimeout(frLivePoll, 150); }
+function frLivePoll() {
+  clearTimeout(frLiveT);
+  var want = FRS.on && FRS.list.length && !document.hidden && (view === 'fr' || act);
+  frLiveT = setTimeout(frLivePoll, want ? (view === 'fr' ? 3000 : 6000) : 2000);
+  if (!want || frLiveBusy) return;
+  frLiveBusy = true;
+  fetch(FR_URL + '/v1/live?c=' + FRS.list.map(function (f) { return f.c; }).join(',')).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    frLiveBusy = false; if (!j) return;
+    var ch = false;
+    FRS.list.forEach(function (f) {
+      var q = j[f.c]; if (!q || !f.s) return;
+      if ((f.s.lv || 0) !== (q.lv || 0) || (f.s.lx || 0) !== (q.lx || 0)) { f.s.lv = q.lv || 0; f.s.lx = q.lx || 0; if (q.at) f.at = q.at; ch = true; }
+    });
+    if (ch) frSave();
+    var sig = FRS.list.map(function (f) { return f.c + ':' + (frLive(f.s) ? 1 : 0); }).join('|');
+    if (sig !== frLiveSeen) { frLiveSeen = sig; if (view === 'fr') lfRender(); frSyncNow(); }
+  }).catch(function () { frLiveBusy = false; });
+}
+/* BOTH TRAINING NOW: said the moment it is true, wherever you are in the app */
+var frSyncWas = '';
+function frSyncNow() {
+  var who = act ? FRS.list.filter(function (f) { return !f.gone && f.s && frLive(f.s); }) : [], k = who.map(function (f) { return f.c; }).join();
+  if (k === frSyncWas) return; frSyncWas = k;
+  if (who.length && view !== 'fr') { lfBanner(IC_LINK, 'In sync', 'Training with ' + who.map(function (f) { return f.n || 'a friend'; }).slice(0, 2).join(' and ') + ' right now', frColOf(who[0].s)); buzz([10, 50, 10]); }
+}
+setTimeout(frLivePoll, 1200);
 function frPullAll(done) {
   /* everybody on the list, and your own record for the reactions on it */
   var left = FRS.list.length + 1;
@@ -4492,7 +4544,12 @@ function lfBanner(icon, title, sub, col) {
 }
 /* TRAINING NOW: a workout started and not finished, within three hours —
    past that it is a phone that died mid-session, not a session. */
-function frLive(st) { var lv = st && st.lv; return typeof lv === 'number' && lv > 0 && Date.now() - lv < 3 * 3600e3 && Date.now() - lv > -6e5; }
+function frLive(st) {
+  var lv = st && st.lv, lx = st && st.lx;
+  if (typeof lv !== 'number' || !(lv > 0) || Date.now() - lv > 8 * 3600e3 || Date.now() - lv < -6e5) return false;
+  /* an expiry says when to stop believing it; a record from before there was one keeps the old three hours */
+  return typeof lx === 'number' && lx > 0 ? Date.now() < lx : Date.now() - lv < 3 * 3600e3;
+}
 /* THE WEEK AS RINGS: one per person, filling toward their OWN weekly goal,
    so three a week and six a week race fairly - closing yours is the win.
    Each ring is in the colour that person chose. The names under it are
