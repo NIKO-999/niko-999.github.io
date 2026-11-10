@@ -1106,17 +1106,16 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ti .tt-slay em { position: relative; color: #ffd9df; text-shadow: 0 0 8px rgba(225,29,72,.7); }
 .tt-slay em::after { content: ''; position: absolute; left: -6%; right: -6%; top: 50%; height: 2px; background: linear-gradient(90deg, transparent, #fff, #e11d48, transparent); transform: rotate(-9deg) scaleX(0); transform-origin: 0 50%; animation: tt-slay 3.6s cubic-bezier(.7, 0, .2, 1) infinite; }
 @keyframes tt-slay { 0%, 55% { transform: rotate(-9deg) scaleX(0); opacity: 1; } 68% { transform: rotate(-9deg) scaleX(1); opacity: 1; } 100% { transform: rotate(-9deg) scaleX(1); opacity: 0; } }
-.fr-ti .tt-eye { flex-direction: column; gap: 5px; --tc: var(--rc, #ff5a1f); text-transform: none; letter-spacing: .22em; font-size: 9.5px; font-weight: 700; color: color-mix(in srgb, var(--tc) 50%, #fff); }
-.tt-eye svg { width: 58px; height: 33px; overflow: visible; filter: drop-shadow(0 0 7px color-mix(in srgb, var(--tc) 70%, transparent)); }
+.tt-eye { --tc: var(--rc, #ff5a1f); display: inline-block; vertical-align: middle; margin-left: 8px; }
+.tt-eye svg { display: block; width: 28px; height: 16px; overflow: visible; filter: drop-shadow(0 0 3px color-mix(in srgb, var(--tc) 70%, transparent)); }
+.tt-eye { padding: 4px; margin: -4px -4px -4px 4px; }
 .tt-eye .e-w { fill: #0b0b0e; } .tt-eye .e-o { fill: none; stroke: var(--tc); stroke-width: 1.6; stroke-linejoin: round; }
 .tt-eye .e-i { animation: tt-eye-look 7s ease-in-out infinite; } .tt-eye .e-i circle { fill: var(--tc); } .tt-eye .e-i .e-r { fill: color-mix(in srgb, var(--tc) 55%, #000); } .tt-eye .e-i .e-p { fill: #000; } .tt-eye .e-i .e-g { fill: #fff; }
 .tt-eye .e-p { transform-origin: 32px 18px; animation: tt-eye-pupil 3.5s ease-in-out infinite; }
 .tt-eye .e-l { fill: #0b0b0e; animation: tt-eye-blink 5.2s ease-in-out infinite; }
-.tt-eye em { animation: tt-eye-say 5.2s ease-in-out infinite; text-transform: uppercase; }
 @keyframes tt-eye-look { 0%, 14%, 100% { transform: none; } 20%, 38% { transform: translateX(-9px); } 46%, 64% { transform: translateX(9px); } 72%, 86% { transform: translate(0, 1.5px); } }
 @keyframes tt-eye-pupil { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.22); } }
 @keyframes tt-eye-blink { 0%, 90%, 100% { transform: none; } 94%, 96% { transform: translateY(36px); } }
-@keyframes tt-eye-say { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
 @keyframes tt-blink { 50% { opacity: 0; } }
 @keyframes tt-glitch { 0%, 94%, 100% { transform: none; } 95% { transform: translateX(-2px); text-shadow: 2px 0 #ff3d71, -2px 0 #38f; } 97% { transform: translateX(2px) skewX(-6deg); text-shadow: -2px 0 #ff3d71, 2px 0 #38f; } }
 .rk-o.is-creator { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 45%, transparent); }
@@ -4796,7 +4795,7 @@ function lfTitleEl(id) {
     sp.className = 'tt tt-eye';
     sp.innerHTML = '<svg viewBox="0 0 64 36" aria-hidden="true"><defs><clipPath id="ttEyeC"><path d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/></clipPath></defs>'
       + '<path class="e-w" d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/><g clip-path="url(#ttEyeC)"><g class="e-i"><circle cx="32" cy="18" r="11.500"/><circle class="e-r" cx="32" cy="18" r="8"/><circle class="e-p" cx="32" cy="18" r="4.600"/><circle class="e-g" cx="35.500" cy="14.500" r="1.800"/></g>'
-      + '<rect class="e-l" x="0" y="-36" width="64" height="36"/></g><path class="e-o" d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/></svg><em>always watching you</em>';
+      + '<rect class="e-l" x="0" y="-36" width="64" height="36"/></g><path class="e-o" d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/></svg>';
     return sp;
   }
   return null;
@@ -5207,8 +5206,12 @@ function frDress(b, st) {
     lfEmblem3(st.fm, rcol).then(function (cv) { if (!cv || !h.isConnected) { if (cv) lfEmStop(); if (!cv) { ban2.classList.remove('has-emblem'); av.classList.add('em-fall'); } return; } h.insertBefore(cv, h.firstChild); });
   }
   ti.textContent = '';
+  var nmEl = $('.fr-ban-t b', b), oldEye = nmEl && $('.tt-eye', nmEl); if (oldEye) oldEye.remove();
   var te = st.ti && lfRkHas('ti', st.ti) ? lfTitleEl(st.ti) : null;
-  if (te) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti)) ti.textContent = lfRkName('ti', st.ti);
+  /* THE EYE IS ONLY AN EYE, and it sits at the end of the name, after any
+     flair, so nothing under the name moves and no line is added. */
+  if (te && te.classList.contains('tt-eye') && nmEl) nmEl.appendChild(te);
+  else if (te) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti)) ti.textContent = lfRkName('ti', st.ti);
   ti.hidden = !ti.firstChild;
 }
 /* ONE PICKER, small: what a kind of thing could be, what it takes, and which is on */
