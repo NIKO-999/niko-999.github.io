@@ -21,7 +21,7 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
 const URL = `${BASE}/lift/`;
 const RK_SEEN = { wo: 1e9, vol: 1e12, pr: 1e9, lv: 99, u: [].concat(
   ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator', 'hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart', 'slayer', 'eye', 'twice'].map((x) => 'ti:' + x),
-  ['twice', 'slayer', 'spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign', 'laurel', 'verdant', 'regal', 'silvern', 'amethyst', 'inferno', 'glacier', 'rosegold', 'winged', 'sapphire', 'ruby', 'aurelian', 'phoenix', 'imperial', 'eclipse', 'prismatic', 'creator'].map((x) => 'fm:' + x)) };
+  ['eye', 'twice', 'slayer', 'spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign', 'laurel', 'verdant', 'regal', 'silvern', 'amethyst', 'inferno', 'glacier', 'rosegold', 'winged', 'sapphire', 'ruby', 'aurelian', 'phoenix', 'imperial', 'eclipse', 'prismatic', 'creator'].map((x) => 'fm:' + x)) };
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -466,12 +466,13 @@ const freeze = (at) => `(() => {
     }
   }
 
-  /* ── the leg check is put away for now: a leg day asks nothing ── */
+  /* ── HOW ARE YOU RECOVERING: every training day asks, and the answer changes the day ── */
   {
     const { c, page } = await ctx(null, '2026-11-02T07:00:00');
-    ok('a leg day no longer asks how your legs are', await page.locator('#lfRec').count() === 0 && !/soreness/i.test(await page.textContent('#lfHome')));
+    ok('a training day asks how you are recovering, with three answers, and no pain option', await page.locator('#lfRec').count() === 1 && /How are you recovering/.test(await page.textContent('#lfRec')) && await page.locator('#lfRec .lf-rq-b').count() === 3 && !/Sharp pain/.test(await page.textContent('#lfRec')));
     await page.click('#lfGo'); await settle(page);
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
+    ok('coming back to the app places you on the set you are on, even with a field focused, and on a long card the set itself is placed', /\[120, 500\]\.forEach\(function \(t\) \{ setTimeout\(function \(\) \{ lfScrollCur\(false\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /THE SET YOU ARE ON, NOT ONLY ITS EXERCISE/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Linear hack calf raises:5,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
@@ -503,6 +504,29 @@ const freeze = (at) => `(() => {
     await c.close();
   }
   {
+    /* moderate soreness cuts a third of the sets, on any session */
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    await page.click('#lfRec .lf-rq-b[data-r="1"]'); await settle(page);
+    ok('moderate soreness says what it does, and the button says fewer sets', /loses a third of its sets/.test(await page.textContent('#lfRec')) && /fewer sets/.test(await page.textContent('#lfGo')) && (await store(page)).rc['2026-11-02'] === 1);
+    await page.click('#lfGo'); await settle(page);
+    const n1 = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length));
+    ok('and every exercise starts a third lighter, none below one set', n1.join() === '3,3,1,3,3', n1);
+    await c.close();
+  }
+  {
+    /* an upper day asks too, and very sore offers another session or a full rest day */
+    const { c, page } = await ctx(null, '2026-11-03T07:00:00');
+    ok('an upper day asks as well', await page.locator('#lfRec').count() === 1);
+    await page.click('#lfRec .lf-rq-b[data-r="2"]'); await settle(page);
+    ok('very sore offers a full rest day or a different session, and a start anyway', await page.locator('#lfRecRest').count() === 1 && await page.locator('#lfRecAlt').count() === 1 && /Start anyway/.test(await page.textContent('#lfGo')));
+    await page.click('#lfRecAlt'); await settle(page);
+    ok('Pick another session opens the picker', await top(page).locator('.lf-li').count() > 1);
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('#lfRecRest'); await settle(page);
+    ok('and a rest day takes the day off', (await store(page)).rd['2026-11-03'] === 1 && (await page.textContent('#lfPick')).trim() === 'Rest day' && await page.locator('#lfRec').count() === 0);
+    await c.close();
+  }
+  {
     const sore = { '2026-10-23': 1, '2026-10-26': 2, '2026-10-28': 1 };
     const { c, page } = await ctx({ unit: 'kg', rc: sore }, '2026-11-02T07:00:00');
     ok('old answers are kept, but offer no lighter targets while it is away', await page.locator('#lfRecSg').count() === 0 && Object.keys((await store(page)).rc).length === 3);
@@ -514,7 +538,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfPick'); await settle(page);
     await top(page).locator('.lf-li', { hasText: 'Rest day' }).click(); await settle(page);
     ok('taking one makes today a rest day', (await page.textContent('#lfPick')).trim() === 'Rest day' && /Train anyway/.test(await page.textContent('#lfGo')) && (await store(page)).rd['2026-11-02'] === 1);
-    ok('and asks nothing about legs', await page.locator('#lfRec').count() === 0);
+    ok('and a rest day asks nothing', await page.locator('#lfRec').count() === 0);
     ok('the 30 days mark it as rest, not as a miss', await page.$eval('.lf-day.is-now', (e) => e.classList.contains('is-rest') && !e.classList.contains('is-on')));
     await page.click('#lfGo'); await settle(page);
     ok('train anyway takes it back', (await page.textContent('#lfPick')).trim() === 'Quad strength' && !(await store(page)).rd['2026-11-02']);
@@ -541,8 +565,8 @@ const freeze = (at) => `(() => {
     await c.close();
   }
   {
-    const { c, page } = await ctx(null, '2026-11-01T07:00:00');
-    ok('an upper day does not ask about legs', await page.locator('#lfRec').count() === 0);
+    const { c, page } = await ctx(null, '2026-11-03T07:00:00');
+    ok('an upper day asks how you are recovering too', await page.locator('#lfRec').count() === 1);
     await c.close();
   }
 
@@ -844,8 +868,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 122 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 122/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 123 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 123/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -882,9 +906,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 122/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 123/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 122);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 123);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -969,7 +993,7 @@ const freeze = (at) => `(() => {
   {
     const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 't1', d: '2026-10-29', s: 1, e: 2, n: 'Hamstrings & glutes', rt: 'p-wed', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 100, r: 8 }] }] }] }, '2026-10-29T18:00:00');
     ok('a Thursday you trained Wednesday\'s session shows that session, done', (await page.textContent('#lfPick')).trim() === 'Hamstrings & glutes' && /Hinge, curls/.test(await page.textContent('.lf-today .lf-sub')) && await page.locator('#lfDone').count() === 1);
-    ok('and does not ask about legs after the fact', await page.locator('#lfRec').count() === 0);
+    ok('and does not ask about recovery after the fact', await page.locator('#lfRec').count() === 0);
     await c.close();
   }
   {
@@ -1474,7 +1498,7 @@ const freeze = (at) => `(() => {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 122);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 123);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
     ok('the link is spent: the hash leaves the address bar', await page.waitForFunction(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || ''), null, { timeout: 10000 }).then(() => true, () => false));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
@@ -1771,6 +1795,8 @@ const freeze = (at) => `(() => {
     ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
     await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     const orn = await page.evaluate(() => ({ n: document.querySelectorAll('.rk-o[data-k="fm"]').length, old: !!document.querySelector('.rk-o[data-id="inferno"]') }));
+    ok('The Eye has a flair of its own, the owner\'s alone: it is not offered to anyone else', /\['eye', 'The Eye', 'One of one', function \(c\) \{ return c\.own; \}, 'M2 12s/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /kind === 'fl' && x\[0\] === 'eye' && !lfOwner\(\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && !(await page.locator('.rk-o[data-id="eye"][data-k="fl"]').count()));
+    ok('Unbeatable: mythic, jet black, not a crown, earned by finishing in front of friends and on goal four weeks running', /\['unbeat', 'Unbeatable', 'friends'/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /unbeat: 1, slayer: 1/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /unbeat: 'jet'/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /fx === 'jet'/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /\+\+bcRun === 4\) won\('unbeat', sun\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /wkDays\(parseYmd\(m\)\) >= S\.goal/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     ok('the frames offered are the painted ones, and the procedural ornate set is not among them', orn.n >= 13 && !orn.old && !(await page.locator('.rk-o[data-id="creator"][data-k="fm"]').count()), orn);
     const artSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
     const artIds = ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign'];
