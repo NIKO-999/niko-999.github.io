@@ -1278,29 +1278,50 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
-  /* ── NEUTRAL ACCENTS: no hue, a shade per face so it always reads ── */
+  /* ── NEUTRAL ACCENTS on the wheel, and the EARNED COLOURS: a gradient each, opened by a badge ── */
   {
-    const { c, page } = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
+    const wo = []; for (let i = 0; i < 50; i++) { const d = new Date(2026, 5, 1 + i, 9, 0); wo.push({ id: 'n' + i, d: d.toISOString().slice(0, 10), s: d.getTime(), e: d.getTime() + 3600e3, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 60, r: 8 }] }] }); }
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
     await settle(page);
-    ok('the neutrals fold away, shut until opened', await page.getAttribute('#lfNeuT', 'aria-expanded') === 'false' && await page.locator('#lfNeu').isHidden());
-    await page.click('#lfNeuT'); await settle(page);
-    ok('the theme offers neutrals beside the wheel', await page.locator('#lfNeu .lf-neu-b').count() === 19 && /Black/.test(await page.textContent('#lfNeu')) && await page.locator('#lfNeu').isVisible());
-    await page.evaluate(() => document.querySelector('#lfNeu .lf-neu-b[data-h="1003"]').click()); await settle(page);
+    ok('the luxury colours are gone, and the neutrals have no fold of their own', await page.locator('#lfLux, #lfLuxT, #lfNeuT, .lf-lux-b').count() === 0);
+    /* the neutrals are a ring inside the hues: press the fourth segment */
+    await page.locator('#lfWheel').scrollIntoViewIfNeeded(); await page.waitForTimeout(200);
+    const pt = await page.evaluate(() => { const b = document.querySelector('#lfWheel').getBoundingClientRect(), a = (3.5 / 19) * 2 * Math.PI, r = b.width / 2 * .53; return [b.left + b.width / 2 + Math.sin(a) * r, b.top + b.height / 2 - Math.cos(a) * r]; });
+    await page.mouse.click(pt[0], pt[1]); await settle(page);
     const dark = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
-    ok('a neutral is kept and named', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1003' && /Graphite/.test(await page.textContent('#lfTheme .lf-fh')) && (await page.textContent('#lfNeuT em')) === 'Graphite');
-    ok('and the fold stays open after picking one', await page.getAttribute('#lfNeuT', 'aria-expanded') === 'true');
+    ok('a neutral is picked off the ring inside the wheel, kept and named', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1003' && (await page.textContent('#lfWhCap')) === 'Graphite' && await page.locator('#lfWheel.is-nk').count() === 1);
     await page.evaluate(() => document.querySelector('#lfMode [data-m="light"]').click()); await settle(page);
     const light = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('and it is a lighter shade on the dark page, a deeper one on the light page', dark === '#636366' && light === '#2c2c2e', [dark, light]);
-    await page.click('#lfLuxT'); await settle(page);
-    ok('a second fold holds the luxury colours, emerald among them', await page.locator('#lfLux .lf-lux-b').count() === 9 && /Emerald/.test(await page.textContent('#lfLux')));
-    await page.evaluate(() => document.querySelector('#lfLux .lf-lux-b[data-h="1100"]').click()); await settle(page);
-    ok('each jewel has its own effect: emerald is a cut gem', await page.evaluate(() => document.documentElement.getAttribute('data-lux-fx')) === 'gem' && await page.locator('#lfLux i.fx-gem').count() === 2 && await page.locator('#lfLux i.fx-iris').count() === 2);
-    ok('its effect lives in the glow behind the page, and the buttons stay the flat colour', await page.evaluate(() => getComputedStyle(document.querySelector('.lf-glow .lf-luxfx')).display) === 'block'
-      && await page.evaluate(() => { const b = document.createElement('button'); b.className = 'lf-btn is-log'; document.body.appendChild(b); const bg = getComputedStyle(b).backgroundImage; b.remove(); return bg; }) === 'none');
-    ok('picking one makes it the accent', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1100' && await page.evaluate(() => document.documentElement.classList.contains('lf-lux')) && (await page.textContent('#lfLuxT em')) === 'Emerald');
+    await page.evaluate(() => document.querySelector('#lfMode [data-m="dark"]').click()); await settle(page);
+    if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
+    await settle(page);
+    ok('ten earned colours, and no owner one on a phone that is not the owner\'s', await page.locator('#lfThemes .lf-th').count() === 10 && await page.locator('#lfThemes .lf-th[data-h="1299"]').count() === 0);
+    ok('one not yet earned is locked and says which badge opens it', await page.locator('#lfThemes .lf-th.is-lock[data-h="1205"]').count() === 1 && /Earn 100 workouts/i.test(await page.textContent('#lfThemes .lf-th[data-h="1205"]')));
+    await page.evaluate(() => document.querySelector('#lfThemes .lf-th[data-h="1205"]').click()); await settle(page);
+    ok('pressing it says so and changes nothing', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1003' && /Earn 100 workouts/.test(await page.textContent('.lf-toast')));
+    ok('fifty workouts have opened Jet', await page.locator('#lfThemes .lf-th[data-h="1200"]:not(.is-lock)').count() === 1);
+    await page.evaluate(() => document.querySelector('#lfThemes .lf-th[data-h="1200"]').click()); await settle(page);
+    const g = await page.evaluate(() => { const b = document.createElement('button'); b.className = 'lf-btn is-log'; document.body.appendChild(b); const bg = getComputedStyle(b).backgroundImage; b.remove(); return { bg, acc: localStorage.getItem('lift.accent.v1'), stops: document.querySelectorAll('#lfAccG stop').length }; });
+    ok('wearing it, the accent is its gradient: the buttons, and the strokes through one shared gradient', g.acc === '1200' && /linear-gradient/.test(g.bg) && g.stops === 7, g);
+    ok('and nothing about it moves: no effect layer anywhere', await page.locator('.lf-luxfx').count() === 0 && await page.evaluate(() => !document.documentElement.hasAttribute('data-lux-fx')));
+    /* a colour kept from the luxury days comes back as the nearest one still offered */
+    await page.evaluate(() => localStorage.setItem('lift.accent.v1', '1100')); await page.reload(); await page.waitForTimeout(400);
+    ok('an old luxury colour is moved onto the wheel, once', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '150');
+    await c.close();
+  }
+  /* ── the owner's colour, on the owner's phone only ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [] });
+    await page.evaluate(() => localStorage.setItem('lift.owner.v1', '2026-11-09')); await page.reload(); await page.waitForTimeout(400);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
+    await settle(page);
+    ok('the owner\'s phone has Molten, one of one, first', await page.locator('#lfThemes .lf-th').first().getAttribute('data-h') === '1299' && /Molten/.test(await page.textContent('#lfThemes .lf-th.is-own')));
+    await page.evaluate(() => document.querySelector('#lfThemes .lf-th[data-h="1299"]').click()); await settle(page);
+    ok('and wearing it puts its gradient on the accent', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '1299' && /#ffb35c/i.test(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log-g'))));
     await c.close();
   }
 

@@ -190,7 +190,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-go:active { transform: scale(.98); }
 .lf-go .lf-play { width: 18px; height: 18px; border-radius: 5px; background: var(--on-ink); display: grid; place-items: center; }
 .lf-go .lf-play svg { width: 10px; height: 10px; fill: var(--ink); stroke: none; }
-.lf-go.is-live { background: var(--log); color: var(--on-log); }
+.lf-go.is-live { background: var(--log-g, var(--log)); color: var(--on-log); }
 .lf-go.is-live .lf-play { background: #fff; }
 .lf-go.is-live .lf-play svg { fill: var(--log); }
 
@@ -224,7 +224,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .is-wkdone .lf-bars > div i { animation: lf-wkbar 1.4s var(--ease) backwards; }
 .is-wkdone .lf-bars > div:nth-child(2) i { animation-delay: .07s; } .is-wkdone .lf-bars > div:nth-child(3) i { animation-delay: .14s; } .is-wkdone .lf-bars > div:nth-child(4) i { animation-delay: .21s; }
 .is-wkdone .lf-bars > div:nth-child(5) i { animation-delay: .28s; } .is-wkdone .lf-bars > div:nth-child(6) i { animation-delay: .35s; } .is-wkdone .lf-bars > div:nth-child(7) i { animation-delay: .42s; }
-@keyframes lf-wkbar { 0% { transform: scaleY(.2); transform-origin: bottom; } 30% { transform: scaleY(1.08); background: var(--log); box-shadow: 0 0 14px color-mix(in srgb, var(--log) 70%, transparent); } 70% { background: var(--log); } 100% { transform: none; } }
+@keyframes lf-wkbar { 0% { transform: scaleY(.2); transform-origin: bottom; } 30% { transform: scaleY(1.08); background: var(--log-g, var(--log)); box-shadow: 0 0 14px color-mix(in srgb, var(--log) 70%, transparent); } 70% { background: var(--log-g, var(--log)); } 100% { transform: none; } }
 .is-wkdone { position: relative; overflow: hidden; }
 .is-wkdone::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--log) 35%, transparent) 48%, rgba(255,255,255,.25) 50%, color-mix(in srgb, var(--log) 35%, transparent) 52%, transparent 70%); transform: translateX(-100%); animation: lf-sweep 1.3s .35s var(--ease) forwards; }
 @keyframes lf-sweep { to { transform: translateX(100%); } }
@@ -234,7 +234,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-wkdone.is-up { opacity: 1; transform: translate(-50%, 0) scale(1); }
 .lf-wkdone::after { content: ''; position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.22) 50%, transparent 65%); transform: translateX(-100%); }
 .lf-wkdone.is-up::after { animation: lf-sweep 1.2s .3s var(--ease) forwards; }
-.lf-wkd-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--log); color: var(--on-log); display: grid; place-items: center; flex: none; }
+.lf-wkd-ic { width: 36px; height: 36px; border-radius: 50%; background: var(--log-g, var(--log)); color: var(--on-log); display: grid; place-items: center; flex: none; }
 .lf-wkd-ic .lf-ic { width: 18px; height: 18px; stroke-width: 3; }
 .lf-wkdone b { display: block; font-size: 15px; font-weight: 800; letter-spacing: -.01em; }
 .lf-wkd-s { font-size: 12px; color: var(--dim); white-space: nowrap; }
@@ -254,7 +254,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-gol-ring::after { content: ''; position: absolute; inset: -10px; border-radius: 50%; box-shadow: 0 0 60px 6px var(--log); opacity: 0; animation: lf-ghglow 1.8s var(--land) ease-out forwards; }
 @keyframes lf-ghglow { 30% { opacity: .9; transform: scale(1.12); } to { opacity: .35; transform: scale(1); } }
 .lf-gol-tr { fill: none; stroke: rgba(255,255,255,.1); stroke-width: 11; }
-.lf-gol-seg { fill: none; stroke: var(--log); stroke-width: 11; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--log)); animation: lf-ghseg .32s cubic-bezier(.3, 1.3, .5, 1) backwards; }
+.lf-gol-seg { fill: none; stroke: var(--log-s, var(--log)); stroke-width: 11; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--log)); animation: lf-ghseg .32s cubic-bezier(.3, 1.3, .5, 1) backwards; }
 @keyframes lf-ghseg { from { stroke-dasharray: 0 999; opacity: 0; } }
 .lf-gol-ring b { position: absolute; inset: 0; display: grid; place-items: center; font-size: 72px; font-weight: 900; letter-spacing: -.04em; animation: lf-ghnum .6s cubic-bezier(.3, 1.6, .5, 1) backwards; }
 @keyframes lf-ghnum { from { transform: scale(.2); opacity: 0; } }
@@ -272,7 +272,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 @keyframes lf-fwrise { from { opacity: 1; transform: translateY(var(--rise)); } 95% { opacity: 1; } to { opacity: 0; transform: translateY(0); } }
 .lf-fw i { position: absolute; left: -1px; top: -1px; width: 2px; height: 2px; animation: lf-fwfall 1.3s var(--t) cubic-bezier(.5, 0, .9, .6) forwards; }
 @keyframes lf-fwfall { to { transform: translateY(38px); } }
-.lf-fw i::before { content: ''; position: absolute; left: 0; top: -1px; width: 14px; height: 3px; border-radius: 3px; background: var(--log); box-shadow: 0 0 8px var(--log); transform-origin: 0 50%; opacity: 0;
+.lf-fw i::before { content: ''; position: absolute; left: 0; top: -1px; width: 14px; height: 3px; border-radius: 3px; background: var(--log-g, var(--log)); box-shadow: 0 0 8px var(--log); transform-origin: 0 50%; opacity: 0;
   transform: rotate(var(--a)); animation: lf-fwspk 1.3s var(--t) cubic-bezier(.1, .7, .3, 1) forwards; }
 .lf-fw i.is-w::before { background: #fff; box-shadow: 0 0 8px #fff; } .lf-fw i.is-lt::before { background: color-mix(in srgb, var(--log) 50%, #fff); }
 @keyframes lf-fwspk { 0% { opacity: 1; transform: rotate(var(--a)) translateX(0) scaleX(.3); } 40% { opacity: 1; transform: rotate(var(--a)) translateX(calc(var(--d) * .8)) scaleX(1); } to { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scaleX(.2); } }
@@ -337,7 +337,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 }
 .lf-btn.is-full { width: 100%; }
 .lf-btn.is-ink { background: var(--ink); color: var(--on-ink); }
-.lf-btn.is-log { background: var(--log); color: var(--on-log); }
+.lf-btn.is-log { background: var(--log-g, var(--log)); color: var(--on-log); }
 .lf-btn.is-bad { color: var(--bad); }
 .lf-btn:active { opacity: .8; }
 
@@ -384,7 +384,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-cell.is-on { background: var(--card2); color: var(--ink); font-weight: 700; }
 .lf-cell.is-now { box-shadow: inset 0 0 0 2px var(--today); color: var(--ink); }
 /* a day you trained is lit in the accent; today keeps its outline instead, so the two never read as one */
-.lf-cell.is-on:not(.is-now) { background: var(--log); color: var(--on-log); }
+.lf-cell.is-on:not(.is-now) { background: var(--log-g, var(--log)); color: var(--on-log); }
 .lf-cell.is-on:not(.is-now) .lf-dots i { background: var(--on-log); }
 .lf-cell.is-ahead { color: var(--ahead); }
 /* ARRIVING AT A MONTH the days you trained light up in turn, so it reads
@@ -428,7 +428,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 }
 .lf-live span:not(.lf-rec) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-live em { font-style: normal; color: var(--live-ink); font-variant-numeric: tabular-nums; }
-.lf-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--log); flex: none; animation: lf-pulse 1.6s ease-in-out infinite; }
+.lf-rec { width: 9px; height: 9px; border-radius: 50%; background: var(--log-g, var(--log)); flex: none; animation: lf-pulse 1.6s ease-in-out infinite; }
 @keyframes lf-pulse { 50% { opacity: .35; } }
 
 /* ── sheets: built and removed, never hidden ── */
@@ -499,14 +499,14 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-rs-l { font-size: 17px; font-weight: 700; color: var(--ink); }
 .lf-ss-rest.is-idle .lf-rs-c, .lf-ss-rest.is-idle .lf-rs-l { color: var(--quiet); }
 .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l { color: var(--good); }
-.lf-ss-rest.is-ready .lf-rs-fg { stroke: var(--log); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--log) 60%, transparent)); }
+.lf-ss-rest.is-ready .lf-rs-fg { stroke: var(--log-s, var(--log)); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--log) 60%, transparent)); }
 @media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
 .lf-burst { position: fixed; width: 0; height: 0; z-index: 90; pointer-events: none; }
-.lf-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--log); animation: lf-burst .75s cubic-bezier(.2,.7,.3,1) forwards; }
+.lf-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--log-g, var(--log)); animation: lf-burst .75s cubic-bezier(.2,.7,.3,1) forwards; }
 .lf-burst i:nth-child(3n) { width: 5px; height: 5px; left: -2.5px; top: -2.5px; background: var(--ink); }
 .lf-burst s { position: absolute; left: 0; top: 0; width: 0; height: 0; border-radius: 50%; pointer-events: none; }
 .lf-wave { box-shadow: 0 0 0 2px var(--log); animation: lf-wave .7s cubic-bezier(.15, .7, .3, 1) forwards; }
@@ -514,16 +514,16 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-flash { background: radial-gradient(closest-side, color-mix(in srgb, var(--log) 55%, transparent), transparent); animation: lf-flash .6s ease-out forwards; }
 @keyframes lf-wave { 0% { width: 0; height: 0; margin: 0; opacity: 1; box-shadow: 0 0 0 4px var(--log); } 100% { width: 180px; height: 180px; margin: -90px 0 0 -90px; opacity: 0; box-shadow: 0 0 0 1px var(--log); } }
 @keyframes lf-flash { 0% { width: 20px; height: 20px; margin: -10px 0 0 -10px; opacity: 1; } 100% { width: 240px; height: 240px; margin: -120px 0 0 -120px; opacity: 0; } }
-.lf-burst u { position: absolute; left: -3px; top: -5px; width: 6px; height: 10px; border-radius: 2px; background: var(--log); opacity: 0; animation: lf-conf 1.45s cubic-bezier(.25, .6, .4, 1) forwards; }
+.lf-burst u { position: absolute; left: -3px; top: -5px; width: 6px; height: 10px; border-radius: 2px; background: var(--log-g, var(--log)); opacity: 0; animation: lf-conf 1.45s cubic-bezier(.25, .6, .4, 1) forwards; }
 .lf-burst u.is-ink { background: var(--ink); }
 .lf-burst u.is-lt { background: color-mix(in srgb, var(--log) 55%, #fff); }
 .lf-burst u.is-sq { width: 7px; height: 7px; border-radius: 50%; }
 @keyframes lf-conf { 0% { opacity: 1; transform: translate(0, 0) rotate(0); } 30% { opacity: 1; transform: translate(calc(var(--dx) * .6), var(--up)) rotate(calc(var(--rot) * .3)); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--dx), var(--fall)) rotate(var(--rot)); } }
-.lf-burst b { position: absolute; left: 0; top: -34px; transform: translateX(-50%); font-size: 15px; font-weight: 800; letter-spacing: .04em; color: var(--on-log); background: var(--log); padding: 3px 10px; border-radius: 999px; animation: lf-prpop .9s cubic-bezier(.2,.9,.3,1.3) forwards; white-space: nowrap; }
+.lf-burst b { position: absolute; left: 0; top: -34px; transform: translateX(-50%); font-size: 15px; font-weight: 800; letter-spacing: .04em; color: var(--on-log); background: var(--log-g, var(--log)); padding: 3px 10px; border-radius: 999px; animation: lf-prpop .9s cubic-bezier(.2,.9,.3,1.3) forwards; white-space: nowrap; }
 @keyframes lf-burst { from { transform: translate(0, 0) scale(1); opacity: 1; } to { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
 @keyframes lf-prpop { 0% { transform: translateX(-50%) scale(.4); opacity: 0; } 25% { transform: translateX(-50%) scale(1.15); opacity: 1; } 70% { transform: translateX(-50%) translateY(-6px) scale(1); opacity: 1; } 100% { transform: translateX(-50%) translateY(-14px) scale(1); opacity: 0; } }
 .lf-fin { text-align: center; padding-top: 8px; }
-.lf-fin-ok { width: 84px; height: 84px; margin: 4px auto 14px; border-radius: 50%; background: var(--log); color: var(--on-log); display: grid; place-items: center; box-shadow: 0 0 0 10px color-mix(in srgb, var(--log) 18%, transparent), 0 0 46px color-mix(in srgb, var(--log) 45%, transparent); animation: lf-finok .6s cubic-bezier(.2,.9,.3,1.25) both; }
+.lf-fin-ok { width: 84px; height: 84px; margin: 4px auto 14px; border-radius: 50%; background: var(--log-g, var(--log)); color: var(--on-log); display: grid; place-items: center; box-shadow: 0 0 0 10px color-mix(in srgb, var(--log) 18%, transparent), 0 0 46px color-mix(in srgb, var(--log) 45%, transparent); animation: lf-finok .6s cubic-bezier(.2,.9,.3,1.25) both; }
 .lf-fin-ok .lf-ic { width: 40px; height: 40px; stroke-width: 2.8; }
 @keyframes lf-finok { from { transform: scale(.3); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .lf-fin .lf-cap { margin: 0 0 4px; }
@@ -557,7 +557,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ws-ring { position: relative; width: 168px; height: 168px; margin: 16px auto 18px; animation: lf-finok .7s cubic-bezier(.2,.9,.3,1.25) both; }
 .lf-ws-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
 .lf-ws-tr { fill: none; stroke: var(--card2); stroke-width: 12; }
-.lf-ws-arc { fill: none; stroke: var(--log); stroke-width: 12; stroke-linecap: round; transition: stroke-dasharray 1.4s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--log) 60%, transparent)); }
+.lf-ws-arc { fill: none; stroke: var(--log-s, var(--log)); stroke-width: 12; stroke-linecap: round; transition: stroke-dasharray 1.4s cubic-bezier(.2,.8,.2,1); filter: drop-shadow(0 0 8px color-mix(in srgb, var(--log) 60%, transparent)); }
 .lf-ws-ring.is-hit::after { content: ''; position: absolute; inset: -10px; border-radius: 50%; box-shadow: 0 0 40px color-mix(in srgb, var(--log) 45%, transparent); animation: lf-breathe 3.2s ease-in-out infinite; pointer-events: none; }
 .lf-ws-in { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
 .lf-ws-in b { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1; }
@@ -566,7 +566,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ws-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; margin: 4px 0 16px; }
 .lf-ws-days > div { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; color: var(--quiet); font-weight: 600; }
 .lf-ws-days i { width: 100%; max-width: 34px; height: 34px; border-radius: 11px; background: var(--card2); }
-.lf-ws-days .is-on i { background: var(--log); box-shadow: 0 0 14px color-mix(in srgb, var(--log) 45%, transparent); animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards; animation-delay: calc(var(--i) * 90ms + 500ms); }
+.lf-ws-days .is-on i { background: var(--log-g, var(--log)); box-shadow: 0 0 14px color-mix(in srgb, var(--log) 45%, transparent); animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards; animation-delay: calc(var(--i) * 90ms + 500ms); }
 .lf-ws-days .is-rest i { background: none; box-shadow: inset 0 0 0 1.5px var(--line); }
 .lf-ws-days .is-on span { color: var(--ink); }
 .lf-ws-lines { display: grid; gap: 8px; margin-top: 16px; text-align: left; }
@@ -580,7 +580,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ws-coins .lf-bdi b { font-size: 11px; }
 .lf-ws-verdict { margin: 4px 0 0; font-size: 14px; font-weight: 700; }
 /* EVERY TARGET HIT: the verdict is a lit pill, and the ring wears a turning halo of light */
-.lf-wsh.is-met .lf-ws-verdict { display: inline-block; padding: 5px 14px; border-radius: 999px; color: var(--on-log); background: var(--log); box-shadow: 0 0 22px color-mix(in srgb, var(--log) 60%, transparent); }
+.lf-wsh.is-met .lf-ws-verdict { display: inline-block; padding: 5px 14px; border-radius: 999px; color: var(--on-log); background: var(--log-g, var(--log)); box-shadow: 0 0 22px color-mix(in srgb, var(--log) 60%, transparent); }
 .lf-wsh.is-met .lf-ws-ring::before { content: ''; position: absolute; inset: -18px; border-radius: 50%; pointer-events: none; z-index: -1;
   background: conic-gradient(from 0deg, transparent 0 20%, color-mix(in srgb, var(--log) 70%, transparent) 30%, transparent 45% 70%, color-mix(in srgb, var(--log) 55%, transparent) 82%, transparent 92%);
   -webkit-mask: radial-gradient(closest-side, transparent 78%, #000 80%, #000 96%, transparent 100%); mask: radial-gradient(closest-side, transparent 78%, #000 80%, #000 96%, transparent 100%);
@@ -598,7 +598,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ws-mr > i i { display: block; height: 100%; border-radius: inherit; background: #ff453a; }
 @media (prefers-reduced-motion: reduce) { .lf-ws-k, .lf-ws-ring, .lf-ws-ring.is-hit::after, .lf-ws-days .is-on i, .lf-wsh.is-met .lf-ws-ring::before, .lf-sheet.lf-wsh.is-met::before { animation: none; } .lf-ws-arc { transition: none; } }
 .fr-live { display: inline-flex; align-items: center; gap: 6px; color: var(--good); font-weight: 600; }
-.fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
+.fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
 @keyframes fr-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
 @media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i, .lf-burst u, .lf-burst s { display: none; } }
 .fr-rg { padding: 14px 16px 6px; }
@@ -648,84 +648,57 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-wheel { position: relative; width: 200px; height: 200px; margin: 6px auto 0; border-radius: 50%; touch-action: none; cursor: pointer;
   background: conic-gradient(hsl(0,80%,56%), hsl(30,80%,56%), hsl(60,80%,56%), hsl(90,80%,56%), hsl(120,80%,56%), hsl(150,80%,56%), hsl(180,80%,56%), hsl(210,80%,64%), hsl(240,80%,64%), hsl(270,80%,64%), hsl(300,80%,56%), hsl(330,80%,56%), hsl(360,80%,56%)); }
 .lf-wheel.is-neu .lf-wh-k { opacity: 0; }
-/* the neutrals' fold: a row like a settings row, the chevron turning half round when open */
-.lf-neu-h { margin: 16px 0 0; font: inherit; }
-.lf-neu-h button { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 2px; color: var(--ink); font-size: 15px; font-weight: 600; text-align: left; }
-.lf-neu-h span { flex: 1; } .lf-neu-h em { font-style: normal; color: var(--dim); font-weight: 500; font-size: 14px; }
-.lf-neu-h .lf-chev { color: var(--dim); transform: rotate(90deg); transition: transform .22s var(--ease); }
-.lf-neu-h button[aria-expanded="true"] .lf-chev { transform: rotate(270deg); }
-.lf-neu:not([hidden]) { margin-top: 4px; }
-/* the luxury swatches: a polished stone, lit from the top left, with a
-   glint crossing it now and then */
-.lf-lux-b i { position: relative; overflow: hidden; background: radial-gradient(circle at 30% 28%, var(--g) 0, var(--f) 42%, color-mix(in srgb, var(--f) 55%, #000) 100%);
-  box-shadow: 0 0 12px color-mix(in srgb, var(--f) 55%, transparent), inset 0 0 0 1px rgba(255,255,255,.25); }
-.lf-lux-b i::after { content: ''; position: absolute; inset: -40%; background: linear-gradient(115deg, transparent 40%, rgba(255,255,255,.75) 50%, transparent 60%); transform: translateX(-120%); animation: lf-glint 3.2s ease-in-out infinite; animation-delay: inherit; }
-@keyframes lf-glint { 0%, 55% { transform: translateX(-120%); } 85%, 100% { transform: translateX(120%); } }
-/* EACH JEWEL HAS ITS OWN EFFECT, and it lives in the GLOW — the light of
-   your colour behind Home and behind the week in review — never on the
-   buttons, ticks or bars, which stay the flat colour. Its swatch in the
-   picker wears it too, so you can see it before choosing:
-     gem    sparkles twinkling through the light (emerald, sapphire)
-     pulse  the sparkle, and the light breathing (ruby)
-     metal  a band of sheen sliding slowly across it (gold, rose gold)
-     chrome brighter, harder bands of mirror light (platinum)
-     fizz   the sheen, with fine bubbles rising (champagne)
-     iris   a second colour drifting through it, like nacre (amethyst, pearl) */
-.lf-lux-b i.fx-gem, .lf-lux-b i.fx-pulse { background: linear-gradient(135deg, color-mix(in srgb, var(--log) 72%, #000) 0 18%, var(--log) 18% 42%, color-mix(in srgb, var(--log) 74%, var(--lux-hi)) 42% 50%, var(--log) 50% 74%, color-mix(in srgb, var(--log) 80%, #000) 74%); }
-.lf-lux-b i.fx-metal, .lf-lux-b i.fx-fizz { background: linear-gradient(115deg, color-mix(in srgb, var(--log) 70%, #000) 0%, var(--log) 28%, var(--lux-hi) 48%, var(--log) 68%, color-mix(in srgb, var(--log) 72%, #000) 100%); background-size: 260% 100%; animation: lf-drift 6s ease-in-out infinite alternate; }
-.lf-lux-b i.fx-chrome { background: linear-gradient(100deg, var(--log) 0%, #fff 14%, var(--log) 26%, color-mix(in srgb, var(--log) 60%, #000) 40%, var(--log) 52%, #fff 66%, var(--log) 78%, color-mix(in srgb, var(--log) 65%, #000) 90%, var(--log) 100%); background-size: 300% 100%; animation: lf-drift 7s linear infinite alternate; }
-.lf-lux-b i.fx-iris { background: linear-gradient(120deg, var(--log) 0%, var(--lux-2) 25%, var(--lux-hi) 45%, var(--log) 62%, var(--lux-2) 82%, var(--log) 100%); background-size: 300% 100%; animation: lf-drift 5s ease-in-out infinite alternate; }
-@keyframes lf-drift { from { background-position: 0% 0; } to { background-position: 100% 0; } }
-.lf-lux-b i[class*="fx-"] { overflow: hidden; isolation: isolate; }
-.lf-lux-b i.fx-gem::before, .lf-lux-b i.fx-pulse::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background: radial-gradient(circle at 25% 30%, #fff 0 1px, transparent 2px), radial-gradient(circle at 65% 70%, #fff 0 1px, transparent 2px), radial-gradient(circle at 78% 30%, #fff 0 1.2px, transparent 2.2px);
-  animation: lf-twinkle 2.6s ease-in-out infinite; }
-.lf-lux-b i.fx-pulse { animation: lf-pulse 2.8s ease-in-out infinite; }
-.lf-lux-b i.fx-fizz::before { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(circle, rgba(255,255,255,.85) 0 1px, transparent 1.6px) 0 0 / 9px 11px; animation: lf-fizzs 3s linear infinite; }
-@keyframes lf-fizzs { to { background-position: 0 -22px; } }
-@keyframes lf-twinkle { 0%, 100% { opacity: .15; } 30% { opacity: 1; } 55% { opacity: .35; } 75% { opacity: .9; } }
-@keyframes lf-pulse { 0%, 100% { box-shadow: 0 0 8px color-mix(in srgb, var(--log) 30%, transparent); } 50% { box-shadow: 0 0 18px color-mix(in srgb, var(--log) 75%, transparent); } }
-/* THE GLOW'S EFFECT: a layer inside the glow, faded out toward the bottom
-   with the glow itself, drawn only while a luxury colour is the accent */
-.lf-luxfx { position: absolute; inset: 0; pointer-events: none; display: none; overflow: hidden;
-  -webkit-mask: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.6) 55%, transparent 100%); mask: linear-gradient(to bottom, #000 0%, rgba(0,0,0,.6) 55%, transparent 100%); }
-:root[data-lux-fx] .lf-luxfx { display: block; }
-.lf-luxfx::before, .lf-luxfx::after { content: ''; position: absolute; inset: 0; }
-/* gem: stars of light scattered through it, twinkling out of step */
-:root[data-lux-fx="gem"] .lf-luxfx::before, :root[data-lux-fx="pulse"] .lf-luxfx::before, :root[data-lux-fx="gem"] .lf-luxfx::after, :root[data-lux-fx="pulse"] .lf-luxfx::after {
-  background: radial-gradient(circle at 8% 22%, var(--lux-hi) 0 1.3px, transparent 3px), radial-gradient(circle at 23% 58%, #fff 0 1px, transparent 2.4px), radial-gradient(circle at 37% 14%, var(--lux-hi) 0 1.6px, transparent 3.4px),
-    radial-gradient(circle at 52% 44%, #fff 0 1px, transparent 2.2px), radial-gradient(circle at 66% 20%, var(--lux-hi) 0 1.2px, transparent 3px), radial-gradient(circle at 81% 52%, #fff 0 1.4px, transparent 3px), radial-gradient(circle at 93% 16%, var(--lux-hi) 0 1px, transparent 2.4px);
-  animation: lf-twinkle 3.2s ease-in-out infinite; }
-:root[data-lux-fx="gem"] .lf-luxfx::after, :root[data-lux-fx="pulse"] .lf-luxfx::after { transform: translate(6%, 18%) scaleX(-1); animation-delay: -1.6s; animation-duration: 2.7s; }
-/* ruby: the whole light breathes */
-:root[data-lux-fx="pulse"] .lf-glow, :root[data-lux-fx="pulse"] .lf-sheet.lf-wsh::before { animation: lf-breath 3.4s ease-in-out infinite; }
-@keyframes lf-breath { 0%, 100% { filter: brightness(.85); } 50% { filter: brightness(1.25) saturate(1.2); } }
-/* metal: a broad band of its light sliding across, slowly */
-:root[data-lux-fx="metal"] .lf-luxfx::before, :root[data-lux-fx="fizz"] .lf-luxfx::before, :root[data-lux-fx="chrome"] .lf-luxfx::before {
-  inset: 0 -60%; background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--lux-hi) 38%, transparent) 46%, color-mix(in srgb, var(--lux-hi) 60%, transparent) 50%, color-mix(in srgb, var(--lux-hi) 38%, transparent) 54%, transparent 70%);
-  animation: lf-sheen 7s ease-in-out infinite alternate; }
-@keyframes lf-sheen { from { transform: translateX(-28%); } to { transform: translateX(28%); } }
-/* chrome: harder bands, two of them, the mirror's stripes */
-:root[data-lux-fx="chrome"] .lf-luxfx::before { background: linear-gradient(105deg, transparent 22%, rgba(255,255,255,.45) 30%, transparent 34%, transparent 52%, rgba(255,255,255,.55) 58%, transparent 62%); animation-duration: 6s; }
-/* champagne: the sheen, and fine bubbles rising through it */
-:root[data-lux-fx="fizz"] .lf-luxfx::after { opacity: .35; background: radial-gradient(circle, var(--lux-hi) 0 1.3px, transparent 2.2px) 0 0 / 71px 83px, radial-gradient(circle, #fff 0 1px, transparent 1.8px) 29px 41px / 53px 67px, radial-gradient(circle, var(--lux-hi) 0 .8px, transparent 1.5px) 47px 12px / 97px 59px; animation: lf-fizzg 9s linear infinite; }
-@keyframes lf-fizzg { to { background-position: 0 -249px, 29px -160px, 47px -165px; } }
-/* iris: a second colour drifting through the light, like the inside of a shell */
-:root[data-lux-fx="iris"] .lf-luxfx::before { background: radial-gradient(60% 70% at 30% 10%, color-mix(in srgb, var(--lux-2) 55%, transparent), transparent 70%); animation: lf-iris 8s ease-in-out infinite alternate; }
-:root[data-lux-fx="iris"] .lf-luxfx::after { background: radial-gradient(50% 60% at 75% 15%, color-mix(in srgb, var(--lux-hi) 35%, transparent), transparent 70%); animation: lf-iris 6s ease-in-out infinite alternate-reverse; }
-@keyframes lf-iris { from { transform: translateX(-18%); } to { transform: translateX(22%); } }
-@media (prefers-reduced-motion: reduce) { .lf-lux-b i[class*="fx-"], .lf-lux-b i[class*="fx-"]::before, .lf-luxfx::before, .lf-luxfx::after, :root[data-lux-fx] .lf-glow, :root[data-lux-fx] .lf-sheet.lf-wsh::before { animation: none !important; } }
-/* the neutrals: a row of chips, each in the shade it takes on this face */
 .lf-neu { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .lf-neu-b { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 4px 8px; border-radius: 14px; background: var(--card2); font-size: 11px; font-weight: 600; color: var(--dim); }
 .lf-neu-b i { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(127,127,127,.35); }
 .lf-neu-b[aria-pressed="true"] { color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
-.lf-luxg { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .lf-wheel:focus-visible { outline: 2px solid var(--focus); outline-offset: 4px; }
 .lf-wh-m { position: absolute; inset: 36px; border-radius: 50%; background: var(--card); box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; }
-.lf-wh-m::after { content: ''; width: 56px; height: 56px; border-radius: 50%; background: var(--log); }
+.lf-wh-m { background: var(--nr, var(--card)); }
+.lf-wh-m::before { content: ''; position: absolute; inset: 22px; border-radius: 50%; background: var(--card); }
+.lf-wh-m::after { content: ''; position: relative; width: 48px; height: 48px; border-radius: 50%; background: var(--log-g, var(--log)); }
+.lf-wh-nk { position: absolute; left: 50%; top: 36px; width: 0; height: 64px; transform-origin: 50% 100%; pointer-events: none; opacity: 0; }
+.lf-wh-nk::before { content: ''; position: absolute; left: -9px; top: 2px; width: 18px; height: 18px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.6); background: var(--log); }
+.lf-wheel.is-nk .lf-wh-nk { opacity: 1; }
+/* AN EARNED COLOUR IS A GRADIENT EVERYWHERE THE ACCENT IS, and that is
+   what earning it buys: a wheel colour is one flat colour, an earned one
+   runs through the glow over Home, the days you trained, the bars, the
+   rings and the accent type. Nothing about it moves; it is the colour */
+:root[data-acc-g] .lf-glow { background: var(--log-g);
+  -webkit-mask: radial-gradient(140% 260px at 25% 0%, rgba(0,0,0,.62), rgba(0,0,0,.18) 55%, transparent 80%); mask: radial-gradient(140% 260px at 25% 0%, rgba(0,0,0,.62), rgba(0,0,0,.18) 55%, transparent 80%); }
+:root[data-acc-g] .lf-day.is-on, :root[data-acc-g] .lf-vr i b, :root[data-acc-g] .lf-dl-bar i, :root[data-acc-g] .lf-vr.is-met i b, :root[data-acc-g] .lf-dl-t.is-met .lf-dl-bar i { background: var(--log-g); border-color: transparent; }
+:root[data-acc-g] .lf-day.is-now { border-color: transparent; background: linear-gradient(var(--card), var(--card)) padding-box, var(--log-g) border-box; }
+:root[data-acc-g] .lf-day.is-now.is-on { background: var(--log-g); box-shadow: inset 0 0 0 2px var(--card); }
+:root[data-acc-g] .lf-cell.is-now { box-shadow: none; border: 2px solid transparent; background: linear-gradient(var(--card), var(--card)) padding-box, var(--log-g) border-box; }
+:root[data-acc-g] .lf-bdr .fg { stroke: url(#lfAccG); }
+:root[data-acc-g] :is(.lf-wk.is-now .lf-wd b, .lf-ws-ring.is-hit .lf-ws-in span, .lf-set .lf-sn.is-pr, .fr-row.is-me .fr-t b, .lf-tip > b, .lf-pct, .lf-aim.is-up, .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l, .lf-fin-u.is-up, .fr-live, .lf-cv-k, .lf-wh-cap, .lf-stat .lf-tag.is-mini, #lfTheme .lf-fh .lf-num) {
+  background: var(--log-g); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+:root[data-acc-g] .lf-wh-cap { font-size: 16px; font-weight: 800; }
+/* AND IT SHINES, SLOWLY: the light band in the gradient drifts across and
+   back, slowly and only a little, twelve seconds each way. Not a thing laid over it, the colour itself */
+:root[data-acc-g] :where(.lf-btn.is-log, .lf-glow, .lf-day.is-on, .lf-cell.is-on, .lf-vr i b, .lf-dl-bar i, .lf-wk.is-now .lf-wd b, .lf-ws-ring.is-hit .lf-ws-in span, .lf-set .lf-sn.is-pr, .fr-row.is-me .fr-t b, .lf-tip > b, .lf-pct, .lf-aim.is-up, .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l, .lf-fin-u.is-up, .fr-live, .lf-cv-k, .lf-wh-cap, .lf-stat .lf-tag.is-mini, #lfTheme .lf-fh .lf-num, .lf-set.is-done .lf-chk span),
+:root[data-acc-g] .lf-wh-m::after, .lf-th:not(.is-lock) i { background-size: 150% 150% !important; animation: lf-thsh 12s ease-in-out infinite alternate; }
+.lf-th:not(.is-lock) i { animation-duration: 9s; }
+:root[data-acc-g] .lf-month.is-play .lf-cell.is-on:not(.is-now) { animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards, lf-thsh 12s ease-in-out infinite alternate; animation-delay: calc(var(--i) * 55ms + 80ms), 0s; }
+@keyframes lf-thsh { from { background-position: 15% 40%; } to { background-position: 85% 60%; } }
+@media (prefers-reduced-motion: reduce) { :root[data-acc-g] *, :root[data-acc-g] .lf-wh-m::after, .lf-th i { animation-name: none !important; } }
+.lf-wh-cap { margin: 10px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--dim); }
+.lf-thg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.lf-th { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px 10px; border-radius: 16px; background: var(--card2); color: var(--ink); font: inherit; position: relative; }
+.lf-th i { width: 44px; height: 44px; border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.12); }
+.lf-th b { font-size: 13px; font-weight: 700; }
+.lf-th span { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--quiet); text-align: center; line-height: 1.25; }
+.lf-th.is-lock i { filter: grayscale(.85) brightness(.55); }
+.lf-th.is-lock b { color: var(--dim); }
+.lf-th.is-lock::after { content: ''; position: absolute; top: 26px; left: 50%; width: 16px; height: 16px; margin-left: -8px; background: rgba(255,255,255,.85);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1zm2 0h6V7a3 3 0 0 0-6 0v3z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.lf-th[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--ink); }
+.lf-th:not(.is-lock) span { color: color-mix(in srgb, var(--ink) 60%, transparent); }
+.lf-th.is-own { grid-column: 1 / -1; flex-direction: row; justify-content: flex-start; gap: 14px; padding: 12px 16px; }
+.lf-th.is-own span { color: #ff9a4a; }
 .lf-wh-k { position: absolute; left: 50%; top: 0; width: 0; height: 50%; transform-origin: 50% 100%; pointer-events: none; }
-.lf-wh-k::before { content: ''; position: absolute; left: -13px; top: 5px; width: 26px; height: 26px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); background: var(--log); }
+.lf-wh-k::before { content: ''; position: absolute; left: -13px; top: 5px; width: 26px; height: 26px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.5); background: var(--log-g, var(--log)); }
 .lf-set.is-ed { grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) 44px; }
 .lf-ed-ex { margin: 14px 0 0; padding: 4px 12px 10px; }
 .lf-ed-ex .lf-hd { margin: 0; min-height: 44px; }
@@ -745,7 +718,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-chk { width: 44px; height: 44px; display: grid; place-items: center; }
 .lf-chk span { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; color: var(--ph); transition: background .15s, color .15s, transform .15s var(--ease); }
 .lf-chk span .lf-ic { width: 15px; height: 15px; stroke-width: 3; }
-.lf-set.is-done .lf-chk span { background: var(--log); color: var(--on-log); }
+.lf-set.is-done .lf-chk span { background: var(--log-g, var(--log)); color: var(--on-log); }
 .lf-set.is-done input { background: color-mix(in srgb, var(--log) 14%, transparent); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
 /* THE TICK: the box springs, the mark draws itself, and the row it is on
@@ -758,7 +731,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 @keyframes lf-rowglow { 0% { background: color-mix(in srgb, var(--log) 26%, transparent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--log) 10%, transparent); } 100% { background: transparent; box-shadow: 0 0 0 6px transparent; } }
 /* each exercise's sets done, a bar that slides from where it was */
 .lf-ex-pb { display: block; height: 3px; border-radius: 3px; background: var(--card2); margin: 2px 0 8px; overflow: hidden; }
-.lf-ex-pb i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--log); transition: width .5s cubic-bezier(.3, 1.2, .5, 1); }
+.lf-ex-pb i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--log-g, var(--log)); transition: width .5s cubic-bezier(.3, 1.2, .5, 1); }
 @media (prefers-reduced-motion: reduce) { .lf-set.is-pop, .lf-set.is-pop .lf-chk span, .lf-set.is-pop .lf-chk path { animation: none; stroke-dashoffset: 0; } .lf-ex-pb i { transition: none; } }
 .lf-set.is-wu .lf-wu-n { appearance: none; border: 0; padding: 0; width: 26px; height: 26px; border-radius: 8px; font: inherit; font-size: 11px; font-weight: 800; color: #ffb35c; background: rgba(255,150,40,.14); cursor: pointer; }
 .lf-set.is-wu .lf-prev { font-size: 11px; color: #d99a52; }
@@ -833,10 +806,10 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-vs-dot { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; border-radius: 50%; background: var(--ink); }
 /* the line gathers a glow in your colour as it nears where you are now */
 /* the blur is the SVG's own filter, not CSS: iOS Safari does not blur an SVG path with a CSS filter, and drew the glow as a hard second line */
-.lf-vs-pr { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 3px color-mix(in srgb, var(--log) 22%, transparent); pointer-events: none; z-index: 1; animation: lf-pin .45s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d, 900ms); }
+.lf-vs-pr { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--log) 22%, transparent); pointer-events: none; z-index: 1; animation: lf-pin .45s cubic-bezier(.3, 1.6, .5, 1) backwards; animation-delay: var(--d, 900ms); }
 @keyframes lf-pin { from { transform: scale(0); opacity: 0; } }
 /* where you are now glows in your colour */
-.lf-vs-plot .lf-vs-dot.is-now { background: var(--log); --ink: var(--log); }
+.lf-vs-plot .lf-vs-dot.is-now { background: var(--log-g, var(--log)); --ink: var(--log); }
 @media (prefers-reduced-motion: reduce) { .lf-vs-pr { animation: none; } }
 /* THE CHARTS: a line drawn in from the left the first time it is shown,
    a glowing dot on where you are now, and a finger along it reads it out */
@@ -876,7 +849,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-coin img { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transition: transform .2s var(--ease); }
 .lf-coin img:not([src]) { display: none; }
 @keyframes lf-halo { to { transform: rotate(1turn); } }
-.lf-coin.is-sc::after { content: ''; position: absolute; right: -2%; bottom: 2%; width: 22%; height: 22%; border-radius: 50%; background: var(--log); box-shadow: 0 0 0 2px var(--card);
+.lf-coin.is-sc::after { content: ''; position: absolute; right: -2%; bottom: 2%; width: 22%; height: 22%; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 2px var(--card);
   -webkit-mask: none; }
 .lf-cv-tier { display: inline-block; margin: 0 0 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .lf-cv-sc { margin-top: 14px; }
@@ -1161,7 +1134,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 </head>
 <body>
 <h1 class="lf-sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Lift</h1>
-<div class="lf-glow" aria-hidden="true"><div class="lf-luxfx"></div></div>
+<div class="lf-glow" aria-hidden="true"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="lfAccG" x1="0" y1="0" x2="1" y2="1"></linearGradient></defs></svg>
 <main id="lfMain">
   <section id="lfHome" aria-label="Home"></section>
   <section id="lfCal" aria-label="Calendar" hidden></section>
@@ -3243,7 +3217,6 @@ function lfWeekSheet(m) {
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (met ? 'On to next week' : 'Done') + '</button>');
   var s = lfSheet({ title: '', body: b, foot: [done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
   /* the week's glow wears a luxury colour's effect too, when the week was met */
-  if (met) { var lfx = el('<div class="lf-luxfx lf-ws-fx" aria-hidden="true"></div>'); s.el.insertBefore(lfx, s.el.firstChild); }
   s.el.setAttribute('aria-label', 'Week in review, ' + range);
   done.addEventListener('click', function () { s.close(); });
   var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, n = $('.lf-fin-vol span', b), vol = toDisp(st.vol);
@@ -3937,60 +3910,56 @@ function lfThemeCard() {
   var h = lfAccent();
   return lfFold('lfTheme', 'thm', 'Theme', lfAccName(h), function (bd) {
     var c = el('<div><span class="lf-flab" style="margin-top:0">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
-      + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span></div>'
-      + '<h4 class="lf-neu-h"><button type="button" id="lfNeuT" aria-controls="lfNeu" aria-expanded="false"><span>Neutral colours</span><em></em>' + IC.chev + '</button></h4><div class="lf-neu" id="lfNeu" hidden></div>'
-      + '<h4 class="lf-neu-h"><button type="button" id="lfLuxT" aria-controls="lfLux" aria-expanded="false"><span>Luxury colours</span><em></em>' + IC.chev + '</button></h4><div class="lf-neu lf-luxg" id="lfLux" hidden></div>'
+      + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span><i class="lf-wh-nk"></i></div>'
+      + '<p class="lf-wh-cap" id="lfWhCap"></p>'
+      + '<span class="lf-flab">Earned colours</span><div class="lf-thg" id="lfThemes"></div>'
       + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to lime</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
       b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
     });
     var wh = $('#lfWheel', c), knob = $('.lf-wh-k', wh), rs = $('#lfAccReset', c);
-    var neu = $('#lfNeu', c), dk = document.documentElement.getAttribute('data-mode') !== 'light', nt = $('#lfNeuT', c);
-    /* THE NEUTRALS FOLD AWAY: eighteen chips under the wheel were a second
-       screen of colour to scroll past. Shut, the row still says which one
-       you are on; it stays open while you are on this tab */
-    function neuSet(o) { nt.setAttribute('aria-expanded', o ? 'true' : 'false'); neu.hidden = !o; }
-    nt.addEventListener('click', function () { var o = nt.getAttribute('aria-expanded') !== 'true'; lfFoldSet('neu', o); neuSet(o); });
-    neuSet(lfFoldOpen('neu'));
-    var lux = $('#lfLux', c), lt = $('#lfLuxT', c);
-    function luxSet(o) { lt.setAttribute('aria-expanded', o ? 'true' : 'false'); lux.hidden = !o; }
-    lt.addEventListener('click', function () { var o = lt.getAttribute('aria-expanded') !== 'true'; lfFoldSet('lux', o); luxSet(o); });
-    luxSet(lfFoldOpen('lux'));
-    LUXE.forEach(function (n, i) {
-      var nb = el('<button type="button" class="lf-neu-b lf-lux-b"><i></i><span></span></button>'), f = dk ? n.d : n.l;
-      nb.dataset.h = 1100 + i; $('span', nb).textContent = n.n; nb.setAttribute('aria-label', n.n + ' accent');
-      $('i', nb).style.setProperty('--f', f); $('i', nb).style.setProperty('--g', n.g);
-      /* the swatch wears its own effect, on its own colours */
-      var si = $('i', nb).style; si.setProperty('--log', f); si.setProperty('--lux-hi', n.g); si.setProperty('--lux-2', n.a2 || n.g); $('i', nb).classList.add('fx-' + n.fx); nb.style.animationDelay = (i * -.37) + 's'; $('i', nb).style.animationDelay = (i * -.37) + 's';
-      nb.addEventListener('click', function () { buzz([8, 30, 8]); lfAccentSet(1100 + i, true); lfRender(); });
-      lux.appendChild(nb);
-    });
-    NEUTRALS.forEach(function (n, i) {
-      var nb = el('<button type="button" class="lf-neu-b"><i></i><span></span></button>');
-      nb.dataset.h = 1000 + i; $('i', nb).style.background = dk ? n.d : n.l; $('span', nb).textContent = n.n;
-      nb.setAttribute('aria-label', n.n + ' accent');
-      nb.addEventListener('click', function () { buzz(8); lfAccentSet(1000 + i, true); lfRender(); });
-      neu.appendChild(nb);
+    var dk = document.documentElement.getAttribute('data-mode') !== 'light', nk = $('.lf-wh-nk', wh), NN = NEUTRALS.length;
+    /* THE NEUTRALS ARE ON THE WHEEL: a ring of them inside the hues, a
+       segment each, picked the way a hue is, by where you put your finger */
+    $('.lf-wh-m', wh).style.setProperty('--nr', 'conic-gradient(' + NEUTRALS.map(function (n, i) { var col = dk ? n.d : n.l; return col + ' ' + (i / NN * 100).toFixed(2) + '% ' + ((i + 1) / NN * 100).toFixed(2) + '%'; }).join(', ') + ')');
+    /* THE EARNED COLOURS: a gradient each, opened by a badge */
+    var thg = $('#lfThemes', c), ths = (lfOwner() ? [[1299, OWNER_TH]] : []).concat(THEMES.map(function (t, i) { return [1200 + i, t]; }));
+    ths.forEach(function (q) {
+      var hv = q[0], t = q[1], ok = lfThemeOk(hv), bd0 = t.b && BADGE[t.b];
+      var tb = el('<button type="button" class="lf-th"><i></i><b></b><span></span></button>');
+      tb.dataset.h = hv; tb.classList.toggle('is-lock', !ok); tb.classList.toggle('is-own', hv === 1299);
+      $('i', tb).style.background = lfThGrad(t, 135); $('b', tb).textContent = t.n;
+      $('span', tb).textContent = ok ? t.r : 'Earn ' + (bd0 ? bd0.n : '');
+      tb.setAttribute('aria-label', t.n + (ok ? ', ' + t.r + ' accent' : ', locked: earn ' + (bd0 ? bd0.n : 'its badge')));
+      tb.addEventListener('click', function () {
+        if (!lfThemeOk(hv)) { lfToast('Earn ' + (bd0 ? bd0.n : 'its badge') + ' to wear ' + t.n); return; }
+        buzz([8, 30, 8]); lfAccentSet(hv, true); lfRender();
+      });
+      thg.appendChild(tb);
     });
     function show(hu) {
-      var nu = lfNeu(hu), a = hu === null || nu ? LIME_H : hu;
-      knob.style.transform = 'rotate(' + a + 'deg)'; wh.classList.toggle('is-neu', !!nu);
+      var nu = lfNeu(hu), tt = lfTheme(hu), a = hu === null || nu || tt ? LIME_H : hu;
+      knob.style.transform = 'rotate(' + a + 'deg)'; wh.classList.toggle('is-neu', !!(nu || tt)); wh.classList.toggle('is-nk', !!nu);
+      if (nu) nk.style.transform = 'rotate(' + ((hu - 1000 + .5) / NN * 360) + 'deg)';
+      $('#lfWhCap', c).textContent = lfAccName(hu);
+      $$('.lf-th', c).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
       wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', lfAccName(hu));
-      $$('.lf-neu-b', c).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
-      $('em', nt).textContent = nu && !nu.g ? nu.n : ''; $('em', lt).textContent = nu && nu.g ? nu.n : '';
       rs.disabled = hu === null;
     }
     function pick(hu, keep) { lfAccentSet(hu, keep); show(hu); }
-    function at(e) { var b = wh.getBoundingClientRect(), x = e.clientX - b.left - b.width / 2, y = e.clientY - b.top - b.height / 2; return (Math.atan2(x, -y) * 180 / Math.PI + 360) % 360; }
+    /* the outer band is the hues, the inner one the neutrals; the middle is the colour you are on */
+    function at(e) { var b = wh.getBoundingClientRect(), x = e.clientX - b.left - b.width / 2, y = e.clientY - b.top - b.height / 2, an = (Math.atan2(x, -y) * 180 / Math.PI + 360) % 360, rr = Math.hypot(x, y) / (b.width / 2);
+      return rr >= .64 ? an : rr >= .4 ? 1000 + Math.min(NN - 1, Math.floor(an / 360 * NN)) : -1; }
     var drag = false;
-    wh.addEventListener('pointerdown', function (e) { drag = true; try { wh.setPointerCapture(e.pointerId); } catch (x) {} pick(at(e)); e.preventDefault(); });
-    wh.addEventListener('pointermove', function (e) { if (drag) pick(at(e)); });
+    wh.addEventListener('pointerdown', function (e) { var v = at(e); if (v < 0) return; drag = v < 1000 ? 'h' : 'n'; try { wh.setPointerCapture(e.pointerId); } catch (x) {} pick(v); e.preventDefault(); });
+    wh.addEventListener('pointermove', function (e) { if (!drag) return; var b = wh.getBoundingClientRect(), x = e.clientX - b.left - b.width / 2, y = e.clientY - b.top - b.height / 2, an = (Math.atan2(x, -y) * 180 / Math.PI + 360) % 360;
+      pick(drag === 'h' ? an : 1000 + Math.min(NN - 1, Math.floor(an / 360 * NN))); });
     var end = function () { if (!drag) return; drag = false; lfAccentSet(lfAccTmp === undefined ? lfAccent() : lfAccTmp, true); lfRender(); };
     wh.addEventListener('pointerup', end); wh.addEventListener('pointercancel', end);
     wh.addEventListener('keydown', function (e) {
       var d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 5 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -5 : 0;
-      if (!d) return; e.preventDefault(); var a = lfAccent(); pick(((a === null || lfNeu(a) ? LIME_H : a) + d + 360) % 360, true);
+      if (!d) return; e.preventDefault(); var a = lfAccent(); pick(((a === null || lfNeu(a) || lfTheme(a) ? LIME_H : a) + d + 360) % 360, true);
     });
     rs.addEventListener('click', function () { lfAccentSet(null, true); lfRender(); });
     show(lfAccent());
@@ -4534,7 +4503,7 @@ function frWeekOf(st) {
   var wk = tr && tr.m ? (tr.m === mon && Array.isArray(tr.w8) && Array.isArray(tr.w8[7]) ? +tr.w8[7][0] || 0 : 0) : (+(st && st.wk) || 0);
   return { n: wk, g: Math.max(1, +(st && st.goal) || 0) };
 }
-function frColOf(st) { var h = frHue(st), nu = lfNeu(h); if (nu) return document.documentElement.getAttribute('data-mode') === 'light' ? nu.l : nu.d; return h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
+function frColOf(st) { var h = frHue(st), nu = lfNeu(h), th = lfTheme(h); if (th) return th.c; if (nu) return document.documentElement.getAttribute('data-mode') === 'light' ? nu.l : nu.d; return h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
 /* WHAT THE FRIENDS TAB SEES, kept for the badges. In sync is a workout of
    yours with a friend's started inside it (from 45 minutes before yours
    began to when it ended), or them live while you were. The week's standing
@@ -4576,14 +4545,16 @@ function frRings(rows) {
      one is ON SCREEN at that moment: the move carries on, never jumps. */
   var arrive = frRgIn, grew = [], cur = frRgCur, done = [], mine = frMyRun(); frRgIn = 0; frRgCur = {};
   drawn.forEach(function (x, i) {
-    var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s), lv = frLive(x.f.s);
+    var rr = r0 - i * step, len = 2 * Math.PI * rr, col = frColOf(x.f.s), lv = frLive(x.f.s), thR = lfTheme(frHue(x.f.s)), paint = col;
+    /* a ring in an earned colour is drawn in its gradient */
+    if (thR) { paint = 'url(#frRgG' + i + ')'; g.insertAdjacentHTML('beforeend', '<defs><linearGradient id="frRgG' + i + '" gradientUnits="userSpaceOnUse" x1="' + (75 - rr) + '" y1="' + (75 - rr) + '" x2="' + (75 + rr) + '" y2="' + (75 + rr) + '">' + thR.s.map(function (q) { q = q.split(' '); return '<stop offset="' + q[1] + '" stop-color="' + q[0] + '"/>'; }).join('') + (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? '' : '<animateTransform attributeName="gradientTransform" type="rotate" values="-18 75 75;18 75 75;-18 75 75" dur="14s" repeatCount="indefinite"/>') + '</linearGradient></defs>'); }
     if (rr < 8) return;
     if (lv) live.push(x);
     var key = x.f.me ? 'me' : String(x.f.c), was = key in frRgMem ? frRgMem[key] : (+frRgSeen[key] || 0), from = arrive ? 0 : key in cur ? cur[key] / len : was;
     frRgMem[key] = x.k; frRgSeen[key] = x.k;
     var up = x.k > was + 1e-6, shut = x.k >= 1 && was < 1, seg = Math.min(18, len * (x.k - was));
     g.insertAdjacentHTML('beforeend', '<circle cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="var(--card3)" stroke-width="' + sw + '"/>'
-      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-k="' + esc(key) + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + col + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
+      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-k="' + esc(key) + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + paint + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
       + (up && x.k > 0 ? '<circle class="fr-rg-cm" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="#fff" stroke-width="' + (sw * .55).toFixed(1) + '" stroke-dasharray="' + seg.toFixed(1) + ' ' + len.toFixed(1) + '" style="--o0:' + (-len * was).toFixed(1) + 'px;--o1:' + (-(len * x.k - seg)).toFixed(1) + 'px;--rc:' + col + '"/>' : ''));
     if (up) grew.push(key);
     /* THEY FINISHED one since you last looked: confetti off the tip of their ring */
@@ -4670,7 +4641,7 @@ function frRings(rows) {
   });
   return c;
 }
-function frHue(st) { var h = st && st.ac; return lfNeu(h) ? h : typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
+function frHue(st) { var h = st && st.ac; return lfNeu(h) || lfTheme(h) ? h : typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
 function frWoSheet(w, f) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '');
@@ -6414,7 +6385,10 @@ function lfMode() { var m = 'auto'; try { m = localStorage.getItem('lift.mode.v1
    (dark on a light fill, white on a deep one, worked out rather than
    chosen), the accent as type, and the tint behind a live workout. */
 var LIME_H = 83;
-function lfAccent() { try { var v = localStorage.getItem('lift.accent.v1'); if (v === null || v === '') return null; v = +v; if (lfNeu(v)) return v; return isFinite(v) ? ((v % 360) + 360) % 360 : null; } catch (e) { return null; } }
+function lfAccent() { try { var v = localStorage.getItem('lift.accent.v1'); if (v === null || v === '') return null; v = +v;
+  if (LUX_OLD[v] !== undefined) { v = LUX_OLD[v]; localStorage.setItem('lift.accent.v1', String(v)); }
+  if (lfTheme(v)) return lfThemeOk(v) ? v : null;
+  if (lfNeu(v)) return v; return isFinite(v) ? ((v % 360) + 360) % 360 : null; } catch (e) { return null; } }
 /* THE NEUTRALS: no hue at all. Each has a colour per face, because a
    near-black is lost on the dark page and a near-white on the light one:
    on dark it is the light end of its family, on light the deep end, so it
@@ -6450,28 +6424,44 @@ var NEUTRALS = [
      the page itself, the deepest grey that still reads as a colour */
   { n: 'Black', d: '#48484a', l: '#000000', di: '#98989d', li: '#000000' }
 ];
-/* THE LUXURY COLOURS: jewels and precious metals, stored from 1100 so
-   they never share a number with a hue or a neutral. g is the light that
-   catches the swatch, and while one is the accent the main buttons carry
-   a slow sweep of it — the one place the app is allowed to shimmer. */
-var LUXE = [
-  { n: 'Emerald', d: '#3ccf8e', l: '#0b6e4f', di: '#5fdca3', li: '#0b6e4f', g: '#b8ffd9', fx: 'gem' },
-  { n: 'Sapphire', d: '#5b86ff', l: '#0f3fa8', di: '#86a6ff', li: '#0f3fa8', g: '#cfdcff', fx: 'gem' },
-  { n: 'Ruby', d: '#e5425f', l: '#9b111e', di: '#f06d84', li: '#9b111e', g: '#ffc9d3', fx: 'pulse' },
-  { n: 'Amethyst', d: '#ae78ff', l: '#5b2a91', di: '#c6a0ff', li: '#5b2a91', g: '#ead9ff', fx: 'iris', a2: '#ff7ad9' },
-  { n: 'Gold', d: '#d9b443', l: '#9c7a17', di: '#e6c763', li: '#7d6112', g: '#fff1b8', fx: 'metal' },
-  { n: 'Champagne', d: '#e8d3a8', l: '#a68a54', di: '#eddcb9', li: '#7f6a40', g: '#fffaf0', fx: 'fizz' },
-  { n: 'Rose gold', d: '#e8ab9c', l: '#a8655a', di: '#f0bfb3', li: '#8a4f45', g: '#fff0ea', fx: 'metal' },
-  { n: 'Platinum', d: '#dfe3e8', l: '#7c8590', di: '#e8ebef', li: '#5d6570', g: '#ffffff', fx: 'chrome' },
-  { n: 'Black pearl', d: '#7e8fa3', l: '#1f2a36', di: '#9aa9ba', li: '#1f2a36', g: '#dfe9f5', fx: 'iris', a2: '#6fe0cf' }
+/* THE THEMES THAT ARE EARNED: an accent that is a GRADIENT, deep and
+   swept through with a lighter band, and never an effect. Each opens with
+   a badge, the way a badge opens; the owner's is one of one. Stored from
+   1200 (the owner 1299) so a hue, a neutral and a theme never share a
+   number. c is the colour the gradient stands for where only one colour
+   will do; di / li the accent as type on the dark / light page */
+var THEMES = [
+  { n: 'Jet', r: 'Rare', b: 'wo50', c: '#5a5a66', di: '#c9c9d6', li: '#16161b', s: ['#050506 0%', '#18181e 32%', '#7d7d8c 47%', '#e6e6ef 50%', '#3a3a44 57%', '#0b0b0e 75%', '#000000 100%'] },
+  { n: 'Sunset', r: 'Rare', b: 'pr25', c: '#ff5e3a', di: '#ff8a5c', li: '#c2361d', s: ['#3b0a2a 0%', '#9b1b30 30%', '#ff5e3a 52%', '#ffb347 70%', '#ffd56b 100%'] },
+  { n: 'Oceanic', r: 'Rare', b: 'st12', c: '#0eb1d2', di: '#5ad8ec', li: '#036c8f', s: ['#021526 0%', '#03396c 32%', '#0eb1d2 55%', '#5ef2e8 70%', '#034a6e 100%'] },
+  { n: 'Rosé', r: 'Rare', b: 'v500k', c: '#e07a9a', di: '#f0a0b8', li: '#9c2f5c', s: ['#3a0d24 0%', '#8e2a5a 30%', '#e07a9a 52%', '#f7d1c4 64%', '#a8436e 100%'] },
+  { n: 'Velvet', r: 'Rare', b: 'cardio25', c: '#1fbf74', di: '#5fe0a0', li: '#0b6e43', s: ['#021a10 0%', '#05472c 32%', '#1fbf74 54%', '#b6ffd8 63%', '#0a5c3a 100%'] },
+  { n: 'Nebula', r: 'Exotic', b: 'wo100', c: '#9b2fd0', di: '#c98bff', li: '#6a1fa0', s: ['#0b0526 0%', '#3a0f6e 28%', '#9b2fd0 46%', '#ff6ad5 58%', '#3d1a8f 80%', '#07031a 100%'] },
+  { n: 'Glacier', r: 'Exotic', b: 'st26', c: '#5aaef0', di: '#9fd6ff', li: '#1f5d9c', s: ['#04122e 0%', '#13407a 30%', '#7fc8ff 48%', '#ffffff 53%', '#3a7fc4 66%', '#06183a 100%'] },
+  { n: 'Ember', r: 'Exotic', b: 'v1m', c: '#d63a10', di: '#ff7a4a', li: '#a8260a', s: ['#050000 0%', '#3a0500 30%', '#b81d00 50%', '#ff6a1a 60%', '#5c0a00 80%', '#0a0000 100%'] },
+  { n: 'Aurora', r: 'Exotic', b: 'hr100', c: '#19e6a5', di: '#5df2c0', li: '#0b7d5a', s: ['#03101f 0%', '#0b3d4f 24%', '#19e6a5 44%', '#7c5cff 64%', '#0c2a4a 84%', '#020a14 100%'] },
+  { n: 'Royal', r: 'Exotic', b: 'sig50', c: '#7a3fc4', di: '#c4a0ff', li: '#5a1fa0', s: ['#0d0221 0%', '#2d0b57 30%', '#5a1fa0 46%', '#f2c14e 53%', '#7a3fc4 61%', '#14052e 100%'] }
 ];
+/* THE OWNER'S: the owner badge's own ring, a dark orange swept through with a light one */
+var OWNER_TH = { n: 'Molten', r: 'One of one', c: '#ff6a1a', di: '#ff8a3c', li: '#b33a00', s: ['#2a0700 0%', '#7a1d00 22%', '#d24600 40%', '#ffb35c 50%', '#ff8a2a 56%', '#b33300 72%', '#3d0b00 100%'] };
+function lfTheme(h) { if (h === 1299) return OWNER_TH; return typeof h === 'number' && h >= 1200 && h < 1200 + THEMES.length && h % 1 === 0 ? THEMES[h - 1200] : null; }
+function lfThGrad(t, a) { return 'linear-gradient(' + (a || 120) + 'deg, ' + t.s.join(', ') + ')'; }
+/* earned: the badge it is for has been won, or, for the owner's, this is the owner's phone */
+function lfThemeOk(h) {
+  if (h === 1299) return !!lfOwner();
+  var t = lfTheme(h); if (!t) return false;
+  var all = typeof lfBadgesCache === 'function' ? lfBadgesCache() : [];
+  return all.some(function (x) { return x.b.id === t.b && x.d; });
+}
+/* a luxury colour kept from before they went comes back as the nearest
+   thing still on the wheel, once, and the new value is written down */
+var LUX_OLD = { 1100: 150, 1101: 225, 1102: 350, 1103: 275, 1104: 45, 1105: 1006, 1106: 1011, 1107: 1001, 1108: 1004 };
 function lfNeu(h) {
   if (typeof h !== 'number' || h % 1 !== 0) return null;
   if (h >= 1000 && h < 1000 + NEUTRALS.length) return NEUTRALS[h - 1000];
-  if (h >= 1100 && h < 1100 + LUXE.length) return LUXE[h - 1100];
   return null;
 }
-function lfAccName(h) { var n = lfNeu(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
+function lfAccName(h) { var n = lfNeu(h) || lfTheme(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
 function lfRgb(hex) { return [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }); }
 function lfAccentSet(h, keep) {
   lfAccTmp = h;
@@ -6483,7 +6473,7 @@ function lfHueName(h) { return ['Red', 'Orange', 'Yellow', 'Lime', 'Green', 'Tea
 function lfHsl(h, s, l) { s /= 100; l /= 100; var k = function (n) { return (n + h / 30) % 12; }, a = s * Math.min(l, 1 - l), f = function (n) { return l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1)); }; return [f(0), f(8), f(4)].map(function (x) { return Math.round(x * 255); }); }
 function lfHex(c) { return '#' + c.map(function (x) { return ('0' + x.toString(16)).slice(-2); }).join(''); }
 function lfLum(c) { var v = c.map(function (x) { x /= 255; return x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4); }); return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; }
-var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg'];
+var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--good', '--done-bg', '--log-g', '--log-s'];
 /* A FRIEND'S PAGE WEARS THEIR COLOUR: the same tokens, written on their
    sheet rather than the page, so it is their accent inside and yours
    everywhere else. Lime is written out in full there, because the page
@@ -6493,21 +6483,34 @@ function lfAccOn(node, h) {
   if (h === null || h === undefined) {
     var lime = { '--today': '#a3e635', '--log': '#a3e635', '--on-log': '#0b1400', '--today-ink': dark ? '#a3e635' : '#65a30d', '--live-bg': dark ? '#16210a' : '#eef7dc',
       '--good': dark ? '#34c759' : '#248a3d', '--done-bg': dark ? 'rgba(52, 199, 89, .16)' : 'rgba(52, 199, 89, .14)' };
-    ACC_KEYS.forEach(function (k) { st.setProperty(k, lime[k]); });
+    ACC_KEYS.forEach(function (k) { if (lime[k]) st.setProperty(k, lime[k]); else st.removeProperty(k); });
     return;
   }
   lfAccTok(h, dark, st);
 }
 function lfApplyAccent() {
-  var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent(), lx = lfNeu(h);
-  document.documentElement.classList.toggle('lf-lux', !!(lx && lx.g));
-  if (lx && lx.g) { st.setProperty('--lux-hi', lx.g); st.setProperty('--lux-2', lx.a2 || lx.g); document.documentElement.setAttribute('data-lux-fx', lx.fx || 'metal'); }
-  else { st.removeProperty('--lux-hi'); st.removeProperty('--lux-2'); document.documentElement.removeAttribute('data-lux-fx'); }
+  var st = document.documentElement.style, h = lfAccTmp !== undefined ? lfAccTmp : lfAccent(), th = lfTheme(h);
+  /* a theme's strokes are drawn in one shared gradient, kept in the page */
+  var gd = document.getElementById('lfAccG');
+  var calmA = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (th && gd) gd.innerHTML = th.s.map(function (x) { var q = x.split(' '); return '<stop offset="' + q[1] + '" stop-color="' + q[0] + '"/>'; }).join('')
+    + (calmA ? '' : '<animateTransform attributeName="gradientTransform" type="rotate" values="-18 .5 .5;18 .5 .5;-18 .5 .5" dur="14s" repeatCount="indefinite"/>');
+  document.documentElement.toggleAttribute('data-acc-g', !!th);
   if (h === null) { ACC_KEYS.forEach(function (k) { st.removeProperty(k); }); return; }
   lfAccTok(h, document.documentElement.getAttribute('data-mode') !== 'light', st);
 }
 function lfAccTok(h, dark, st) {
-  var nu = lfNeu(h);
+  var nu = lfNeu(h), th = lfTheme(h);
+  st.removeProperty('--log-g'); st.removeProperty('--log-s');
+  if (th) {
+    var tc = th.c, ti = dark ? th.di : th.li;
+    st.setProperty('--today', tc); st.setProperty('--log', tc); st.setProperty('--on-log', '#ffffff');
+    st.setProperty('--today-ink', ti); st.setProperty('--good', ti);
+    st.setProperty('--log-g', lfThGrad(th)); st.setProperty('--log-s', 'url(#lfAccG)');
+    st.setProperty('--live-bg', 'color-mix(in srgb, ' + tc + ' ' + (dark ? 14 : 12) + '%, ' + (dark ? '#000' : '#fff') + ')');
+    st.setProperty('--done-bg', 'color-mix(in srgb, ' + tc + ' ' + (dark ? 18 : 22) + '%, transparent)');
+    return;
+  }
   if (nu) {
     var nf = dark ? nu.d : nu.l, ni = dark ? nu.di : nu.li;
     st.setProperty('--today', nf); st.setProperty('--log', nf);
