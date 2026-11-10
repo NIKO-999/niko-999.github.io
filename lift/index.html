@@ -678,7 +678,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 [data-acc-g][data-acc-g] .lf-wh-cap { font-size: 16px; font-weight: 800; }
 /* A NAME IN AN EARNED COLOUR: the colour itself with a light band that passes slowly along it.
    Only an earned colour does this, never a wheel colour, and it is the same wherever that name is drawn */
-.lf-ng { background: var(--ng); background-size: 320% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: lf-thsh 11s ease-in-out infinite alternate; }
+.lf-ng { background: var(--ng); background-size: 260% 100%; filter: drop-shadow(0 0 5px color-mix(in srgb, var(--ngc, #fff) 50%, transparent)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: lf-thsh 11s ease-in-out infinite alternate; }
 @media (prefers-reduced-motion: reduce) { .lf-ng { animation: none; } }
 /* AND IT SHINES, SLOWLY: the light band in the gradient drifts across and
    back, slowly and only a little, twelve seconds each way. Not a thing laid over it, the colour itself */
@@ -6682,9 +6682,12 @@ function lfApplyAccent() {
 function lfNameOn(node, st) {
   var th = lfTheme(frHue(st));
   node.classList.toggle('lf-ng', !!th);
-  if (!th) { node.style.removeProperty('--ng'); return; }
-  var dark = document.documentElement.getAttribute('data-mode') !== 'light', c = dark ? th.di : th.li;
-  node.style.setProperty('--ng', 'linear-gradient(100deg, ' + c + ' 0%, ' + c + ' 30%, color-mix(in srgb, ' + c + ' 38%, ' + (dark ? '#fff' : th.c) + ') 50%, ' + c + ' 70%, ' + c + ' 100%)');
+  if (!th) { node.style.removeProperty('--ng'); node.style.removeProperty('--ngc'); return; }
+  /* THE NAME WEARS THE WHOLE COLOUR, not a flat tint of it: its own gradient, deep at one end and
+     lit at the other, held just clear of black so it still reads, with a glow of the colour round it */
+  var dark = document.documentElement.getAttribute('data-mode') !== 'light';
+  node.style.setProperty('--ng', lfThGrad(th, 100, dark ? [.54, .88] : [.22, .44]));
+  node.style.setProperty('--ngc', th.c);
 }
 function lfThStops(t, cx) {
   var lr = document.documentElement.getAttribute('data-mode') !== 'light' ? [.3, .56] : [.34, .54];

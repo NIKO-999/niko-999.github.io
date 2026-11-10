@@ -1365,6 +1365,8 @@ const freeze = (at) => `(() => {
     await page.reload(); await page.waitForTimeout(500);
     await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
     const nm = await page.$$eval('#frBoard .fr-row', (rs) => Object.fromEntries(rs.map((r) => [r.querySelector('.fr-t b').textContent, r.querySelector('.fr-t b').classList.contains('lf-ng')])));
+    const nmFx = await page.$$eval('#frBoard .fr-row', (rs) => Object.fromEntries(rs.map((r) => { const cs = getComputedStyle(r.querySelector('.fr-t b')); return [r.querySelector('.fr-t b').textContent, [/linear-gradient/.test(cs.backgroundImage), /drop-shadow/.test(cs.filter)]]; })));
+    ok('an earned colour\'s name is its own gradient with a glow of the colour; Sam\'s plain name has neither', nmFx.Niko[0] && nmFx.Niko[1] && nmFx.Ally[0] && nmFx.Ally[1] && !nmFx.Sam[0] && !nmFx.Sam[1], JSON.stringify(nmFx));
     ok('only an earned colour colours a name: yours and Ally\'s, not Sam\'s wheel blue', nm.Niko === true && nm.Ally === true && nm.Sam === false, JSON.stringify(nm));
     const open = async (who) => { const i = await page.locator('#frBoard .fr-row').evaluateAll((els, n) => els.findIndex((e) => e.querySelector('.fr-t b').textContent === n), who); await page.locator('#frBoard .fr-row').nth(i).locator('.fr-open').click({ force: true }); await page.waitForTimeout(900); };
     const sheet = () => page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), cs = getComputedStyle(s); return { g: cs.getPropertyValue('--log-g').trim(), t: cs.getPropertyValue('--log-t').trim(), attr: s.hasAttribute('data-acc-g'), nameG: s.querySelector('.fr-ban-t b').classList.contains('lf-ng') }; });
