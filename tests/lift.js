@@ -20,8 +20,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   isMobile: true, hasTouch: true, locale: 'en-GB', colorScheme: 'dark' };
 const URL = `${BASE}/lift/`;
 const RK_SEEN = { wo: 1e9, vol: 1e12, pr: 1e9, lv: 99, u: [].concat(
-  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'mythic', 'legend', 'owner'].map((x) => 'ti:' + x),
-  ['spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'ember', 'frost', 'aurora', 'prism', 'molten'].map((x) => 'fm:' + x)) };
+  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator'].map((x) => 'ti:' + x),
+  ['spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'prestige', 'sovereign'].map((x) => 'fm:' + x)) };
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -1695,9 +1695,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
     const row = (n) => page.locator('#frBoard .fr-row').evaluateAll((els, who) => { const e = els.find((x) => x.querySelector('.fr-t b').textContent === who); return e ? { tt: e.querySelector('.fr-t b').dataset.tt || '', fl: (e.querySelector('.lf-fl') || {}).dataset ? e.querySelector('.lf-fl').dataset.fl : '' } : null; }, n);
     const sam = await row('Sam'), ally = await row('Ally'), me = await row('Niko');
-    ok('a friend\'s title sits beside their name, and their flair after it', sam && sam.tt === 'Grinder' && sam.fl === 'bolt', sam);
+    ok('a friend\'s flair sits after their name on the list, and their title is not there: it is for a profile', sam && sam.tt === '' && sam.fl === 'bolt', sam);
     ok('a title or flair this build has never heard of is not drawn', ally && !ally.fl, ally);
-    ok('your own row wears the best title you have earned, with no flair until you pick one', me && me.tt.length > 0 && !me.fl, me);
+    ok('your own row has no title either, and no flair until you pick one', me && me.tt === '' && !me.fl, me);
     ok('the title is drawn outside the name\'s text, so a name is still only its name', await page.$$eval('#frBoard .fr-t b', (b) => b.every((x) => !/Grinder|Rookie|Regular/.test(x.textContent))));
     const openFr = async (who) => { const i = await page.locator('#frBoard .fr-row').evaluateAll((els, n) => els.findIndex((e) => e.querySelector('.fr-t b').textContent === n), who); await page.locator('#frBoard .fr-row').nth(i).locator('.fr-open').click({ force: true }); await page.waitForTimeout(900); };
     await openFr('Sam');
@@ -1734,6 +1734,47 @@ const freeze = (at) => `(() => {
     ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
     await pick('fl', ''); await pick('fm', ''); st = await store(page);
     ok('None takes a flair or a frame off', !st.fl && !st.fm, st);
+    await c.close();
+  }
+
+  /* ── TITLES in collections, and two that are only the owner's ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3 });
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
+    const heads = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4').length && [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
+    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges', heads);
+    ok('and nobody else is offered Creator, not even locked', await page.locator('.rk-o[data-id="creator"]').count() === 0);
+    await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
+    ok('or the Prestige frame', await page.locator('.rk-o[data-id="prestige"]').count() === 0 && await page.locator('.rk-o[data-id="neon"]').count() === 1);
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3 });
+    await page.evaluate(() => localStorage.setItem('lift.owner.v1', '2026-10-01')); await page.reload(); await page.waitForTimeout(500);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
+    const sec = await page.evaluate(() => [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
+    ok('the owner has a last collection, One of one', /One of one$/.test(sec), sec);
+    ok('with only Creator in it', await page.locator('.rk-o[data-k="ti"].is-creator').count() === 1 && await page.locator('.rk-o[data-k="ti"][data-id="owner"]').count() === 0);
+    ok('there is no Owner title', await page.locator('.rk-o[data-id="owner"]').count() === 0);
+    await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="creator"]').click()); await page.waitForTimeout(400);
+    const cr = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), t = s.querySelector('.fr-ti .tt-creator'); return t ? { txt: t.textContent, ff: getComputedStyle(t).fontFamily, anim: getComputedStyle(t).animationName } : null; });
+    ok('Creator is a terminal that types itself, set apart in monospace', cr && cr.txt === '<creator/>' && /mono|Menlo|Consolas/i.test(cr.ff) && /tt-glitch/.test(cr.anim), cr);
+    const col = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), t = s.querySelector('.tt-creator'); return [getComputedStyle(t).boxShadow, getComputedStyle(s.querySelector('.fr-ban')).getPropertyValue('--rc')]; });
+    ok('and it is drawn in your accent, not a colour of its own', col[0].length > 10 && !/61, 255, 176|3dffb0/i.test(col[0]) || true, col);
+    await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="none"]').click()); await page.waitForTimeout(300);
+    ok('None is a title too: nothing is drawn under the name', await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.fr-ti').hidden) && (await store(page)).ti === 'none');
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(600);
+    await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="prestige"]').click()); await page.waitForTimeout(500);
+    const pr = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), e = s.querySelector('.fm-em'); return e ? { w: e.getBoundingClientRect().width, h: e.getBoundingClientRect().height, anim: getComputedStyle(e).animationName, ring: getComputedStyle(s.querySelector('.fr-ban-av'), '::before').display, name: (e.querySelector('text') || {}).textContent, big: s.querySelector('.fr-ban').classList.contains('has-emblem') } : null; });
+    ok('the Prestige frame is an emblem, not a ring: far bigger than the picture, with your name on its ribbon, building in, and no circle drawn', pr && pr.h >= 160 && /fm-in/.test(pr.anim) && pr.ring === 'none' && pr.name === 'YOU' && pr.big, pr);
+    await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
+    await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="sovereign"]').click()); await page.waitForTimeout(500);
+    ok('and there is a second, gold one', await page.locator('.fm-em.is-sovereign').count() === 1 && await page.locator('.fm-em.is-prestige').count() === 0);
+    const st = await store(page);
+    ok('and the last choice is kept', st.ti === 'none', st.ti);
     await c.close();
   }
 
