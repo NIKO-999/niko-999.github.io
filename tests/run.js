@@ -145,8 +145,8 @@ const alive = (url) => new Promise((res) => {
          "no summary", which reads exactly like a crash and is not one,
          so the number wants headroom rather than to sit on the edge of
          the longest file's real runtime. Lift reached 570s and then went
-         past 600 on a slow machine, so it is 900 now. */
-      timeout: 900000,
+         past 600 on a slow machine, so it is 1500 now. */
+      timeout: 1500000,
     });
     const out = (r.stdout || '') + (r.stderr || '');
     const secs = ((Date.now() - t0) / 1000).toFixed(1);

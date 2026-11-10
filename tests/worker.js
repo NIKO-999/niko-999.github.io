@@ -516,9 +516,10 @@ const kv = () => {
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
     /* LIVE: the small read the app asks every few seconds */
     /* WHAT THEY WEAR: ids, clamped like everything else */
-    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, ti: 'grinder', fl: 'bolt', fm: 'Bad!', xl: 14, du: ['KLMN2345', '2026-11-02'] } } });
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, ti: 'grinder', fl: 'bolt', fm: 'Bad!', ow: 1, xl: 14, du: ['KLMN2345', '2026-11-02'] } } });
     q = await (await hit('GET', '/v1/lift/' + C)).json();
     ok('a title and a flair come through', q.s.ti === 'grinder' && q.s.fl === 'bolt', q.s);
+    ok('the creator mark comes through as 1 and nothing else', q.s.ow === 1, q.s);
     ok('an id that is not one is dropped, and no level or duel is kept', !('fm' in q.s) && !('xl' in q.s) && !('du' in q.s), q.s);
     q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, ti: '<b>x</b>', fl: 'a'.repeat(40) } } });
     q = await (await hit('GET', '/v1/lift/' + C)).json();

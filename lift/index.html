@@ -1040,6 +1040,11 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv-cap { text-align: center; max-width: 360px; margin: 0 auto; }
 .lf-cv-k { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--good); }
 .lf-cv-n { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 4px; }
+/* THE EYE names itself in its own colour, and says what it does under it. */
+.lf-cv.is-eye .lf-cv-n { font-size: 30px; background: linear-gradient(100deg, #ff3a00, #ffb23a 45%, #fff1c9 50%, #ffb23a 55%, #ff3a00) 100% 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 12px rgba(255,90,0,.55)); animation: cv-eye 5s ease-in-out infinite; }
+.lf-cv.is-eye .lf-cv-cap p { color: #ffb37a; letter-spacing: .1em; text-transform: uppercase; font-size: 11px; font-weight: 700; }
+@keyframes cv-eye { 0%, 40% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+@media (prefers-reduced-motion: reduce) { .lf-cv.is-eye .lf-cv-n { animation: none; } }
 .lf-cv-cap p { color: var(--dim); font-size: 14px; line-height: 1.45; margin: 0; }
 .lf-cv-h { color: var(--quiet); font-size: 12px; margin-top: 14px; }
 .lf-recd { font-size: 13px; color: var(--dim); margin: 10px 2px 0; }
@@ -1080,6 +1085,34 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .tt-creator em { display: inline-block; overflow: hidden; white-space: nowrap; vertical-align: bottom; max-width: 12ch; animation: tt-type 1.5s steps(11) 1 backwards; }
 .tt-creator::after { content: ''; width: .55ch; height: 1.1em; margin-left: 1px; background: var(--tc); box-shadow: 0 0 6px var(--tc); animation: tt-blink 1s steps(1) infinite; }
 @keyframes tt-type { from { max-width: 0; } }
+/* THE ANIMATED TITLES: one idea each, and each a loop slow enough to sit under a name. */
+.fr-ti .tt-blaze em { background: linear-gradient(0deg, #ff3d00, #ffb020 45%, #fff3b0 60%, #ffb020 75%, #ff3d00) 0 0 / 100% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-blaze 2.6s linear infinite; filter: drop-shadow(0 0 6px rgba(255,106,0,.55)); }
+@keyframes tt-blaze { to { background-position: 0 -300%; } }
+.fr-ti .tt-wip { flex-direction: column; gap: 4px; --tc: var(--rc, #22d3ee); }
+.tt-wip i { width: 100%; height: 3px; border-radius: 2px; background: color-mix(in srgb, var(--tc) 22%, transparent); overflow: hidden; position: relative; }
+.tt-wip i::after { content: ''; position: absolute; inset: 0; background: var(--tc); box-shadow: 0 0 6px var(--tc); transform-origin: 0 50%; animation: tt-wip 3.2s cubic-bezier(.3, 0, .2, 1) infinite; }
+@keyframes tt-wip { 0% { transform: scaleX(0); opacity: 1; } 70% { transform: scaleX(.92); opacity: 1; } 85% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+.fr-ti .tt-shine em { background: linear-gradient(100deg, var(--dim) 40%, #fff 50%, var(--dim) 60%) 120% 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-shine 3.4s ease-in-out infinite; }
+@keyframes tt-shine { 0%, 30% { background-position: 120% 0; } 100% { background-position: -40% 0; } }
+.fr-ti .tt-beast { --tc: var(--rc, #ff3d71); }
+.tt-beast i { width: 24px; height: 13px; border-radius: 7px; background: color-mix(in srgb, var(--tc) 25%, transparent); position: relative; animation: tt-beast-t 4s ease-in-out infinite; }
+.tt-beast i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: tt-beast-k 4s ease-in-out infinite; }
+@keyframes tt-beast-k { 0%, 20% { transform: none; } 32%, 100% { transform: translateX(11px); } }
+@keyframes tt-beast-t { 0%, 20% { background: color-mix(in srgb, var(--tc) 25%, transparent); box-shadow: none; } 32%, 100% { background: var(--tc); box-shadow: 0 0 9px var(--tc); } }
+.fr-ti .tt-slay em { position: relative; color: #ffd9df; text-shadow: 0 0 8px rgba(225,29,72,.7); }
+.tt-slay em::after { content: ''; position: absolute; left: -6%; right: -6%; top: 50%; height: 2px; background: linear-gradient(90deg, transparent, #fff, #e11d48, transparent); transform: rotate(-9deg) scaleX(0); transform-origin: 0 50%; animation: tt-slay 3.6s cubic-bezier(.7, 0, .2, 1) infinite; }
+@keyframes tt-slay { 0%, 55% { transform: rotate(-9deg) scaleX(0); opacity: 1; } 68% { transform: rotate(-9deg) scaleX(1); opacity: 1; } 100% { transform: rotate(-9deg) scaleX(1); opacity: 0; } }
+.fr-ti .tt-eye { flex-direction: column; gap: 5px; --tc: var(--rc, #ff5a1f); text-transform: none; letter-spacing: .22em; font-size: 9.5px; font-weight: 700; color: color-mix(in srgb, var(--tc) 50%, #fff); }
+.tt-eye svg { width: 58px; height: 33px; overflow: visible; filter: drop-shadow(0 0 7px color-mix(in srgb, var(--tc) 70%, transparent)); }
+.tt-eye .e-w { fill: #0b0b0e; } .tt-eye .e-o { fill: none; stroke: var(--tc); stroke-width: 1.6; stroke-linejoin: round; }
+.tt-eye .e-i { animation: tt-eye-look 7s ease-in-out infinite; } .tt-eye .e-i circle { fill: var(--tc); } .tt-eye .e-i .e-r { fill: color-mix(in srgb, var(--tc) 55%, #000); } .tt-eye .e-i .e-p { fill: #000; } .tt-eye .e-i .e-g { fill: #fff; }
+.tt-eye .e-p { transform-origin: 32px 18px; animation: tt-eye-pupil 3.5s ease-in-out infinite; }
+.tt-eye .e-l { fill: #0b0b0e; animation: tt-eye-blink 5.2s ease-in-out infinite; }
+.tt-eye em { animation: tt-eye-say 5.2s ease-in-out infinite; text-transform: uppercase; }
+@keyframes tt-eye-look { 0%, 14%, 100% { transform: none; } 20%, 38% { transform: translateX(-9px); } 46%, 64% { transform: translateX(9px); } 72%, 86% { transform: translate(0, 1.5px); } }
+@keyframes tt-eye-pupil { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.22); } }
+@keyframes tt-eye-blink { 0%, 90%, 100% { transform: none; } 94%, 96% { transform: translateY(36px); } }
+@keyframes tt-eye-say { 0%, 100% { opacity: .7; } 50% { opacity: 1; } }
 @keyframes tt-blink { 50% { opacity: 0; } }
 @keyframes tt-glitch { 0%, 94%, 100% { transform: none; } 95% { transform: translateX(-2px); text-shadow: 2px 0 #ff3d71, -2px 0 #38f; } 97% { transform: translateX(2px) skewX(-6deg); text-shadow: -2px 0 #ff3d71, 2px 0 #38f; } }
 .rk-o.is-creator { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 45%, transparent); }
@@ -1116,6 +1149,31 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ban.has-emblem { padding-top: 76px; }
 .fm-em { position: absolute; left: 50%; top: -63.5px; width: 190px; height: 190px; margin-left: -95px; pointer-events: none; animation: fm-in .9s var(--ease) backwards; filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)); }
 @keyframes fm-in { from { opacity: 0; transform: scale(.55) rotate(-8deg); } }
+.fr-ban-av.em-on { --fm: none; z-index: 1; }
+/* ART FRAMES are painted pictures, used as they are. The picture under one
+   is sized to the hole the artist left, and the only motion added is a
+   slow shine and a breath of glow: anything more fights the painting. */
+.fr-ban.has-emblem.has-art { padding-top: 54px; }
+.fr-ban.has-emblem.has-art .fr-ban-av { width: 116px; height: 116px; margin: 0 0 42px; font-size: 40px; }
+.fm-em.is-art { top: -32px; width: 180px; height: 180px; margin-left: -90px; z-index: 2; background: var(--art) center / contain no-repeat; animation: fm-art-in .7s var(--ease) backwards, fm-art-glow 4.5s ease-in-out .7s infinite; }
+.fm-em.is-art::after { content: ''; position: absolute; inset: 0; -webkit-mask: var(--art) center / contain no-repeat; mask: var(--art) center / contain no-repeat; background: linear-gradient(115deg, transparent 44%, rgba(255,255,255,.5) 50%, transparent 56%) 130% 0 / 300% 100% no-repeat; animation: fm-art-shine 6s ease-in-out 1.2s infinite; }
+.fm-em.is-art i { position: absolute; opacity: 0; pointer-events: none; }
+.fm-em .fx-em, .fm-em .fx-gl { width: 3px; height: 3px; margin: -1.5px; border-radius: 50%; background: #fff; box-shadow: 0 0 6px 1px var(--glow); }
+.fm-em .fx-em { animation: fm-fx-ember 3.6s linear calc(var(--i) * -.9s) infinite; }
+.fm-em .fx-gl { animation: fm-fx-glint 3.6s ease-in-out calc(var(--i) * -.52s) infinite; }
+.fm-em .fx-fl { width: 18px; height: 34px; margin: -30px 0 0 -9px; transform-origin: 50% 100%; border-radius: 50% 50% 45% 45% / 72% 72% 28% 28%; background: radial-gradient(ellipse at 50% 92%, #fff 0, var(--glow) 34%, transparent 70%); filter: blur(1.6px); mix-blend-mode: screen; animation: fm-fx-burn 3.2s ease-in-out calc(var(--i) * -.71s) infinite; }
+.fm-em .fx-dr { width: 4px; height: 10px; margin: -2px 0 0 -2px; transform-origin: 50% 0; border-radius: 50% 50% 50% 50% / 28% 28% 72% 72%; background: linear-gradient(var(--glow), #fff); box-shadow: 0 0 6px var(--glow); animation: fm-fx-drip 3.4s cubic-bezier(.5, 0, .9, .4) calc(var(--i) * -.57s) infinite; }
+.fm-em .fx-zp { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.fm-em .fx-zp path { fill: none; stroke: #fff; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; opacity: 0; filter: drop-shadow(0 0 3px var(--glow)) drop-shadow(0 0 8px var(--glow)); animation: fm-fx-zap 3.9s linear calc(var(--i) * -1.3s) infinite; }
+@keyframes fm-fx-ember { 0% { opacity: 0; transform: none; } 15% { opacity: .9; } 100% { opacity: 0; transform: translate(5px, -36px) scale(.3); } }
+@keyframes fm-fx-glint { 0%, 100% { opacity: 0; transform: scale(.2); } 50% { opacity: 1; transform: scale(1.5); } }
+@keyframes fm-fx-burn { 0%, 100% { opacity: .35; transform: scale(.8, .7) skewX(-4deg); } 35% { opacity: .85; transform: scale(1, 1.2) skewX(3deg); } 65% { opacity: .6; transform: scale(.9, 1) skewX(-2deg); } }
+@keyframes fm-fx-drip { 0% { opacity: 0; transform: scaleY(.2); } 35% { opacity: .95; transform: scaleY(1); } 55% { opacity: .95; transform: translateY(3px) scaleY(1.15); } 100% { opacity: 0; transform: translateY(30px) scaleY(.8); } }
+@keyframes fm-fx-zap { 0%, 6%, 100% { opacity: 0; } 1% { opacity: 1; } 2.5% { opacity: .25; } 4% { opacity: .9; } }
+@keyframes fm-art-in { from { opacity: 0; transform: scale(.86); } }
+@keyframes fm-art-glow { 0%, 100% { filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)) drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 8px 14px rgba(0,0,0,.6)) drop-shadow(0 0 9px var(--glow)); } }
+@keyframes fm-art-shine { 0%, 55% { background-position: 130% 0; } 85%, 100% { background-position: -30% 0; } }
+.fr-ban-av.em-on::before { display: none; }
 .fr-ban-av.em-fall::before { display: block !important; -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px)); mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px)); background: conic-gradient(var(--rc), #000, var(--rc), #000, var(--rc)); }
 .fr-ban.has-emblem .fr-ban-h { flex-direction: column; align-items: center; text-align: center; gap: 0; }
 .fr-ban.has-emblem .fr-ban-av { width: 63px; height: 63px; margin: 0 0 66px; font-size: 24px; box-shadow: none; }
@@ -1135,7 +1193,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .rk-set b { font-weight: 600; color: var(--dim); display: inline-flex; align-items: center; }
 .rk-rows { margin-top: 6px; }
 
-@media (prefers-reduced-motion: reduce) { .lf-fl, .fr-ban-av::before, .fr-ban-av::after, .fm-em, .tt-creator, .tt-creator em, .tt-creator::after { animation: none !important; } }
+@media (prefers-reduced-motion: reduce) { .lf-fl, .fr-ban-av::before, .fr-ban-av::after, .fm-em, .fm-em::after, .fm-em i, .tt-creator, .tt-creator em, .tt-creator::after, .fr-ti .tt *, .fr-ti .tt *::after, .fm-em svg path { animation: none !important; } }
 .fr-row.is-gone { opacity: .6; }
 .fr-wk { display: grid; justify-items: end; gap: 1px; }
 .fr-wk b { font-size: 17px; font-weight: 700; }
@@ -1777,6 +1835,7 @@ function lfClean(o) {
   if (typeof o.wkSum === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkSum)) d.wkSum = o.wkSum;
   /* what you wear (a title, a flair, a frame) and what has been celebrated */
   ['ti', 'fl', 'fm'].forEach(function (k) { if (typeof o[k] === 'string' && /^[a-z0-9]{2,10}$/.test(o[k])) d[k] = o[k]; });
+  if (typeof o.slay === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.slay)) d.slay = o.slay;
   if (o.mseen && typeof o.mseen === 'object') {
     var ms = { u: [] }; ['wo', 'vol', 'pr'].forEach(function (k) { ms[k] = Math.max(0, Math.round(+o.mseen[k]) || 0); });
     if (Array.isArray(o.mseen.u)) ms.u = o.mseen.u.filter(function (x) { return typeof x === 'string' && /^[a-z]{2}:[a-z0-9]{2,10}$/.test(x); }).slice(0, 120);
@@ -4341,9 +4400,9 @@ function frStats() {
   var mu = lfTargets().slice(0, 16).map(function (x) { return [x[0], got[x[0]] || 0, x[1]]; });
   var rk = lfRkSt();
   return { wo30: in30.length, sets30: in30.reduce(function (a, w) { return a + woSets(w); }, 0), pr30: pr30, wk: wk, goal: S.goal,
-    streak: streak, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8,
+    streak: streak, ow: lfOwner() ? 1 : 0, d: d, last: last, w7: w7, mu: mu, r7: r7, v8: v8,
     /* what friends see of your badges: the three you showcase, or your latest three */
-    bg: (function () { var all = lfBadges().filter(function (x) { return x.d; }), sh = lfShow();
+    bg: (function () { var all = lfBadges().filter(function (x) { return x.d && x.b.id !== 'creator'; }), sh = lfShow();
       var pick = sh.length ? sh.map(function (id) { return all.filter(function (x) { return x.b.id === id; })[0]; }).filter(Boolean) : all.sort(function (a, b) { return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; }).slice(0, 3);
       return pick.map(function (x) { return [x.b.id, x.d]; }); })(),
     /* the workouts themselves, newest first: what friends open to see your sets */
@@ -4495,13 +4554,25 @@ function frSyncNow() {
   if (who.length && view !== 'fr') { lfBanner(IC_LINK, 'In sync', 'Training with ' + who.map(function (f) { return f.n || 'a friend'; }).slice(0, 2).join(' and ') + ' right now', frColOf(who[0].s)); buzz([10, 50, 10]); }
 }
 setTimeout(frLivePoll, 1200);
+/* BEATING THE CREATOR. The last whole week, Monday to Sunday: more kilos
+   moved than the creator moved in it, and the creator has to have trained.
+   Their record must have been sent this week, or its weeks are not the
+   weeks being compared. Once it happens it is kept: the date is the Sunday. */
+function lfSlayCheck(f) {
+  if (S.slay || lfOwner() || !f || !f.s || f.s.ow !== 1 || !Array.isArray(f.s.v8)) return;
+  var mon = monday(today()); if (!(f.at >= mon.getTime())) return;
+  var theirs = +f.s.v8[6] || 0, a = addDays(mon, -7), mine = Math.round(windowStats(a, addDays(a, 6)).vol);
+  if (!(theirs > 0 && mine > theirs)) return;
+  S.slay = ymd(addDays(mon, -1)); lfBCk = ''; lfSave();
+  lfToast('You out-lifted the creator. Giant Slayer is yours'); setTimeout(lfMomentsRun, 600);
+}
 function frPullAll(done) {
   /* everybody on the list, and your own record for the reactions on it */
   var left = FRS.list.length + 1;
   function one() { if (--left === 0) { frSave(); if (done) done(); } }
   function pull(f) {
     frApi('GET', '/v1/lift/' + f.c).then(function (r) {
-      if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.rx = Array.isArray(r.j.rx) ? r.j.rx : []; f.gone = false; }
+      if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.rx = Array.isArray(r.j.rx) ? r.j.rx : []; f.gone = false; lfSlayCheck(f); }
       else if (r.st === 404) f.gone = true;
     }).catch(function () {}).then(one);
   }
@@ -4584,7 +4655,7 @@ function frStrip(dstr) {
 }
 /* YOUR SHOWCASE: up to three badges you have earned, the only ones friends
    see. Empty, it falls back to your three latest, as before. */
-function lfShow() { var got = {}; lfBadgesCache().forEach(function (x) { if (x.d) got[x.b.id] = x.d; }); return (S.show || []).filter(function (id) { return got[id]; }).slice(0, 3); }
+function lfShow() { var got = {}; lfBadgesCache().forEach(function (x) { if (x.d) got[x.b.id] = x.d; }); return (S.show || []).filter(function (id) { return got[id] && id !== 'creator'; }).slice(0, 3); }
 var lfBC = null, lfBCk = '';
 function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.length - 1].id : '') + ':' + JSON.stringify(S.fx || '').length + ':' + (S.bw || []).length; if (k !== lfBCk) { lfBC = lfBadges(); lfBCk = k; } return lfBC; }
 /* ── WHAT YOU WEAR ──────────────────────────────────────────────────────
@@ -4594,7 +4665,7 @@ function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.
 function lfRkCtx() {
   var got = lfBadgesCache().filter(function (x) { return x.d; });
   var has = {}; got.forEach(function (x) { has[x.b.id] = 1; });
-  return { has: has, wo: S.wo.length, run: lfGoalRun(), bd: got.length, myth: got.some(function (x) { return x.b.t === 4; }), own: !!lfOwner() };
+  return { has: has, wo: S.wo.length, run: lfGoalRun(), bd: got.length, myth: got.some(function (x) { return x.b.t === 4; }), own: !!lfOwner(), slay: !!S.slay };
 }
 var RK = {
   ti: [['rookie', 'Rookie', 'Where it starts', function () { return 1; }], ['regular', 'Regular', '10 workouts', function (c) { return c.wo >= 10; }],
@@ -4605,7 +4676,11 @@ var RK = {
     ['curator', 'Curator', '60 badges', function (c) { return c.bd >= 60; }], ['master', 'Master', '400 workouts', function (c) { return c.wo >= 400; }],
     ['engine', 'Engine', 'Earn Engine', function (c) { return !!c.has.cardio100; }],
     ['mythic', 'Mythic', 'Earn a mythic badge', function (c) { return c.myth; }], ['legend', 'Living Legend', '500 workouts', function (c) { return c.wo >= 500; }],
-    ['creator', 'Creator', 'One of one', function (c) { return c.own; }]],
+    ['sudo', 'Sudo', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
+    ['wip', 'Loading Gains', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
+    ['beast', 'Beast Mode', '120 workouts', function (c) { return c.wo >= 120; }],
+    ['slayer', 'Giant Slayer', 'Out-lift the creator in a week', function (c) { return c.slay; }],
+    ['creator', 'Creator', 'One of one', function (c) { return c.own; }], ['eye', 'The Eye', 'One of one', function (c) { return c.own; }]],
   fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
     ['heart', 'Heart', '15 workouts', function (c) { return c.wo >= 15; }, 'M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z', '#f43f5e'],
     ['drop', 'Drop', '20 workouts', function (c) { return c.wo >= 20; }, 'M12 2.5c3.5 4.4 6 7.4 6 10.7a6 6 0 0 1-12 0c0-3.3 2.5-6.3 6-10.7z', '#22d3ee'],
@@ -4626,6 +4701,7 @@ var RK = {
     ['duo', 'Duo', 'Earn Gym Buddies', function (c) { return !!c.has.duo10; }, 'M9 11a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM2.5 20c0-3.5 2.800-6 6.500-6s6.500 2.500 6.500 6M17 10a3 3 0 1 0 0-6M18.500 14.200c2 .6 3.500 2.600 3.500 5.800', '#38bdf8', 1],
     ['flag', 'Flag', 'Earn Squad Goals', function (c) { return !!c.has.squad; }, 'M5 21V4M5 4h11l-2 4 2 4H5', '#22c55e', 1],
     ['medal', 'Medal', 'Earn Crowned', function (c) { return !!c.has.lead1; }, 'M12 14a5 5 0 1 0 0-10 5 5 0 0 0 0 10zM8.500 13.500L7 21l5-2.500 5 2.500-1.500-7.500', '#f59e0b', 1],
+    ['slayer', 'Slayer', 'Out-lift the creator in a week', function (c) { return c.slay; }, 'M12 2l2.2 3.2V14H17v2.2h-3.6V21h-2.800v-4.800H7V14h2.800V5.200z', '#e11d48'],
     ['pack', 'Paw', 'Earn Pack Leader', function (c) { return !!c.has.pack; }, 'M12 21c-3.300 0-5.500-1.800-5.500-4 0-2.700 3.200-5 5.500-5s5.500 2.300 5.500 5c0 2.200-2.200 4-5.500 4zM5 11.500a1.700 2.300 0 1 0 .01 0zM9 6.500a1.700 2.300 0 1 0 .01 0zM15 6.500a1.700 2.300 0 1 0 .01 0zM19 11.500a1.700 2.300 0 1 0 .01 0z', '#fb923c'],
     ['pulse', 'Pulse', 'Earn Cardio Heart', function (c) { return !!c.has.cardio25; }, 'M2 12h4l2.5-6 4 12 2.5-6H22', '#f43f5e', 1],
     ['stairs', 'Stairs', 'Earn Step Up', function (c) { return !!c.has.stair10; }, 'M3 20h5v-4h4v-4h4V8h5', '#06b6d4', 1],
@@ -4634,28 +4710,94 @@ var RK = {
     ['wind', 'Wind', 'Earn Iron Lungs', function (c) { return !!c.has.lungs; }, 'M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7', '#67e8f9', 1],
     ['gem', 'Gem', 'Earn a mythic badge', function (c) { return c.myth; }, 'M6.5 3.5h11l4 6L12 21 2.5 9.5z', '#a78bfa'],
     ['barbell', 'Barbell', 'One of one', function (c) { return c.own; }, 'M3 9v6M6.5 6.5v11M17.5 6.5v11M21 9v6M6.5 12h11', '#ff7a1a', 1]],
-  fm: [['ring', 'Ring', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Neon', '12 workouts', function (c) { return c.wo >= 12; }],
-    ['orbit', 'Orbit', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Ember', '30 workouts', function (c) { return c.wo >= 30; }],
-    ['sparkle', 'Sparkle', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Halo', '75 workouts', function (c) { return c.wo >= 75; }],
-    ['frost', 'Frost', '12 weeks on goal', function (c) { return c.run >= 12; }], ['glitch', 'Glitch', '100 workouts', function (c) { return c.wo >= 100; }],
-    ['aurora', 'Aurora', '150 workouts', function (c) { return c.wo >= 150; }], ['prism', 'Prism', '250 workouts', function (c) { return c.wo >= 250; }],
-    ['blossom', 'Blossom', '60 workouts', function (c) { return c.wo >= 60; }], ['angel', 'Angel', '100 workouts', function (c) { return c.wo >= 100; }],
-    ['celestial', 'Celestial', '200 workouts', function (c) { return c.wo >= 200; }],
-    ['prestige', 'Prestige', 'One of one', function (c) { return c.own; }], ['sovereign', 'Sovereign', 'One of one', function (c) { return c.own; }]]
+  fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
+    ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
+    ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
+    ['frost', 'Jade Wyrm', '12 weeks on goal', function (c) { return c.run >= 12; }], ['glitch', 'Voidforge', '100 workouts', function (c) { return c.wo >= 100; }],
+    ['aurora', 'Rose Wyrm', '150 workouts', function (c) { return c.wo >= 150; }], ['prism', 'Lilac Wyrm', '250 workouts', function (c) { return c.wo >= 250; }],
+    ['blossom', 'Orchid', '60 workouts', function (c) { return c.wo >= 60; }], ['angel', 'Silver Wyrm', '100 workouts', function (c) { return c.wo >= 100; }],
+    ['celestial', 'Aurum', '200 workouts', function (c) { return c.wo >= 200; }],
+    ['prestige', 'Obsidian', 'One of one', function (c) { return c.own; }], ['sovereign', 'Night Wyrm', 'One of one', function (c) { return c.own; }]]
 };
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'mythic']],
-  ['one', 'One of one', '#ff5a1f', ['creator'], 1]];
+  ['an', 'Animated', '#22d3ee', ['sudo', 'blaze', 'wip', 'nodaysoff', 'beast']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
+  ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
 function lfTitleEl(id) {
   var sp = el('<span class="tt"></span>');
   if (id === 'creator') { sp.className = 'tt tt-creator'; sp.innerHTML = '<em>&lt;creator/&gt;</em>'; return sp; }
+  if (id === 'sudo') { sp.className = 'tt tt-creator'; sp.innerHTML = '<em>$ sudo lift</em>'; return sp; }
+  if (id === 'blaze') { sp.className = 'tt tt-blaze'; sp.innerHTML = '<em>On fire</em>'; return sp; }
+  if (id === 'wip') { sp.className = 'tt tt-wip'; sp.innerHTML = '<em>Loading gains</em><i aria-hidden="true"></i>'; return sp; }
+  if (id === 'nodaysoff') { sp.className = 'tt tt-shine'; sp.innerHTML = '<em>No days off</em>'; return sp; }
+  if (id === 'beast') { sp.className = 'tt tt-beast'; sp.innerHTML = '<em>Beast mode</em><i aria-hidden="true"></i>'; return sp; }
+  if (id === 'slayer') { sp.className = 'tt tt-slay'; sp.innerHTML = '<em>Giant slayer</em>'; return sp; }
+  /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
+  if (id === 'eye') {
+    sp.className = 'tt tt-eye';
+    sp.innerHTML = '<svg viewBox="0 0 64 36" aria-hidden="true"><defs><clipPath id="ttEyeC"><path d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/></clipPath></defs>'
+      + '<path class="e-w" d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/><g clip-path="url(#ttEyeC)"><g class="e-i"><circle cx="32" cy="18" r="11.500"/><circle class="e-r" cx="32" cy="18" r="8"/><circle class="e-p" cx="32" cy="18" r="4.600"/><circle class="e-g" cx="35.500" cy="14.500" r="1.800"/></g>'
+      + '<rect class="e-l" x="0" y="-36" width="64" height="36"/></g><path class="e-o" d="M2 18C12 4 24 1 32 1s20 3 30 17C52 32 40 35 32 35S12 32 2 18z"/></svg><em>always watching you</em>';
+    return sp;
+  }
   return null;
 }
 /* THE EMBLEMS: real 3D, built here with the same renderer and reflections as the badges. Forged iron with a raised bevelled frame and a brushed grain, a recessed pool of lava that moves, a lava channel round the ring, hot plates on crossed barbells. The lava is your accent. No text, no banner; the middle is your picture. They belong to one person. */
+/* THE ORNATE FRAMES: wreaths, wings, crowns and crests, each a whole piece with its own metal, gems and light. No text on any of them. */
+var RK_ORN = {
+  laurel: { fx: ['grad'], g: ['#ffcf4a', '#ff7a1a'], n: 'Laurel', w: 10, m: '#d79a12', leaf: 'laurel', crest: 'gem', gc: '#2ecc71', gl: '#ffd36b', sp: 'star', sc: '#fff1b0' },
+  verdant: { fx: ['grad'], g: ['#6bff9a', '#ffd54a'], n: 'Verdant', w: 25, m: '#d79a12', leaf: 'laurel', lc: '#1f9d55', crest: 'crown', gc: '#7dff9a', gl: '#4dff9a', sp: 'star', sc: '#bfffd0' },
+  regal: { fx: ['fire'], n: 'Regal', w: 40, m: '#dca420', leaf: 'laurel', crest: 'crown', gc: '#e11d48', gl: '#ffb347', wings: 2, sp: 'star', sc: '#ffe6a0' },
+  silvern: { fx: ['bolt'], n: 'Silvern', w: 55, m: '#cfd8ea', leaf: 'feather', lc: '#c6d4f2', crest: 'gem', gc: '#4aa3ff', gl: '#a8d8ff', wings: 1, sp: 'star', sc: '#ffffff' },
+  amethyst: { fx: ['bolt'], n: 'Amethyst', w: 70, m: '#7a46e6', mr: .2, leaf: 'crystal', lc: '#9a5cff', crest: 'star', gc: '#e0b3ff', gl: '#b388ff', sp: 'star', sc: '#f0d9ff' },
+  inferno: { fx: ['fire'], n: 'Inferno', w: 90, m: '#3a1208', mr: .4, leaf: 'flame', crest: 'flame', gc: '#ff7a1a', gl: '#ff5a1a', sp: 'ember', sc: '#ffb070' },
+  glacier: { fx: ['bolt'], n: 'Glacier', w: 110, m: '#9fd3ea', leaf: 'crystal', lc: '#4fc3f7', crest: 'star', gc: '#e6fbff', gl: '#8fe3ff', sp: 'snow', sc: '#ffffff' },
+  rosegold: { fx: ['grad'], g: ['#ff9ec4', '#ffd7a8'], n: 'Rose Gold', w: 130, m: '#e09a86', leaf: 'petal', lc: '#f0a8bd', crest: 'gem', gc: '#ff6fa3', gl: '#ffb3cc', sp: 'petal', sc: '#ffc9dc' },
+  winged: { fx: ['grad'], g: ['#ffe08a', '#8fd6ff'], n: 'Winged', w: 160, m: '#d79a12', leaf: 'feather', lc: '#f7e3a0', crest: 'crown', gc: '#6ecbff', gl: '#ffe08a', wings: 1, sp: 'star', sc: '#fff2c0' },
+  sapphire: { fx: ['bolt'], n: 'Sapphire', r: 8, rq: '8 weeks on goal', m: '#7aa2f5', leaf: 'feather', lc: '#9fbdf7', crest: 'star', gc: '#2a6bff', gl: '#5b9bff', wings: 2, sp: 'star', sc: '#cfe0ff' },
+  ruby: { fx: ['fire'], n: 'Ruby Throne', w: 190, m: '#cf9618', leaf: 'laurel', lc: '#b3142a', crest: 'crown', gc: '#ff2a4a', gl: '#ff4d6a', sp: 'ember', sc: '#ff9aa8' },
+  aurelian: { fx: ['fire'], n: 'Aurelian', w: 260, m: '#e5b422', leaf: 'laurel', crest: 'rays', gc: '#fff0a8', gl: '#ffd34d', sp: 'star', sc: '#fff2c0' },
+  phoenix: { fx: ['fire'], n: 'Phoenix', w: 300, m: '#7a1608', mr: .4, leaf: 'flame', crest: 'flame', wings: 1, gc: '#ffb347', gl: '#ff6a1a', sp: 'ember', sc: '#ffb070' },
+  imperial: { fx: ['bolt'], n: 'Imperial', w: 350, m: '#1a1a22', mr: .3, leaf: 'laurel', lc: '#e2b13c', crest: 'crown', gc: '#a855f7', gl: '#c084fc', sp: 'star', sc: '#e6c8ff' },
+  eclipse: { fx: ['fire', 'bolt'], n: 'Eclipse', w: 400, m: '#1a1a22', mr: .3, leaf: 'laurel', lc: '#2a2a35', crest: 'rays', gc: '#ffd34d', gl: '#ffcf5a', sp: 'star', sc: '#fff0b0' },
+  creator: { fx: ['fire', 'bolt'], n: 'Creator', own: 1, m: '#c9cedb', mr: .22, leaf: 'laurel', lc: '#23262f', crest: 'eye', gc: 'acc', gl: 'acc', wings: 1, sp: 'ember', sc: 'acc', trim: 1 },
+  prismatic: { fx: ['grad'], n: 'Prismatic', w: 500, m: '#e8ecf6', leaf: 'crystal', lc: '#ffffff', crest: 'gem', gc: '#ffffff', gl: '#ffffff', wings: 2, sp: 'star', sc: '#ffffff', rainbow: 1 }
+};
+/* EVERY FRAME IS A PAINTING NOW: [glow, effect]. The file is fm/<id>.webp, and
+   the ids are the ones the rings had, so what anybody wore became its painted
+   twin. Two effects, one a family: embers rise off the forged ones, the wyrms glint. */
+var RK_ART = { ring: ['#ff7a1a', 'f'], neon: ['#3dff5a', 'v'], orbit: ['#2f8bff', 'l'], ember: ['#ff2a1a', 'f'], glitch: ['#9a4dff', 'l'], blossom: ['#ff4dd8', 's'], celestial: ['#ffc21a', 'f'], prestige: ['#e8ecf6', 'l'],
+  sparkle: ['#8fb4ff', 's'], halo: ['#ffb45a', 'f'], frost: ['#6dffb0', 'v'], aurora: ['#ff7ad0', 's'], prism: ['#b58cff', 'l'], angel: ['#e8ecf6', 's'], sovereign: ['#9aa3b8', 'l'] };
+/* THE EFFECT MATCHES THE COLOUR: f flames that burn slowly off the top, v
+   venom that gathers and drips, l lightning that walks the rim, s glints.
+   All of it is a handful of elements over the painting, never a canvas. */
+function lfArtFx(im, fx) {
+  function at(a, r) { var t = a * Math.PI / 180; return [90 + r * Math.sin(t), 90 - r * Math.cos(t)]; }
+  function dot(cls, a, r, i) { var e = document.createElement('i'), q = at(a, r); e.className = cls; e.style.left = q[0] + 'px'; e.style.top = q[1] + 'px'; e.style.setProperty('--i', i); im.appendChild(e); return e; }
+  var i;
+  if (fx === 'f') { for (i = 0; i < 9; i++) dot('fx-fl', -100 + i * 25, 70 + (i % 2) * 5, i); for (i = 0; i < 4; i++) dot('fx-em', -60 + i * 40, 80, i); }
+  else if (fx === 'v') { for (i = 0; i < 6; i++) dot('fx-dr', 105 + i * 30, 76, i); for (i = 0; i < 3; i++) dot('fx-gl', -70 + i * 70, 78, i); }
+  else if (fx === 's') { for (i = 0; i < 7; i++) dot('fx-gl', i * 51 + 20, 78, i); }
+  else if (fx === 'l') {
+    var NS = 'http://www.w3.org/2000/svg', sv = document.createElementNS(NS, 'svg'); sv.setAttribute('viewBox', '0 0 180 180'); sv.setAttribute('class', 'fx-zp');
+    for (i = 0; i < 3; i++) (function (i) {
+      var pa = document.createElementNS(NS, 'path'); pa.style.setProperty('--i', i);
+      function strike() { var a0 = Math.random() * 360, d = '', k, q; for (k = 0; k <= 9; k++) { q = at(a0 + k * 7, 76 + (k % 9 ? (Math.random() - .5) * 15 : 0)); d += (k ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1); } pa.setAttribute('d', d); }
+      strike(); pa.addEventListener('animationiteration', strike); sv.appendChild(pa);
+    })(i);
+    im.appendChild(sv);
+  }
+}
+// Off until real artwork replaces the procedural build: it was judged cheap beside the reference frames.
+var LF_ORN_ON = false;
+LF_ORN_ON && Object.keys(RK_ORN).forEach(function (k) {
+  var o = RK_ORN[k], at = RK.fm.map(function (x) { return x[0]; }).indexOf('prestige');
+  RK.fm.splice(at < 0 ? RK.fm.length : at, 0, [k, o.n, o.own ? 'One of one' : o.r ? o.rq : o.w + ' workouts', function (c) { return o.own ? c.own : o.r ? c.run >= o.r : c.wo >= o.w; }]);
+});
 var lfEmLive = null;
-var RK_EMB = ['prestige', 'sovereign', 'blossom', 'angel', 'celestial'];
+var RK_EMB = ['prestige', 'sovereign', 'blossom', 'angel', 'celestial'].concat(Object.keys(RK_ORN));
 function lfEmStop() { if (lfEmLive) { var q = lfEmLive; lfEmLive = null; q(); } }
 var LF_LAVA_V = 'varying vec3 vP; void main() { vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
 var LF_LAVA_F = 'precision highp float; uniform float t; uniform vec3 c; uniform float k; varying vec3 vP;'
@@ -4666,6 +4808,17 @@ var LF_LAVA_F = 'precision highp float; uniform float t; uniform vec3 c; uniform
   + 'float ridge = pow(1.0 - abs(w * 2.0 - 1.0), 5.0); float core = smoothstep(0.7, 0.98, ridge); float crust = smoothstep(0.35, 0.6, q);'
   + 'vec3 hot = c * 1.25 + vec3(1.0, 0.85, 0.6) * core * 0.7; vec3 col = mix(c * 0.03, hot, smoothstep(0.15, 0.85, ridge)) * (0.5 + 0.8 * (1.0 - crust)) + core * vec3(1.0, 0.92, 0.75) * 0.45;'
   + 'gl_FragColor = vec4(col, 1.0); }';
+var LF_UV_V = 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }';
+var LF_FIRE_F = 'precision highp float; uniform float t; uniform vec3 c; uniform float s; varying vec2 vUv;'
+  + 'float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }'
+  + 'float n(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }'
+  + 'void main() { float x = vUv.x - 0.5, y = vUv.y; float w = 0.62 * (1.0 - y * 0.85) * (0.6 + 0.4 * n(vec2(y * 3.0 - t * 1.4, s)));'
+  + 'float shape = smoothstep(w, w * 0.2, abs(x)); float f = n(vec2(x * 4.0 + s, y * 3.2 - t * 2.4)) * 0.6 + n(vec2(x * 8.0, y * 6.0 - t * 3.6 + s)) * 0.4;'
+  + 'float fl = shape * smoothstep(0.1, 0.7, f + (1.0 - y) * 0.7 - 0.25); fl *= smoothstep(1.0, 0.55, y);'
+  + 'vec3 col = mix(c * 1.05, c * 0.6 + vec3(1.0, 0.85, 0.5) * 0.55, smoothstep(0.55, 1.0, fl) * (1.0 - y * 0.7)); gl_FragColor = vec4(col * fl * 1.25, fl * 0.85); }';
+var LF_GRAD_F = 'precision highp float; uniform float t; uniform vec3 c1; uniform vec3 c2; uniform float rb; varying vec3 vP;'
+  + 'void main() { float a = atan(vP.y, vP.x); float m = 0.5 + 0.5 * sin(a * 2.0 + t * 1.2); vec3 col = mix(c1, c2, m);'
+  + 'if (rb > 0.5) col = 0.55 + 0.45 * cos(6.28318 * (a / 6.28318 + t * 0.08 + vec3(0.0, 0.33, 0.67))); gl_FragColor = vec4(col * 1.2, 1.0); }';
 var LF_SOFT_F = 'precision highp float; uniform float t; uniform vec3 c; uniform float k; varying vec3 vP;'
   + 'float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }'
   + 'float n(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(h(i), h(i + vec2(1.0, 0.0)), f.x), mix(h(i + vec2(0.0, 1.0)), h(i + vec2(1.0, 1.0)), f.x), f.y); }'
@@ -4712,7 +4865,7 @@ function lfEmblem3(kind, colStr) {
       grp.add(g);
     }
     var plateFront = .08, anim = [], pearl, gold, rose;
-    var SOFT = kind === 'angel' || kind === 'blossom' || kind === 'celestial';
+    var SOFT = kind === 'angel' || kind === 'blossom' || kind === 'celestial', ORN = RK_ORN[kind] && (function (o0) { var o = {}, hx = '#' + ac.getHexString(); for (var k in o0) o[k] = o0[k] === 'acc' ? hx : o0[k]; return o; })(RK_ORN[kind]);
     if (SOFT) {
       pearl = new T.MeshPhysicalMaterial({ color: 0xf4eee6, metalness: .3, roughness: .26, clearcoat: 1, clearcoatRoughness: .08, envMapIntensity: 1.1 });
       gold = new T.MeshPhysicalMaterial({ color: 0xe9c875, metalness: 1, roughness: .22, envMapIntensity: 1.2 });
@@ -4720,7 +4873,142 @@ function lfEmblem3(kind, colStr) {
     }
     var leaf = function (L, w) { var sh = new T.Shape(); sh.moveTo(0, 0); sh.quadraticCurveTo(L * .5, w, L, 0); sh.quadraticCurveTo(L * .5, -w * .55, 0, 0); return sh; };
     var starS = function (R, q) { var sh = new T.Shape(); for (var i = 0; i < 10; i++) { var a = (-90 + i * 36) * D, rr = i % 2 ? q : R; if (i) sh.lineTo(rr * Math.cos(a), -rr * Math.sin(a)); else sh.moveTo(rr * Math.cos(a), -rr * Math.sin(a)); } sh.closePath(); return sh; };
-    if (kind === 'angel') {
+    if (ORN) {
+      var gcol = new T.Color(ORN.gl), gv = new T.Vector3(gcol.r, gcol.g, gcol.b), gnc = new T.Color(ORN.gc);
+      var shade = function (k, F) { return new T.ShaderMaterial({ uniforms: { t: uni.t, c: { value: gv }, k: { value: k } }, vertexShader: LF_LAVA_V, fragmentShader: F, side: T.DoubleSide }); };
+      var metal = new T.MeshPhysicalMaterial({ color: ORN.m, metalness: 1, roughness: ORN.mr || .3, envMapIntensity: .72 });
+      var gemM = new T.MeshPhysicalMaterial({ color: ORN.gc, metalness: .1, roughness: .05, clearcoat: 1, emissive: ORN.gc, emissiveIntensity: .8, envMapIntensity: 1.1 });
+      var pearlM = new T.MeshPhysicalMaterial({ color: ORN.lc || 0xf4eee6, metalness: .35, roughness: .3, clearcoat: .6, clearcoatRoughness: .12, envMapIntensity: .6 });
+      var leafM = ORN.leaf === 'flame' ? shade(5, LF_LAVA_F) : ORN.leaf === 'crystal' ? new T.MeshPhysicalMaterial({ color: ORN.lc, metalness: .3, roughness: .14, clearcoat: .5, emissive: ORN.lc, emissiveIntensity: .3, envMapIntensity: .5 })
+        : ORN.leaf === 'feather' || ORN.leaf === 'petal' ? pearlM : ORN.lc ? new T.MeshPhysicalMaterial({ color: ORN.lc, metalness: .55, roughness: .3, envMapIntensity: 1.2 }) : metal;
+      var wingM = ORN.leaf === 'flame' ? leafM : ORN.leaf === 'feather' ? pearlM : metal;
+      /* the aura, behind everything, in the frame's own light */
+      var ac2 = document.createElement('canvas'); ac2.width = ac2.height = 256; var ax = ac2.getContext('2d'), ag = ax.createRadialGradient(128, 128, 30, 128, 128, 128), rgb = [gcol.r, gcol.g, gcol.b].map(function (v) { return Math.round(v * 255); }).join(',');
+      ag.addColorStop(0, 'rgba(' + rgb + ',.55)'); ag.addColorStop(.6, 'rgba(' + rgb + ',.16)'); ag.addColorStop(1, 'rgba(' + rgb + ',0)'); ax.fillStyle = ag; ax.fillRect(0, 0, 256, 256);
+      var aura = new T.Mesh(new T.PlaneGeometry(3.4, 3.4), new T.MeshBasicMaterial({ map: new T.CanvasTexture(ac2), transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); aura.position.z = -.3; grp.add(aura);
+      anim.push(function (t) { aura.material.opacity = .7 + Math.sin(t * 1.3) * .25; });
+      /* wings, behind the wreath */
+      if (ORN.wings) [-1, 1].forEach(function (sd) {
+        var wg = new T.Group(); wg.position.set(sd * .5, .02, -.05); wg.scale.x = sd;
+        for (var f = 0; f < 6; f++) { var L = (ORN.wings === 1 ? .78 : .5) - f * .055, m = new T.Mesh(ext(leaf(L, L * .22), .02, .008), wingM); m.rotation.z = (38 - f * 13) * D; m.position.z = f * .004; wg.add(m);
+          var m2 = new T.Mesh(ext(leaf(L * 1.16, L * .26), .018, .006), ORN.trim || ORN.leaf === 'feather' ? metal : wingM); m2.rotation.z = (46 - f * 13) * D; m2.position.z = -.03 - f * .003; wg.add(m2);
+          if (ORN.leaf === 'feather' || ORN.trim) { var ed = new T.Mesh(ext(leaf(L * .98, L * .02), .01, .004), metal); ed.rotation.z = (38 - f * 13) * D; ed.position.z = f * .004 + .02; wg.add(ed); } }
+        grp.add(wg); anim.push(function (t) { wg.rotation.z = sd * Math.sin(t * 1.2) * .03; });
+      });
+      /* the wreath: two rows of leaves climbing each side of the ring */
+      var nl = ORN.wings === 1 ? 12 : 14;
+      [-1, 1].forEach(function (sd) { [0, 1].forEach(function (row) { for (var i = 0; i < nl; i++) {
+        var tt = i / (nl - 1), th = (-98 + tt * (row ? 150 : 162)) * D, Lf = (row ? .3 : .4) * (1 - tt * .22), Rr = row ? .6 : .68;
+        var lm = new T.Mesh(ext(leaf(Lf, Lf * .38), .025, .01), leafM);
+        if (ORN.lc && ORN.leaf !== 'flame') {
+          /* enamel leaves are set in gold: an edge behind, a rib along the middle */
+          var tr = new T.Mesh(ext(leaf(Lf * 1.08, Lf * .46), .02, .006), metal); tr.position.z = -.012; lm.add(tr);
+          var rb = new T.Mesh(ext(leaf(Lf * .92, Lf * .03), .012, .004), metal); rb.position.z = .028; lm.add(rb);
+        }
+        lm.position.set(sd * Rr * Math.cos(th), Rr * Math.sin(th), row ? .05 : .025);
+        var base = (sd > 0 ? th + Math.PI / 2 : Math.PI - (th + Math.PI / 2)) + (row ? -.55 : .5) * sd; lm.rotation.z = base; grp.add(lm);
+        var ph = i * .55 + (row ? 1.3 : 0) + sd;
+        anim.push(function (t) { lm.rotation.z = base + Math.sin(t * 1.5 + ph) * .035; });
+      } }); });
+      /* the ring and its studs */
+            var rg3 = new T.Mesh(new T.TorusGeometry(.485, .01, 8, 120), gemM); rg3.position.z = .1; grp.add(rg3);
+/* the band: a thick ring with a scalloped outer edge, like a bezel, with the jewels set into it */
+      var bs = new T.Shape(), BN = 240; for (var bi = 0; bi <= BN; bi++) { var bt = bi / BN * Math.PI * 2, br = .635 + .02 * Math.cos(bt * 24); if (bi) bs.lineTo(br * Math.cos(bt), br * Math.sin(bt)); else bs.moveTo(br * Math.cos(bt), br * Math.sin(bt)); }
+      var hp = []; for (var hi3 = 0; hi3 < 96; hi3++) { var hq = -hi3 / 96 * Math.PI * 2; hp.push(new T.Vector2(.5 * Math.cos(hq), .5 * Math.sin(hq))); } bs.holes.push(new T.Path(hp));
+      var bandM = new T.Mesh(new T.ExtrudeGeometry(bs, { depth: .05, bevelEnabled: true, bevelThickness: .018, bevelSize: .012, bevelSegments: 3, curveSegments: 1 }), metal); bandM.position.z = .055; grp.add(bandM);
+      var bandIn = new T.Mesh(new T.TorusGeometry(.51, .012, 8, 120), metal); bandIn.position.z = .13; grp.add(bandIn);
+      var studs = []; for (var q = 0; q < 8; q++) { var sa = (q * 45 + 22.5) * D, st2 = new T.Mesh(new T.SphereGeometry(.05, 18, 18), gemM); st2.scale.z = .6; st2.position.set(.575 * Math.cos(sa), .575 * Math.sin(sa), .135); grp.add(st2); studs.push(st2); }
+      for (var sp2 = 0; sp2 < 16; sp2++) { var spa = (sp2 * 22.5 + 11.25) * D, spk2 = new T.Mesh(new T.ConeGeometry(.026, .09, 8), metal); spk2.position.set(.665 * Math.cos(spa), .665 * Math.sin(spa), .08); spk2.rotation.z = spa - Math.PI / 2; grp.add(spk2); }
+      var flow = new T.Mesh(new T.TorusGeometry(.655, .008, 8, 140), shade(5, LF_SOFT_F)); flow.position.z = .1; grp.add(flow);
+      for (var pe = 0; pe < 48; pe++) { var pa = pe * 7.5 * D, pb = new T.Mesh(new T.SphereGeometry(.013, 10, 10), pearlM); pb.position.set(.505 * Math.cos(pa), .505 * Math.sin(pa), .14); grp.add(pb); }
+      for (var bz = 0; bz < 8; bz++) { var za = (bz * 45 + 22.5) * D, bzl = new T.Mesh(new T.TorusGeometry(.055, .011, 8, 24), metal); bzl.position.set(.575 * Math.cos(za), .575 * Math.sin(za), .14); grp.add(bzl); }
+      /* the crest */
+      var cz = .06;
+      if (ORN.crest === 'crown') {
+        var cs = new T.Shape(); [[-.2, 0], [.2, 0], [.2, .18], [.1, .12], [0, .27], [-.1, .12], [-.2, .18]].forEach(function (q2, i2) { if (i2) cs.lineTo(q2[0], q2[1]); else cs.moveTo(q2[0], q2[1]); }); cs.closePath();
+        var cm = new T.Mesh(ext(cs, .05, .014), metal); cm.scale.setScalar(1.45); cm.position.set(0, .62, cz); grp.add(cm);
+        [[-.2, .18], [0, .27], [.2, .18]].forEach(function (q2) { var g2 = new T.Mesh(new T.SphereGeometry(.045, 16, 16), gemM); g2.position.set(q2[0] * 1.45, .62 + q2[1] * 1.45 + .03, cz + .04); grp.add(g2); });
+        var cg = new T.Mesh(new T.OctahedronGeometry(1, 0), gemM); cg.scale.set(.07, .1, .05); cg.position.set(0, .7, cz + .06); grp.add(cg);
+        [-1, 1].forEach(function (sd) { var sj = new T.Mesh(new T.OctahedronGeometry(1, 0), gemM); sj.scale.set(.04, .06, .03); sj.position.set(sd * .16, .74, cz + .05); grp.add(sj); var ar = new T.Mesh(new T.TorusGeometry(.2, .012, 8, 40, Math.PI * .5), metal); ar.position.set(0, .64, cz + .02); ar.rotation.z = sd > 0 ? Math.PI * .25 - .2 : Math.PI * .75 - .2; grp.add(ar); });
+        anim.push(function (t) { cg.rotation.y = t * 1.2; });
+      } else if (ORN.crest === 'gem') {
+        var gm2 = new T.Mesh(new T.OctahedronGeometry(1, 0), gemM); gm2.scale.set(.15, .24, .1); gm2.position.set(0, .78, cz + .05); grp.add(gm2);
+        [-1, 1].forEach(function (sd) { var cl = new T.Mesh(ext(leaf(.22, .06), .02, .006), metal); cl.position.set(sd * .06, .68, cz); cl.rotation.z = sd > 0 ? 1.0 : Math.PI - 1.0; grp.add(cl); });
+        var hl = new T.Mesh(new T.TorusGeometry(.17, .008, 8, 64), shade(4, LF_SOFT_F)); hl.position.set(0, .78, cz + .02); grp.add(hl);
+        anim.push(function (t) { gm2.rotation.y = t * 1.1; hl.rotation.z = t * .5; });
+      } else if (ORN.crest === 'star') {
+        var sm2 = new T.Mesh(ext(starS(.27, .12), .05, .014), metal); sm2.position.set(0, .8, cz); grp.add(sm2);
+        var sg = new T.Mesh(new T.SphereGeometry(.065, 16, 16), gemM); sg.position.set(0, .8, cz + .07); grp.add(sg);
+        anim.push(function (t) { var k5 = 1 + Math.sin(t * 2) * .06; sm2.scale.set(k5, k5, 1); sm2.rotation.z = Math.sin(t * .7) * .1; });
+      } else if (ORN.crest === 'flame') {
+        var fl = [], fm2 = shade(5, LF_LAVA_F);
+        [[0, .5, 90], [-.12, .36, 106], [.12, .36, 74], [-.22, .26, 120], [.22, .26, 60]].forEach(function (q2) { var f2 = new T.Mesh(ext(leaf(q2[1], q2[1] * .26), .02, .006), fm2); f2.position.set(q2[0], .6, cz); f2.rotation.z = q2[2] * D; grp.add(f2); fl.push(f2); });
+        anim.push(function (t) { fl.forEach(function (f2, i3) { f2.scale.x = 1 + Math.sin(t * 5 + i3 * 1.7) * .06; f2.scale.y = 1 + Math.sin(t * 6.3 + i3) * .08; }); });
+      } else if (ORN.crest === 'eye') {
+        /* the Creator's mark, small and set at the top: a hexagon of glass in a chrome rim, round an eye with a star in it */
+        var eg = new T.Group(); eg.position.set(0, .88, cz); eg.scale.setScalar(.3); grp.add(eg);
+        var hx = function (R) { var sh = new T.Shape(); for (var hi2 = 0; hi2 < 6; hi2++) { var ha = (90 + hi2 * 60) * D; if (hi2) sh.lineTo(R * Math.cos(ha), R * Math.sin(ha)); else sh.moveTo(R * Math.cos(ha), R * Math.sin(ha)); } sh.closePath(); return sh; };
+        var hr = hx(1); hr.holes.push(new T.Path(hx(.88).getPoints().reverse()));
+        eg.add(new T.Mesh(ext(hr, .12, .04), metal));
+        var glM = new T.MeshPhysicalMaterial({ color: new T.Color(ORN.gc).multiplyScalar(.7), metalness: 0, roughness: .14, clearcoat: .6, emissive: ORN.gc, emissiveIntensity: .75, envMapIntensity: .22 });
+        var gp = new T.Mesh(ext(hx(.9), .08, .04), glM); gp.position.z = -.02; eg.add(gp);
+        var ey = new T.Shape(); ey.moveTo(-.66, 0); ey.bezierCurveTo(-.4, .31, .28, .43, .7, 0); ey.bezierCurveTo(.3, -.41, -.35, -.41, -.66, 0);
+        var em3 = new T.Mesh(ext(ey, .06, .03), metal); em3.position.z = .08; eg.add(em3);
+        var ir = new T.Mesh(new T.SphereGeometry(.3, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), glM); ir.rotation.x = Math.PI / 2; ir.scale.set(1, .3, 1); ir.position.z = .14; eg.add(ir);
+        var sx = new T.Shape(); for (var si = 0; si < 8; si++) { var sa2 = (90 + si * 45) * D, sr = si % 2 ? .05 : .19; if (si) sx.lineTo(sr * Math.cos(sa2), sr * Math.sin(sa2)); else sx.moveTo(sr * Math.cos(sa2), sr * Math.sin(sa2)); } sx.closePath();
+        var smx = new T.Mesh(ext(sx, .04, .012), metal); smx.position.z = .2; eg.add(smx);
+        anim.push(function (t) { glM.emissiveIntensity = .7 + Math.sin(t * 1.7) * .2; smx.scale.setScalar(1 + Math.sin(t * 2.1) * .08); eg.rotation.y = Math.sin(t * .6) * .25; });
+      } else if (ORN.crest === 'rays') {
+        var rays = new T.Group(); grp.add(rays);
+        for (var r2 = 0; r2 < 24; r2++) { var lng = r2 % 2 === 0, ra = r2 * 15 * D, rm = new T.Mesh(ext(leaf(lng ? .34 : .2, .035), .02, .006), r2 % 4 === 0 ? gemM : metal); rm.position.set(.72 * Math.cos(ra), .72 * Math.sin(ra), -.02); rm.rotation.z = ra; rays.add(rm); }
+        anim.push(function (t) { rays.rotation.z = t * .06; rays.scale.setScalar(1 + Math.sin(t * 1.2) * .02); });
+      }
+      /* FIRE coming off the frame: tongues of flame all round the outer edge, each its own, none the same */
+      var addFire = function () {
+        var N = 24, cards = [];
+        for (var fi = 0; fi < N; fi++) {
+          var fa = fi / N * Math.PI * 2, fg = new T.PlaneGeometry(.3, .4); fg.translate(0, .2, 0);
+          var fmat = new T.ShaderMaterial({ uniforms: { t: uni.t, c: { value: gv }, s: { value: fi * 1.7 } }, vertexShader: LF_UV_V, fragmentShader: LF_FIRE_F, transparent: true, blending: T.AdditiveBlending, depthWrite: false, side: T.DoubleSide });
+          var fm3 = new T.Mesh(fg, fmat); fm3.position.set(.7 * Math.cos(fa), .7 * Math.sin(fa), .02); fm3.rotation.z = fa - Math.PI / 2; fm3.renderOrder = 3; grp.add(fm3); cards.push([fm3, fi]);
+        }
+        anim.push(function (t) { cards.forEach(function (q) { var k = 1 + Math.sin(t * 5.3 + q[1] * 1.9) * .18 + Math.sin(t * 8.1 + q[1]) * .1; q[0].scale.set(1, k * (q[1] % 3 === 0 ? 1.25 : 1), 1); }); });
+      };
+      /* LIGHTNING crackling round it: arcs that strike somewhere new every beat, jagged, and gone */
+      var addBolt = function () {
+        var arcs = [], bc = new T.Color(ORN.sc), blight = new T.PointLight(bc, 0, 3); sc.add(blight);
+        for (var bi2 = 0; bi2 < 6; bi2++) {
+          var bg = new T.BufferGeometry(), bp = new Float32Array(15 * 3); bg.setAttribute('position', new T.BufferAttribute(bp, 3));
+          var bl = new T.Line(bg, new T.LineBasicMaterial({ color: bc, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false }));
+          var bn = new T.Points(bg, new T.PointsMaterial({ size: .075, color: 0xffffff, transparent: true, opacity: 0, blending: T.AdditiveBlending, depthWrite: false }));
+          bl.renderOrder = 4; bn.renderOrder = 4; grp.add(bl); grp.add(bn); arcs.push({ bl: bl, bn: bn, bp: bp, bg: bg, next: bi2 * .35, born: -9, last: -9, a0: 0, span: 1, r0: .85 });
+        }
+        anim.push(function (t) {
+          var peak = 0;
+          arcs.forEach(function (a) {
+            if (t > a.next) { a.born = t; a.a0 = Math.random() * 6.283; a.span = .6 + Math.random() * 1; a.r0 = .8 + Math.random() * .12; a.next = t + .5 + Math.random() * 1.3; a.last = -9; }
+            var age = t - a.born;
+            if (age < .26) {
+              if (t - a.last > .055) { a.last = t; for (var k = 0; k < 15; k++) { var u = k / 14, an = a.a0 + u * a.span, rr = a.r0 + (Math.random() - .5) * .11 + Math.sin(u * Math.PI) * .1; a.bp[k * 3] = rr * Math.cos(an); a.bp[k * 3 + 1] = rr * Math.sin(an); a.bp[k * 3 + 2] = .16; } a.bg.attributes.position.needsUpdate = true; }
+              var o = (1 - age / .26) * (.75 + Math.random() * .25); a.bl.material.opacity = o; a.bn.material.opacity = o; peak = Math.max(peak, o);
+            } else { a.bl.material.opacity = 0; a.bn.material.opacity = 0; }
+          });
+          blight.intensity = peak * 3; blight.position.set(Math.cos(t * 3) * .8, Math.sin(t * 3) * .8, .6);
+        });
+      };
+      /* a GRADIENT sweeping round the rim, two colours (or all of them) running the whole way */
+      var addGrad = function () {
+        var g1 = new T.Color(ORN.g ? ORN.g[0] : ORN.gl), g2 = new T.Color(ORN.g ? ORN.g[1] : ORN.gc);
+        var gm = new T.ShaderMaterial({ uniforms: { t: uni.t, c1: { value: new T.Vector3(g1.r, g1.g, g1.b) }, c2: { value: new T.Vector3(g2.r, g2.g, g2.b) }, rb: { value: ORN.rainbow ? 1 : 0 } }, vertexShader: LF_LAVA_V, fragmentShader: LF_GRAD_F });
+        var g3 = new T.Mesh(new T.TorusGeometry(.66, .02, 10, 160), gm); g3.position.z = .115; grp.add(g3);
+        var g4 = new T.Mesh(new T.TorusGeometry(.51, .016, 10, 160), gm); g4.position.z = .125; grp.add(g4);
+      };
+      (ORN.fx || []).forEach(function (k) { if (k === 'fire') addFire(); else if (k === 'bolt') addBolt(); else if (k === 'grad') addGrad(); });
+      anim.push(function (t) { gemM.emissiveIntensity = .55 + Math.sin(t * 2.2) * .3; studs.forEach(function (s3, i4) { s3.scale.setScalar(1 + Math.sin(t * 2.2 + i4) * .12); }); flow.rotation.z = t * .2; });
+      if (ORN.rainbow) anim.push(function (t) { var cc = new T.Color().setHSL((t * .06) % 1, .75, .62); leafM.color.copy(cc); leafM.emissive.copy(cc); gemM.color.copy(cc); gemM.emissive.copy(cc); });
+      /* a bright glint that runs across the metal every few seconds */
+      var sw = new T.PointLight(0xffffff, 0, 3.2); sc.add(sw);
+      anim.push(function (t) { var ph = (t % 4.2) / 4.2; sw.position.set(-1.3 + ph * 2.6, .5 - ph * .6, .9); sw.intensity = Math.sin(Math.PI * ph) * 2.6; });
+    } else if (kind === 'angel') {
       [-1, 1].forEach(function (sd) {
         var wg = new T.Group(); wg.position.set(sd * .5, .04, -.03); wg.scale.x = sd;
         for (var f = 0; f < 7; f++) { var L = .95 - f * .08, ang = (52 - f * 13) * D, g = ext(leaf(L, .16 - f * .006), .02, .008); var m = new T.Mesh(g, f % 2 ? pearl : pearl); m.rotation.z = ang; m.position.z = f * .004; wg.add(m);
@@ -4755,39 +5043,53 @@ function lfEmblem3(kind, colStr) {
       var ringM = new T.Mesh(new T.TorusGeometry(.52, .07, 28, 120), kind === 'blossom' ? rose : kind === 'celestial' ? pearl : pearl); ringM.position.z = .06; grp.add(ringM);
       var chM = new T.Mesh(new T.TorusGeometry(.52, .026, 14, 120), soft(5)); chM.position.z = .118; grp.add(chM);
     }
-    if (SOFT) {}
-    else if (kind === 'prestige') {
-      barbell(60); barbell(-60);
-      var pl = ext(star(1, .58), .1, .03); pl.translate(0, 0, -.05); add(pl, iron);
-      add(new T.ShapeGeometry(star(.84, .49)), lava(3.4), 0, 0, plateFront + .002);
-      var fs = star(.97, .565); var hole = star(.84, .49); fs.holes.push(new T.Path(hole.getPoints().reverse()));
-      var fr = ext(fs, .03, .012); add(fr, iron2, 0, 0, plateFront - .02);
-      for (var k = 0; k < 6; k++) { var a = (-90 + k * 60) * D; add(new T.SphereGeometry(.03, 12, 12), lava(4), .98 * Math.cos(a), -.98 * Math.sin(a), plateFront + .02); }
-    } else {
-      var pl2 = ext(spade(1), .1, .03); pl2.translate(0, 0, -.05); add(pl2, iron);
-      add(new T.ShapeGeometry(spade(.86)), lava(3.2), 0, .02, plateFront + .002);
-      var fs2 = spade(.98), hl = spade(.86); fs2.holes.push(new T.Path(hl.getPoints().reverse()));
-      add(ext(fs2, .03, .012), iron2, 0, 0, plateFront - .02);
-      var arch = new T.QuadraticBezierCurve3(new T.Vector3(-1.02, .3, .09), new T.Vector3(0, 1.38, .09), new T.Vector3(1.02, .26, .09));
-      add(new T.TubeGeometry(arch, 48, .036, 12, false), chrome);
-      add(new T.TubeGeometry(arch, 48, .014, 8, false), lava(6), 0, 0, .03);
-      [-1, 1].forEach(function (sd) { var e = new T.Mesh(new T.CylinderGeometry(.13, .13, .08, 32), iron2); e.position.set(sd * 1.02, sd < 0 ? .3 : .26, .09); e.rotation.x = Math.PI / 2; e.rotation.z = sd * .5; grp.add(e);
-        var er = new T.Mesh(new T.TorusGeometry(.13, .012, 8, 32), lava(5)); er.position.copy(e.position); er.position.z += .04; er.rotation.z = sd * .5; grp.add(er); });
-      var disc = new T.Mesh(new T.CylinderGeometry(.28, .28, .09, 48), iron2); disc.position.set(.66, -.52, .16); disc.rotation.x = Math.PI / 2; grp.add(disc);
-      add(new T.CircleGeometry(.2, 40), lava(7), .66, -.52, .215);
+    if (SOFT || ORN) {}
+    else {
+      /* NEW MATERIAL: oil-slick. The colour moves with the angle you see it at and with time, tinted by your accent, so it is never one colour. */
+      var irid = function () {
+        return new T.ShaderMaterial({ uniforms: { t: uni.t, c: uni.c }, side: T.DoubleSide,
+          vertexShader: 'varying vec3 vN; varying vec3 vV; varying vec3 vP; void main() { vec4 mv = modelViewMatrix * vec4(position, 1.0); vN = normalize(normalMatrix * normal); vV = normalize(-mv.xyz); vP = position; gl_Position = projectionMatrix * mv; }',
+          fragmentShader: 'precision highp float; uniform float t; uniform vec3 c; varying vec3 vN; varying vec3 vV; varying vec3 vP; void main() { vec3 n = normalize(vN); float f = 1.0 - abs(dot(n, normalize(vV))); float h = f * 1.7 + vP.y * 0.7 + vP.x * 0.4 + t * 0.07; vec3 col = 0.52 + 0.48 * cos(6.28318 * (h + vec3(0.0, 0.33, 0.67))); col = mix(col, c * 1.15 + vec3(0.1), 0.34); float spec = pow(max(dot(n, normalize(vec3(-0.4, 0.6, 0.7))), 0.0), 22.0); col = col * (0.3 + 0.95 * f) + vec3(spec) * 0.9 + c * 0.08; gl_FragColor = vec4(col, 1.0); }' });
+      };
+      var oil = irid();
+      if (kind === 'prestige') {
+        /* THE ARMILLARY: three gyroscopic rings, each tilted on its own axis and turning at its own speed, with engraved ticks and a crystal riding each */
+        [[.74, 1.05, .15, .5, .016], [.9, 1.25, -.12, -.36, .013], [.62, .72, .2, .66, .02]].forEach(function (q, qi) {
+          var tilt = new T.Group(), spin = new T.Group(); tilt.add(spin); grp.add(tilt);
+          var rm = new T.Mesh(new T.TorusGeometry(q[0], q[4], 12, 160), qi === 1 ? chrome : iron2); spin.add(rm);
+          for (var i = 0; i < 60; i++) { var ta = i * 6 * D, big = i % 5 === 0, tk = new T.Mesh(new T.BoxGeometry(big ? .012 : .007, big ? .06 : .035, .012), gold || (gold = new T.MeshPhysicalMaterial({ color: 0xe9c875, metalness: 1, roughness: .22, envMapIntensity: 1.2 })));
+            tk.position.set(q[0] * Math.cos(ta), q[0] * Math.sin(ta), 0); tk.rotation.z = ta; spin.add(tk); }
+          var gem = new T.Mesh(new T.OctahedronGeometry(1, 0), oil); gem.scale.set(.05, .1, .05); gem.position.set(q[0], 0, 0); spin.add(gem);
+          var orb = new T.Mesh(new T.SphereGeometry(.03, 14, 14), oil); orb.position.set(-q[0], 0, 0); spin.add(orb);
+          tilt.rotation.x = q[1];
+          anim.push(function (t) { spin.rotation.z = t * q[3]; tilt.rotation.y = q[2] * t + qi; gem.rotation.y = t * 1.4; });
+        });
+        var shards = new T.Group(); grp.add(shards);
+        for (var sI = 0; sI < 8; sI++) { var sa = sI * 45 * D, sh2 = new T.Mesh(new T.OctahedronGeometry(1, 0), oil); sh2.scale.set(.045, .19, .045); sh2.position.set(1.02 * Math.cos(sa), 1.02 * Math.sin(sa), .02); sh2.rotation.z = sa - Math.PI / 2; shards.add(sh2); }
+        anim.push(function (t) { shards.rotation.z = t * .16; for (var q2 = 0; q2 < shards.children.length; q2++) shards.children[q2].scale.y = .19 * (1 + Math.sin(t * 1.6 + q2) * .12); });
+      } else {
+        /* THE CROWN OF BLADES: long and short crystal blades fanning from the ring, over dark metal ones, breathing */
+        var back = new T.Group(), front = new T.Group(); grp.add(back); grp.add(front); back.position.z = -.03; front.position.z = .02;
+        for (var bI = 0; bI < 24; bI++) {
+          var long = bI % 2 === 0, L = long ? .5 : .3, ba = bI * 15 * D, r0 = .6 + L / 2;
+          var bl = new T.Mesh(new T.OctahedronGeometry(1, 0), oil); bl.scale.set(long ? .06 : .045, L / 2, .022); bl.position.set(r0 * Math.cos(ba), r0 * Math.sin(ba), 0); bl.rotation.z = ba - Math.PI / 2; front.add(bl);
+          var bk = new T.Mesh(new T.OctahedronGeometry(1, 0), iron2); bk.scale.set(long ? .085 : .062, L / 2 * 1.1, .02); bk.position.set((r0 + .02) * Math.cos(ba), (r0 + .02) * Math.sin(ba), 0); bk.rotation.z = ba - Math.PI / 2; back.add(bk);
+        }
+        anim.push(function (t) { for (var q3 = 0; q3 < front.children.length; q3++) { var k4 = 1 + Math.sin(t * 1.3 + q3 * .7) * .045, f4 = front.children[q3], b4 = back.children[q3], L4 = q3 % 2 === 0 ? .5 : .3, r4 = .6 + L4 * k4 / 2, a4 = q3 * 15 * D; f4.scale.y = L4 / 2 * k4; f4.position.set(r4 * Math.cos(a4), r4 * Math.sin(a4), 0); b4.scale.y = L4 / 2 * 1.1 * k4; b4.position.set((r4 + .02) * Math.cos(a4), (r4 + .02) * Math.sin(a4), 0); } front.rotation.z = Math.sin(t * .3) * .02; back.rotation.z = -Math.sin(t * .3) * .02; });
+        var orbit = new T.Mesh(new T.TorusGeometry(1.06, .01, 8, 160), gold || (gold = new T.MeshPhysicalMaterial({ color: 0xe9c875, metalness: 1, roughness: .22, envMapIntensity: 1.2 }))); grp.add(orbit);
+        anim.push(function (t) { orbit.rotation.x = .9 + Math.sin(t * .35) * .25; orbit.rotation.y = t * .2; });
+      }
+      /* the ring that holds the picture: dark metal with a channel of the oil-slick */
+      var rg = new T.Mesh(new T.TorusGeometry(.52, .075, 28, 120), iron2); rg.position.z = .06; grp.add(rg);
+      var rc = new T.Mesh(new T.TorusGeometry(.52, .03, 14, 120), oil); rc.position.z = .12; grp.add(rc);
+      var rk = new T.Mesh(new T.TorusGeometry(.605, .008, 8, 120), chrome); rk.position.z = .06; grp.add(rk);
     }
-    /* the ring that holds the picture, with a channel of lava and a ring of spikes */
-    if (!SOFT) { var ring = new T.Mesh(new T.TorusGeometry(.52, .085, 28, 120), iron2); ring.position.z = .06; grp.add(ring);
-    var chan = new T.Mesh(new T.TorusGeometry(.52, .034, 14, 120), lava(5)); chan.position.z = .125; grp.add(chan); }
-    if (SOFT) {}
-    else if (kind === 'prestige') for (var k2 = 0; k2 < 12; k2++) { var a2 = k2 * 30 * D, sp = new T.Mesh(new T.ConeGeometry(.04, .14, 10), iron2); sp.position.set(.64 * Math.cos(a2), .64 * Math.sin(a2), .07); sp.rotation.z = a2 - Math.PI / 2; grp.add(sp); }
-    else for (var k3 = 0; k3 < 20; k3++) { var a3 = k3 * 18 * D, lk = new T.Mesh(new T.TorusGeometry(.06, .015, 8, 18), chrome); lk.scale.y = .62; lk.position.set(.63 * Math.cos(a3), .63 * Math.sin(a3), .07); lk.rotation.z = a3 + Math.PI / 2; lk.rotation.x = k3 % 2 ? Math.PI / 2 : 0; grp.add(lk); }
-    var glow = new T.PointLight(ac, 1.5, 3.2); glow.position.set(0, 0, .8); sc.add(glow);
+    var glow = new T.PointLight(ORN ? new T.Color(ORN.gl) : ac, 1.5, 3.2); glow.position.set(0, 0, .8); sc.add(glow);
     /* sparks lifting off it */
     var N = 46, pos = new Float32Array(N * 3), sd = []; for (var e = 0; e < N; e++) { sd.push(.25 + Math.random() * .5); pos[e * 3] = (Math.random() - .5) * 1.6; pos[e * 3 + 1] = -1 + Math.random() * 2; pos[e * 3 + 2] = .3 + Math.random() * .3; }
     var pg = new T.BufferGeometry(); pg.setAttribute('position', new T.BufferAttribute(pos, 3));
-    var sparks = new T.Points(pg, new T.PointsMaterial({ size: SOFT ? .035 : .045, color: kind === 'blossom' ? 0xffc6d6 : SOFT ? 0xfff3d0 : ac, transparent: true, opacity: SOFT ? .7 : .85, blending: T.AdditiveBlending, depthWrite: false })); sc.add(sparks);
-    var fall = kind === 'blossom';
+    var sparks = new T.Points(pg, new T.PointsMaterial({ size: SOFT || ORN ? .038 : .045, color: ORN ? new T.Color(ORN.sc) : kind === 'blossom' ? 0xffc6d6 : SOFT ? 0xfff3d0 : ac, transparent: true, opacity: SOFT || ORN ? .75 : .85, blending: T.AdditiveBlending, depthWrite: false })); sc.add(sparks);
+    var fall = kind === 'blossom' || !!(ORN && (ORN.sp === 'snow' || ORN.sp === 'petal'));
     grp.scale.setScalar(.98); sc.add(grp);
     var dead = false, raf = 0, t0 = performance.now(), last = t0;
     function stop() { if (dead) return; dead = true; cancelAnimationFrame(raf); try { bdDrop(grp); sparks.geometry.dispose(); sparks.material.dispose(); grain.dispose(); rd.dispose(); rd.forceContextLoss(); } catch (e) {} }
@@ -4835,10 +5137,14 @@ function lfFlairEl(id) {
 function frDress(b, st) {
   var av = $('.fr-ban-av', b), ti = $('.fr-ti', b);
   av.className = av.className.replace(/ ?is-fm-[a-z0-9]+/g, '');
-  var h = $('.fr-ban-h', b), old = $('.fm-em', h); if (old) old.remove(); $('.fr-ban', b).classList.remove('has-emblem'); av.classList.remove('em-fall');
+  var h = $('.fr-ban-h', b), old = $('.fm-em', h); if (old) old.remove(); $('.fr-ban', b).classList.remove('has-emblem'); $('.fr-ban', b).classList.remove('has-art'); av.classList.remove('em-fall'); av.classList.remove('em-on');
   if (st.fm && lfRkHas('fm', st.fm)) av.classList.add('is-fm-' + st.fm);
-  if (RK_EMB.indexOf(st.fm) >= 0 && lfRkHas('fm', st.fm)) {
-    var ban2 = $('.fr-ban', b); ban2.classList.add('has-emblem');
+  if (RK_ART[st.fm] && lfRkHas('fm', st.fm)) {
+    var ba = $('.fr-ban', b), im = document.createElement('div'); im.className = 'fm-em is-art';
+    im.style.setProperty('--art', 'url(fm/' + st.fm + '.webp)'); im.style.setProperty('--glow', RK_ART[st.fm][0]); im.classList.add('is-fx-' + RK_ART[st.fm][1]); lfArtFx(im, RK_ART[st.fm][1]);
+    ba.classList.add('has-emblem'); ba.classList.add('has-art'); av.classList.add('em-on'); h.insertBefore(im, h.firstChild);
+  } else if (RK_EMB.indexOf(st.fm) >= 0 && lfRkHas('fm', st.fm)) {
+    var ban2 = $('.fr-ban', b); ban2.classList.add('has-emblem'); av.classList.add('em-on');
     var rcol = getComputedStyle(ban2).getPropertyValue('--rc').trim();
     lfEmblem3(st.fm, rcol).then(function (cv) { if (!cv || !h.isConnected) { if (cv) lfEmStop(); if (!cv) { ban2.classList.remove('has-emblem'); av.classList.add('em-fall'); } return; } h.insertBefore(cv, h.firstChild); });
   }
@@ -4870,7 +5176,7 @@ function lfRkPick(kind, onPick) {
       });
       return o;
     }
-    var opts = RK[kind].filter(function (x) { return !(kind === 'fm' && (x[0] === 'prestige' || x[0] === 'sovereign') && !lfOwner()); }).map(function (x) { return { id: x[0], n: x[1], q: x[2], ok: !!x[3](c) }; });
+    var opts = RK[kind].filter(function (x) { return !(kind === 'fm' && (x[0] === 'prestige' || x[0] === 'sovereign' || (RK_ORN[x[0]] && RK_ORN[x[0]].own)) && !lfOwner()); }).map(function (x) { return { id: x[0], n: x[1], q: x[2], ok: !!x[3](c) }; });
     if (kind === 'ti') { var gn = el('<div class="rk-opts"></div>'); gn.appendChild(opt({ id: 'none', n: 'None', q: '', ok: true })); body.appendChild(gn); }
     if (kind !== 'ti') { opts.unshift({ id: '', n: 'None', q: '', ok: true }); var g0 = el('<div class="rk-opts"></div>'); opts.forEach(function (x) { g0.appendChild(opt(x)); }); body.appendChild(g0); return; }
     RK_TC.forEach(function (tc) {
@@ -5555,7 +5861,7 @@ var BD_TIER = { wo50: 2, wo100: 3, st12: 2, st26: 3, v1m: 2, v5m: 3, pr10: 2, pr
      finish   an exotic enamel that breathes in its own light: months
      halo     a finish, and a light turning round it: the longest of all
    The rare ones are quick to win, so they wear a finish and no halo. */
-var BD_FX = { night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon',
+var BD_FX = { slayer: 'inferno', night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', lungs: 'aurora', fullbody: 'neon',
   wo50: 'ice', st12: 'lava', v1m: 'obsidian', pr10: 'galaxy', abs50: 'aurora', duo10: 'ice', lead3: 'molten', ton15: 'neon', rep1k: 'sunrise', leg100: 'emerald',
   mon20: 'neon', stairhr: 'sunrise', inclhr: 'emerald',
   wo100: 'galaxy', st26: 'opal', v5m: 'holo', pr100: 'neon', abs100: 'emerald', duo50: 'aurora', lead10: 'sunrise', ton20: 'carbon', rep2k: 'lava', leg200: 'ice', year: 'opal',
@@ -5566,14 +5872,14 @@ var BD_FX = { night: 'galaxy', dawn: 'sunrise', onfire: 'lava', winter: 'ice', l
   zero: 'neon', newyear: 'galaxy', century: 'carbon', twice: 'emerald',
   sets2k: 'carbon', sets5k: 'circuit', hr100: 'sunrise', hr250: 'inferno', rp50k: 'neon', rp100k: 'storm', mo6: 'emerald', mo12: 'marble',
   /* MYTHIC, the hardest there are, in the exotic finishes */
-  wo365: 'prism', st52: 'void', v10m: 'nebula', owner: 'magma',
+  wo365: 'prism', st52: 'void', v10m: 'nebula', owner: 'magma', creator: 'magma',
   /* the newest: the three new finishes, holo, plasma and obsidian, on the long ones */
   wo250: 'crystal', wo500: 'plasma', ton25: 'plasma', wkvol: 'obsidian', v500k: 'molten', setwk100: 'holo', pr50: 'plasma', sig50: 'obsidian', sig100: 'holo',
   ex80: 'plasma', tgt12: 'holo', allmus4: 'obsidian', cardio100: 'plasma', cdh50: 'holo',
   allmus: 'prism', dec31: 'galaxy', friday13: 'void', leap: 'opal', ironwk: 'inferno', plate4: 'storm' };
 /* MYTHIC: a tier past the halo, for the badges that take a year or more:
    a prism ring turning round it and sparks in orbit, crazy on purpose */
-var BD_MYTH = { wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
+var BD_MYTH = { slayer: 1, wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
 /* EXOTIC: the halo tier, for what takes many months */
 var BD_HALO = { wo250: 1, v1m: 1, ton25: 1, hr100: 1, sets2k: 1, rp50k: 1, mo6: 1, tgt12: 1, allmus4: 1, ex80: 1, sig100: 1, cdh50: 1, wo100: 1, st26: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
 var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
@@ -5623,6 +5929,7 @@ var BADGES = [
   ['landslide', 'Landslide', 'friends', 'A week finished in front, at twice the next best on the rings.', '#ff5a1f'],
   ['photo', 'Photo Finish', 'friends', 'You and a friend both closed your goal in the same week, level at the top.', '#8fd8ff'],
   ['pack', 'Pack Leader', 'friends', 'A week finished in front of three or more friends.', '#ffb347'],
+  ['slayer', 'Giant Slayer', 'friends', 'A whole week out-lifting the creator.', '#e11d48'],
   /* milestones: how and when you train, each its own shape and colour */
   ['early', 'Early Bird', 'mile', 'Ten workouts started before 7 am.', '#fb923c'],
   ['owl', 'Night Owl', 'mile', 'Ten workouts started after 8 pm.', '#4f46e5'],
@@ -5713,9 +6020,11 @@ var BADGES = [
   ['cardio100', 'Engine', 'cardio', 'Cardio logged in a hundred workouts.'],
   ['cdh50', 'Fifty Hours', 'cardio', 'Fifty hours of cardio, all told.'],
   /* THE OWNER: one of a kind, on one phone, and the only badge that moves */
-  ['owner', 'Owner', 'rare', 'The one who built this.', '#ff5a1f']
+  ['owner', 'Owner', 'rare', 'The one who built this.', '#ff5a1f'],
+  /* THE CREATOR: orange glass and chrome, an eye with a star in it. One of one. */
+  ['creator', 'The Eye', 'rare', 'Always watching you.', '#ff6a00']
 ].map(function (a) { var o = { id: a[0], n: a[1], k: a[2], d: a[3] }; if (a[4]) o.c = a[4]; if (BD_TIER[a[0]]) o.lv = BD_TIER[a[0]];
-  if (BD_FX[a[0]]) { o.fx = BD_FX[a[0]]; o.t = a[0] === 'owner' ? 5 : BD_MYTH[a[0]] ? 4 : BD_HALO[a[0]] ? 3 : 2; } else if (BD_SHEEN[a[0]]) o.sn = 1; return o; });
+  if (BD_FX[a[0]]) { o.fx = BD_FX[a[0]]; o.t = a[0] === 'owner' || a[0] === 'creator' ? 5 : BD_MYTH[a[0]] ? 4 : BD_HALO[a[0]] ? 3 : 2; } else if (BD_SHEEN[a[0]]) o.sn = 1; return o; });
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
 /* every badge, with the day it was won or how far along it is */
@@ -5896,7 +6205,8 @@ function lfBadges() {
     if (w.x.some(function (e) { return BARBELL[e.id] && e.sets.some(function (q) { return q.r > 0 && +q.w >= 180; }); })) won('plate4', w.d);
   });
   if (ws.length >= 365) won('wo365', ws[364].d);
-  var own = lfOwner(); if (own) won('owner', own);
+  var own = lfOwner(); if (own) { won('owner', own); won('creator', own); }
+  if (S.slay) won('slayer', S.slay);
   if (vol >= 1e7 * uk) { var vv = 0; ws.some(function (w) { vv += woVol(w); if (vv >= 1e7 * uk) { won('v10m', w.d); return true; } return false; }); }
   var stBest = 0, stRun = 0;
   if (ws.length && S.goal > 0) for (var mq = monday(parseYmd(ws[0].d)); mq <= today(); mq = addDays(mq, 7)) {
@@ -5935,7 +6245,7 @@ function lfBadges() {
     pr3: [0, 1], sets30: [0, 1], wkend: [Math.min(wkendN, 4), 4], mon20: [Math.min(monBest, 20), 20], year: [0, 1], cardio25: [Math.min(cdN, 25), 25], leg50: [Math.min(legN, 50), 50],
     st26: [Math.min(streak, 26), 26], v5m: [Math.round(vol / uk), 5e6], pr100: [Math.min(prDays.length, 100), 100], abs100: [Math.min(absN, 100), 100], duo50: [Math.min(syN, 50), 50], lead10: [Math.min(winN, 10), 10],
     ton15: [0, 1], ton20: [0, 1], rep1k: [Math.min(wkRepBest, 1000), 1000], rep2k: [Math.min(wkRepBest, 2000), 2000], leg100: [Math.min(legN, 100), 100], leg200: [Math.min(legN, 200), 200],
-    zero: [Math.min(zBest, 14), 14], newyear: [0, 1], century: [0, 1], twice: [0, 1], wave: [0, 1], trio: [0, 1], landslide: [0, 1], photo: [0, 1], pack: [0, 1] };
+    zero: [Math.min(zBest, 14), 14], newyear: [0, 1], century: [0, 1], twice: [0, 1], wave: [0, 1], trio: [0, 1], landslide: [0, 1], photo: [0, 1], pack: [0, 1], slayer: [0, 1] };
   ['chest', 'bk', 'sh', 'arm'].forEach(function (pp) { [50, 100, 200].forEach(function (n) { prog[pp + n] = [Math.min(partN[pp], n), n]; }); });
   [['sets500', setT, 500], ['sets2k', setT, 2000], ['sets5k', setT, 5000], ['hr25', Math.floor(minT / 60), 25], ['hr100', Math.floor(minT / 60), 100], ['hr250', Math.floor(minT / 60), 250],
     ['rp10k', repT, 1e4], ['rp50k', repT, 5e4], ['rp100k', repT, 1e5], ['mo3', moHit, 3], ['mo6', moHit, 6], ['mo12', moHit, 12], ['wo365', ws.length, 365], ['st52', stBest, 52], ['v10m', Math.round(vol / uk), 1e7]]
@@ -5946,7 +6256,7 @@ function lfBadges() {
     ['allmus4', amBest, 4], ['post50', postN, 50], ['cdwk', bestOf(cdWk), 5], ['cardio100', cdW, 100], ['cdh50', Math.floor(cdTot / 60), 50]]
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
   /* the owner badge is not a thing anyone else can see they lack */
-  return BADGES.filter(function (b) { return b.id !== 'owner' || out.owner; }).map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
+  return BADGES.filter(function (b) { return (b.id !== 'owner' && b.id !== 'creator' && b.id !== 'slayer') || out[b.id]; }).map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
 function lfBadgeProg(x) {
   var p = x.p; if (!p || p[1] === 1) return 'Locked';
@@ -6051,7 +6361,7 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'crownb', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
   tgt12: 'rosette', allmus4: 'trid', post50: 'hextall', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
@@ -6068,7 +6378,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4'
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50',
   chest50: '50', chest100: '100', chest200: '200', bk50: '50', bk100: '100', bk200: '200', sh50: '50', sh100: '100', sh200: '200', arm50: '50', arm100: '100', arm200: '200',
-  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
+  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:trophy', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
   sets500: '500', sets2k: '2k', sets5k: '5k', hr25: '25h', hr100: '100h', hr250: '250h', rp10k: '10k', rp50k: '50k', rp100k: '100k', mo3: '3', mo6: '6', mo12: '12', allmus: 'i:dumb', dec31: 'i:star', friday13: '13', leap: '29', ironwk: '10h', plate4: '4', wo365: '365', st52: '52', v10m: '10M', owner: 'i:flame',
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
@@ -6620,7 +6930,77 @@ function bdPolar(shp, dish, mirror) {
   for (var r = 1; r < K; r++) for (var m = 0; m < N; m++) { var a = 1 + (r - 1) * N + m, b2 = 1 + (r - 1) * N + (m + 1) % N, c = a + N, d = b2 + N; idx.push(a, c, d, a, d, b2); }
   var g = new BD3.BufferGeometry(); g.setAttribute('position', new BD3.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new BD3.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals(); return g;
 }
+/* THE CREATOR, built whole: a hexagon of orange glass in a chrome rim, chrome bands sweeping round an eye, an orange iris, a four-point star for a pupil.
+   Nothing here is a picture. The glass has a candy gloss, the chrome reflects, and four things move: a light sweeping across, light crawling through the glass, the star breathing, and sparks circling the rim. */
+function bdCreator(n) {
+  var T = BD3, g = new T.Group(), hi = n > 600, D = Math.PI / 180;
+  var hex = function (R) { var sh = new T.Shape(); for (var i = 0; i < 6; i++) { var a = (90 + i * 60) * D; if (i) sh.lineTo(R * Math.cos(a), R * Math.sin(a)); else sh.moveTo(R * Math.cos(a), R * Math.sin(a)); } sh.closePath(); return sh; };
+  var ext = function (sh, depth, bv, seg) { return new T.ExtrudeGeometry(sh, { depth: depth, bevelEnabled: true, bevelThickness: bv, bevelSize: bv, bevelSegments: hi ? 6 : 3, curveSegments: seg || (hi ? 40 : 20) }); };
+  var chrome = new T.MeshPhysicalMaterial({ color: 0xaeb4c2, metalness: 1, roughness: .16, envMapIntensity: 1.05 });
+  var gc = document.createElement('canvas'); gc.width = 4; gc.height = 256; var gx = gc.getContext('2d'), gr = gx.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#ff8c00'); gr.addColorStop(.45, '#ff5a00'); gr.addColorStop(1, '#e02a00'); gx.fillStyle = gr; gx.fillRect(0, 0, 4, 256);
+  var gtx = new T.CanvasTexture(gc); gtx.encoding = T.sRGBEncoding; gtx.repeat.set(.5, .5); gtx.offset.set(.5, .5);
+  var glass = new T.MeshPhysicalMaterial({ color: 0xc8560e, map: gtx, metalness: 0, roughness: .16, clearcoat: .8, clearcoatRoughness: .04, emissive: 0xd42400, emissiveIntensity: .3, envMapIntensity: .38 });
+  var rimS = hex(1); rimS.holes.push(new T.Path(hex(.9).getPoints().reverse()));
+  var rim = new T.Mesh(ext(rimS, .1, .04), chrome); rim.position.z = -.05; g.add(rim);
+  var plate = new T.Mesh(ext(hex(.91), .05, .035), glass); plate.position.z = -.03; g.add(plate);
+  /* a ribbon along a curve, for the bands */
+  var ribbon = function (pts, w0, w1) {
+    var cu = new T.CatmullRomCurve3(pts.map(function (q) { return new T.Vector3(q[0], q[1], 0); })), N = 70, L = [], R = [];
+    for (var i = 0; i <= N; i++) { var u = i / N, p = cu.getPoint(u), tg = cu.getTangent(u), nx = -tg.y, ny = tg.x, w = (w0 + (w1 - w0) * u) / 2; L.push(new T.Vector2(p.x + nx * w, p.y + ny * w)); R.push(new T.Vector2(p.x - nx * w, p.y - ny * w)); }
+    var sh = new T.Shape(L.concat(R.reverse())); var m = new T.Mesh(ext(sh, .03, .012, 4), chrome); m.position.z = .052; g.add(m);
+  };
+  ribbon([[.1, .3], [.36, .42], [.62, .5], [.86, .5]], .09, .05);
+  ribbon([[-.1, -.32], [-.36, -.44], [-.62, -.52], [-.86, -.5]], .09, .05);
+  ribbon([[-.58, .04], [-.72, .13], [-.87, .15]], .07, .045); ribbon([[-.58, -.04], [-.72, -.13], [-.87, -.16]], .07, .045);
+  ribbon([[.62, .04], [.75, .12], [.87, .15]], .07, .045); ribbon([[.62, -.04], [.75, -.12], [.87, -.16]], .07, .045);
+  /* the eye */
+  var eye = new T.Shape(); eye.moveTo(-.66, 0); eye.bezierCurveTo(-.4, .31, .28, .43, .7, 0); eye.bezierCurveTo(.3, -.41, -.35, -.41, -.66, 0);
+  var em = new T.Mesh(ext(eye, .05, .03), chrome); em.position.z = .062; g.add(em);
+  var ring = new T.Mesh(new T.TorusGeometry(.325, .034, 18, hi ? 96 : 48), chrome); ring.position.z = .135; g.add(ring);
+  var irisC = document.createElement('canvas'); irisC.width = irisC.height = 128; var ix = irisC.getContext('2d'), ig = ix.createRadialGradient(64, 56, 4, 64, 64, 64);
+  ig.addColorStop(0, '#ffb23a'); ig.addColorStop(.55, '#ff6a00'); ig.addColorStop(1, '#e83000'); ix.fillStyle = ig; ix.fillRect(0, 0, 128, 128);
+  var itx = new T.CanvasTexture(irisC); itx.encoding = T.sRGBEncoding;
+  var irisM = new T.MeshPhysicalMaterial({ color: 0xffffff, map: itx, roughness: .08, clearcoat: 1, clearcoatRoughness: .02, emissive: 0xff3a00, emissiveIntensity: .4, envMapIntensity: .8 });
+  var iris = new T.Mesh(new T.SphereGeometry(.3, hi ? 48 : 24, hi ? 24 : 12, 0, Math.PI * 2, 0, Math.PI / 2), irisM); iris.rotation.x = Math.PI / 2; iris.scale.set(1, .3, 1); iris.position.z = .1; g.add(iris);
+  var star = new T.Shape(); for (var i = 0; i < 8; i++) { var a = (90 + i * 45) * D, rr = i % 2 ? .05 : .19; if (i) star.lineTo(rr * Math.cos(a), rr * Math.sin(a)); else star.moveTo(rr * Math.cos(a), rr * Math.sin(a)); } star.closePath();
+  var sm = new T.Mesh(ext(star, .03, .012), chrome); sm.position.z = .17; g.add(sm);
+  /* a haze of orange light behind it, which is the glow */
+  var hc = document.createElement('canvas'); hc.width = hc.height = 256; var hx = hc.getContext('2d'), hg = hx.createRadialGradient(128, 128, 20, 128, 128, 128);
+  hg.addColorStop(0, 'rgba(255,120,20,.9)'); hg.addColorStop(.5, 'rgba(255,70,0,.35)'); hg.addColorStop(1, 'rgba(255,60,0,0)'); hx.fillStyle = hg; hx.fillRect(0, 0, 256, 256);
+  var haze = new T.Mesh(new T.PlaneGeometry(3.6, 3.6), new T.MeshBasicMaterial({ map: new T.CanvasTexture(hc), transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); haze.position.z = -.25; haze.renderOrder = 1; g.add(haze);
+  /* rays turning slowly behind it: the mark of the rarest thing on the shelf */
+  var rc = document.createElement('canvas'); rc.width = rc.height = 512; var rx = rc.getContext('2d'); rx.translate(256, 256);
+  for (var ri = 0; ri < 16; ri++) { rx.rotate(Math.PI / 8); var rg = rx.createLinearGradient(0, 0, 0, -256); rg.addColorStop(0, 'rgba(255,150,40,.55)'); rg.addColorStop(1, 'rgba(255,90,0,0)'); rx.fillStyle = rg; rx.beginPath(); rx.moveTo(0, 0); rx.lineTo(ri % 2 ? -14 : -26, -256); rx.lineTo(ri % 2 ? 14 : 26, -256); rx.closePath(); rx.fill(); }
+  var rays = new T.Mesh(new T.PlaneGeometry(4.4, 4.4), new T.MeshBasicMaterial({ map: new T.CanvasTexture(rc), transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); rays.position.z = -.3; rays.renderOrder = 0; g.add(rays);
+  /* light crawling through the glass */
+  var flow = bdFlowTex(); flow.repeat.set(1.1, 1.1);
+  var crawl = new T.Mesh(new T.ShapeGeometry(hex(.89)), new T.MeshBasicMaterial({ map: flow, color: 0xff6a10, transparent: true, opacity: .15, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); crawl.position.z = .0865; crawl.renderOrder = 2; g.add(crawl);
+  /* a glint that sweeps across the whole face every few seconds */
+  var gl = bdGlintTex(), gm = new T.Mesh(new T.ShapeGeometry(hex(.99)), new T.MeshBasicMaterial({ map: gl, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); gm.position.z = .19; gm.renderOrder = 5; g.add(gm);
+  /* sparks circling the rim */
+  var NS = 18, sp = new Float32Array(NS * 3), spg = new T.BufferGeometry(); spg.setAttribute('position', new T.BufferAttribute(sp, 3));
+  var spk = new T.Points(spg, new T.PointsMaterial({ size: .06, color: 0xffb060, transparent: true, opacity: .9, blending: T.AdditiveBlending, depthWrite: false })); g.add(spk);
+  var pl = new T.PointLight(0xff6a1a, 1.4, 4); pl.position.set(0, 0, 1.3); g.add(pl);
+  g.userData.cr = function (t) {
+    flow.offset.set(Math.sin(t * .23) * .14, -t * .05);
+    var ph = (t % 4.6) / 4.6; gl.offset.set(2 - ph * 3.6, 0);
+    var br = 1 + Math.sin(t * 1.9) * .07; star_s(br, t);
+    /* IT WATCHES: the iris drifts, holds, and comes back, as an eye does */
+    var lk = t % 9, lx = lk < 2 ? 0 : lk < 2.6 ? -(lk - 2) / .6 : lk < 4.4 ? -1 : lk < 5.4 ? -1 + (lk - 4.4) * 2 : lk < 7.2 ? 1 : lk < 7.8 ? 1 - (lk - 7.2) / .6 : 0;
+    lx = lx * .11; iris.position.x = ring.position.x = sm.position.x = lx;
+    rays.rotation.z = t * .12; rays.material.opacity = .42 + Math.sin(t * 1.3) * .14;
+    irisM.emissiveIntensity = .5 + Math.sin(t * 1.6) * .2; glass.emissiveIntensity = .32 + Math.sin(t * .9 + 1) * .08;
+    haze.material.opacity = .75 + Math.sin(t * 1.4) * .22; pl.intensity = 1.4 + Math.sin(t * 1.9) * .3;
+    for (var k = 0; k < NS; k++) { var a = t * .35 + k * (Math.PI * 2 / NS), r0 = 1.06 + Math.sin(t * 1.1 + k * 2.3) * .05; sp[k * 3] = r0 * Math.cos(a); sp[k * 3 + 1] = r0 * Math.sin(a) * 1.04; sp[k * 3 + 2] = .1 + Math.sin(t * 2 + k) * .04; }
+    spg.attributes.position.needsUpdate = true;
+  };
+  function star_s(k, t) { sm.scale.set(k, k, 1); sm.rotation.z = Math.sin(t * .8) * .12; }
+  g.userData.cr(1.3);
+  return g;
+}
 function bdMake(b, m, n, pre) {
+  if (b.id === 'creator' && !b.lock) return bdCreator(n);
   var g = new BD3.Group(), trim = bdTrimOf(b), mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
   var body = new BD3.ExtrudeGeometry(shp, { depth: .1, bevelEnabled: true, bevelThickness: .05, bevelSize: .045, bevelSegments: n > 600 ? 8 : 4, curveSegments: n > 600 ? 48 : 24 });
@@ -6816,7 +7196,7 @@ function lfCoinBtn(x, size) {
   b.setAttribute('aria-label', x.b.n + (x.b.lv ? ', level ' + x.b.lv : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
   bdStill(x, $('img', b));
   if (x.d && x.b.t === 4) b.appendChild(el('<u class="lf-myth" aria-hidden="true"><s></s><s></s></u>'));
-  if (x.d && x.b.t === 5) {
+  if (x.d && x.b.t === 5 && x.b.id !== 'creator') {
     /* the molten light is masked to the badge's own picture, so it flows through the badge and nowhere else */
     var lv = el('<u class="lf-lava" aria-hidden="true"><s></s><i></i></u>'), emb = el('<u class="lf-embers" aria-hidden="true"><s></s><s></s><s></s><s></s><s></s><s></s></u>'), im = $('img', b);
     var setMask = function () { if (im.src) { var u = 'url("' + im.src + '")'; lv.style.webkitMaskImage = u; lv.style.maskImage = u; } };
@@ -6835,7 +7215,7 @@ function lfCoinView(x, earnedNow) {
     + '<div class="lf-cv-cap"><div class="lf-cv-k"></div><div class="lf-cv-n"></div><p></p><div class="lf-cv-h">Drag to spin · tap to flip</div></div></div>');
   var kd = $('.lf-cv-k', v); kd.textContent = earnedNow ? (x.b.k === 'month' ? 'Medal won' : 'Badge earned') : x.r ? 'Personal best' : x.d ? BD_KIND[x.b.k].n : x.b.k === 'month' ? 'This month' : 'Not yet earned';
   if (x.d) kd.style.color = x.b.c || BD_KIND[x.b.k].c;
-  $('.lf-cv-n', v).textContent = x.b.n;
+  $('.lf-cv-n', v).textContent = x.b.n; if (x.b.id === 'creator' && x.d) v.classList.add('is-eye');
   /* the pill names the level, if it is one of a run, and the finish */
   if (x.b.fx || x.b.lv) { var tl = el('<span class="lf-cv-tier"></span>');
     if (x.b.t === 5) tl.classList.add('is-owner');
@@ -6843,7 +7223,7 @@ function lfCoinView(x, earnedNow) {
     if (x.b.fx) { tl.classList.add('is-fx'); tl.style.setProperty('--gl', BD_FXGL[x.b.fx]); }
     $('.lf-cv-cap', v).insertBefore(tl, $('.lf-cv-k', v)); }
   /* THE SHOWCASE: three of yours, chosen here, are what friends see */
-  if (x.d && !x.fr && BADGE[x.b.id]) {
+  if (x.d && !x.fr && BADGE[x.b.id] && x.b.id !== 'creator') {
     var scb = el('<button type="button" class="lf-btn lf-cv-sc" id="lfShowBtn"></button>');
     var paintShow = function () { var on = lfShow().indexOf(x.b.id) >= 0; scb.textContent = on ? 'In your showcase · remove' : 'Showcase to friends'; scb.classList.toggle('is-ink', !on); scb.setAttribute('aria-pressed', on ? 'true' : 'false'); };
     scb.addEventListener('click', function () {
@@ -6906,6 +7286,7 @@ function lfCoinView(x, earnedNow) {
       if (!drag) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; ry += vy; rx += vx; rx += (.12 - rx) * .06; }
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
       aw.rotation.set(rx + sw * .4, ry + sw, 0);
+      if (aw.userData.cr) aw.userData.cr(performance.now() / 1000);
       if (aw.userData.flow) { var tt = performance.now() / 1000; aw.userData.flow.offset.set(Math.sin(tt * .21) * .12, -tt * .045); aw.userData.flow2.offset.set(tt * .03, Math.cos(tt * .17) * .1); aw.userData.haze.opacity = .17 + Math.sin(tt * 1.9) * .05; var phs = tt % 3.6, gp = phs / 1.1, g2 = (phs - .45) / 1.1; aw.userData.glint.forEach(function (t, i) { var q = i ? g2 : gp; t.offset.x = q > 0 && q < 1 ? (i ? -.8 + q * 1.6 : .8 - q * 1.6) : 2; });
         /* the lava surges as the light crosses it, then settles */ var sg = 1 + 1.6 * Math.exp(-Math.pow((phs - .5) / .35, 2)) + Math.sin(tt * 3.3) * .15; aw.userData.lavaM.forEach(function (m) { m.color.setScalar(sg); }); }
       r.render(sc, cam);
@@ -7007,7 +7388,7 @@ function lfMedalCard() {
 /* THE COLLECTIONS: the shelf in sections, by what the badge is for. A
    badge left out of every list still shows, in the last */
 var BD_COLL = [
-  ['own', 'One of one', '#ff5a1f', ['owner']],
+  ['own', 'One of one', '#ff5a1f', ['owner', 'creator']],
   ['ses', 'Sessions', '#2f7bff', ['first', 'wo10', 'wo50', 'wo100', 'wo250', 'wo365', 'wo500', 'mon20', 'mo3', 'mo6', 'mo12', 'year', 'hr25', 'hr100', 'hr250', 'long', 'ironwk', 'twice']],
   ['con', 'Consistency', '#8b5cf6', ['goal', 'st4', 'st12', 'st26', 'st52', 'week', 'seven', 'zero', 'wkend', 'back', 'early', 'owl', 'night', 'dawn', 'winter', 'newyear', 'dec31', 'friday13', 'leap']],
   ['vol', 'Volume', '#ff8a1c', ['v100k', 'v500k', 'v1m', 'v5m', 'v10m', 'ton10', 'ton15', 'ton20', 'ton25', 'wkvol']],
@@ -7017,7 +7398,7 @@ var BD_COLL = [
   ['bod', 'Body parts', '#10b981', ['tgt1', 'tgtall', 'tgt4', 'tgt12', 'quad', 'allmus', 'allmus4', 'chest50', 'chest100', 'chest200', 'bk50', 'bk100', 'bk200', 'sh50', 'sh100', 'sh200',
     'arm50', 'arm100', 'arm200', 'leg50', 'leg100', 'leg200', 'post50', 'abs10', 'abs50', 'abs100']],
   ['car', 'Cardio', '#06b6d4', ['stair10', 'stairhr', 'incl10', 'inclhr', 'cardio25', 'cdwk', 'cardio100', 'cdh50', 'lungs']],
-  ['fri', 'Friends', '#6366f1', ['duo1', 'duo10', 'duo50', 'lead1', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack']]
+  ['fri', 'Friends', '#6366f1', ['duo1', 'duo10', 'duo50', 'lead1', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer']]
 ];
 function lfBadgeCard() {
   var all = lfBadges(), got = all.filter(function (x) { return x.d; }).length;

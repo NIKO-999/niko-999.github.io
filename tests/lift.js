@@ -20,8 +20,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
   isMobile: true, hasTouch: true, locale: 'en-GB', colorScheme: 'dark' };
 const URL = `${BASE}/lift/`;
 const RK_SEEN = { wo: 1e9, vol: 1e12, pr: 1e9, lv: 99, u: [].concat(
-  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator'].map((x) => 'ti:' + x),
-  ['spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign'].map((x) => 'fm:' + x)) };
+  ['rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'duelist', 'elite', 'relentless', 'veteran', 'champion', 'curator', 'master', 'engine', 'mythic', 'legend', 'creator', 'sudo', 'blaze', 'wip', 'nodaysoff', 'beast', 'slayer', 'eye'].map((x) => 'ti:' + x),
+  ['slayer', 'spark', 'heart', 'drop', 'leaf', 'sun', 'flame', 'wave', 'moon', 'bolt', 'crown', 'shield', 'star', 'trophy', 'infinity', 'target', 'rocket', 'link', 'duo', 'flag', 'medal', 'pack', 'pulse', 'stairs', 'hill', 'watch', 'wind', 'gem', 'barbell'].map((x) => 'fl:' + x), ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign', 'laurel', 'verdant', 'regal', 'silvern', 'amethyst', 'inferno', 'glacier', 'rosegold', 'winged', 'sapphire', 'ruby', 'aurelian', 'phoenix', 'imperial', 'eclipse', 'prismatic', 'creator'].map((x) => 'fm:' + x)) };
 const freeze = (at) => `(() => {
   const F = new Date('${at}').getTime(); const R = Date;
   window.Date = class extends R {
@@ -1705,8 +1705,8 @@ const freeze = (at) => `(() => {
     const ban = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { ti: s.querySelector('.fr-ti').textContent, hid: s.querySelector('.fr-ti').hidden, av: s.querySelector('.fr-ban-av').className, bk: s.querySelector('.fr-ban').className, fl: !!s.querySelector('.fr-ban-t b .lf-fl') }; });
     ok('their profile says their title', ban.ti === 'Grinder' && !ban.hid, ban);
     ok('and wears their frame and their flair, on a banner that stays the accent', /is-fm-aurora/.test(ban.av) && !/fr-bk-/.test(ban.bk) && ban.fl, ban);
-    const ring = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), cs = getComputedStyle(s.querySelector('.fr-ban-av'), '::before'); return { bg: /conic-gradient/.test(cs.backgroundImage), pos: cs.position, ms: cs.maskImage || cs.webkitMaskImage }; });
-    ok('the frame is a ring cut out of a conic gradient round the picture', ring.bg && ring.pos === 'absolute' && /radial-gradient/.test(ring.ms), ring);
+    const ring = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), e = s.querySelector('.fm-em.is-art'); return e ? { art: e.style.getPropertyValue('--art'), over: getComputedStyle(e).zIndex, fx: e.className } : null; });
+    ok('the frame is their painting, laid over the picture, with its effect', ring && /fm\/aurora\.webp/.test(ring.art) && ring.over === '2' && /is-fx-s/.test(ring.fx), ring);
     await page.keyboard.press('Escape'); await settle(page);
     await openFr('Ally');
     const al = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { av: s.querySelector('.fr-ban-av').className, bk: s.querySelector('.fr-ban').className, ti: s.querySelector('.fr-ti').textContent }; });
@@ -1729,10 +1729,23 @@ const freeze = (at) => `(() => {
     await pick('ti', 'regular'); await pick('fl', 'spark'); await pick('fm', 'ring'); st = await store(page);
     ok('what you pick is kept', st.ti === 'regular' && st.fl === 'spark' && st.fm === 'ring', st);
     const vals = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.querySelector('b').textContent));
-    ok('each row says what is worn', vals[0] === 'Regular' && vals[1] === 'Spark' && vals[2] === 'Ring', vals);
+    ok('each row says what is worn', vals[0] === 'Regular' && vals[1] === 'Spark' && vals[2] === 'Molten', vals);
     await page.waitForTimeout(3200);
     const last = posts.filter((q) => q.s && 'ti' in q.s).pop();
     ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
+    await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
+    const orn = await page.evaluate(() => ({ n: document.querySelectorAll('.rk-o[data-k="fm"]').length, old: !!document.querySelector('.rk-o[data-id="inferno"]') }));
+    ok('the frames offered are the painted ones, and the procedural ornate set is not among them', orn.n >= 13 && !orn.old && !(await page.locator('.rk-o[data-id="creator"][data-k="fm"]').count()), orn);
+    const artSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    const artIds = ['ring', 'neon', 'orbit', 'ember', 'sparkle', 'halo', 'frost', 'glitch', 'aurora', 'prism', 'blossom', 'angel', 'celestial', 'prestige', 'sovereign'];
+    ok('every frame has its painting on disk and an entry that draws it', artIds.every((id) => require('fs').statSync(require('path').join(__dirname, '..', 'lift', 'fm', id + '.webp')).size > 20000 && new RegExp('\\b' + id + ": \\['#").test(artSrc)), artIds);
+    const worn = await page.evaluate(() => { const e = document.querySelector('#lfYou .fm-em.is-art') || [...document.querySelectorAll('.fm-em.is-art')].pop(); return e ? { art: e.style.getPropertyValue('--art'), n: e.querySelectorAll('i').length, fx: /is-fx-f/.test(e.className) } : null; });
+    ok('the one worn is drawn from its picture, with its effect', worn && /fm\/ring\.webp/.test(worn.art) && worn.n >= 9 && worn.fx, worn);
+    ok('the effect goes with the colour: flames, venom, lightning or glints', /ring: \['#ff7a1a', 'f'\]/.test(artSrc) && /neon: \['#3dff5a', 'v'\]/.test(artSrc) && /orbit: \['#2f8bff', 'l'\]/.test(artSrc) && /function lfArtFx/.test(artSrc) && /fm-fx-zap/.test(artSrc) && /fm-fx-drip/.test(artSrc) && /fm-fx-burn/.test(artSrc));
+    ok('there are animated titles anybody can earn, and The Eye and its line are the owner\'s alone', /\['an', 'Animated', '#22d3ee', \['sudo', 'blaze', 'wip', 'nodaysoff', 'beast'\]\]/.test(artSrc) && /\['one', 'One of one', '#ff5a1f', \['creator', 'eye'\], 1\]/.test(artSrc) && /<em>always watching you<\/em>/.test(artSrc) && /\['eye', 'The Eye', 'One of one', function \(c\) \{ return c\.own; \}\]/.test(artSrc));
+    ok('out-lifting the creator for a week is kept, and pays a badge, a title and a flair', /function lfSlayCheck/.test(artSrc) && /if \(S\.slay\) won\('slayer', S\.slay\)/.test(artSrc) && /\['slayer', 'Giant Slayer', 'Out-lift the creator in a week'/.test(artSrc) && /\['slayer', 'Slayer', 'Out-lift the creator in a week'/.test(artSrc) && /slayer: 1, wo365/.test(artSrc));
+    ok('and none of them carries any text: they are made of metal, gems and light', !/<text/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').slice(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').indexOf('var RK_ORN'), require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').indexOf('function lfEmStop'))));
+    await page.keyboard.press('Escape'); await settle(page);
     await pick('fm', 'blossom'); st = await store(page);
     ok('a softer emblem is earned, not given: Blossom opens at sixty workouts, Angel and Celestial later', st.fm === 'blossom' && await (async () => { await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500); const l = await page.evaluate(() => ['angel', 'celestial'].map((id) => document.querySelector('.rk-o[data-id="' + id + '"]').classList.contains('is-lock'))); await page.keyboard.press('Escape'); await settle(page); return l.join() === 'true,true'; })(), st.fm);
     await pick('fl', ''); await pick('fm', ''); st = await store(page);
@@ -1782,13 +1795,23 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── THE CREATOR BADGE is the owner's alone: not on anyone else's shelf, and never sent to friends ── */
+  {
+    const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('the Creator badge cannot be showcased, and never goes into what friends are sent', /id !== 'creator'; \}\)\.slice\(0, 3\)/.test(src) && /x\.d && x\.b\.id !== 'creator'/.test(src) && /BADGE\[x\.b\.id\] && x\.b\.id !== 'creator'/.test(src));
+    const { c, page } = await ctx({ unit: 'kg', goal: 3 });
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('and without the owner link it is not on the shelf, not even locked', await page.locator('#lfBadges .lf-coin[data-b="creator"]').count() === 0);
+    await c.close();
+  }
+
   /* ── TITLES in collections, and two that are only the owner's ── */
   {
     const { c, page } = await ctx({ unit: 'kg', goal: 3 });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
     const heads = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4').length && [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
-    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges', heads);
+    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges,Animated,Against the creator', heads);
     ok('and nobody else is offered Creator, not even locked', await page.locator('.rk-o[data-id="creator"]').count() === 0);
     await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     ok('or the Prestige frame', await page.locator('.rk-o[data-id="prestige"]').count() === 0 && await page.locator('.rk-o[data-id="neon"]').count() === 1);
@@ -1815,7 +1838,7 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="prestige"]').click()); await page.waitForTimeout(500);
     const pr = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { big: s.querySelector('.fr-ban').classList.contains('has-emblem') || s.querySelector('.fr-ban-av').classList.contains('em-fall'), ring: getComputedStyle(s.querySelector('.fr-ban-av'), '::before').display, cls: s.querySelector('.fr-ban-av').className }; });
     const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
-    ok('the Prestige frame is a 3D emblem, not a ring: forged iron, lava moving through it, lit by the accent, no banner and no text', pr && pr.big && /is-fm-prestige/.test(pr.cls) && /ShaderMaterial/.test(src) && /function lfEmblem3/.test(src) && !/lfEmblem\(/.test(src) && !/ToUpperCase\(\)\.slice\(0, 10\)/.test(src), pr);
+    ok('the frame only the owner has is a whole piece, not a ring, with no banner and no text', pr && pr.big && /is-fm-prestige/.test(pr.cls) && /ShaderMaterial/.test(src) && /function lfEmblem3/.test(src) && !/lfEmblem\(/.test(src) && !/ToUpperCase\(\)\.slice\(0, 10\)/.test(src), pr);
     await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="sovereign"]').click()); await page.waitForTimeout(500);
     ok('and there is a second, the obsidian spade', await page.locator('.fr-ban-av.is-fm-sovereign').count() === 1 && await page.locator('.fr-ban-av.is-fm-prestige').count() === 0);

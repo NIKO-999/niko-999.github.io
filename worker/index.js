@@ -426,6 +426,8 @@ function liftClean(b) {
   s.r7 = Array.isArray(b.s.r7) && b.s.r7.length === 7 ? b.s.r7.map((v) => { v = Math.round(+v); return isFinite(v) ? Math.max(0, Math.min(100000, v)) : 0; }) : [0, 0, 0, 0, 0, 0, 0];
   /* the three latest badges: an id the app knows the shape of, and a date */
   s.bg = Array.isArray(b.s.bg) ? b.s.bg.filter((x) => Array.isArray(x) && /^[a-z0-9]{2,8}$/.test(x[0]) && /^\d{4}-\d\d-\d\d$/.test(x[1])).slice(0, 3).map((x) => [x[0], x[1]]) : [];
+  /* the creator's own record says so, which is what a week against them is measured from */
+  if (b.s.ow === 1) s.ow = 1;
   /* sets by muscle carry halves: a squat is half a glute set */
   const half = (v) => { v = Math.round(+v * 2) / 2; return isFinite(v) ? Math.max(0, Math.min(1000, v)) : 0; };
   s.mu = Array.isArray(b.s.mu) ? b.s.mu.filter((m) => Array.isArray(m) && LIFT_MUS.includes(m[0])).slice(0, 16).map((m) => [m[0], half(m[1]), num(m[2])]) : [];
