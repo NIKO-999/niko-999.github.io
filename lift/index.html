@@ -749,6 +749,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ex-pb { display: block; height: 3px; border-radius: 3px; background: var(--card2); margin: 2px 0 8px; overflow: hidden; }
 .lf-ex-pb i { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--log-g, var(--log)); transition: width .5s cubic-bezier(.3, 1.2, .5, 1); }
 @media (prefers-reduced-motion: reduce) { .lf-set.is-pop, .lf-set.is-pop .lf-chk span, .lf-set.is-pop .lf-chk path { animation: none; stroke-dashoffset: 0; } .lf-ex-pb i { transition: none; } }
+.lf-set.is-wu .lf-wu-n, .lf-set.is-drop .lf-dr-n { display: inline-flex; align-items: center; justify-content: center; line-height: 1; text-align: center; }
+.lf-set.is-drop .lf-dr-n svg { width: 15px; height: 15px; display: block; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .lf-set.is-wu .lf-wu-n { appearance: none; border: 0; padding: 0; width: 26px; height: 26px; border-radius: 8px; font: inherit; font-size: 11px; font-weight: 800; color: #fff; background: rgba(255,255,255,.16); cursor: pointer; }
 .lf-set.is-wu .lf-prev { font-size: 11px; color: var(--dim); }
 .lf-set.is-wu input { border-style: dashed; }
@@ -2845,7 +2847,7 @@ function lfStart(rt) {
   var nToday = act ? 0 : woOn(ymd(today())).length;
   if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
-  lfAgainOk = 0;
+  lfAgainOk = 0; lfCurExId = '';
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() === 1 && !!rt;
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -2965,7 +2967,7 @@ function lfTick() {
    it rather than on the first card; ticked off, the next one comes up to
    take its place, so the set you are about to do is never down by the
    rest timer at the foot */
-var lfCurGo = 0, lfOrd = null;
+var lfCurGo = 0, lfOrd = null, lfCurExId = '';
 /* THE ORDER CARDS ARE DRAWN IN. Set when the workout opens: what is not
    finished first, in its order, so the exercise you are on leads, and
    what is done after it. It holds still while you work, so a card never
@@ -2981,7 +2983,10 @@ function lfSessOrder(fresh) {
 function lfScrollCur(smooth) {
   var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
   var cards = $$('.lf-ex', list), cur = null;
-  for (var i = 0; i < cards.length; i++) if ($('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', cards[i])) { cur = cards[i]; break; }
+  var openSet = function (c) { return $('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', c); };
+  /* the exercise you were just on keeps you while it has a set left */
+  for (var j = 0; j < cards.length && lfCurExId; j++) if (cards[j].dataset.ex === lfCurExId && openSet(cards[j])) { cur = cards[j]; break; }
+  for (var i = 0; i < cards.length && !cur; i++) if (openSet(cards[i])) cur = cards[i];
   if (!cur) return;
   var to = Math.max(0, bd.scrollTop + cur.getBoundingClientRect().top - bd.getBoundingClientRect().top - 8);
   /* THE SET YOU ARE ON, NOT ONLY ITS EXERCISE: on a long card the card's top
@@ -3035,6 +3040,11 @@ function lfSwapRows() {
 }
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
+  /* THE LIST IS REBUILT, AND A REBUILT LIST HAS NO HEIGHT FOR A MOMENT, so the
+     scroll fell to the top and everything after it started from there: every
+     tick, every warm-up and every drop set threw you away from your set.
+     Where you were is kept and put back before anything is placed. */
+  var bdK = list.closest('.lf-sh-bd'), keepTop = bdK ? bdK.scrollTop : 0;
   var ord = lfSessOrder(lfCurGo === 2);
   if (lfCurGo) { var cg = lfCurGo; lfCurGo = 0; requestAnimationFrame(function () { if (cg === 3) { var bd0 = list.closest('.lf-sh-bd'); if (bd0) try { bd0.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { bd0.scrollTop = 0; } return; } lfScrollCur(cg === 1 && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)); });
     /* on opening, the sheet is still sliding up a frame later: placed again once it has arrived */
@@ -3140,7 +3150,7 @@ function lfPaintSession() {
         lfJudge(e, si, s);
         act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
-        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurGo = 1; lfPaintSession(); lfTick();
+        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurExId = e.id; lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
       lfSwipe(row, function () { e.sets.splice(si, 1); }, 'Set removed');
@@ -3148,7 +3158,7 @@ function lfPaintSession() {
       /* DROP SETS hang off this set, marked ↳: ticked the same way, and the
          rest starts again from the last of them, but none is a set */
       (s.ds || []).forEach(function (d, di) {
-        var dr = el('<div class="lf-set is-drop"><span class="lf-sn lf-dr-n">↳</span><span class="lf-prev">Drop ' + (di + 1) + '</span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
+        var dr = el('<div class="lf-set is-drop"><span class="lf-sn lf-dr-n"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v8a3 3 0 0 0 3 3h9M14 10l4 5-4 5"/></svg></span><span class="lf-prev">Drop ' + (di + 1) + '</span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /><button type="button" class="lf-chk"><span>' + IC.check + '</span></button></div>');
         dr.classList.toggle('is-done', !!d.ok);
         var dw = $$('input', dr)[0], drp = $$('input', dr)[1], dk = $('.lf-chk', dr), dn = $('.lf-dr-n', dr);
         dw.setAttribute('aria-label', 'Set ' + (si + 1) + ' drop ' + (di + 1) + ' weight in ' + S.unit); drp.setAttribute('aria-label', 'Set ' + (si + 1) + ' drop ' + (di + 1) + ' reps');
@@ -3194,6 +3204,7 @@ function lfPaintSession() {
   cc.appendChild(lfCardioPick(act.cd, function (c) { act.cd = c; lfSaveAct(); sum(); }));
   sum(); list.appendChild(cc);
   if (!act.x.length) list.insertBefore(el('<div class="lf-empty"><b>Nothing in this workout yet</b>Add the first exercise and start logging sets.</div>'), add);
+  if (bdK && keepTop) bdK.scrollTop = keepTop;
 }
 /* A PR IS A MOMENT: a burst in the accent from the set's number, and the
    word itself lifting off it. Drawn over everything, gone in a second,

@@ -473,6 +473,8 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await settle(page);
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
     ok('coming back to the app places you on the set you are on, even with a field focused, and on a long card the set itself is placed', /\[120, 500\]\.forEach\(function \(t\) \{ setTimeout\(function \(\) \{ lfScrollCur\(false\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /THE SET YOU ARE ON, NOT ONLY ITS EXERCISE/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
+    const srcS = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('a repaint keeps where you were and the exercise you ticked keeps you, and the W and the drop arrow are centred in their boxes', /if \(bdK && keepTop\) bdK\.scrollTop = keepTop;/.test(srcS) && /lfCurExId = e\.id; lfCurGo = 1;/.test(srcS) && /\.lf-set\.is-wu \.lf-wu-n, \.lf-set\.is-drop \.lf-dr-n \{ display: inline-flex; align-items: center; justify-content: center/.test(srcS) && !/<span class="lf-sn lf-dr-n">↳/.test(srcS));
     ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Linear hack calf raises:5,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
