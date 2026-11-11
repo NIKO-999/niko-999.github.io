@@ -5677,12 +5677,15 @@ function lfDragon(col) {
   function rnd() { sd = (sd * 16807) % 2147483647; return sd / 2147483647; }
   /* a path drawn as neon: a wide soft glow, a coloured line, a white core */
   function neon(draw, w, hue, a) {
-    [[w * 3.6, .1, 60], [w * 2, .3, 58], [w, .95, 62], [w * .36, 1, 94]].forEach(function (q) { x.lineWidth = q[0]; x.strokeStyle = 'hsla(' + hue + ',' + SAT + '%,' + (light ? 40 : q[2]) + '%,' + q[1] * a + ')'; x.beginPath(); draw(); x.stroke(); });
+    /* 'g' is the dragon's own steel: grey and white, where the accent is kept for what burns and glints */
+    var gy = hue === 'g';
+    (gy ? [[w * 3.2, .07, 84], [w * 1.8, .16, 78], [w, .8, 74], [w * .36, 1, 97]] : [[w * 3.6, .1, 60], [w * 2, .3, 58], [w, .95, 62], [w * .36, 1, 94]]).forEach(function (q) { x.lineWidth = q[0]; x.strokeStyle = gy ? 'hsla(220,10%,' + (light ? 24 : q[2]) + '%,' + q[1] * a + ')' : 'hsla(' + hue + ',' + SAT + '%,' + (light ? 40 : q[2]) + '%,' + q[1] * a + ')'; x.beginPath(); draw(); x.stroke(); });
   }
   /* a finer line for the detail: a coloured stroke and a pale one, no glow pass */
   function thin(draw, w, hue, a) {
-    x.lineWidth = w * 2.2; x.strokeStyle = 'hsla(' + hue + ',' + SAT + '%,' + (light ? 40 : 58) + '%,' + .28 * a + ')'; x.beginPath(); draw(); x.stroke();
-    x.lineWidth = w; x.strokeStyle = 'hsla(' + hue + ',' + SAT + '%,' + (light ? 36 : 84) + '%,' + .9 * a + ')'; x.beginPath(); draw(); x.stroke();
+    var gy = hue === 'g';
+    x.lineWidth = w * 2.2; x.strokeStyle = gy ? 'hsla(220,10%,' + (light ? 30 : 80) + '%,' + .14 * a + ')' : 'hsla(' + hue + ',' + SAT + '%,' + (light ? 40 : 58) + '%,' + .28 * a + ')'; x.beginPath(); draw(); x.stroke();
+    x.lineWidth = w; x.strokeStyle = gy ? 'hsla(220,10%,' + (light ? 26 : 88) + '%,' + .85 * a + ')' : 'hsla(' + hue + ',' + SAT + '%,' + (light ? 36 : 84) + '%,' + .9 * a + ')'; x.beginPath(); draw(); x.stroke();
   }
   function bodyW(f) { return (3 + 8 * Math.exp(-Math.pow((f - .18) / .2, 2)) + 4 * (1 - f)) * k; }
   /* a wing off point a, spread along the side sg of the body: an arm, four finger bones and a scalloped edge between their tips */
@@ -5691,14 +5694,15 @@ function lfDragon(col) {
     /* in the body's own frame: n is out from the body, t is back along it */
     function P2(o, bk) { return [a[0] + nx * o * sp + tx * bk * k, a[1] + ny * o * sp + ty * bk * k]; }
     var sh = P2(0, 0), el = P2(34, -10), wr = P2(62, sw * 40 - 6), tips = [P2(118, sw * 80 - 28), P2(104, sw * 80 + 6), P2(80, sw * 80 + 40), P2(46, 70)];
-    neon(function () { x.moveTo(sh[0], sh[1]); x.lineTo(el[0], el[1]); x.lineTo(wr[0], wr[1]); }, 2.6 * k, hue, al);
+    neon(function () { x.moveTo(sh[0], sh[1]); x.lineTo(el[0], el[1]); x.lineTo(wr[0], wr[1]); }, 2.6 * k, 'g', al);
     var back = P2(0, 62);
     /* the membrane is lit from behind: a wash of the colour between the bones */
-    x.fillStyle = 'hsla(' + hue + ',' + SAT + '%,' + (light ? 45 : 58) + '%,' + .13 * al + ')'; x.beginPath(); x.moveTo(sh[0], sh[1]); x.lineTo(el[0], el[1]); x.lineTo(wr[0], wr[1]); tips.forEach(function (tp) { x.lineTo(tp[0], tp[1]); }); x.lineTo(back[0], back[1]); x.closePath(); x.fill();
-    tips.forEach(function (tp, i) { neon(function () { x.moveTo(wr[0], wr[1]); x.quadraticCurveTo((wr[0] + tp[0]) / 2 - nx * 7 * k, (wr[1] + tp[1]) / 2 - ny * 7 * k, tp[0], tp[1]); }, 1.5 * k, hue + 12, al); });
-    for (var ri = 0; ri < 3; ri++) { var rm = [(tips[ri][0] + tips[ri + 1][0]) / 2, (tips[ri][1] + tips[ri + 1][1]) / 2]; thin(function () { x.moveTo(el[0], el[1]); x.lineTo(rm[0], rm[1]); }, .9 * k, hue + 6, al * .8); }
+    x.globalCompositeOperation = 'source-over'; x.fillStyle = 'rgba(8,9,13,' + .62 * al + ')'; x.beginPath(); x.moveTo(sh[0], sh[1]); x.lineTo(el[0], el[1]); x.lineTo(wr[0], wr[1]); tips.forEach(function (tp) { x.lineTo(tp[0], tp[1]); }); x.lineTo(back[0], back[1]); x.closePath(); x.fill(); x.globalCompositeOperation = light ? 'source-over' : 'lighter';
+    x.fillStyle = 'hsla(' + hue + ',' + SAT + '%,' + (light ? 45 : 58) + '%,' + .06 * al + ')'; x.beginPath(); x.moveTo(sh[0], sh[1]); x.lineTo(el[0], el[1]); x.lineTo(wr[0], wr[1]); tips.forEach(function (tp) { x.lineTo(tp[0], tp[1]); }); x.lineTo(back[0], back[1]); x.closePath(); x.fill();
+    tips.forEach(function (tp, i) { neon(function () { x.moveTo(wr[0], wr[1]); x.quadraticCurveTo((wr[0] + tp[0]) / 2 - nx * 7 * k, (wr[1] + tp[1]) / 2 - ny * 7 * k, tp[0], tp[1]); }, 1.5 * k, 'g', al); });
+    for (var ri = 0; ri < 3; ri++) { var rm = [(tips[ri][0] + tips[ri + 1][0]) / 2, (tips[ri][1] + tips[ri + 1][1]) / 2]; thin(function () { x.moveTo(el[0], el[1]); x.lineTo(rm[0], rm[1]); }, .9 * k, 'g', al * .8); }
     [el, wr].forEach(function (jt) { x.fillStyle = 'hsla(' + hue + ',100%,90%,' + al + ')'; x.beginPath(); x.arc(jt[0], jt[1], 3.2 * k, 0, 7); x.fill(); x.fillStyle = 'hsla(' + hue + ',' + SAT + '%,60%,' + .3 * al + ')'; x.beginPath(); x.arc(jt[0], jt[1], 8 * k, 0, 7); x.fill(); });
-    var cl = P2(76, sw * 40 - 16); neon(function () { x.moveTo(wr[0], wr[1]); x.lineTo(cl[0], cl[1]); }, 1.6 * k, hue + 24, al);
+    var cl = P2(76, sw * 40 - 16); neon(function () { x.moveTo(wr[0], wr[1]); x.lineTo(cl[0], cl[1]); }, 1.6 * k, 'g', al);
     tipsOut.push(tips[0]);
     neon(function () { x.moveTo(tips[0][0], tips[0][1]); for (var i = 1; i < tips.length; i++) { var m = [(tips[i - 1][0] + tips[i][0]) / 2, (tips[i - 1][1] + tips[i][1]) / 2], c = [m[0] - nx * 12 * k * sp / k, m[1] - ny * 12 * k * sp / k]; x.quadraticCurveTo(c[0], c[1], tips[i][0], tips[i][1]); } x.quadraticCurveTo((tips[3][0] + back[0]) / 2 - nx * 10 * k, (tips[3][1] + back[1]) / 2 - ny * 10 * k, back[0], back[1]); }, 1.6 * k, hue - 8, al * .9);
   }
@@ -5717,45 +5721,48 @@ function lfDragon(col) {
     for (var j = pts.length - 2; j >= 0; j--) {
       var a = pts[j], b = pts[j + 1]; if (!a || !b) continue;
       var f = j / N, w = (3 + 8 * Math.exp(-Math.pow((f - .18) / .2, 2)) + 4 * (1 - f)) * k, hue = H0 + (f - .3) * 40;
-      neon(function () { x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); }, w, hue, fade);
+      /* a dark body, edged in steel: it hides what it passes over, and the accent stays for the ridge */
+      x.globalCompositeOperation = 'source-over'; x.strokeStyle = 'rgba(7,8,11,' + .96 * fade + ')'; x.lineWidth = w * 2; x.beginPath(); x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); x.stroke(); x.globalCompositeOperation = light ? 'source-over' : 'lighter';
+      [-1, 1].forEach(function (sg) { neon(function () { x.moveTo(a[0] + a[2] * w * .92 * sg, a[1] + a[3] * w * .92 * sg); x.lineTo(b[0] + b[2] * w * .92 * sg, b[1] + b[3] * w * .92 * sg); }, 1.25 * k, 'g', fade); });
       if (j % 3 === 0 && j > 2) { var rl = (9 - 6 * f) * (j % 6 === 0 ? 1.5 : 1) * k, mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2; neon(function () { x.moveTo(mx2 - a[2] * rl, my2 - a[3] * rl); x.lineTo(mx2 + a[2] * rl, my2 + a[3] * rl); }, 1.2 * k, hue + 24, fade); }
     }
     /* armour: a flank line down each side, and a scale on every other segment */
     for (var sj = 0; sj < pts.length - 2; sj++) {
       var sa = pts[sj], sb = pts[sj + 1]; if (!sa || !sb) continue;
-      var sf = sj / N, so = bodyW(sf) * .62, sh2 = H0 + (sf - .3) * 40 + 10, tx2 = sb[0] - sa[0], ty2 = sb[1] - sa[1], tl2 = Math.hypot(tx2, ty2) || 1; tx2 /= tl2; ty2 /= tl2;
+      var sf = sj / N, so = bodyW(sf) * .62, sh2 = 'g', tx2 = sb[0] - sa[0], ty2 = sb[1] - sa[1], tl2 = Math.hypot(tx2, ty2) || 1; tx2 /= tl2; ty2 /= tl2;
       [-1, 1].forEach(function (sg) {
         thin(function () { x.moveTo(sa[0] + sa[2] * so * sg, sa[1] + sa[3] * so * sg); x.lineTo(sb[0] + sb[2] * so * sg, sb[1] + sb[3] * so * sg); }, .9 * k, sh2, fade);
-        if (sj % 2 === 1 && sj < N - 6) thin(function () { x.moveTo(sa[0] + sa[2] * so * sg, sa[1] + sa[3] * so * sg); x.lineTo(sa[0] + sa[2] * so * .3 * sg - tx2 * 6 * k, sa[1] + sa[3] * so * .3 * sg - ty2 * 6 * k); }, .8 * k, sh2 + 8, fade * .9);
+        if (sj % 2 === 1 && sj < N - 6) thin(function () { x.moveTo(sa[0] + sa[2] * so * sg, sa[1] + sa[3] * so * sg); x.lineTo(sa[0] + sa[2] * so * .3 * sg - tx2 * 6 * k, sa[1] + sa[3] * so * .3 * sg - ty2 * 6 * k); }, .8 * k, sh2, fade * .9);
       });
     }
     /* a frill of spines down the neck and fins along the end of the tail */
     for (var fj = 1; fj < 9; fj++) { var fa = pts[fj]; if (!fa) continue; var fl = (16 - fj * 1.3) * k, fh = H0 + 22; [-1, 1].forEach(function (sg) { thin(function () { x.moveTo(fa[0] + fa[2] * bodyW(fj / N) * .6 * sg, fa[1] + fa[3] * bodyW(fj / N) * .6 * sg); x.lineTo(fa[0] + fa[2] * (bodyW(fj / N) * .6 + fl) * sg + (pts[fj - 1] ? (pts[fj - 1][0] - fa[0]) * .5 : 0), fa[1] + fa[3] * (bodyW(fj / N) * .6 + fl) * sg + (pts[fj - 1] ? (pts[fj - 1][1] - fa[1]) * .5 : 0)); }, 1.1 * k, fh, fade); }); }
-    [33, 37, 41].forEach(function (tj) { var ta = pts[tj]; if (!ta) return; [-1, 1].forEach(function (sg) { thin(function () { x.moveTo(ta[0], ta[1]); x.lineTo(ta[0] + ta[2] * 13 * k * sg + (pts[tj - 1] ? (pts[tj][0] - pts[tj - 1][0]) * 1.4 : 0), ta[1] + ta[3] * 13 * k * sg + (pts[tj - 1] ? (pts[tj][1] - pts[tj - 1][1]) * 1.4 : 0)); }, 1.1 * k, H0 + 16, fade); }); });
+    [33, 37, 41].forEach(function (tj) { var ta = pts[tj]; if (!ta) return; [-1, 1].forEach(function (sg) { thin(function () { x.moveTo(ta[0], ta[1]); x.lineTo(ta[0] + ta[2] * 13 * k * sg + (pts[tj - 1] ? (pts[tj][0] - pts[tj - 1][0]) * 1.4 : 0), ta[1] + ta[3] * 13 * k * sg + (pts[tj - 1] ? (pts[tj][1] - pts[tj - 1][1]) * 1.4 : 0)); }, 1.1 * k, 'g', fade); }); });
     /* legs: a pair at the shoulders and a pair at the hips, each with claws */
     [8, 19].forEach(function (j) { var a = pts[j]; if (!a) return; var hue = H0 + (j / N - .3) * 40; [-1, 1].forEach(function (sg) { var kx = a[0] + sg * a[2] * 26 * k, ky = a[1] + sg * a[3] * 26 * k;
-      neon(function () { x.moveTo(a[0], a[1]); x.quadraticCurveTo(a[0] + sg * a[2] * 12 * k + a[3] * 10 * k, a[1] + sg * a[3] * 12 * k - a[2] * 10 * k, kx, ky); }, 2.4 * k, hue, fade);
-      [-1, 0, 1].forEach(function (c) { neon(function () { x.moveTo(kx, ky); x.lineTo(kx + sg * a[2] * 8 * k - a[3] * c * 7 * k, ky + sg * a[3] * 8 * k + a[2] * c * 7 * k); }, 1.3 * k, hue, fade); }); }); });
+      neon(function () { x.moveTo(a[0], a[1]); x.quadraticCurveTo(a[0] + sg * a[2] * 12 * k + a[3] * 10 * k, a[1] + sg * a[3] * 12 * k - a[2] * 10 * k, kx, ky); }, 2.4 * k, 'g', fade);
+      [-1, 0, 1].forEach(function (c) { neon(function () { x.moveTo(kx, ky); x.lineTo(kx + sg * a[2] * 8 * k - a[3] * c * 7 * k, ky + sg * a[3] * 8 * k + a[2] * c * 7 * k); }, 1.3 * k, 'g', fade); }); }); });
     /* a spade at the end of the tail */
     var tl = null, ti = 0; for (var q = pts.length - 1; q >= 0; q--) if (pts[q]) { tl = pts[q]; ti = q; break; }
-    if (tl && ti < N - 1 && ti > 20) { var tp = pts[ti - 1]; if (tp) { var dx = tl[0] - tp[0], dy = tl[1] - tp[1], dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl; neon(function () { x.moveTo(tl[0], tl[1]); x.lineTo(tl[0] + dx * 22 * k - dy * 9 * k, tl[1] + dy * 22 * k + dx * 9 * k); x.lineTo(tl[0] + dx * 34 * k, tl[1] + dy * 34 * k); x.lineTo(tl[0] + dx * 22 * k + dy * 9 * k, tl[1] + dy * 22 * k - dx * 9 * k); x.closePath(); }, 1.6 * k, H0 + 12, fade); } }
+    if (tl && ti < N - 1 && ti > 20) { var tp = pts[ti - 1]; if (tp) { var dx = tl[0] - tp[0], dy = tl[1] - tp[1], dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl; neon(function () { x.moveTo(tl[0], tl[1]); x.lineTo(tl[0] + dx * 22 * k - dy * 9 * k, tl[1] + dy * 22 * k + dx * 9 * k); x.lineTo(tl[0] + dx * 34 * k, tl[1] + dy * 34 * k); x.lineTo(tl[0] + dx * 22 * k + dy * 9 * k, tl[1] + dy * 22 * k - dx * 9 * k); x.closePath(); }, 1.6 * k, 'g', fade); } }
     /* the head, from above: a skull with a jaw, swept horns and two eyes */
     var h = pts[0], h2 = pts[3] || pts[1];
     if (h && h2) {
       var ang = Math.atan2(h[1] - h2[1], h[0] - h2[0]); x.save(); x.translate(h[0], h[1]); x.rotate(ang); x.scale(k, k);
       var hc = H0 - 6, hw = 2.6;
-      neon(function () { x.moveTo(-14, -10); x.lineTo(2, -13); x.lineTo(22, -8); x.lineTo(40, -3); x.lineTo(40, 3); x.lineTo(22, 8); x.lineTo(2, 13); x.lineTo(-14, 10); x.closePath(); }, hw, hc, fade);
-      neon(function () { x.moveTo(40, 0); x.lineTo(14, 0); }, 1.4, hc + 20, fade);
+      x.globalCompositeOperation = 'source-over'; x.fillStyle = 'rgba(7,8,11,' + .96 * fade + ')'; x.beginPath(); x.moveTo(-14, -10); x.lineTo(2, -13); x.lineTo(22, -8); x.lineTo(40, -3); x.lineTo(40, 3); x.lineTo(22, 8); x.lineTo(2, 13); x.lineTo(-14, 10); x.closePath(); x.fill(); x.globalCompositeOperation = light ? 'source-over' : 'lighter';
+      neon(function () { x.moveTo(-14, -10); x.lineTo(2, -13); x.lineTo(22, -8); x.lineTo(40, -3); x.lineTo(40, 3); x.lineTo(22, 8); x.lineTo(2, 13); x.lineTo(-14, 10); x.closePath(); }, hw, 'g', fade);
+      neon(function () { x.moveTo(40, 0); x.lineTo(14, 0); }, 1.4, 'g', fade);
       [-1, 1].forEach(function (sg) {
-        neon(function () { x.moveTo(0, sg * 12); x.quadraticCurveTo(-18, sg * 28, -44, sg * 26); }, hw, hc + 30, fade);
-        neon(function () { x.moveTo(-8, sg * 10); x.quadraticCurveTo(-22, sg * 19, -36, sg * 14); }, 1.6, hc + 40, fade);
-        neon(function () { x.moveTo(36, sg * 3); x.bezierCurveTo(30, sg * 22, 6, sg * 30, -16, sg * 40); }, 1.3, hc + 50, fade);
-        neon(function () { x.moveTo(20, sg * 3); x.quadraticCurveTo(14, sg * 11, 6, sg * 9); }, 1.3, hc + 10, fade);
-        thin(function () { x.moveTo(-10, sg * 6.5); x.lineTo(24, sg * 3); x.lineTo(36, sg * 1); }, .8, hc + 16, fade);
-        [0, 1, 2, 3, 4].forEach(function (ti) { thin(function () { x.moveTo(36 - ti * 3.2, sg * (3 + ti * .9)); x.lineTo(34 - ti * 3.2, sg * (6.6 + ti * .9)); }, .8, hc + 80, fade); });
-        [0, 1, 2].forEach(function (fi) { thin(function () { x.moveTo(-12, sg * 5); x.quadraticCurveTo(-22, sg * (9 + fi * 5), -32 - fi * 2, sg * (13 + fi * 8)); }, .9, hc + 36 + fi * 8, fade); });
-        thin(function () { x.moveTo(-4, sg * 12); x.lineTo(-12, sg * 22); }, .9, hc + 46, fade);
-        neon(function () { x.moveTo(32, sg * 3); x.lineTo(28, sg * 8); x.lineTo(24, sg * 4); }, 1.1, hc + 70, fade);
+        neon(function () { x.moveTo(0, sg * 12); x.quadraticCurveTo(-18, sg * 28, -44, sg * 26); }, hw, 'g', fade);
+        neon(function () { x.moveTo(-8, sg * 10); x.quadraticCurveTo(-22, sg * 19, -36, sg * 14); }, 1.6, 'g', fade);
+        neon(function () { x.moveTo(36, sg * 3); x.bezierCurveTo(30, sg * 22, 6, sg * 30, -16, sg * 40); }, 1.3, 'g', fade);
+        neon(function () { x.moveTo(20, sg * 3); x.quadraticCurveTo(14, sg * 11, 6, sg * 9); }, 1.3, 'g', fade);
+        thin(function () { x.moveTo(-10, sg * 6.5); x.lineTo(24, sg * 3); x.lineTo(36, sg * 1); }, .8, 'g', fade);
+        [0, 1, 2, 3, 4].forEach(function (ti) { thin(function () { x.moveTo(36 - ti * 3.2, sg * (3 + ti * .9)); x.lineTo(34 - ti * 3.2, sg * (6.6 + ti * .9)); }, .8, 'g', fade); });
+        [0, 1, 2].forEach(function (fi) { thin(function () { x.moveTo(-12, sg * 5); x.quadraticCurveTo(-22, sg * (9 + fi * 5), -32 - fi * 2, sg * (13 + fi * 8)); }, .9, 'g', fade); });
+        thin(function () { x.moveTo(-4, sg * 12); x.lineTo(-12, sg * 22); }, .9, 'g', fade);
+        neon(function () { x.moveTo(32, sg * 3); x.lineTo(28, sg * 8); x.lineTo(24, sg * 4); }, 1.1, 'g', fade);
         x.fillStyle = 'hsla(' + hc + ',100%,75%,' + fade + ')'; x.beginPath(); x.arc(37, sg * 1.5, 1.1, 0, 7); x.fill();
         x.fillStyle = 'rgba(255,255,255,' + fade + ')'; x.beginPath(); x.arc(14, sg * 6.5, 2.6, 0, 7); x.fill();
         x.strokeStyle = 'rgba(0,0,0,' + .85 * fade + ')'; x.lineWidth = 1; x.beginPath(); x.moveTo(14, sg * 6.5 - 2.2); x.lineTo(14, sg * 6.5 + 2.2); x.stroke();
