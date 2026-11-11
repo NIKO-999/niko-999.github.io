@@ -1,0 +1,17 @@
+{
+  "name": "lift-ios",
+  "private": true,
+  "description": "The iPhone shell for Lift. The app itself is ../lift and is copied in by build-www.sh; nothing here changes it.",
+  "scripts": {
+    "www": "sh build-www.sh",
+    "sync": "sh build-www.sh && npx cap sync ios",
+    "open": "npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0"
+  }
+}

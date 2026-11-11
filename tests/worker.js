@@ -110,6 +110,13 @@ const kv = () => {
       r.headers.get('Access-Control-Allow-Origin') !== o,
       r.headers.get('Access-Control-Allow-Origin'));
   }
+  /* THE iPHONE APP is served from its own shell's origin, and only that one */
+  r = await hit('GET', '/v1/pod/1200361736', { origin: 'capacitor://localhost' });
+  ok('the iPhone app\'s own origin is answered', r.headers.get('Access-Control-Allow-Origin') === 'capacitor://localhost', r.headers.get('Access-Control-Allow-Origin'));
+  for (const o of ['capacitor://evil.example', 'ionic://localhost', 'capacitor://localhost.evil.example']) {
+    r = await hit('GET', '/v1/pod/1200361736', { origin: o });
+    ok('and nothing dressed as it is: ' + o, r.headers.get('Access-Control-Allow-Origin') !== o, r.headers.get('Access-Control-Allow-Origin'));
+  }
   ok('the origin is varied on, so a cache cannot serve one to another',
     (r.headers.get('Vary') || '').includes('Origin'));
 

@@ -51,8 +51,10 @@
    thing that exercises this file end to end. */
 const ORIGIN = 'https://niko-999.github.io';
 const LOOPBACK = /^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/;
+/* THE iPHONE APP: the same pages, served from inside a native shell under this one origin. It is the shell's own and nobody else's. */
+const NATIVE = 'capacitor://localhost';
 
-function allowed(o) { return o === ORIGIN || LOOPBACK.test(o); }
+function allowed(o) { return o === ORIGIN || o === NATIVE || LOOPBACK.test(o); }
 
 function cors(req) {
   const o = req.headers.get('Origin') || '';

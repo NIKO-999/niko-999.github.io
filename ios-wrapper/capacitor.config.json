@@ -1,0 +1,10 @@
+{
+  "appId": "com.yourname.lift",
+  "appName": "Lift",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#000000",
+    "allowsLinkPreview": false
+  }
+}
