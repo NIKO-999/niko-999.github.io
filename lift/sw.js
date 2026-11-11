@@ -6,7 +6,7 @@
    answers when it cannot be reached — so with a signal this is the app
    with no service worker at all, and in a gym basement with none it is
    the last copy that loaded. Same origin and GET only. */
-var CACHE = 'lift-v111';
+var CACHE = 'lift-v112';
 var SHELL = ['./', 'index.html', 'manifest.json', 'icon.svg', 'icon-180.png', 'icon-192.png', '../arc/fonts/Inter.woff2', 'three.min.js'];
 self.addEventListener('install', function (e) {
   self.skipWaiting();

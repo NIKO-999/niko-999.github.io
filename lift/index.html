@@ -5673,7 +5673,7 @@ function lfDragon(col) {
     u = Math.max(0, Math.min(.9999, u)); var n = P.length - 1, f = u * n, i = Math.floor(f), t = f - i, a = P[Math.max(0, i - 1)], b = P[i], c = P[i + 1], d2 = P[Math.min(n, i + 2)];
     return [cr(a[0], b[0], c[0], d2[0], t) * W, cr(a[1], b[1], c[1], d2[1], t) * H];
   }
-  var T = 4.2, N = 46, du = .0085, t0 = performance.now(), raf = 0, parts = [], lastNow = t0, tipsOut = [], sd = 5;
+  var T = 4.2, N = 46, du = .0085, t0 = performance.now(), raf = 0, parts = [], lastNow = t0, tipsOut = [], sd = 5, rings = [];
   function rnd() { sd = (sd * 16807) % 2147483647; return sd / 2147483647; }
   /* a path drawn as neon: a wide soft glow, a coloured line, a white core */
   function neon(draw, w, hue, a) {
@@ -5690,6 +5690,7 @@ function lfDragon(col) {
     /* the membrane is lit from behind: a wash of the colour between the bones */
     x.fillStyle = 'hsla(' + hue + ',' + SAT + '%,' + (light ? 45 : 58) + '%,' + .13 * al + ')'; x.beginPath(); x.moveTo(sh[0], sh[1]); x.lineTo(el[0], el[1]); x.lineTo(wr[0], wr[1]); tips.forEach(function (tp) { x.lineTo(tp[0], tp[1]); }); x.lineTo(back[0], back[1]); x.closePath(); x.fill();
     tips.forEach(function (tp, i) { neon(function () { x.moveTo(wr[0], wr[1]); x.quadraticCurveTo((wr[0] + tp[0]) / 2 - nx * 7 * k, (wr[1] + tp[1]) / 2 - ny * 7 * k, tp[0], tp[1]); }, 1.5 * k, hue + 12, al); });
+    var cl = P2(76, sw * 40 - 16); neon(function () { x.moveTo(wr[0], wr[1]); x.lineTo(cl[0], cl[1]); }, 1.6 * k, hue + 24, al);
     tipsOut.push(tips[0]);
     neon(function () { x.moveTo(tips[0][0], tips[0][1]); for (var i = 1; i < tips.length; i++) { var m = [(tips[i - 1][0] + tips[i][0]) / 2, (tips[i - 1][1] + tips[i][1]) / 2], c = [m[0] - nx * 12 * k * sp / k, m[1] - ny * 12 * k * sp / k]; x.quadraticCurveTo(c[0], c[1], tips[i][0], tips[i][1]); } x.quadraticCurveTo((tips[3][0] + back[0]) / 2 - nx * 10 * k, (tips[3][1] + back[1]) / 2 - ny * 10 * k, back[0], back[1]); }, 1.6 * k, hue - 8, al * .9);
   }
@@ -5699,7 +5700,7 @@ function lfDragon(col) {
     var pts = [], flap = Math.sin(tt * 6) * .5 + .5;
     for (var i = 0; i < N; i++) {
       var ui = u - i * du; if (ui < 0 || ui > 1) { pts.push(null); continue; }
-      var p = at(ui), q = at(ui - .004), nx = q[1] - p[1], ny = p[0] - q[0], nl = Math.hypot(nx, ny) || 1, wig = Math.sin(i * .45 - tt * 8) * 6 * k * Math.min(1, i / 6) * (1 - i / N * .3);
+      var p = at(ui), q = at(ui - .004), nx = q[1] - p[1], ny = p[0] - q[0], nl = Math.hypot(nx, ny) || 1, wig = Math.sin(i * .45 - tt * 8) * 6 * k * Math.min(1, i / 6) * (.5 + i / N * 1.1);
       pts.push([p[0] + nx / nl * wig, p[1] + ny / nl * wig, nx / nl, ny / nl]);
     }
     var fade = Math.min(1, Math.max(0, (T + .35 - tt) / .5));
@@ -5707,9 +5708,9 @@ function lfDragon(col) {
     var ws = pts[9]; if (ws) [1, -1].forEach(function (sg) { wing(ws, sg, flap, H0 + 18, fade); });
     for (var j = pts.length - 2; j >= 0; j--) {
       var a = pts[j], b = pts[j + 1]; if (!a || !b) continue;
-      var f = j / N, w = (8.5 - 6.8 * f) * k, hue = H0 + (f - .3) * 40;
+      var f = j / N, w = (3 + 8 * Math.exp(-Math.pow((f - .18) / .2, 2)) + 4 * (1 - f)) * k, hue = H0 + (f - .3) * 40;
       neon(function () { x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); }, w, hue, fade);
-      if (j % 3 === 0 && j > 2) { var rl = (7 - 5 * f) * k, mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2; neon(function () { x.moveTo(mx2 - a[2] * rl, my2 - a[3] * rl); x.lineTo(mx2 + a[2] * rl, my2 + a[3] * rl); }, 1.2 * k, hue + 24, fade); }
+      if (j % 3 === 0 && j > 2) { var rl = (9 - 6 * f) * (j % 6 === 0 ? 1.5 : 1) * k, mx2 = (a[0] + b[0]) / 2, my2 = (a[1] + b[1]) / 2; neon(function () { x.moveTo(mx2 - a[2] * rl, my2 - a[3] * rl); x.lineTo(mx2 + a[2] * rl, my2 + a[3] * rl); }, 1.2 * k, hue + 24, fade); }
     }
     /* legs: a pair at the shoulders and a pair at the hips, each with claws */
     [8, 19].forEach(function (j) { var a = pts[j]; if (!a) return; var hue = H0 + (j / N - .3) * 40; [-1, 1].forEach(function (sg) { var kx = a[0] + sg * a[2] * 26 * k, ky = a[1] + sg * a[3] * 26 * k;
@@ -5742,6 +5743,10 @@ function lfDragon(col) {
       if (br > 0) { var mg = x.createRadialGradient(mx3, my3, 0, mx3, my3, 150 * k / 1.9); mg.addColorStop(0, 'hsla(' + (H0 + 25) + ',' + SAT + '%,80%,' + .5 * br * fade + ')'); mg.addColorStop(.4, 'hsla(' + H0 + ',' + SAT + '%,58%,' + .16 * br * fade + ')'); mg.addColorStop(1, 'hsla(' + H0 + ',' + SAT + '%,50%,0)'); x.fillStyle = mg; x.beginPath(); x.arc(mx3, my3, 150 * k / 1.9, 0, 7); x.fill(); }
       if (br > 0) for (var pn = 0; pn < 9; pn++) { var sp = (.5 + rnd()) * 360 * k / 1.9, da = ang + (rnd() - .5) * .5; parts.push({ x: mx3, y: my3, vx: Math.cos(da) * sp, vy: Math.sin(da) * sp, l: 0, m: .5 + rnd() * .4, s: (4 + rnd() * 5) * k / 1.9, f: 1 }); }
     }
+    /* embers drift off the body, and a ring of light goes out from the head when it arrives and when it turns */
+    var pb = pts[Math.floor(rnd() * N)]; if (pb && rnd() < .7) parts.push({ x: pb[0], y: pb[1], vx: (rnd() - .5) * 26, vy: 8 + rnd() * 26, l: 0, m: 1 + rnd() * .9, s: (1.6 + rnd() * 1.8) * k / 1.9, f: 0 });
+    [[.5, 0], [1.9, 1]].forEach(function (rg) { if (tt > rg[0] && !rings[rg[1]] && pts[0]) rings[rg[1]] = { x: pts[0][0], y: pts[0][1], t: tt }; });
+    rings.forEach(function (rg) { var ra = tt - rg.t; if (ra > .8) return; neon(function () { x.arc(rg.x, rg.y, 20 * k + ra * 380 * k / 1.9, 0, 7); }, 2.2 * k * (1 - ra / .8), H0 + 10, (1 - ra / .8) * fade); });
     /* and sparks come off the wing tips */
     tipsOut.forEach(function (tp) { if (rnd() < .5) parts.push({ x: tp[0], y: tp[1], vx: (rnd() - .5) * 40, vy: (rnd() - .5) * 40 + 12, l: 0, m: .8 + rnd() * .6, s: (1.8 + rnd() * 2) * k / 1.9, f: 0 }); });
     parts = parts.filter(function (q) { return (q.l += dt) < q.m; });
