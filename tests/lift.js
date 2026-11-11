@@ -1346,6 +1346,17 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── A WEEK IS WON BY HITTING YOUR GOAL, then by the longer run of weeks: a small goal reached first wins nothing ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 2, wo: [], fx: { sy: {}, wk: { '2026-10-05': [1000, 500, 1, 0, '', 0], '2026-10-12': [1000, 500, 1, 0, '', 1], '2026-10-19': [800, 300, 1, 0, ''] } } }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const got = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent).filter((tx) => /^Crowned/.test(tx)));
+    ok('a week the flag says was lost is not crowned even if the progress was higher, a won one is, and a week kept before the flag still counts', got.length === 1 && /18 Oct|25 Oct/.test(got[0]) && !/11 Oct/.test(got[0]), got);
+    const src2 = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('the rings put a goal hit first, then the longer run of weeks on goal, and the creator is beaten the same way, never by kilos', /b\.met - a\.met\) \|\| \(a\.met && b\.met \? b\.st - a\.st : 0\)/.test(src2) && /if \(!\(mine > cStreak\)\) return;/.test(src2) && !/v8\[6\]/.test(src2.slice(src2.indexOf('function lfSlayCheck'), src2.indexOf('function frPullAll'))));
+    await c.close();
+  }
+
   /* ── MILESTONES: when you train, how long, how much at once, how widely ── */
   {
     const wo = [], ids = ['hack', 'squat', 'legext', 'legpress', 'rdl', 'seatcurl', 'lyingcurl', 'hipthrust', 'bss', 'calfstand', 'calfseat', 'calf', 'backext', 'revhyper', 'cablecrunch', 'hlr', 'abwheel', 'pullup', 'latpd', 'csrow',

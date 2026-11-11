@@ -1912,7 +1912,7 @@ function lfClean(o) {
   if (o.fx && typeof o.fx === 'object') {
     d.fx = { sy: {}, wk: {} }; var isD = function (v) { return typeof v === 'string' && /^\d{4}-\d\d-\d\d$/.test(v); };
     if (o.fx.sy && typeof o.fx.sy === 'object') Object.keys(o.fx.sy).slice(-500).forEach(function (k) { if (/^[A-Za-z0-9_-]{1,24}\|[A-Z2-9]{8}$/.test(k) && isD(o.fx.sy[k])) d.fx.sy[k] = o.fx.sy[k]; });
-    if (o.fx.wk && typeof o.fx.wk === 'object') Object.keys(o.fx.wk).sort().slice(-200).forEach(function (k) { var v = o.fx.wk[k]; if (isD(k) && Array.isArray(v)) d.fx.wk[k] = [Math.max(0, Math.min(1000, Math.round(+v[0]) || 0)), Math.max(0, Math.min(1000, Math.round(+v[1]) || 0)), Math.max(0, Math.min(50, Math.round(+v[2]) || 0)), v[3] ? 1 : 0, isD(v[4]) ? v[4] : '']; });
+    if (o.fx.wk && typeof o.fx.wk === 'object') Object.keys(o.fx.wk).sort().slice(-200).forEach(function (k) { var v = o.fx.wk[k]; if (isD(k) && Array.isArray(v)) d.fx.wk[k] = [Math.max(0, Math.min(1000, Math.round(+v[0]) || 0)), Math.max(0, Math.min(1000, Math.round(+v[1]) || 0)), Math.max(0, Math.min(50, Math.round(+v[2]) || 0)), v[3] ? 1 : 0, isD(v[4]) ? v[4] : ''].concat(v.length > 5 ? [v[5] ? 1 : 0] : []); });
   }
   if (typeof o.wkDone === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkDone)) d.wkDone = o.wkDone;
   if (typeof o.wkSum === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkSum)) d.wkSum = o.wkSum;
@@ -4934,17 +4934,23 @@ setTimeout(frLivePoll, 1200);
    friend would see the old shape until you next trained, so the first open
    of a new shape sends it once. */
 if (FRS.on && FRS.sv !== 3) { FRS.sv = 3; frSave(); setTimeout(function () { frPushNow(); }, 3000); }
-/* BEATING THE CREATOR. The last whole week, Monday to Sunday: more kilos
-   moved than the creator moved in it, and the creator has to have trained.
-   Their record must have been sent this week, or its weeks are not the
-   weeks being compared. Once it happens it is kept: the date is the Sunday. */
+/* BEATING THE CREATOR. The last whole week, Monday to Sunday: you hit your
+   goal and so did the creator, and your run of weeks on goal is longer than
+   theirs. Kilos and days do not decide it, so a small goal reached first
+   wins nothing. Their record must have been sent this week, or its weeks are
+   not the weeks being compared. Once it happens it is kept: the date is the Sunday. */
 function lfSlayCheck(f) {
-  if (S.slay || lfOwner() || !f || !f.s || f.s.ow !== 1 || !Array.isArray(f.s.v8)) return;
-  var mon = monday(today()); if (!(f.at >= mon.getTime())) return;
-  var theirs = +f.s.v8[6] || 0, a = addDays(mon, -7), mine = Math.round(windowStats(a, addDays(a, 6)).vol);
-  if (!(theirs > 0 && mine > theirs)) return;
+  if (S.slay || lfOwner() || !f || !f.s || f.s.ow !== 1) return;
+  var mon = monday(today()), tr = f.s.tr; if (!(f.at >= mon.getTime()) || !tr || tr.m !== ymd(mon) || !Array.isArray(tr.w8) || !Array.isArray(tr.w8[6])) return;
+  /* last week, both of you hit your goals, and your run of weeks on goal is the longer one */
+  var cg = +f.s.goal || 0, cThis = (+f.s.wk || 0) >= cg, cStreak = (+f.s.streak || 0) - (cThis ? 1 : 0);
+  if (!(cg > 0 && S.goal > 0 && (+tr.w8[6][0] || 0) >= cg)) return;
+  var last = addDays(mon, -7), mine = 0;
+  if (wkDays(last) < S.goal) return;
+  for (var m = last, g = 0; g < 104 && wkDays(m) >= S.goal; m = addDays(m, -7), g++) mine++;
+  if (!(mine > cStreak)) return;
   S.slay = ymd(addDays(mon, -1)); lfBCk = ''; lfSave();
-  lfToast('You out-lifted the creator. Giant Slayer is yours'); setTimeout(lfMomentsRun, 600);
+  lfToast('You out-lasted the creator. Giant Slayer is yours'); setTimeout(lfMomentsRun, 600);
 }
 function frPullAll(done) {
   /* everybody on the list, and your own record for the reactions on it */
@@ -5886,15 +5892,20 @@ function frFxNote(rows) {
   if (me && fr.length) {
     var k = function (f) { var w = frWeekOf(f.s); return Math.min(1000, Math.round(w.n / w.g * 1000)); };
     var my = k(me), best = Math.max.apply(null, fr.map(k)), all = my >= 1000 && fr.every(function (f) { return k(f) >= 1000; }) ? 1 : 0;
-    var was = fx.wk[mon] || [], v = [my, best, fr.length, all || was[3] ? 1 : 0, was[4] || (all ? ymd(today()) : '')];
+    /* A WEEK IS WON BY HITTING YOUR GOAL, then by the longer run of weeks on it:
+       getting to two workouts first means nothing when two is all you aimed at */
+    var mst = +(me.s && me.s.streak) || 0, win = my >= 1000 && fr.every(function (f) { return k(f) < 1000 || (+(f.s && f.s.streak) || 0) < mst; }) ? 1 : 0;
+    var was = fx.wk[mon] || [], v = [my, best, fr.length, all || was[3] ? 1 : 0, was[4] || (all ? ymd(today()) : ''), win];
     if (JSON.stringify(v) !== JSON.stringify(was)) { fx.wk[mon] = v; ch = true; }
   }
   if (ch) { S.fx = fx; lfSave(); setTimeout(lfBadgeNew, 600); }
 }
 function frRings(rows) {
   frFxNote(rows);
-  var ls = rows.map(function (f) { var w = frWeekOf(f.s); return { f: f, w: w, k: f.gone ? -1 : Math.min(1, w.n / w.g) }; })
-    .sort(function (a, b) { return b.k - a.k || b.w.n - a.w.n; });
+  /* IN FRONT IS: a goal hit, then the longer run of weeks on goal. Until
+     anyone has hit theirs it is whoever is closest to their own */
+  var ls = rows.map(function (f) { var w = frWeekOf(f.s), k = f.gone ? -1 : Math.min(1, w.n / w.g); return { f: f, w: w, k: k, met: k >= 1, st: +(f.s && f.s.streak) || 0 }; })
+    .sort(function (a, b) { return (b.met - a.met) || (a.met && b.met ? b.st - a.st : 0) || b.k - a.k || b.w.n - a.w.n; });
   var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div><div id="frBoard"></div></div>');
   var g = $('g', c), drawn = ls.filter(function (x) { return !x.f.gone; }).slice(0, 6), n = drawn.length;
   var sw = n > 4 ? 8 : 11, step = sw + 3, r0 = 69 - sw / 2;
@@ -5934,7 +5945,7 @@ function frRings(rows) {
      started yet says nothing. Training now stays on the ring itself. */
   var lead = ls.filter(function (x) { return !x.f.gone && x.k > 0; });
   if (lead.length) {
-    var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && lead[1].k === top.k && lead[1].w.n === top.w.n;
+    var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && (top.met ? lead[1].met && lead[1].st === top.st : !lead[1].met && lead[1].k === top.k && lead[1].w.n === top.w.n);
     mid.hidden = false; mid.id = 'frRgLead';
     mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b>';
     $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
@@ -6452,6 +6463,9 @@ var BADGES = [
 var BADGE = {}; BADGES.forEach(function (b) { BADGE[b.id] = b; });
 var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, bbrow: 1, hipthrust: 1, sldl: 1, rackpull: 1, ohp: 1 };
 /* every badge, with the day it was won or how far along it is */
+/* a week in front: the stored win flag, or for a week kept before there was
+   one, the old reading, so nothing already earned is taken back */
+function frWon(v) { return v.length > 5 ? !!v[5] && v[2] > 0 : v[0] > 0 && v[0] > v[1] && v[2] > 0; }
 function lfBadges() {
   var ws = woSorted(), out = {}, uk = S.unit === 'lb' ? LB : 1;
   function won(id, d) { if (!out[id]) out[id] = { d: d }; }
@@ -6587,7 +6601,7 @@ function lfBadges() {
     var v = fx.wk[m], sun = ymd(addDays(parseYmd(m), 6));
     if (v[3]) won('squad', v[4] || sun);
     if (m >= thisMonF) return;
-    if (v[0] > 0 && v[0] > v[1] && v[2] > 0) { won('lead1', sun); run++; if (run === 3) won('lead3', sun); if (++winN === 10) won('lead10', sun); if (S.goal > 0 && wkDays(parseYmd(m)) >= S.goal) { if (++bcRun === 4) won('unbeat', sun); } else bcRun = 0; } else { run = 0; bcRun = 0; }
+    if (frWon(v)) { won('lead1', sun); run++; if (run === 3) won('lead3', sun); if (++winN === 10) won('lead10', sun); if (S.goal > 0 && wkDays(parseYmd(m)) >= S.goal) { if (++bcRun === 4) won('unbeat', sun); } else bcRun = 0; } else { run = 0; bcRun = 0; }
     curRun = run;
   });
   /* THE NEW RARE ONES */
@@ -6607,7 +6621,7 @@ function lfBadges() {
   wks.forEach(function (m) {
     var v = fx.wk[m], sun = ymd(addDays(parseYmd(m), 6));
     if (m >= thisMonF) return;
-    var front = v[0] > 0 && v[0] > v[1] && v[2] > 0;
+    var front = frWon(v);
     if (front && v[1] > 0 && v[0] >= v[1] * 2) won('landslide', sun);
     if (front && v[2] >= 3) won('pack', sun);
     if (v[0] >= 1000 && v[1] >= 1000) won('photo', sun);
