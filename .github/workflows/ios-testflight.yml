@@ -1,0 +1,91 @@
+name: Lift for iPhone (TestFlight)
+
+# Builds the iPhone app on a GitHub Mac and sends it to TestFlight.
+# Run it from the Actions tab: "Lift for iPhone (TestFlight)" > Run workflow.
+# One-time setup is in ios-wrapper/SETUP-CLOUD.md.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      BUNDLE_ID: ${{ secrets.BUNDLE_ID }}
+      TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+      ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Check the secrets are there
+        run: |
+          for v in BUNDLE_ID TEAM_ID KEY_ID ISSUER_ID; do
+            if [ -z "${!v}" ]; then echo "Missing secret for $v. See ios-wrapper/SETUP-CLOUD.md"; exit 1; fi
+          done
+          if [ -z "${{ secrets.APPSTORE_KEY_P8 }}" ]; then echo "Missing secret APPSTORE_KEY_P8"; exit 1; fi
+
+      - name: Put the app in the shell
+        working-directory: ios-wrapper
+        run: |
+          sed -i '' "s/com.yourname.lift/${BUNDLE_ID}/" capacitor.config.json
+          npm install
+          sh build-www.sh
+          npx cap add ios
+          npx @capacitor/assets generate --ios --iconBackgroundColor '#0b0b0d' --splashBackgroundColor '#000000' || true
+          npx cap sync ios
+
+      - name: Portrait only, no encryption questions
+        working-directory: ios-wrapper/ios/App/App
+        run: |
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations array" Info.plist
+          /usr/libexec/PlistBuddy -c "Add :UISupportedInterfaceOrientations:0 string UIInterfaceOrientationPortrait" Info.plist
+          /usr/libexec/PlistBuddy -c "Delete :UISupportedInterfaceOrientations~ipad" Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" Info.plist || true
+
+      - name: Write the App Store Connect key
+        run: |
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s' "${{ secrets.APPSTORE_KEY_P8 }}" > "$RUNNER_TEMP/keys/AuthKey_${KEY_ID}.p8"
+
+      - name: Build the archive
+        working-directory: ios-wrapper/ios/App
+        run: |
+          xcodebuild archive \
+            -workspace App.xcworkspace -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Lift.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${KEY_ID}.p8" \
+            -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID" \
+            DEVELOPMENT_TEAM="$TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            MARKETING_VERSION=1.0 CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+
+      - name: Send it to TestFlight
+        working-directory: ios-wrapper/ios/App
+        run: |
+          cat > "$RUNNER_TEMP/export.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>teamID</key><string>${TEAM_ID}</string>
+            <key>destination</key><string>upload</string>
+            <key>signingStyle</key><string>automatic</string>
+            <key>uploadSymbols</key><true/>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Lift.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${KEY_ID}.p8" \
+            -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER_ID"
