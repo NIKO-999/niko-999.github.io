@@ -550,10 +550,19 @@ const freeze = (at) => `(() => {
     /* moderate soreness cuts a third of the sets, on any session */
     const { c, page } = await ctx(null, '2026-11-02T07:00:00');
     await page.click('#lfRec .lf-rq-b[data-r="1"]'); await settle(page);
-    ok('moderate soreness says what it does, and the button says fewer sets', /loses a third of its sets/.test(await page.textContent('#lfRec')) && /fewer sets/.test(await page.textContent('#lfGo')) && (await store(page)).rc['2026-11-02'] === 1);
+    ok('moderate soreness says what it does, and the button says fewer sets', /loses a third of its sets/.test(await page.textContent('#lfRec')) && /lighter session/.test(await page.textContent('#lfGo')) && (await store(page)).rc['2026-11-02'] === 1);
     await page.click('#lfGo'); await settle(page);
     const n1 = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length));
     ok('and every exercise starts a third lighter, none below one set', n1.join() === '3,3,1,3,3', n1);
+    await c.close();
+  }
+  {
+    /* very sore halves them instead, rounded up */
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    await page.click('#lfRec .lf-rq-b[data-r="2"]'); await settle(page);
+    await page.click('#lfGo'); await settle(page);
+    const n2 = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length));
+    ok('a lighter session from very sore halves the sets, rounded up', n2.join() === '2,2,1,2,2', n2);
     await c.close();
   }
   {
@@ -561,7 +570,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx(null, '2026-11-03T07:00:00');
     ok('an upper day asks as well', await page.locator('#lfRec').count() === 1);
     await page.click('#lfRec .lf-rq-b[data-r="2"]'); await settle(page);
-    ok('very sore offers a full rest day or a different session, and a start anyway', await page.locator('#lfRecRest').count() === 1 && await page.locator('#lfRecAlt').count() === 1 && /Start anyway/.test(await page.textContent('#lfGo')));
+    ok('very sore offers a full rest day or a different session, and a lighter session instead of a start anyway', await page.locator('#lfRecRest').count() === 1 && await page.locator('#lfRecAlt').count() === 1 && /Start lighter session/.test(await page.textContent('#lfGo')) && !/Start anyway/.test(await page.textContent('#lfRec') + await page.textContent('#lfGo')));
     await page.click('#lfRecAlt'); await settle(page);
     ok('Pick another session opens the picker', await top(page).locator('.lf-li').count() > 1);
     await page.keyboard.press('Escape'); await settle(page);

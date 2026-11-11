@@ -1783,7 +1783,7 @@ var BODY_P = { Chest: 'chest', Back: 'bk', Shoulders: 'sh', Biceps: 'arm', Trice
 var RECOVERY = [
   ['Mild soreness', 'Normal strength and movement', 'Train as planned.'],
   ['Moderate soreness', 'Movement is normal', 'Every exercise loses a third of its sets today. Same weights, fewer sets.'],
-  ['Very sore or weaker', 'Reduced range or noticeably weaker', 'Skip the hard session. Change what you train today, or take a full rest day.']
+  ['Very sore or weaker', 'Reduced range or noticeably weaker', 'Half the sets today, same weights. Or change what you train, or take a full rest day.']
 ];
 function lfIsLegEx(id) { var e = exById(id); return !!(e && LEG_M[e.m]); }
 function lfIsLegDay(rt) { return !!rt && rt.ex.filter(function (id) { var e = exById(id); return e && (e.m === 'Quads' || e.m === 'Hamstrings' || e.m === 'Glutes'); }).length >= 2; }
@@ -1815,7 +1815,7 @@ function lfSetRest(on) {
 }
 function lfRc(k) { var v = S.rc[k || ymd(today())]; return v === undefined ? -1 : v; }
 /* Moderate soreness cuts a third, rounded, never below one set. */
-function lfCut(n) { return Math.max(1, n - Math.max(1, Math.round(n / 3))); }
+function lfCut(n, half) { return half ? Math.max(1, Math.ceil(n / 2)) : Math.max(1, n - Math.max(1, Math.round(n / 3))); }
 /* The plan's lighter volume, offered once legs keep coming in sore. */
 var FOCUS_RECOVER = { Quads: [10, 12], Hamstrings: [8, 8], Calves: [9, 12] };
 /* THE RECOVERY CHECK IS BACK, FOR EVERY WORKOUT and not only a leg day: how
@@ -2428,8 +2428,8 @@ function lfTodayCard() {
       var alt = el('<button type="button" class="lf-btn is-full" id="lfRecAlt">' + IC.swap + '<span>Pick another session</span></button>');
       alt.addEventListener('click', lfRoutinePicker);
       rq.appendChild(alt);
-      $('span:last-child', go).textContent = 'Start anyway';
-    } else if (rv === 1) $('span:last-child', go).textContent = 'Start · fewer sets';
+      $('span:last-child', go).textContent = 'Start lighter session';
+    } else if (rv === 1) $('span:last-child', go).textContent = 'Start lighter session';
     c.insertBefore(rq, go);
   }
   /* Cardio goes in at the end of the session; a finished one can still
@@ -2926,14 +2926,14 @@ function lfStart(rt) {
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
   lfAgainOk = 0; lfCurExId = '';
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
-  var cut = LEG_CHECK && lfRc() === 1 && !!rt;
+  var cut = LEG_CHECK && lfRc() >= 1 && !!rt, half = lfRc() >= 2;
   var swm = rt && S.sw && S.sw[rt.id] || {};
   (rt ? rt.ex : []).forEach(function (id0) {
     /* the program's slot keeps its target; whatever stands in for it is what you do */
     var id = swm[id0] && exById(swm[id0]) ? swm[id0] : id0;
     if (!exById(id)) return;
     var tg = rt.tg && rt.tg[id0];
-    if (cut && tg) tg = [lfCut(tg[0]), tg[1], tg[2]].concat(tg[3] ? [tg[3]] : []);
+    if (cut && tg) tg = [lfCut(tg[0], half), tg[1], tg[2]].concat(tg[3] ? [tg[3]] : []);
     lfAddEx(id, tg);
     if (id !== id0) act.x[act.x.length - 1].from = id0;
   });
