@@ -1759,6 +1759,7 @@ const freeze = (at) => `(() => {
     await top(o.page).locator('#lfFinShare').click(); await settle(o.page);
     ok('and the card is made at story size', JSON.stringify(await o.page.evaluate(() => window.lfCardLast)) === '{"w":1080,"h":1920}');
     await o.c.close();
+    ok('the card carries no footer line', !/Logged in Lift/.test(src2));
     ok('the card keeps to the middle of a story and shows every set: the weights are on it', /bottom = 1670/.test(src2) && /function lfCardWorkout/.test(src2) && /navigator\.canShare\(\{ files: \[f\] \}\)/.test(src2) && /fmtWS\(q\.w\)/.test(src2));
   }
   /* ── RANK: a level, a title, a flair, a frame and a backdrop, worn and seen by friends ── */
