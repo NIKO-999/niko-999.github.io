@@ -8166,13 +8166,14 @@ function bdWayf(A) {
 }
 /* DON'T MISS: a storm in black chrome. The crystal is the one that grows in
    stairs, six steps cut down into it, cast in jet black and polished to a
-   mirror. Lightning strikes through it: a bolt in front and behind, a flash
-   that runs inward down the steps so each one lights in turn, and a light
-   that throws the storm's blue across the chrome. Rain, cloud lit from
-   within, and round it twenty-eight beads, one for every day of the month,
-   that all jump when it strikes. A tap calls a strike and turns it over.
-   One clock drives the sky, the metal, the bolt and the light, so they
-   agree about when it struck. */
+   mirror, and the weather is IN the metal: rain runs down through the
+   surface and lightning forks through it, lit from within as light on the
+   steel itself, continuous across every step. A flash runs inward down the
+   stairs so each one lights in turn, a light throws the storm's blue across
+   the chrome, and round it go twenty-eight beads, one for every day of the
+   month, that all jump when it strikes. A tap calls a strike and turns it
+   over. One clock drives the sky, the metal and the light, so they agree
+   about when it struck. */
 function bdTempest(A) {
   var T = A.T, g = A.g, hi = A.hi, i, K = 6, S0 = 1.62, ST = .26, tapT = -99, tapN = 0;
   /* when it strikes: a strike a little under every two and a half seconds,
@@ -8189,46 +8190,61 @@ function bdTempest(A) {
     /* cloud, dark and slow, and lit from inside when it strikes */
     for (j = 0; j < 16; j++) {
       var cx = N * (.08 + .84 * bdR(j + 1)) + Math.sin(t * .18 + j) * N * .05, cy = N * (.1 + .5 * bdR(j + 21)), cr = N * (.16 + .14 * bdR(j + 41)), gr = x.createRadialGradient(cx, cy, 0, cx, cy, cr);
-      gr.addColorStop(0, 'rgba(46,62,104,' + (.2 + .55 * v) + ')'); gr.addColorStop(1, 'rgba(20,30,70,0)'); x.fillStyle = gr; x.fillRect(0, 0, N, N);
+      gr.addColorStop(0, 'rgba(46,62,104,' + (.16 + .5 * v) + ')'); gr.addColorStop(1, 'rgba(20,30,70,0)'); x.fillStyle = gr; x.fillRect(0, 0, N, N);
     }
-    if (v > .02) { var fg = x.createRadialGradient(N * .5, N * .22, 0, N * .5, N * .22, N * .55); fg.addColorStop(0, 'rgba(170,200,255,' + (.45 * v) + ')'); fg.addColorStop(1, 'rgba(60,100,220,0)'); x.fillStyle = fg; x.fillRect(0, 0, N, N); }
   }));
   var pivot = new T.Group(); g.add(pivot);
   var cr = new T.Group(); cr.rotation.z = Math.PI / 4; cr.scale.setScalar(.8); pivot.add(cr);
   var front = new T.Group(), back = new T.Group(); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
-  var mats = [], FM = [], BM = [], BASE = [0x20242e, 0x171a22, 0x11141a, 0x0c0e13, 0x090b0f, 0x06070a];
+  /* THE WEATHER IS PAINTED ON ONE SHEET OF LIGHT that every step is lit
+     from: an extruded face takes its texture coordinates from where it is,
+     so one picture laid over the whole crystal runs unbroken across all six
+     steps, and the bolt forks down through them as one bolt. It is drawn in
+     the frame the viewer sees (upright) and turned to the crystal's own */
+  var EN = hi ? 512 : 384, ec = document.createElement('canvas'); ec.width = ec.height = EN; var ex = ec.getContext('2d'), etx = new T.CanvasTexture(ec);
+  etx.encoding = T.sRGBEncoding; etx.wrapS = etx.wrapT = T.ClampToEdgeWrapping; etx.repeat.set(1 / 1.8, 1 / 1.8); etx.offset.set(.5, .5);
+  function jag(x0, y0, x1, y1, d, lv, out) { if (!lv) { out.push([x1, y1]); return; } var mx = (x0 + x1) / 2 + (bdR(x0 * .07 + y1 * .03 + lv * 11 + d) - .5) * d, my = (y0 + y1) / 2 + (bdR(y0 * .05 + x1 * .02 + lv * 13 + d) - .5) * d * .5; jag(x0, y0, mx, my, d * .55, lv - 1, out); jag(mx, my, x1, y1, d * .55, lv - 1, out); }
+  function stroke(pts, w, col) { ex.strokeStyle = col; ex.lineWidth = w; ex.beginPath(); pts.forEach(function (q, j) { if (j) ex.lineTo(q[0], q[1]); else ex.moveTo(q[0], q[1]); }); ex.stroke(); }
+  var bolt = null, boltKey = -1;
+  function makeBolt(key) {
+    var r = bdR(key * 3.7 + 1), main = [[EN * (r - .5) * .34, -EN * .5]], paths = [], j;
+    jag(main[0][0], main[0][1], EN * (bdR(key + 9) - .5) * .3, EN * .5, EN * .26, 6, main); paths.push([main, 1]);
+    for (j = 0; j < 3; j++) { var o = main[Math.floor(main.length * (.2 + .2 * j + bdR(key + j) * .1))], ang = (bdR(key * 2 + j) - .5) * 2.4, br = [o]; jag(o[0], o[1], o[0] + Math.sin(ang) * EN * .3, o[1] + Math.cos(ang) * EN * .26, EN * .1, 4, br); paths.push([br, .55]); }
+    bolt = paths; boltKey = key;
+  }
+  var lastDraw = -1;
+  function paintWeather(t, v) {
+    ex.setTransform(1, 0, 0, 1, 0, 0); ex.globalCompositeOperation = 'source-over'; ex.fillStyle = '#000'; ex.fillRect(0, 0, EN, EN);
+    ex.translate(EN / 2, EN / 2); ex.rotate(Math.PI / 4); ex.lineCap = ex.lineJoin = 'round'; ex.globalCompositeOperation = 'lighter';
+    /* rain: slanting streaks that run down through the steel, quicker ones brighter */
+    var n = hi ? 70 : 46, j;
+    for (j = 0; j < n; j++) {
+      var q = (t * (.55 + bdR(j) * .5) + bdR(j + 3)) % 1, rx = (bdR(j + 1) - .5) * EN * 1.3 - q * EN * .05, ry = (q - .5) * EN * 1.3, ln = EN * (.05 + bdR(j + 7) * .05);
+      ex.strokeStyle = 'rgba(120,170,255,' + (.28 + bdR(j + 9) * .3) + ')'; ex.lineWidth = EN * .004; ex.beginPath(); ex.moveTo(rx, ry); ex.lineTo(rx - ln * .25, ry + ln); ex.stroke();
+    }
+    if (v > .03 && bolt) {
+      ex.globalAlpha = Math.min(1, v * 1.3);
+      for (j = 0; j < bolt.length; j++) { var w = bolt[j][1]; stroke(bolt[j][0], EN * .11 * w, 'rgba(40,90,255,.28)'); stroke(bolt[j][0], EN * .05 * w, 'rgba(110,165,255,.6)'); stroke(bolt[j][0], EN * .018 * w, 'rgba(255,255,255,1)'); }
+      ex.globalAlpha = 1;
+    }
+    etx.needsUpdate = true;
+  }
+  var mats = [], sm = [], FM = [], BM = [], BASE = [0x20242e, 0x171a22, 0x11141a, 0x0c0e13, 0x090b0f, 0x06070a];
   for (i = 0; i < K; i++) {
     var s = (S0 - i * ST) / 2, top = .05 + (K - 1 - i) * .06, sh = new T.Shape();
     sh.moveTo(-s, -s); sh.lineTo(s, -s); sh.lineTo(s, s); sh.lineTo(-s, s); sh.closePath();
     if (i < K - 1) { var h = (S0 - (i + 1) * ST) / 2, ho = new T.Path(); ho.moveTo(-h, -h); ho.lineTo(-h, h); ho.lineTo(h, h); ho.lineTo(h, -h); ho.closePath(); sh.holes.push(ho); }
     var geo = new T.ExtrudeGeometry(sh, { depth: top, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: hi ? 4 : 3 });
-    /* black chrome: no colour to speak of, a mirror's roughness, a clear coat on top, and an environment to reflect */
-    mats[i] = new T.MeshPhysicalMaterial({ color: BASE[i], metalness: 1, roughness: .07, envMapIntensity: 2, clearcoat: 1, clearcoatRoughness: .03, emissive: 0x000000 });
-    FM[i] = new T.Mesh(geo, mats[i]); front.add(FM[i]); BM[i] = new T.Mesh(geo, mats[i]); back.add(BM[i]);
+    /* black chrome: no colour to speak of, a mirror's roughness, a clear coat on top, and an environment to reflect;
+       the faces carry the weather, the walls only catch the flash */
+    var mk = function (map) { return new T.MeshPhysicalMaterial({ color: BASE[i], metalness: 1, roughness: .07, envMapIntensity: 2, clearcoat: 1, clearcoatRoughness: .03, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
+    mats[i] = mk(etx); sm[i] = mk(null);
+    FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); front.add(FM[i]); BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); back.add(BM[i]);
   }
-  /* the bolt: drawn afresh for each strike, in front of the crystal and behind it */
-  var BN = 512, bc = document.createElement('canvas'); bc.width = bc.height = BN; var bx = bc.getContext('2d'), btx = new T.CanvasTexture(bc), lastKey = -1;
-  btx.encoding = T.sRGBEncoding;
-  function jag(x0, y0, x1, y1, d, lv, out) { if (!lv) { out.push([x1, y1]); return; } var mx = (x0 + x1) / 2 + (bdR(x0 * 7 + y1 * 3 + lv * 11 + d) - .5) * d, my = (y0 + y1) / 2 + (bdR(y0 * 5 + x1 * 2 + lv * 13 + d) - .5) * d * .5; jag(x0, y0, mx, my, d * .55, lv - 1, out); jag(mx, my, x1, y1, d * .55, lv - 1, out); }
-  function stroke(pts, w, col) { bx.strokeStyle = col; bx.lineWidth = w; bx.beginPath(); pts.forEach(function (p, j) { if (j) bx.lineTo(p[0], p[1]); else bx.moveTo(p[0], p[1]); }); bx.stroke(); }
-  function drawBolt(key) {
-    var r = bdR(key * 3.7 + 1), main = [[BN * (.5 + (r - .5) * .34), BN * .04]], paths = [], j, k2;
-    jag(main[0][0], main[0][1], BN * (.5 + (bdR(key + 9) - .5) * .3), BN * .96, BN * .26, 6, main);
-    paths.push([main, 1]);
-    for (j = 0; j < 3; j++) { var o = main[Math.floor(main.length * (.25 + .2 * j + bdR(key + j) * .1))], ang = (bdR(key * 2 + j) - .5) * 2.4, br = [o]; jag(o[0], o[1], o[0] + Math.sin(ang) * BN * .3, o[1] + Math.cos(ang) * BN * .26, BN * .1, 4, br); paths.push([br, .55]); }
-    bx.clearRect(0, 0, BN, BN); bx.lineCap = bx.lineJoin = 'round'; bx.globalCompositeOperation = 'lighter';
-    for (k2 = 0; k2 < paths.length; k2++) { var q = paths[k2], sc = q[1]; stroke(q[0], 18 * sc, 'rgba(60,110,255,.22)'); stroke(q[0], 8 * sc, 'rgba(130,180,255,.55)'); stroke(q[0], 2.6 * sc, 'rgba(255,255,255,1)'); }
-    btx.needsUpdate = true;
-  }
-  var bm1 = new T.MeshBasicMaterial({ map: btx, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: 0 }), bplane = new T.PlaneGeometry(1.9, 1.9), bf = new T.Mesh(bplane, bm1), bb = new T.Mesh(bplane, bm1);
-  bf.position.z = .31; bb.position.z = -.31; bb.rotation.y = Math.PI; bf.renderOrder = bb.renderOrder = 6; pivot.add(bf); pivot.add(bb);
   /* the lights: a glint wandering over the mirror, a cold fill, and the flash itself */
   var lamp = new T.PointLight(0xcfe0ff, 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
   var cool = new T.PointLight(0x4f80ff, .8, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
   var fl = new T.PointLight(0x9fc0ff, 0, 7); fl.position.set(0, .3, 1.5); g.add(fl);
-  /* rain, slanting through the whole scene */
-  var NR = hi ? 90 : 56, rp = new Float32Array(NR * 6), rg = new T.BufferGeometry(); rg.setAttribute('position', new T.BufferAttribute(rp, 3));
-  var rain = new T.LineSegments(rg, new T.LineBasicMaterial({ color: 0x9fbfff, transparent: true, opacity: .32, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); rain.frustumCulled = false; g.add(rain);
   /* the month: twenty-eight beads, a bright one running the ring */
   var ring = new T.Group(), beads = [], bm = []; g.add(ring);
   for (i = 0; i < 28; i++) {
@@ -8240,27 +8256,23 @@ function bdTempest(A) {
   A.add(function (t) {
     if (pend) { tapAt = t; tapT = t; tapN++; pend = false; }
     var f = sk(t), v = f.v, u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0;
-    if (f.key !== lastKey && v > .05) { lastKey = f.key; drawBolt(f.key); }
-    bm1.opacity = Math.min(1, v * 1.25);
+    if (f.key !== boltKey && v > .05) makeBolt(f.key);
+    /* the sheet is repainted a few times a second (every frame while it strikes), so the rain runs */
+    if (t - lastDraw > .05 || t < lastDraw || v > .03) { lastDraw = t; paintWeather(t, v); }
     pivot.rotation.y = Math.sin(t * .5) * .34 + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .16; pivot.position.y = Math.sin(t * .8) * .045;
     for (i = 0; i < K; i++) {
       /* the flash runs inward down the steps, each one lit as it passes */
       var w = v * (.3 + .7 * Math.max(0, 1 - Math.abs(f.since * 14 - i) / 1.6)), lift = u >= 0 && u < 1.2 ? Math.max(0, Math.sin((u - i * .1) * Math.PI / .5)) * (u > i * .1 && u < i * .1 + .5 ? .09 : 0) : 0;
-      mats[i].emissive.setRGB(.12 * w, .28 * w, .7 * w); mats[i].emissiveIntensity = 1;
+      mats[i].emissiveIntensity = 1 + 2.4 * w; sm[i].emissive.setRGB(.1 * w, .24 * w, .6 * w);
       FM[i].position.z = lift; BM[i].position.z = lift;
     }
     lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .9 + Math.sin(t * 1.3) * .3;
-    fl.intensity = v * 5; fl.position.set(Math.sin(f.key * 3.1) * .6, .5, 1.5);
+    fl.intensity = v * 1.6; fl.position.set(Math.sin(f.key * 3.1) * .6, .5, 1.5);
     ring.rotation.z = t * .12; var ph = (t * 7) % 28;
     for (i = 0; i < 28; i++) {
       var d = (i - ph + 28) % 28, k2 = Math.exp(-d * .45), lit = Math.min(1, k2 + v * .9);
       beads[i].scale.setScalar(.022 + .04 * lit); bm[i].color.setHSL(.6 + .03 * Math.sin(i), .85, .3 + .55 * lit); bm[i].opacity = .3 + .7 * lit;
     }
-    for (i = 0; i < NR; i++) {
-      var q = (t * (1.3 + bdR(i) * .8) + bdR(i + 3)) % 1, rx = (bdR(i + 1) - .5) * 3.2 - q * .35, ry = 1.55 - q * 3.3, rz = (bdR(i + 7) - .5) * 1.1, o = i * 6;
-      rp[o] = rx; rp[o + 1] = ry; rp[o + 2] = rz; rp[o + 3] = rx - .05; rp[o + 4] = ry - .2; rp[o + 5] = rz;
-    }
-    rg.attributes.position.needsUpdate = true;
   });
   A.add(bdMotes(g, 36, .035, 0xbfd6ff, function (k, t, p, o) { var f = (t * (.05 + bdR(k + 9) * .08) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28 - t * .12; p[o] = Math.cos(a) * (.8 + bdR(k + 15) * .6); p[o + 1] = 1.4 - f * 2.8; p[o + 2] = (bdR(k + 13) - .5) * 1.0; }, .55));
 }
