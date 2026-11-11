@@ -339,6 +339,17 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-again { margin-top: 12px; width: 100%; }
 .lf-card-pv { display: flex; justify-content: center; padding: 4px 0 8px; }
 .lf-card-pv img { width: min(100%, 320px); aspect-ratio: 9 / 16; border-radius: 18px; background: #0b0b0e; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 18px 40px rgba(0,0,0,.5); }
+.lf-ex { --ss: color-mix(in srgb, var(--log) 55%, #000); }
+.lf-ssb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; }
+.lf-ssb::before { content: ''; position: absolute; inset: -6px -3px; }
+.lf-ssb svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lf-ssb[aria-pressed="true"] { background: var(--ss); color: #fff; }
+.lf-ex.is-ss { box-shadow: inset 4px 0 0 var(--ss); }
+.lf-ss-l { display: flex; align-items: center; gap: 8px; margin: 2px 0 2px; font-size: 12.5px; color: var(--dim); }
+.lf-ss-l i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ss); }
+.lf-ex.is-ss .lf-set.is-done .lf-chk span { background: var(--ss); color: #fff; }
+.lf-ex.is-ss .lf-set.is-done input { background: color-mix(in srgb, var(--ss) 30%, transparent); }
+.lf-wo-ex.is-ss { box-shadow: inset 3px 0 0 color-mix(in srgb, var(--log) 55%, #000); padding-left: 12px; }
 .lf-lw { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; margin-top: 12px; }
 .lf-lw b { margin-left: auto; font-weight: 600; color: var(--dim); font-size: 13px; }
 .lf-lw .lf-ic { width: 16px; height: 16px; color: var(--dim); }
@@ -1532,7 +1543,7 @@ var PROGRAM_GF = [
    done heaviest and the rest of the work kept tight, 30 to 60 seconds
    between sets. The first push day opens with a superset block. */
 var PROGRAM_SX = [
-  { id: 's-mon', dow: 1, n: 'Push A', sp: 'Chest, shoulders and triceps', ex: [['smithinc', 2, 6, 10], ['pecdeck', 2, 10, 12], ['mchest', 2, 8, 12], ['incdb', 2, 8, 12], ['cfly', 2, 10, 12], ['dbraise1', 2, 12, 15, 'each side'], ['dbshp', 2, 8, 10], ['latraise', 3, 10, 15], ['sapush', 2, 10, 12, 'each side'], ['jm', 2, 6, 10], ['tripush', 2, 10, 15], ['cablecrunch', 2, 8, 12]] },
+  { id: 's-mon', dow: 1, n: 'Push A', sp: 'Chest, shoulders and triceps', ss: [['smithinc', 'pecdeck', 'mchest', 'incdb', 'cfly']], ex: [['smithinc', 2, 6, 10], ['pecdeck', 2, 10, 12], ['mchest', 2, 8, 12], ['incdb', 2, 8, 12], ['cfly', 2, 10, 12], ['dbraise1', 2, 12, 15, 'each side'], ['dbshp', 2, 8, 10], ['latraise', 3, 10, 15], ['sapush', 2, 10, 12, 'each side'], ['jm', 2, 6, 10], ['tripush', 2, 10, 15], ['cablecrunch', 2, 8, 12]] },
   { id: 's-tue', dow: 2, n: 'Pull A', sp: 'Back and biceps', ex: [['bbrow', 2, 6, 10], ['pullupbw', 2, 6, 8], ['latpd', 2, 8, 12], ['kelso', 2, 10, 12], ['seatrow', 2, 8, 12], ['lowrow', 2, 8, 12], ['dbshrug', 2, 10, 12], ['cpullover', 2, 10, 12], ['cablecurl', 2, 10, 12], ['hammer', 2, 8, 12], ['mpreacher', 2, 8, 12]] },
   { id: 's-wed', dow: 3, n: 'Legs A', sp: 'Quads, hamstrings, calves and arms', ex: [['legext', 4, 12, 15], ['bss', 3, 10, 12, 'each side'], ['squat', 4, 8, 12], ['seatcurl', 3, 10, 15], ['sldl', 3, 10, 15], ['stdcurl', 2, 10, 12, 'each side'], ['calfseat', 3, 15, 20], ['calfstand', 3, 12, 20], ['woodchop', 2, 10, 15], ['btbcurl', 2, 12, 15], ['revcurl', 2, 12, 15], ['fconc', 2, 12, 15]] },
   { id: 's-thu', dow: 4, n: 'Push B', sp: 'Shoulders, chest and triceps', ex: [['dbshp', 3, 8, 10], ['latraise', 3, 10, 15], ['cablat', 3, 8, 12, 'each side'], ['facepull', 2, 10, 15], ['smithinc', 3, 6, 10], ['cfly', 3, 12, 15], ['incdb', 3, 8, 12], ['tripush', 2, 10, 12], ['sapush', 2, 8, 12, 'each side'], ['pecdeck', 2, 10, 12], ['triover', 2, 8, 12]] },
@@ -1552,7 +1563,7 @@ var PROGRAM_QC = [
   { id: 'k-sat', dow: 6, n: 'Calf burnout', sp: 'Calves, sissy squats, Romanian deadlifts', ex: [['calf', 4, 15, 20], ['legext', 3, 12, 15, 'each side'], ['sissy', 3, 10, 12], ['rdl', 3, 8, 10], ['hackcalf', 3, 20, 20]] }
 ];
 function lfMkProg(list) { return list.map(function (d) {
-  return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, choice: d.choice ? 1 : 0, ex: d.ex.map(function (e) { return e[0]; }),
+  return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, choice: d.choice ? 1 : 0, ss: d.ss || [], ex: d.ex.map(function (e) { return e[0]; }),
     tg: d.ex.reduce(function (o, e) { o[e[0]] = e[4] ? [e[1], e[2], e[3], e[4]] : [e[1], e[2], e[3]]; return o; }, {}) };
 }); }
 /* WHICH PROGRAM RUNS is a setting, `S.prog`. The other one stays whole:
@@ -1967,6 +1978,7 @@ function lfCleanWo(w) {
        be seen, and nothing that counts sets, volume or records reads this */
     var wu = (Array.isArray(e.wu) ? e.wu : []).filter(function (s) { return s && num(s.r) !== null && num(s.w) !== null && +s.r > 0; }).slice(0, 10).map(function (s) { return { w: capW(+s.w), r: capR(Math.round(+s.r)) }; });
     if (wu.length) o.wu = wu;
+    if (typeof e.ss === 'string' && /^[a-z0-9]{1,8}$/.test(e.ss)) o.ss = e.ss;
     return o;
   }).filter(function (e) { return e.sets.length; }) : [];
   return { id: typeof w.id === 'string' ? w.id : lfId(), d: w.d, s: +w.s || 0, e: +w.e || 0, n: typeof w.n === 'string' ? w.n.slice(0, 40) : 'Workout', rt: typeof w.rt === 'string' ? w.rt : null, x: x, cd: lfCleanCd(w.cd) };
@@ -1995,7 +2007,7 @@ function lfLoadAct() {
     var a = JSON.parse(localStorage.getItem(ACTK));
     if (!a || !Array.isArray(a.x) || !a.s) return null;
     a.x = a.x.filter(function (e) { return e && typeof e.id === 'string' && Array.isArray(e.sets); });
-    a.x.forEach(function (e) { if (e.wu && !Array.isArray(e.wu)) delete e.wu; });
+    a.x.forEach(function (e) { if (e.wu && !Array.isArray(e.wu)) delete e.wu; if (e.ss && !(typeof e.ss === 'string' && /^[a-z0-9]{1,8}$/.test(e.ss))) delete e.ss; });
     a.cd = lfCleanCd(a.cd);
     return a;
   } catch (e) { return null; }
@@ -2904,6 +2916,8 @@ function lfStart(rt) {
     lfAddEx(id, tg);
     if (id !== id0) act.x[act.x.length - 1].from = id0;
   });
+  /* the day's superset groups, from the plan: those exercises are linked from the start */
+  (rt && rt.ss || []).forEach(function (g, gi) { var mem = act.x.filter(function (q) { return g.indexOf(q.from || q.id) >= 0; }); if (mem.length > 1) mem.forEach(function (q) { q.ss = 'p' + gi; }); });
   if (cut) act.cut = 1;
   lfSaveAct(); buzz(15);
   lfRender(); lfOpenSession();
@@ -3040,6 +3054,26 @@ function lfScrollCur(smooth) {
   if (Math.abs(to - bd.scrollTop) < 4) return;
   try { bd.scrollTo({ top: to, behavior: smooth ? 'smooth' : 'auto' }); } catch (e) { bd.scrollTop = to; }
 }
+/* SUPERSETS: two or more exercises done round by round. Linked from the card
+   (with the one below, or above for the last) or by the plan. The group is a
+   string on each exercise, `ss`, and means only this: a set ticked while a
+   partner still owes its set of the same number sends you there instead of
+   starting a rest, and the rest starts when the round is done. */
+function lfSsGroup(e) { return e.ss ? (lfOrd || act.x).filter(function (q) { return q.ss === e.ss && act.x.indexOf(q) >= 0; }) : [e]; }
+function lfSsNext(e, si) {
+  var g = lfSsGroup(e), i = g.indexOf(e);
+  for (var k = 1; k < g.length; k++) { var c = g[(i + k) % g.length]; if (c.sets[si] && !c.sets[si].ok) return c; }
+  return null;
+}
+function lfSsToggle(e) {
+  if (e.ss) { var gid = e.ss; delete e.ss; if (act.x.filter(function (q) { return q.ss === gid; }).length < 2) act.x.forEach(function (q) { if (q.ss === gid) delete q.ss; }); }
+  else {
+    var ord = lfOrd || act.x, i = ord.indexOf(e), nx = ord[i + 1] || ord[i - 1];
+    if (!nx || nx === e) { lfToast('Add another exercise to superset with'); return; }
+    var id = nx.ss || 'm' + Date.now().toString(36).slice(-5); e.ss = id; nx.ss = id;
+  }
+  lfSaveAct(); lfPaintSession();
+}
 /* SWAP: put another exercise in this one's place. Said once, kept: next time the day starts with it, and the original is one press away. */
 function lfSwapTo(e, id, quiet) {
   var orig = e.from || e.id, was = e.id, wasN = e.n, n = e.sets.length;
@@ -3098,10 +3132,18 @@ function lfPaintSession() {
     var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
     var aim = lfAim(e);
-    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
+    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-ssb" aria-label="Superset with the next exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
       + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><div class="lf-aim"></div>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
+    var ssb = $('.lf-ssb', card), ssg = e.ss ? lfSsGroup(e) : [];
+    ssb.setAttribute('aria-pressed', ssg.length > 1 ? 'true' : 'false'); ssb.setAttribute('aria-label', ssg.length > 1 ? 'Take out of the superset' : 'Superset with the next exercise');
+    ssb.addEventListener('click', function () { lfSsToggle(e); });
+    if (ssg.length > 1) {
+      card.classList.add('is-ss');
+      var sl = el('<div class="lf-ss-l"><i aria-hidden="true"></i><span></span></div>'); $('span', sl).textContent = ssg.length > 2 ? 'Superset · ' + ssg.length + ' exercises, round by round' : 'Superset with ' + ssg.filter(function (q) { return q !== e; })[0].n;
+      card.insertBefore(sl, $('.lf-tg', card));
+    }
     $('.lf-ex-n', card).textContent = e.n;
     /* the bar starts where it was before this repaint and slides to now */
     var pbK = ei + ':' + e.id, pbNow = e.sets.length ? e.sets.filter(function (q) { return q.ok; }).length / e.sets.length * 100 : 0, pbI = $('.lf-ex-pb i', card);
@@ -3192,9 +3234,11 @@ function lfPaintSession() {
         s.ok = 1;
         /* a record by either of lfIsPr's two measures, this session's earlier sets included */
         lfJudge(e, si, s);
-        act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush();
+        /* in a superset the partner's set comes first; the rest starts when the round is done */
+        var ssn = e.ss ? lfSsNext(e, si) : null;
+        if (ssn) { act.rest = 0; act.rang = 0; } else { act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush(); }
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
-        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurExId = e.id; lfCurGo = 1; lfPaintSession(); lfTick();
+        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurExId = ssn ? ssn.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
       lfSwipe(row, function () { e.sets.splice(si, 1); }, 'Set removed');
@@ -3371,6 +3415,7 @@ function lfFinish() {
       if (ds.length) q.ds = ds; return q; }) };
     var wu = (e.wu || []).filter(function (s) { return s.ok && s.r > 0; }).map(function (s) { return { w: +s.w || 0, r: +s.r }; });
     if (wu.length) o.wu = wu;
+    if (e.ss) o.ss = e.ss;
     return o;
   }).filter(function (e) { return e.sets.length; });
   var cd = lfCleanCd(act.cd);
@@ -3442,6 +3487,7 @@ function lfSummary(w, prs, review) {
     var sl = el('<div class="lf-fin-l lf-fin-sets" id="lfFinSets"><div class="lf-cap">Sets</div></div>');
     w.x.forEach(function (e) {
       var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
+      if (e.ss) x.classList.add('is-ss');
       $('b', x).textContent = exName(e.id, e.n);
       $('div', x).textContent = e.sets.map(lfSetTxt).join('   ·   ');
       lfWuLine(x, e);

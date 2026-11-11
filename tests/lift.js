@@ -466,6 +466,33 @@ const freeze = (at) => `(() => {
     }
   }
 
+  /* ── SUPERSETS: linked from a card or by the plan, round by round, in a darker accent ── */
+  {
+    const srcSS = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('a superset wears the accent, darker, and no other colour', /\.lf-ex \{ --ss: color-mix\(in srgb, var\(--log\) 55%, #000\); \}/.test(srcSS) && /\.lf-ex\.is-ss \.lf-set\.is-done \.lf-chk span \{ background: var\(--ss\)/.test(srcSS));
+    const { c, page } = await ctx({ unit: 'kg', prog: 'sx', pick: { d: '2026-11-02', id: 's-mon' } }, '2026-11-02T07:00:00');
+    await page.click('#lfGo'); await settle(page);
+    ok('the plan links its own superset block: Push A opens with five exercises in one group', await page.locator('.lf-ex.is-ss').count() === 5 && /5 exercises/.test(await page.locator('.lf-ss-l').first().textContent()));
+    const tick = async (n, v) => { const row = page.locator('.lf-ex').nth(n).locator('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop)').first(); await row.scrollIntoViewIfNeeded(); await row.locator('input').nth(0).fill('50'); await row.locator('input').nth(1).fill('8'); await row.locator('.lf-chk').click(); await page.waitForTimeout(350); };
+    await tick(0); 
+    ok('ticking a set in a superset sends you to the next one and starts no rest', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')));
+    for (const k of [1, 2, 3]) await tick(k);
+    ok('and still none while the round is unfinished', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')));
+    await tick(4);
+    ok('the rest starts when the last of the round is ticked', await page.evaluate(() => !document.querySelector('#lfRest').classList.contains('is-idle')));
+    await c.close();
+  }
+  {
+    /* linking by hand, and taking it out again */
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    await page.click('#lfGo'); await settle(page);
+    ok('no exercise is linked to start with', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb').count() >= 3);
+    await page.locator('.lf-ssb').first().click(); await settle(page);
+    ok('the link button joins an exercise to the one below it', await page.locator('.lf-ex.is-ss').count() === 2 && /Superset with/.test(await page.locator('.lf-ss-l').first().textContent()));
+    await page.locator('.lf-ssb').first().click(); await settle(page);
+    ok('pressed again it takes them out, and neither is left linked to nothing', await page.locator('.lf-ex.is-ss').count() === 0);
+    await c.close();
+  }
   /* ── HOW ARE YOU RECOVERING: every training day asks, and the answer changes the day ── */
   {
     const { c, page } = await ctx(null, '2026-11-02T07:00:00');
@@ -474,7 +501,7 @@ const freeze = (at) => `(() => {
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
     ok('coming back to the app places you on the set you are on, even with a field focused, and on a long card the set itself is placed', /\[120, 500\]\.forEach\(function \(t\) \{ setTimeout\(function \(\) \{ lfScrollCur\(false\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /THE SET YOU ARE ON, NOT ONLY ITS EXERCISE/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     const srcS = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
-    ok('a repaint keeps where you were and the exercise you ticked keeps you, and the W and the drop arrow are centred in their boxes', /if \(bdK && keepTop\) bdK\.scrollTop = keepTop;/.test(srcS) && /lfCurExId = e\.id; lfCurGo = 1;/.test(srcS) && /\.lf-set\.is-wu \.lf-wu-n, \.lf-set\.is-drop \.lf-dr-n \{ display: inline-flex; align-items: center; justify-content: center/.test(srcS) && !/<span class="lf-sn lf-dr-n">↳/.test(srcS));
+    ok('a repaint keeps where you were and the exercise you ticked keeps you, and the W and the drop arrow are centred in their boxes', /if \(bdK && keepTop\) bdK\.scrollTop = keepTop;/.test(srcS) && /lfCurExId = ssn \? ssn\.id : e\.id; lfCurGo = 1;/.test(srcS) && /\.lf-set\.is-wu \.lf-wu-n, \.lf-set\.is-drop \.lf-dr-n \{ display: inline-flex; align-items: center; justify-content: center/.test(srcS) && !/<span class="lf-sn lf-dr-n">↳/.test(srcS));
     ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Linear hack calf raises:5,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
@@ -1228,7 +1255,9 @@ const freeze = (at) => `(() => {
     await T.locator('#frWo .lf-li').first().click(); await settle(A.page);
     ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60 × 10/.test(await top(A.page).textContent()), await top(A.page).textContent());
     ok('a new shape of your record is sent once on the first open, so friends see time and drops without waiting for your next workout', /FRS\.sv !== 3\) \{ FRS\.sv = 3; frSave\(\); setTimeout\(function \(\) \{ frPushNow\(\); \}, 3000\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
-    ok('and looks like the workout you finish: the weight moved, time or sets and reps, a Sets list, and no badges', await top(A.page).locator('#frWoFin .lf-fin-vol').count() === 1 && await top(A.page).locator('#frWoFin .lf-sum').count() === 1 && /Sets/.test(await top(A.page).locator('#frWoSets .lf-cap').textContent()) && await top(A.page).locator('#lfFinBg, .lf-tag').count() === 0 && /function frWoSheet[\s\S]*?lf-wu-l[\s\S]*?↳[\s\S]*?Cardio/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
+    const fwx = await top(A.page).evaluate((t) => ({ vol: t.querySelectorAll('#frWoFin .lf-fin-vol').length, sum: t.querySelectorAll('#frWoFin .lf-sum').length, cap: (t.querySelector('#frWoSets .lf-cap') || {}).textContent, bg: t.querySelectorAll('#lfFinBg, .lf-tag').length }));
+    ok('and looks like the workout you finish: the weight moved, time or sets and reps, a Sets list, and no badges', fwx.vol === 1 && fwx.sum === 1 && /Sets/.test(fwx.cap || '') && fwx.bg === 0, fwx);
+    ok('and its code lays out warm-ups, drop sets and cardio', /function frWoSheet[\s\S]*?↳[\s\S]*?lf-wu-l[\s\S]*?Cardio/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     await top(A.page).locator('.fr-rx-b').first().click(); await A.page.waitForTimeout(400);
     ok('a 🔥 on a friend\'s workout reaches their record', m.has('liftr:' + codeB) && await top(A.page).locator('.fr-rx-b[aria-pressed="true"]').count() === 1, [await top(A.page).locator('.fr-rx').count(), await top(A.page).locator('.fr-rx-b').first().isDisabled().catch(() => 'none'), sent.slice(-2)]);
     const rxB = await (await worker.fetch(new Request(W + '/v1/lift/' + codeB, { headers: { origin: 'https://niko-999.github.io' } }), env)).json();
