@@ -3633,7 +3633,7 @@ function lfShareCardSheet(sp, name) {
   var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.png'; document.body.appendChild(a); a.click(); a.remove(); };
   share.addEventListener('click', function () {
     if (!blob) return; var f = file();
-    if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Lift' }).catch(function () {}); else saveIt();
+    if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function () {}); else saveIt();
   });
   save.addEventListener('click', saveIt);
   var sh = lfSheet({ title: 'Share', body: b, foot: [save, share], onClose: function () { if (url) setTimeout(function () { URL.revokeObjectURL(url); }, 4000); } });
