@@ -516,6 +516,9 @@ const kv = () => {
     ok('and never a field this build does not know — no weights, no exercises', !('kg' in q.s) && !('ex' in q.s) && !('kh' in q), JSON.stringify(q));
     /* LIVE: the small read the app asks every few seconds */
     /* WHAT THEY WEAR: ids, clamped like everything else */
+    q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 1, wl: [{ d: '2026-11-02', n: 'Legs', id: 'w9', t: 1122, m: 71, cd: '30 min incline treadmill\u0007', x: [{ n: 'Romanian deadlift', wu: [[60, 12], ['x', 3]], s: [[80, 10], [100, 10, [[80, 8], [60, 10, 'x']]], [110, 6, 'bad']] }] }] } } });
+    q = await (await hit('GET', '/v1/lift/' + C)).json();
+    ok('how long it took, the cardio line, warm-ups and drop sets come through, clamped', JSON.stringify(q.s.wl) === '[{"d":"2026-11-02","n":"Legs","id":"w9","t":1122,"m":71,"cd":"30 min incline treadmill","x":[{"n":"Romanian deadlift","wu":[[60,12],[0,3]],"s":[[80,10],[100,10,[[80,8],[60,10]]],[110,6]]}]}]', JSON.stringify(q.s.wl));
     q = await hit('PUT', '/v1/lift/' + C, { key: KEY, body: { n: 'Niko', s: { wo30: 12, ti: 'grinder', fl: 'bolt', fm: 'Bad!', ow: 1, xl: 14, du: ['KLMN2345', '2026-11-02'] } } });
     q = await (await hit('GET', '/v1/lift/' + C)).json();
     ok('a title and a flair come through', q.s.ti === 'grinder' && q.s.fl === 'bolt', q.s);

@@ -1063,7 +1063,14 @@ const freeze = (at) => `(() => {
     const split = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
     ok('the glute split is Monday to Saturday', split.join() === 'Mon · Glutes · heavy,Tue · Back & biceps,Wed · Quads & calves,Thu · Chest, shoulders & triceps,Fri · Glutes · top shelf,Sat · Conditioning & core', split);
     const segW = await page.$$eval('#lfProg button', (b) => b.map((x) => x.scrollWidth <= x.clientWidth + 1));
-    ok('five programs fit on the switch, none cut off', segW.length === 5 && segW.every(Boolean));
+    ok('six programs fit on the switch, none cut off', segW.length === 6 && segW.every(Boolean));
+    await page.click('#lfProg [data-p="sx"]'); await settle(page);
+    const sx = await page.$$eval('#lfSplit .lf-li b', (b) => b.map((x) => x.textContent));
+    ok('the six-day push, pull, legs split runs Monday to Saturday from the spreadsheet', sx.join() === 'Mon · Push A,Tue · Pull A,Wed · Legs A,Thu · Push B,Fri · Pull B,Sat · Legs B', sx);
+    const sxSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    const sxOk = await page.evaluate(() => { const bad = []; PROGRAMS.sx.days.forEach((d) => { const seen = {}; d.ex.forEach((id) => { if (!exById(id)) bad.push(d.id + ':' + id); if (seen[id]) bad.push(d.id + ' twice:' + id); seen[id] = 1; }); }); return { bad, n: PROGRAMS.sx.days.map((d) => d.ex.length).join() }; }).catch(() => null);
+    ok('every exercise in it exists and none is in a day twice', /var PROGRAM_SX = \[/.test(sxSrc) && /sx: \{ n: "AJ's routine"/.test(sxSrc) && /'s-mon': \['Push A: chest, shoulders and triceps'/.test(sxSrc), sxOk);
+    await page.click('#lfProg [data-p="gl"]'); await settle(page);
     await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
     const sat = await top(page).textContent();
     ok('Saturday reads its rounds, carries and plank as written', sat.includes('4 rounds') && sat.includes('3 × 30–40 m each side') && sat.includes('3 × 20–30 s each side') && sat.includes('3 × 8–10 each side') && /rower/.test(sat), sat.slice(0, 300));
@@ -1219,7 +1226,8 @@ const freeze = (at) => `(() => {
     await A.page.keyboard.press('Escape'); await settle(A.page);
     ok('and their workouts', (await T.locator('#frWo .lf-li b').allTextContents()).join() === 'Lower A' && /1 sets · 600 kg/.test(await T.locator('#frWo .lf-li span').first().textContent()));
     await T.locator('#frWo .lf-li').first().click(); await settle(A.page);
-    ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60×10/.test(await top(A.page).textContent()), await top(A.page).textContent());
+    ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60 × 10/.test(await top(A.page).textContent()), await top(A.page).textContent());
+    ok('and looks like the workout you finish: the weight moved, time or sets and reps, a Sets list, and no badges', await top(A.page).locator('#frWoFin .lf-fin-vol').count() === 1 && await top(A.page).locator('#frWoFin .lf-sum').count() === 1 && /Sets/.test(await top(A.page).locator('#frWoSets .lf-cap').textContent()) && await top(A.page).locator('#lfFinBg, .lf-tag').count() === 0 && /function frWoSheet[\s\S]*?lf-wu-l[\s\S]*?↳[\s\S]*?Cardio/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     await top(A.page).locator('.fr-rx-b').first().click(); await A.page.waitForTimeout(400);
     ok('a 🔥 on a friend\'s workout reaches their record', m.has('liftr:' + codeB) && await top(A.page).locator('.fr-rx-b[aria-pressed="true"]').count() === 1, [await top(A.page).locator('.fr-rx').count(), await top(A.page).locator('.fr-rx-b').first().isDisabled().catch(() => 'none'), sent.slice(-2)]);
     const rxB = await (await worker.fetch(new Request(W + '/v1/lift/' + codeB, { headers: { origin: 'https://niko-999.github.io' } }), env)).json();

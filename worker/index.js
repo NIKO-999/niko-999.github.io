@@ -458,10 +458,19 @@ function liftClean(b) {
     d: w.d, n: txt(w.n, 40) || 'Workout', id: typeof w.id === 'string' && /^[A-Za-z0-9_-]{1,24}$/.test(w.id) ? w.id : '',
     /* the time it started, as minutes into the day, when the phone knew */
     ...(Number.isInteger(w.t) && w.t >= 0 && w.t < 1440 ? { t: w.t } : {}),
-    x: w.x.filter((e) => e && Array.isArray(e.s)).slice(0, 15).map((e) => ({
-      n: txt(e.n, 60) || 'Exercise',
-      s: e.s.filter(Array.isArray).slice(0, 20).map((st) => { const kg = Math.round(+st[0] * 10) / 10, rp = Math.round(+st[1]); return [isFinite(kg) ? Math.max(0, Math.min(2000, kg)) : 0, isFinite(rp) ? Math.max(0, Math.min(1000, rp)) : 0]; })
-    }))
+    /* how long it took, in minutes, and the cardio line, when there was one */
+    ...(Number.isInteger(w.m) && w.m > 0 && w.m < 1440 ? { m: w.m } : {}),
+    ...(txt(w.cd, 60) ? { cd: txt(w.cd, 60) } : {}),
+    x: w.x.filter((e) => e && Array.isArray(e.s)).slice(0, 15).map((e) => {
+      const pair = (st) => { const kg = Math.round(+st[0] * 10) / 10, rp = Math.round(+st[1]); return [isFinite(kg) ? Math.max(0, Math.min(2000, kg)) : 0, isFinite(rp) ? Math.max(0, Math.min(1000, rp)) : 0]; };
+      const wu = Array.isArray(e.wu) ? e.wu.filter(Array.isArray).slice(0, 10).map(pair) : [];
+      return {
+        n: txt(e.n, 60) || 'Exercise',
+        /* warm-ups beside the sets, and the drop sets that hang off one */
+        ...(wu.length ? { wu } : {}),
+        s: e.s.filter(Array.isArray).slice(0, 20).map((st) => { const dr = Array.isArray(st[2]) ? st[2].filter(Array.isArray).slice(0, 6).map(pair) : []; return dr.length ? pair(st).concat([dr]) : pair(st); })
+      };
+    })
   })) : [];
   return { n: n || 'Lifter', s };
 }

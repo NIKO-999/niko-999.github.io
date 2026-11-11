@@ -1399,7 +1399,10 @@ var EXERCISES = [
   ['hipext', 'Hip extensions', 'Glutes'], ['mrdl', 'Machine Romanian deadlift', 'Hamstrings', 1], ['kbmach', 'Glute kickback machine', 'Glutes'],
   ['apullup', 'Assisted pull-ups', 'Back', 1], ['hirow', 'High row machine', 'Back', 1], ['wgrow', 'Seated wide-grip rows', 'Back', 1],
   ['crdpull', 'Cable rear delt pulls', 'Shoulders'], ['adips', 'Assisted dips', 'Triceps', 1], ['smskull', 'Smith machine skull crushers', 'Triceps'],
-  ['hackcalf', 'Linear hack calf raises', 'Calves']
+  ['hackcalf', 'Linear hack calf raises', 'Calves'],
+  ['jm', 'JM press', 'Triceps', 1], ['kelso', 'Kelso shrugs', 'Back'], ['lowrow', 'Low rows (upper back)', 'Back', 1],
+  ['mpreacher', 'Machine preacher curls', 'Biceps'], ['btbcurl', 'Behind-the-back EZ-bar curls', 'Biceps'], ['fconc', 'Forearm concentration curls', 'Biceps'],
+  ['dbraise1', 'One-arm dumbbell lateral raises', 'Shoulders']
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
 
 /* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the
@@ -1524,6 +1527,18 @@ var PROGRAM_GF = [
   { id: 'f-thu', dow: 4, n: 'Chest & shoulders', sp: 'Chest, shoulders and triceps', ex: [['mshp', 3, 8, 12], ['mlat', 3, 12, 15], ['pecdeck', 3, 12, 15], ['adips', 3, 8, 12], ['mchest', 3, 8, 12], ['smskull', 3, 10, 12]] },
   { id: 'f-fri', dow: 5, n: 'Glutes & hamstrings', sp: 'Glutes and hamstrings', ex: [['gdrive', 3, 8, 12], ['mrdl', 3, 8, 12], ['hipext', 3, 12, 15], ['seatcurl', 3, 10, 12], ['kbmach', 3, 12, 15, 'each side'], ['calf', 3, 12, 15]] }
 ];
+/* THE SIX-DAY PUSH / PULL / LEGS, from a spreadsheet: chest, back and legs
+   each twice a week, every day opening with the movement that has to be
+   done heaviest and the rest of the work kept tight, 30 to 60 seconds
+   between sets. The first push day opens with a superset block. */
+var PROGRAM_SX = [
+  { id: 's-mon', dow: 1, n: 'Push A', sp: 'Chest, shoulders and triceps', ex: [['smithinc', 2, 6, 10], ['pecdeck', 2, 10, 12], ['mchest', 2, 8, 12], ['incdb', 2, 8, 12], ['cfly', 2, 10, 12], ['dbraise1', 2, 12, 15, 'each side'], ['dbshp', 2, 8, 10], ['latraise', 3, 10, 15], ['sapush', 2, 10, 12, 'each side'], ['jm', 2, 6, 10], ['tripush', 2, 10, 15], ['cablecrunch', 2, 8, 12]] },
+  { id: 's-tue', dow: 2, n: 'Pull A', sp: 'Back and biceps', ex: [['bbrow', 2, 6, 10], ['pullupbw', 2, 6, 8], ['latpd', 2, 8, 12], ['kelso', 2, 10, 12], ['seatrow', 2, 8, 12], ['lowrow', 2, 8, 12], ['dbshrug', 2, 10, 12], ['cpullover', 2, 10, 12], ['cablecurl', 2, 10, 12], ['hammer', 2, 8, 12], ['mpreacher', 2, 8, 12]] },
+  { id: 's-wed', dow: 3, n: 'Legs A', sp: 'Quads, hamstrings, calves and arms', ex: [['legext', 4, 12, 15], ['bss', 3, 10, 12, 'each side'], ['squat', 4, 8, 12], ['seatcurl', 3, 10, 15], ['sldl', 3, 10, 15], ['stdcurl', 2, 10, 12, 'each side'], ['calfseat', 3, 15, 20], ['calfstand', 3, 12, 20], ['woodchop', 2, 10, 15], ['btbcurl', 2, 12, 15], ['revcurl', 2, 12, 15], ['fconc', 2, 12, 15]] },
+  { id: 's-thu', dow: 4, n: 'Push B', sp: 'Shoulders, chest and triceps', ex: [['dbshp', 3, 8, 10], ['latraise', 3, 10, 15], ['cablat', 3, 8, 12, 'each side'], ['facepull', 2, 10, 15], ['smithinc', 3, 6, 10], ['cfly', 3, 12, 15], ['incdb', 3, 8, 12], ['tripush', 2, 10, 12], ['sapush', 2, 8, 12, 'each side'], ['pecdeck', 2, 10, 12], ['triover', 2, 8, 12]] },
+  { id: 's-fri', dow: 5, n: 'Pull B', sp: 'Back thickness and biceps', ex: [['bbrow', 3, 6, 10], ['seatrow', 3, 6, 10], ['latpd', 3, 6, 10], ['pullupbw', 2, 5, 8], ['straight', 2, 8, 12], ['lowrow', 2, 8, 12], ['kelso', 2, 8, 12], ['hammer', 3, 8, 12], ['cablecurl', 3, 8, 12], ['mpreacher', 2, 10, 12], ['shrug', 2, 10, 12]] },
+  { id: 's-sat', dow: 6, n: 'Legs B', sp: 'Quads, hamstrings, calves and adductors', ex: [['squat', 4, 8, 12], ['sllp', 3, 10, 12, 'each side'], ['legext', 3, 10, 12], ['lyingcurl', 3, 10, 12], ['calfstand', 3, 8, 15], ['calfseat', 3, 10, 15], ['rdl', 3, 8, 12], ['adduct', 3, 10, 12]] }
+];
 /* THE LEG FOCUSED SPLIT: the whole body over six days, legs three times —
    heavy, sweep, then a calf and isolation day — with the upper body kept
    short between them, and Sunday off. Three working sets an exercise at
@@ -1549,10 +1564,11 @@ var PROGRAMS = {
   ppl: { n: 'Push / pull / legs', s: 'PPL', days: lfMkProg(PROGRAM_PPL) },
   gl: { n: 'Conditioning', s: 'Conditioning', days: lfMkProg(PROGRAM_GL) },
   qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) },
-  gf: { n: 'Glute focus', s: 'Glute focus', days: lfMkProg(PROGRAM_GF) }
+  gf: { n: 'Glute focus', s: 'Glute focus', days: lfMkProg(PROGRAM_GF) },
+  sx: { n: "AJ's routine", s: "AJ's routine", days: lfMkProg(PROGRAM_SX) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
-var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf'];
+var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx'];
 var CHOICES = lfMkProg(CHOICE_RT);
 /* A set × rep target as written: '3 × 8–12', '3 × 30–40 m each side',
    or '4 rounds'. */
@@ -1589,6 +1605,29 @@ var DAY_TIPS = {
     'Single-leg extensions even out left and right; stretched partials at failure.',
     'Sissy squats for the deepest quad stretch, then Romanian deadlifts keep the hinge strong.',
     'Standing calf raises off a block, 3 × 20 non-stop to burn them out. Sunday is rest.']],
+  /* the sheet's own rules, on every day of the six-day split */
+  's-mon': ['Push A: chest, shoulders and triceps', [
+    'Open with the superset block: smith incline press, pec deck, machine press, incline dumbbell press and cable flyes.',
+    'Reach the target reps at the heaviest weight you can, and hit them on every exercise of a superset.',
+    'Between sets, 30 to 60 seconds at most. Write down the weights you used on every set, every workout.',
+    'Rest-pause on the last set: 10 reps, rest 5 seconds, 5 reps, rest 5 seconds, last 5 reps.']],
+  's-tue': ['Pull A: back and biceps', [
+    'Barbell rows: the heaviest weight you can for the target reps.',
+    'Between sets, 30 to 60 seconds, except two minutes after conventional deadlifts.',
+    'Finish with 30 minutes on the treadmill: incline 3, speed 12.5, about 200 calories.']],
+  's-wed': ['Legs A: quads, hamstrings, calves and arms', [
+    'Leg extensions first, and heaviest on the squat.',
+    'Calves, standing and seated, are done every leg day.',
+    'Behind-the-back and reverse EZ-bar curls, then forearm concentration curls with 7 kg, finish the day.']],
+  's-thu': ['Push B: shoulders, chest and triceps', [
+    'Side raises, the one-arm cable ones with no rest between sides.',
+    'Between sets, 30 to 60 seconds. Rest-pause the last set where it helps.']],
+  's-fri': ['Pull B: back thickness and biceps', [
+    'Rows and pulldowns lead, then pull-ups, straight-arm pulldowns and shrugs.',
+    'Between sets, 30 to 60 seconds, except two minutes after conventional deadlifts.']],
+  's-sat': ['Legs B: quads, hamstrings, calves and adductors', [
+    'Squats first, then the single-leg press each side.',
+    'Adductor machine at level 5 to finish.']],
   'g-mon': ['Glutes, heavy strength', ['Romanian deadlifts and hip thrusts are the heavy work: keep them shy of technical failure.', 'Elevated lunges reach deeper into the glute; go each side.', GL_WEEKS]],
   'g-tue': ['Back, biceps and core', ['Neutral-grip pulldowns and chest-supported rows lead.', 'Reverse pec deck and seated face pulls for the rear delts.', 'Rope hammer curls and preacher curls finish it.']],
   'g-wed': ['Quads and calves', ['Leg press and hack squat carry the load.', 'Leg extensions single and double leg.', 'Bulgarian split squats each side, then seated calf raises.']],
@@ -1696,6 +1735,7 @@ var FOCUS_PPL = [['Quads', 15, 15, 1], ['Calves', 8, 8, 1], ['Abs', 6, 6, 1], ['
 var FOCUS_GL = lfFocusFrom(PROGRAM_GL, { Glutes: 1, Hamstrings: 1, Abs: 1 });
 var FOCUS_QC = lfFocusFrom(PROGRAM_QC, { Quads: 1, Calves: 1 });
 var FOCUS_GF = lfFocusFrom(PROGRAM_GF, { Glutes: 1, Hamstrings: 1, Quads: 1 });
+var FOCUS_SX = lfFocusFrom(PROGRAM_SX, {});
 function lfFocusOf(list) { return list.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 var FOCUS_V1 = 'Quads:13:16:1,Calves:12:12:1,Lower back:6:6:1,Hamstrings:10:10:0,Glutes:5:8:0,Abs:9:9:0';
 function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
@@ -4051,7 +4091,7 @@ function lfRenderLib() {
       if (S.prog === k) return;
       var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
       var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
-      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
+      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF, sx: FOCUS_SX }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
       if (JSON.stringify(S.focus) === sig(oldDef)) S.focus = lfFocusOf(newDef);
       S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
       lfSave(); lfRender();
@@ -4671,7 +4711,9 @@ function frStats() {
     wl: woSorted().reverse().filter(function (w) { return w.d >= from30 && w.x.length; }).slice(0, 20).map(function (w) {
       /* the time it started, as minutes into the day */
       var st0 = w.s > 1e11 ? new Date(w.s) : null;
-      return { id: w.id, d: w.d, n: w.n, t: st0 ? st0.getHours() * 60 + st0.getMinutes() : undefined, x: w.x.map(function (e) { return { n: e.n || exName(e.id), s: e.sets.map(function (st) { return [st.w, st.r]; }) }; }) };
+      /* how long it took, the cardio, and each exercise's warm-ups and drop sets, so a friend sees the workout the way you do */
+      return { id: w.id, d: w.d, n: w.n, t: st0 ? st0.getHours() * 60 + st0.getMinutes() : undefined, m: w.s > 1e11 && w.e > w.s ? Math.round((w.e - w.s) / 60000) : undefined, cd: w.cd ? lfCdTxt(w.cd) : undefined,
+        x: w.x.map(function (e) { return { n: e.n || exName(e.id), wu: e.wu && e.wu.length ? e.wu.map(function (q) { return [q.w, q.r]; }) : undefined, s: e.sets.map(function (st) { return st.ds && st.ds.length ? [st.w, st.r, st.ds.map(function (d) { return [d.w, d.r]; })] : [st.w, st.r]; }) }; }) };
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol),
     /* the accent you chose, as a hue, so your page is your colour to friends */
     ac: lfAccent(),
@@ -5899,17 +5941,32 @@ function frRings(rows) {
 }
 function frHue(st) { var h = st && st.ac; return lfNeu(h) || lfTheme(h) ? h : typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
 function frWoSheet(w, f) {
-  var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
-  $('p', b).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '');
+  /* THE FRIEND'S WORKOUT LOOKS LIKE THE ONE YOU FINISH: the day and the
+     start, the weight moved, time, sets and reps, then every set with its
+     warm-ups and drop sets and the cardio. The badges earned are left off:
+     they are not on a friend's record. */
+  var sets = 0, reps = 0, vol = 0; w.x.forEach(function (e) { e.s.forEach(function (q) { sets++; reps += q[1]; vol += q[0] * q[1]; }); });
+  var b = el('<div class="lf-fin is-rev" id="frWoFin"><p class="lf-fin-d"></p><div class="lf-fin-vol lf-num"><span>0</span><small></small></div></div>');
+  $('.lf-fin-d', b).textContent = fmtDay(w.d) + (w.t >= 0 ? ' · ' + fmtMinOfDay(w.t) : '') + (w.cd ? ' · + ' + w.cd : '');
+  $('.lf-fin-vol small', b).textContent = S.unit + ' moved';
+  var stats = []; if (w.m > 0) stats.push([fmtDur(w.m * 60000), 'time']); stats.push([sets, 'sets'], [fmtBig(reps), 'reps']);
+  b.appendChild(lfSum(stats));
+  if (f && FRS.on) b.appendChild(frRxBar(w, f));
+  var sl = el('<div class="lf-fin-l lf-fin-sets" id="frWoSets"><div class="lf-cap">Sets</div></div>');
   w.x.forEach(function (e) {
-    var li = el('<div class="lf-li fr-wx"><div class="lf-li-t"><b></b><span class="lf-num"></span></div></div>');
-    $('b', li).textContent = e.n;
-    $('span', li).textContent = e.s.length ? e.s.map(function (q) { return (q[0] ? fmtW(q[0]) + '×' : 'BW×') + q[1]; }).join('  ·  ') : 'No sets';
-    $('.lf-list', b).appendChild(li);
+    var x = el('<div class="lf-wo-ex"><b></b><div></div></div>');
+    $('b', x).textContent = e.n;
+    $('div', x).textContent = e.s.length ? e.s.map(function (q) { return (q[0] ? fmtW(q[0]) : 'BW') + ' × ' + q[1] + (q[2] || []).map(function (d) { return ' ↳ ' + (d[0] ? fmtW(d[0]) : 'BW') + ' × ' + d[1]; }).join(''); }).join('   ·   ') : 'No sets';
+    if (e.wu && e.wu.length) { var p = el('<p class="lf-wu-l"><i>W</i><span></span></p>'); $('span', p).textContent = e.wu.map(function (q) { return (q[0] ? fmtW(q[0]) : 'BW') + ' × ' + q[1]; }).join('   ·   '); x.insertBefore(p, $('div', x)); }
+    sl.appendChild(x);
   });
-  if (f && FRS.on) b.insertBefore(frRxBar(w, f), $('.lf-list', b));
+  if (w.cd) { var cl = el('<div class="lf-wo-ex"><b>Cardio</b><div></div></div>'); $('div', cl).textContent = w.cd; sl.appendChild(cl); }
+  b.appendChild(sl);
   var ws = lfSheet({ title: w.n, body: b });
   lfAccOn(ws.el, frHue(f && f.s));
+  var n = $('.lf-fin-vol span', b), v = toDisp(vol), calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, t0 = 0;
+  if (calm) { n.textContent = Math.round(v).toLocaleString(); return; }
+  (function step(ts) { if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / 900), e = 1 - Math.pow(1 - k, 3); n.textContent = Math.round(v * e).toLocaleString(); if (k < 1 && document.body.contains(n)) requestAnimationFrame(step); })(0);
 }
 function frAddSheet() {
   var b = el('<div><label class="lf-flab" for="frCode" style="margin-top:0">Their friend code</label><input class="lf-field lf-num" id="frCode" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345" /><p class="lf-lab fr-err" hidden></p></div>');
