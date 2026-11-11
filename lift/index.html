@@ -3612,7 +3612,8 @@ function lfCardWorkout(w, prs) {
     e.sets.forEach(function (q) { var ws = fmtWS(q.w); if (last && last.w === ws) last.r.push(q.r); else { last = { w: ws, r: [q.r] }; groups.push(last); } });
     var txt = groups.map(function (g) { return g.w + ' ' + S.unit.replace(/^kg$|^lb$/, '') + '× ' + g.r.join(', '); }).join('   ·   ');
     var dr = []; e.sets.forEach(function (q) { (q.ds || []).forEach(function (d) { dr.push(fmtWS(d.w) + ' × ' + d.r); }); });
-    if (dr.length) txt += '   ·   drop ' + dr.join(', ');
+    /* a drop set reads as a staircase down: Drop set ↓ 80 × 8 ↓ 60 × 10 */
+    if (dr.length) txt += '   ·   Drop set  ' + dr.map(function (d) { return '↓ ' + d; }).join('  ');
     return [exName(e.id, e.n), txt.replace(/\s+×/g, ' ×')];
   });
   if (w.cd) lines.push(['Cardio', lfCdTxt(w.cd)]);
