@@ -3708,7 +3708,7 @@ function lfMonthSheet(m) {
   s.el.setAttribute('aria-label', 'Month in review, ' + name);
   done.addEventListener('click', function () { s.close(); });
   shr.addEventListener('click', function () {
-    lfShareCardSheet({ kicker: 'Lift  ·  Month in review', title: name + (m.getFullYear() !== today().getFullYear() ? ' ' + m.getFullYear() : ''),
+    lfShareCardSheet({ kicker: 'Workout  ·  Month in review', title: name + (m.getFullYear() !== today().getFullYear() ? ' ' + m.getFullYear() : ''),
       sub: st.wo + (st.wo === 1 ? ' session' : ' sessions') + '  ·  ' + (S.goal > 0 && d.weeks.length ? nMet + ' of ' + d.weeks.length + ' weeks on goal' : d.days + ' days'),
       hero: Math.round(toDisp(st.vol)).toLocaleString(), heroL: S.unit + ' moved', stats: [[String(st.wo), 'sessions'], [String(st.sets), 'sets'], [fmtBig(st.reps), 'reps']], prs: d.prs,
       lines: d.weeks.filter(function (w) { return w.wo; }).map(function (w) { return ['Week of ' + w.m.getDate() + ' ' + MON[w.m.getMonth()].slice(0, 3), w.wo + (w.wo === 1 ? ' session' : ' sessions') + '  ·  ' + fmtBig(toDisp(w.vol)) + ' ' + S.unit + (w.met ? '  ·  goal hit' : '')]; }) }, 'lift-' + MON[m.getMonth()].toLowerCase());
