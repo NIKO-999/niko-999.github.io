@@ -6711,7 +6711,7 @@ var BD_FX = { unbeat: 'jet', slayer: 'nebula', night: 'galaxy', dawn: 'sunrise',
   /* the newest: the three new finishes, holo, plasma and obsidian, on the long ones */
   wo250: 'crystal', wo500: 'plasma', ton25: 'plasma', wkvol: 'obsidian', v500k: 'molten', setwk100: 'holo', pr50: 'plasma', sig50: 'obsidian', sig100: 'holo',
   ex80: 'plasma', tgt12: 'holo', allmus4: 'obsidian', cardio100: 'plasma', cdh50: 'holo',
-  forge: 'inferno', stormc: 'storm', summit: 'ice', sands: 'marble', vein: 'crystal', wayf: 'emerald', dontmiss: 'bismuth',
+  forge: 'inferno', stormc: 'storm', summit: 'ice', sands: 'marble', vein: 'crystal', wayf: 'emerald', dontmiss: 'tempest',
   allmus: 'prism', dec31: 'galaxy', friday13: 'void', leap: 'opal', ironwk: 'inferno', plate4: 'storm' };
 /* MYTHIC: a tier past the halo, for the badges that take a year or more:
    a prism ring turning round it and sparks in orbit, crazy on purpose */
@@ -6722,7 +6722,7 @@ var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10
   explore: 1, wkend: 1, cardio25: 1, sets40: 1, pr25: 1, post50: 1, cdwk: 1, leg50: 1, sets30: 1, plate3: 1, week: 1, squad: 1, long: 1, pr3: 1,
   chest50: 1, bk50: 1, sh50: 1, arm50: 1, sets500: 1, hr25: 1, rp10k: 1, mo3: 1 };
 /* the light each finish gives off */
-var BD_FXGL = { bismuth: '#ff8ad0', jet: '#8d93a6', magma: '#ff5a1f', prism: '#e48bff', nebula: '#a855f7', void: '#ff8a2a', inferno: '#ff4d1a', crystal: '#c7f0ff', storm: '#5ad1ff', marble: '#f5d27a', circuit: '#2bffb0', galaxy: '#8b7cff', sunrise: '#ffb347', lava: '#ff5a1f', ice: '#8fd8ff', aurora: '#3dffb0', neon: '#ff3df2', molten: '#ffc94a', opal: '#d9c8ff', carbon: '#7aa2ff', emerald: '#2ee68a', holo: '#b9e6ff', plasma: '#c25cff', obsidian: '#ffcf6b' };
+var BD_FXGL = { tempest: '#7fb2ff', jet: '#8d93a6', magma: '#ff5a1f', prism: '#e48bff', nebula: '#a855f7', void: '#ff8a2a', inferno: '#ff4d1a', crystal: '#c7f0ff', storm: '#5ad1ff', marble: '#f5d27a', circuit: '#2bffb0', galaxy: '#8b7cff', sunrise: '#ffb347', lava: '#ff5a1f', ice: '#8fd8ff', aurora: '#3dffb0', neon: '#ff3df2', molten: '#ffc94a', opal: '#d9c8ff', carbon: '#7aa2ff', emerald: '#2ee68a', holo: '#b9e6ff', plasma: '#c25cff', obsidian: '#ffcf6b' };
 var BADGES = [
   ['first', 'First workout', 'start', 'Your first logged session.'],
   ['wo10', '10 workouts', 'start', 'Ten sessions in the book.'],
@@ -7212,7 +7212,7 @@ function bdTrimOf(b) {
   if (!base || base.charAt(0) !== '#' || base.length !== 7) return b.fx ? BD_FXTRIM[b.fx] : BD_TRIM.silver;
   var c = lfRgb(base); return lfHex(c.map(function (v) { return Math.round(v * .62 + 255 * .38); }));
 }
-var BD_FXTRIM = { bismuth: '#f3d4e6', jet: '#2b2d35', holo: '#eef6ff', plasma: '#e6d0ff', obsidian: '#ffe2a0', magma: '#ffb37a', prism: '#f6e6ff', nebula: '#dccbff', void: '#ffd2a6', inferno: '#ffc2a0', crystal: '#f2fbff', storm: '#d6f3ff', marble: '#fff3cf', circuit: '#c9ffe9', galaxy: '#cdd3ff', sunrise: '#ffd27a', lava: '#8a8f98', ice: '#eaf7ff', aurora: '#d2fff0', neon: '#f2f2f6', molten: '#ffd56b', opal: '#f4f0ff', carbon: '#c9ced6', emerald: '#d8ffe9' };
+var BD_FXTRIM = { tempest: '#c3cfe8', jet: '#2b2d35', holo: '#eef6ff', plasma: '#e6d0ff', obsidian: '#ffe2a0', magma: '#ffb37a', prism: '#f6e6ff', nebula: '#dccbff', void: '#ffd2a6', inferno: '#ffc2a0', crystal: '#f2fbff', storm: '#d6f3ff', marble: '#fff3cf', circuit: '#c9ffe9', galaxy: '#cdd3ff', sunrise: '#ffd27a', lava: '#8a8f98', ice: '#eaf7ff', aurora: '#d2fff0', neon: '#f2f2f6', molten: '#ffd56b', opal: '#f4f0ff', carbon: '#c9ced6', emerald: '#d8ffe9' };
 var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
 var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
@@ -7552,15 +7552,17 @@ function bdFx(fx, k, x, y, q) {
     return mix(crust, molten, Math.min(1, hot * 1.3 + .08));
   }
   /* THE EXOTIC FINISHES, for the hardest of all */
-  /* BISMUTH, the metal that grows in stairs: square steps cut in toward the
-     middle, each oxidised its own colour (gold, magenta, violet, blue, teal,
-     green), a dark seam between every two, and a bright lip on each */
-  if (fx === 'bismuth') {
-    var bx = (x - y) * .7071, by = (x + y) * .7071, bd = Math.max(Math.abs(bx), Math.abs(by)), bi = Math.min(5, Math.floor(bd / .17)), bf = bd / .17 - Math.floor(bd / .17);
-    var BP = [[78, 214, 150], [64, 196, 220], [96, 110, 255], [190, 80, 255], [255, 90, 190], [255, 196, 70]], bc = BP[bi];
-    if (k === 'b') return mix([255, 255, 255], bc, .35);
-    if (k === 'd') return n > .985 ? [255, 255, 255] : mix([16, 10, 26], bc, .3);
-    return bf < .08 ? mix(bc, [20, 10, 30], .6) : bf > .88 ? mix(bc, [255, 255, 255], .5) : mix(bc, [255, 255, 255], .06 + n * .06);
+  /* TEMPEST, black chrome with a storm in it: stairs cut in toward the middle,
+     each a shade of graphite, a blue seam between every two, and a vein of
+     lightning crackling through the lot */
+  if (fx === 'tempest') {
+    var tx = (x - y) * .7071, ty = (x + y) * .7071, td = Math.max(Math.abs(tx), Math.abs(ty)), ti = Math.min(5, Math.floor(td / .17)), tf = td / .17 - Math.floor(td / .17);
+    var TG = [[40, 44, 56], [30, 33, 42], [22, 25, 32], [16, 18, 24], [11, 13, 18], [7, 8, 11]], tc = TG[ti];
+    var tvein = Math.abs(Math.sin((x + y * .55) * 8 + Math.sin(y * 11 + x * 3) * 1.3)), tbolt = tvein < .05 ? 1 : tvein < .12 ? (.12 - tvein) / .07 * .45 : 0;
+    var tbase = tf < .07 ? mix(tc, [90, 140, 255], .7) : tf > .9 ? mix(tc, [200, 215, 255], .55) : mix(tc, [255, 255, 255], .05 + n * .05);
+    if (k === 'b') return mix([220, 230, 255], tbase, .55);
+    if (k === 'd') return n > .985 ? [255, 255, 255] : mix([5, 6, 9], tbase, .4);
+    return mix(tbase, [235, 245, 255], Math.min(1, tbolt));
   }
   if (fx === 'prism') {
     var pr = c3((x - y) * .9 + Math.sin(x * 3 + y * 2) * .08 + n * .03, 0, .33, .67);
@@ -8162,65 +8164,107 @@ function bdWayf(A) {
   });
   A.add(bdMotes(g, 50, .035, 0xcfeaff, function (k, t, p, o) { var f = (t * (.07 + bdR(k) * .1) + bdR(k + 40)) % 1; p[o] = (bdR(k + 1) - .5) * 2.7; p[o + 1] = -1.3 + f * 1.1 + Math.sin(t + k) * .05; p[o + 2] = (bdR(k + 3) - .5) * 1.0; }, .6));
 }
-/* DON'T MISS: bismuth, the one metal that grows in stairs. A hopper crystal
-   with six steps cut down into it, each step oxidised its own colour, the
-   whole of it stood on a corner. A light wanders over the stairs and the
-   metal shifts through pink, violet, blue and green as it passes. Round it
-   twenty-eight beads, one for every day of the month, with a bright one
-   running the ring. A tap sends the steps up in turn and turns it over. */
-function bdBismuth(A) {
-  var T = A.T, g = A.g, hi = A.hi, i, K = 6, S0 = 1.62, ST = .26;
+/* DON'T MISS: a storm in black chrome. The crystal is the one that grows in
+   stairs, six steps cut down into it, cast in jet black and polished to a
+   mirror. Lightning strikes through it: a bolt in front and behind, a flash
+   that runs inward down the steps so each one lights in turn, and a light
+   that throws the storm's blue across the chrome. Rain, cloud lit from
+   within, and round it twenty-eight beads, one for every day of the month,
+   that all jump when it strikes. A tap calls a strike and turns it over.
+   One clock drives the sky, the metal, the bolt and the light, so they
+   agree about when it struck. */
+function bdTempest(A) {
+  var T = A.T, g = A.g, hi = A.hi, i, K = 6, S0 = 1.62, ST = .26, tapT = -99, tapN = 0;
+  /* when it strikes: a strike a little under every two and a half seconds,
+     three flickers each, and a tap adds one of its own */
+  function sk(t) {
+    var P = 2.4, k = Math.floor(t / P), ph = t - k * P, s0 = .25 + bdR(k + 7) * 1.1, v = 0, since = ph - s0, key = k, pl = [s0, s0 + .13, s0 + .3 + bdR(k + 3) * .1], j, d, e;
+    for (j = 0; j < 3; j++) { d = ph - pl[j]; if (d >= 0) { e = Math.exp(-d * (j ? 10 : 7)) * (j ? .75 : 1); if (e > v) v = e; } }
+    d = t - tapT; if (d >= 0 && d < 1.2) { e = Math.exp(-d * 6); if (e > v) { v = e; since = d; key = 1000 + tapN; } }
+    return { v: v, since: since, key: key };
+  }
   A.add(bdSkyPlane(g, hi, function (x, N, t) {
+    var f = sk(t), v = f.v, j;
     x.globalCompositeOperation = 'lighter';
-    [[.34, .38, 255, 120, 200, .22, .9], [.66, .6, 120, 100, 255, .22, 1.3], [.5, .78, 60, 210, 230, .16, 1.1]].forEach(function (b, j) {
-      var cx = N * (b[0] + Math.sin(t * .3 * b[6] + j) * .08), cy = N * (b[1] + Math.cos(t * .25 * b[6] + j * 2) * .07), gr = x.createRadialGradient(cx, cy, 0, cx, cy, N * .42);
-      gr.addColorStop(0, 'rgba(' + b[2] + ',' + b[3] + ',' + b[4] + ',' + b[5] + ')'); gr.addColorStop(1, 'rgba(' + b[2] + ',' + b[3] + ',' + b[4] + ',0)'); x.fillStyle = gr; x.fillRect(0, 0, N, N);
-    });
-    for (i = 0; i < (hi ? 110 : 48); i++) { x.fillStyle = 'rgba(255,255,255,' + ((.25 + bdR(i + 3) * .6) * (.5 + .5 * Math.sin(t * (1 + bdR(i) * 2) + i))) + ')'; x.fillRect(N * bdR(i + 60), N * bdR(i + 120), 1.6, 1.6); }
+    /* cloud, dark and slow, and lit from inside when it strikes */
+    for (j = 0; j < 16; j++) {
+      var cx = N * (.08 + .84 * bdR(j + 1)) + Math.sin(t * .18 + j) * N * .05, cy = N * (.1 + .5 * bdR(j + 21)), cr = N * (.16 + .14 * bdR(j + 41)), gr = x.createRadialGradient(cx, cy, 0, cx, cy, cr);
+      gr.addColorStop(0, 'rgba(46,62,104,' + (.2 + .55 * v) + ')'); gr.addColorStop(1, 'rgba(20,30,70,0)'); x.fillStyle = gr; x.fillRect(0, 0, N, N);
+    }
+    if (v > .02) { var fg = x.createRadialGradient(N * .5, N * .22, 0, N * .5, N * .22, N * .55); fg.addColorStop(0, 'rgba(170,200,255,' + (.45 * v) + ')'); fg.addColorStop(1, 'rgba(60,100,220,0)'); x.fillStyle = fg; x.fillRect(0, 0, N, N); }
   }));
   var pivot = new T.Group(); g.add(pivot);
   var cr = new T.Group(); cr.rotation.z = Math.PI / 4; cr.scale.setScalar(.8); pivot.add(cr);
   var front = new T.Group(), back = new T.Group(); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
-  var mats = [], FM = [], BM = [];
+  var mats = [], FM = [], BM = [], BASE = [0x20242e, 0x171a22, 0x11141a, 0x0c0e13, 0x090b0f, 0x06070a];
   for (i = 0; i < K; i++) {
     var s = (S0 - i * ST) / 2, top = .05 + (K - 1 - i) * .06, sh = new T.Shape();
     sh.moveTo(-s, -s); sh.lineTo(s, -s); sh.lineTo(s, s); sh.lineTo(-s, s); sh.closePath();
     if (i < K - 1) { var h = (S0 - (i + 1) * ST) / 2, ho = new T.Path(); ho.moveTo(-h, -h); ho.lineTo(-h, h); ho.lineTo(h, h); ho.lineTo(h, -h); ho.closePath(); sh.holes.push(ho); }
-    var geo = new T.ExtrudeGeometry(sh, { depth: top, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: hi ? 3 : 2 });
-    mats[i] = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: .2, envMapIntensity: 1.1, clearcoat: .5, clearcoatRoughness: .12 });
+    var geo = new T.ExtrudeGeometry(sh, { depth: top, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: hi ? 4 : 3 });
+    /* black chrome: no colour to speak of, a mirror's roughness, a clear coat on top, and an environment to reflect */
+    mats[i] = new T.MeshPhysicalMaterial({ color: BASE[i], metalness: 1, roughness: .07, envMapIntensity: 2, clearcoat: 1, clearcoatRoughness: .03, emissive: 0x000000 });
     FM[i] = new T.Mesh(geo, mats[i]); front.add(FM[i]); BM[i] = new T.Mesh(geo, mats[i]); back.add(BM[i]);
   }
-  var lamp = new T.PointLight(0xffe0f4, 1.3, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
-  var cool = new T.PointLight(0x7fd8ff, .9, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
+  /* the bolt: drawn afresh for each strike, in front of the crystal and behind it */
+  var BN = 512, bc = document.createElement('canvas'); bc.width = bc.height = BN; var bx = bc.getContext('2d'), btx = new T.CanvasTexture(bc), lastKey = -1;
+  btx.encoding = T.sRGBEncoding;
+  function jag(x0, y0, x1, y1, d, lv, out) { if (!lv) { out.push([x1, y1]); return; } var mx = (x0 + x1) / 2 + (bdR(x0 * 7 + y1 * 3 + lv * 11 + d) - .5) * d, my = (y0 + y1) / 2 + (bdR(y0 * 5 + x1 * 2 + lv * 13 + d) - .5) * d * .5; jag(x0, y0, mx, my, d * .55, lv - 1, out); jag(mx, my, x1, y1, d * .55, lv - 1, out); }
+  function stroke(pts, w, col) { bx.strokeStyle = col; bx.lineWidth = w; bx.beginPath(); pts.forEach(function (p, j) { if (j) bx.lineTo(p[0], p[1]); else bx.moveTo(p[0], p[1]); }); bx.stroke(); }
+  function drawBolt(key) {
+    var r = bdR(key * 3.7 + 1), main = [[BN * (.5 + (r - .5) * .34), BN * .04]], paths = [], j, k2;
+    jag(main[0][0], main[0][1], BN * (.5 + (bdR(key + 9) - .5) * .3), BN * .96, BN * .26, 6, main);
+    paths.push([main, 1]);
+    for (j = 0; j < 3; j++) { var o = main[Math.floor(main.length * (.25 + .2 * j + bdR(key + j) * .1))], ang = (bdR(key * 2 + j) - .5) * 2.4, br = [o]; jag(o[0], o[1], o[0] + Math.sin(ang) * BN * .3, o[1] + Math.cos(ang) * BN * .26, BN * .1, 4, br); paths.push([br, .55]); }
+    bx.clearRect(0, 0, BN, BN); bx.lineCap = bx.lineJoin = 'round'; bx.globalCompositeOperation = 'lighter';
+    for (k2 = 0; k2 < paths.length; k2++) { var q = paths[k2], sc = q[1]; stroke(q[0], 18 * sc, 'rgba(60,110,255,.22)'); stroke(q[0], 8 * sc, 'rgba(130,180,255,.55)'); stroke(q[0], 2.6 * sc, 'rgba(255,255,255,1)'); }
+    btx.needsUpdate = true;
+  }
+  var bm1 = new T.MeshBasicMaterial({ map: btx, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: 0 }), bplane = new T.PlaneGeometry(1.9, 1.9), bf = new T.Mesh(bplane, bm1), bb = new T.Mesh(bplane, bm1);
+  bf.position.z = .31; bb.position.z = -.31; bb.rotation.y = Math.PI; bf.renderOrder = bb.renderOrder = 6; pivot.add(bf); pivot.add(bb);
+  /* the lights: a glint wandering over the mirror, a cold fill, and the flash itself */
+  var lamp = new T.PointLight(0xcfe0ff, 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
+  var cool = new T.PointLight(0x4f80ff, .8, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
+  var fl = new T.PointLight(0x9fc0ff, 0, 7); fl.position.set(0, .3, 1.5); g.add(fl);
+  /* rain, slanting through the whole scene */
+  var NR = hi ? 90 : 56, rp = new Float32Array(NR * 6), rg = new T.BufferGeometry(); rg.setAttribute('position', new T.BufferAttribute(rp, 3));
+  var rain = new T.LineSegments(rg, new T.LineBasicMaterial({ color: 0x9fbfff, transparent: true, opacity: .32, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); rain.frustumCulled = false; g.add(rain);
   /* the month: twenty-eight beads, a bright one running the ring */
   var ring = new T.Group(), beads = [], bm = []; g.add(ring);
   for (i = 0; i < 28; i++) {
     var a = i / 28 * Math.PI * 2, mt = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false }), bd = new T.Mesh(new T.SphereGeometry(1, 10, 8), mt);
     bd.position.set(Math.cos(a) * 1.18, Math.sin(a) * 1.18, 0); ring.add(bd); beads.push(bd); bm.push(mt);
   }
-  var tapAt = -99, pend = false, lastT = 0;
+  var tapAt = -99, pend = false;
   g.userData.tap = function () { pend = true; };
   A.add(function (t) {
-    if (pend) { tapAt = t; pend = false; }
-    var u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0;
+    if (pend) { tapAt = t; tapT = t; tapN++; pend = false; }
+    var f = sk(t), v = f.v, u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0;
+    if (f.key !== lastKey && v > .05) { lastKey = f.key; drawBolt(f.key); }
+    bm1.opacity = Math.min(1, v * 1.25);
     pivot.rotation.y = Math.sin(t * .5) * .34 + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .16; pivot.position.y = Math.sin(t * .8) * .045;
     for (i = 0; i < K; i++) {
-      var hu = (([42, 335, 285, 235, 195, 160][i] + t * 4 + Math.sin(t * .5 + i * .7) * 14 + 360) % 360) / 360, lift = u >= 0 && u < 1.2 ? Math.max(0, Math.sin((u - i * .1) * Math.PI / .5)) * (u > i * .1 && u < i * .1 + .5 ? .09 : 0) : 0;
-      mats[i].color.setHSL(hu, .9, .46); mats[i].emissive.setHSL(hu, .9, .06);
+      /* the flash runs inward down the steps, each one lit as it passes */
+      var w = v * (.3 + .7 * Math.max(0, 1 - Math.abs(f.since * 14 - i) / 1.6)), lift = u >= 0 && u < 1.2 ? Math.max(0, Math.sin((u - i * .1) * Math.PI / .5)) * (u > i * .1 && u < i * .1 + .5 ? .09 : 0) : 0;
+      mats[i].emissive.setRGB(.12 * w, .28 * w, .7 * w); mats[i].emissiveIntensity = 1;
       FM[i].position.z = lift; BM[i].position.z = lift;
     }
-    /* the wandering light is what makes the steps flash in turn */
-    lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = 1.3 + Math.sin(t * 1.3) * .4;
+    lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .9 + Math.sin(t * 1.3) * .3;
+    fl.intensity = v * 5; fl.position.set(Math.sin(f.key * 3.1) * .6, .5, 1.5);
     ring.rotation.z = t * .12; var ph = (t * 7) % 28;
     for (i = 0; i < 28; i++) {
-      var d = (i - ph + 28) % 28, k2 = Math.exp(-d * .45), hb = ((i / 28 * 360 + t * 20) % 360) / 360;
-      beads[i].scale.setScalar(.022 + .04 * k2); bm[i].color.setHSL(hb, .8, .35 + .45 * k2); bm[i].opacity = .35 + .65 * k2;
+      var d = (i - ph + 28) % 28, k2 = Math.exp(-d * .45), lit = Math.min(1, k2 + v * .9);
+      beads[i].scale.setScalar(.022 + .04 * lit); bm[i].color.setHSL(.6 + .03 * Math.sin(i), .85, .3 + .55 * lit); bm[i].opacity = .3 + .7 * lit;
     }
+    for (i = 0; i < NR; i++) {
+      var q = (t * (1.3 + bdR(i) * .8) + bdR(i + 3)) % 1, rx = (bdR(i + 1) - .5) * 3.2 - q * .35, ry = 1.55 - q * 3.3, rz = (bdR(i + 7) - .5) * 1.1, o = i * 6;
+      rp[o] = rx; rp[o + 1] = ry; rp[o + 2] = rz; rp[o + 3] = rx - .05; rp[o + 4] = ry - .2; rp[o + 5] = rz;
+    }
+    rg.attributes.position.needsUpdate = true;
   });
-  A.add(bdMotes(g, 40, .04, 0xffb6e6, function (k, t, p, o) { var f = (t * (.06 + bdR(k) * .08) + bdR(k + 40)) % 1, a = bdR(k + 2) * 6.28 + t * .1; p[o] = Math.cos(a) * (.9 + bdR(k + 5) * .6); p[o + 1] = -1.4 + f * 2.8; p[o + 2] = (bdR(k + 3) - .5) * 1.0; }, .7));
-  A.add(bdMotes(g, 30, .035, 0x9fe8ff, function (k, t, p, o) { var f = (t * (.05 + bdR(k + 9) * .08) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28 - t * .12; p[o] = Math.cos(a) * (.8 + bdR(k + 15) * .6); p[o + 1] = 1.4 - f * 2.8; p[o + 2] = (bdR(k + 13) - .5) * 1.0; }, .6));
+  A.add(bdMotes(g, 36, .035, 0xbfd6ff, function (k, t, p, o) { var f = (t * (.05 + bdR(k + 9) * .08) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28 - t * .12; p[o] = Math.cos(a) * (.8 + bdR(k + 15) * .6); p[o + 1] = 1.4 - f * 2.8; p[o + 2] = (bdR(k + 13) - .5) * 1.0; }, .55));
 }
-var BD_SCENE = { dontmiss: bdBismuth, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
+var BD_SCENE = { dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
