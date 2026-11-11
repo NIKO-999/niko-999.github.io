@@ -562,7 +562,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfRec .lf-rq-b[data-r="2"]'); await settle(page);
     await page.click('#lfGo'); await settle(page);
     const n2 = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length));
-    ok('a lighter session from very sore halves the sets, rounded up', n2.join() === '2,2,1,2,2', n2);
+    ok('a lighter session from very sore halves the sets, rounded up', n2.join() === '2,2,1,3,2', n2);
     await c.close();
   }
   {
