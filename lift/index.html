@@ -6477,6 +6477,7 @@ var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, 
 /* a week in front: the stored win flag, or for a week kept before there was
    one, the old reading, so nothing already earned is taken back */
 function frWon(v) { return v.length > 5 ? !!v[5] && v[2] > 0 : v[0] > 0 && v[0] > v[1] && v[2] > 0; }
+var BD_PREVIEW = true;
 function lfBadges() {
   var ws = woSorted(), out = {}, uk = S.unit === 'lb' ? LB : 1;
   function won(id, d) { if (!out[id]) out[id] = { d: d }; }
@@ -6710,6 +6711,8 @@ function lfBadges() {
     ['pr25', prDays.length, 25], ['pr50', prDays.length, 50], ['ex15', exNN, 15], ['ex80', exNN, 80], ['sig50', sigBest, 50], ['sig100', sigBest, 100], ['tgt12', tStreak, 12],
     ['allmus4', amBest, 4], ['post50', postN, 50], ['cdwk', bestOf(cdWk), 5], ['cardio100', cdW, 100], ['cdh50', Math.floor(cdTot / 60), 50]]
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
+  /* A LOOK AT THE SIX SCENES: on the owner's phone only, and put away by setting this to false */
+  if (BD_PREVIEW && lfOwner()) ['forge', 'stormc', 'summit', 'sands', 'vein', 'wayf'].forEach(function (id) { won(id, ymd(today())); });
   /* the owner badge is not a thing anyone else can see they lack */
   return BADGES.filter(function (b) { return (b.id !== 'owner' && b.id !== 'creator' && b.id !== 'slayer') || out[b.id]; }).map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
