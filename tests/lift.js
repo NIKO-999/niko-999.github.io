@@ -920,8 +920,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 123 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 123/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 129 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 129/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -958,9 +958,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 123/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 129/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 123);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 129);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1572,7 +1572,7 @@ const freeze = (at) => `(() => {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 123);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 129);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
     ok('the link is spent: the hash leaves the address bar', await page.waitForFunction(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || ''), null, { timeout: 10000 }).then(() => true, () => false));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
@@ -1899,7 +1899,7 @@ const freeze = (at) => `(() => {
     ok('The Eye has a flair of its own, the owner\'s alone: it is not offered to anyone else', /\['eye', 'The Eye', 'One of one', function \(c\) \{ return c\.own; \}, 'M2 12s/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /kind === 'fl' && x\[0\] === 'eye' && !lfOwner\(\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && !(await page.locator('.rk-o[data-id="eye"][data-k="fl"]').count()));
     {
       const fsx = require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8'), ids = ['forge', 'stormc', 'summit', 'sands', 'vein', 'wayf'];
-      ok('six scene badges are objects in their own weather, each with an unlock, a finish and a mythic frame', ids.every((id) => new RegExp("\\['" + id + "', '[^']+', '[a-z]+', '[^']+', '#[0-9a-f]{6}'\\]").test(fsx) && new RegExp('BD_SCENE = \\{[^}]*' + id + ':').test(fsx) && new RegExp('BD_MYTH = \\{[^}]*' + id + ': 1').test(fsx) && new RegExp("prog\\." + id + " = ").test(fsx) && new RegExp("won\\('" + id + "'").test(fsx)));
+      ok('six scene badges are objects in their own weather, each with an unlock, a finish and a mythic frame', ids.every((id) => new RegExp("\\['" + id + "', '[^']+', '[a-z]+', '[^']+', '#[0-9a-f]{6}'\\]").test(fsx) && new RegExp('BD_SCENE = \\{[^}]*' + id + ':').test(fsx) && new RegExp('BD_MYTH = \\{[^}]*' + id + ': 1').test(fsx) && new RegExp("prog\\." + id + " = ").test(fsx) && new RegExp("won\\('" + id + "'|\\[\\d+, '" + id + "'\\]").test(fsx)));
       ok('each scene badge answers a tap in its own way instead of flipping, and says so', ids.every((id) => { const fn = fsx.slice(fsx.indexOf('function ' + { forge: 'bdForge', stormc: 'bdStorm', summit: 'bdSummit', sands: 'bdSands', vein: 'bdVein', wayf: 'bdWayf' }[id] + '('), fsx.indexOf('function ' + { forge: 'bdStorm', stormc: 'bdSummit', summit: 'bdSands', sands: 'bdVein', vein: 'bdWayf', wayf: 'bdXX' }[id] + '(') > 0 ? fsx.indexOf('function ' + { forge: 'bdStorm', stormc: 'bdSummit', summit: 'bdSands', sands: 'bdVein', vein: 'bdWayf', wayf: 'bdXX' }[id] + '(') : fsx.indexOf('var BD_SCENE')); return /g\.userData\.tap = /.test(fn); }) && /if \(aw\.userData\.tap\) aw\.userData\.tap\(performance\.now\(\) \/ 1000\); else vy/.test(fsx) && /drag to spin|Drag to spin \\u00b7 tap it/.test(fsx));
       ok('their skies are repainted as time passes, so the weather moves', /var f = function \(t\) \{ g\.getWorldQuaternion\(q\)[^]*?draw\(t\); tx\.needsUpdate = true;/.test(fsx) && /if \(BD_SCENE\[b\.id\] && !b\.lock\) return bdScene/.test(fsx));
     }
