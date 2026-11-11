@@ -447,7 +447,7 @@ const freeze = (at) => `(() => {
       ok('the target is written under the name', (await ex.locator('.lf-tg').textContent()) === '4 × 6–10 · 1 RIR · rest 2–3 min');
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
       ok('under the top of the range, the aim is the same weight and one more rep', ph.join() === '80,9,80,9,80,8,80,8', ph);
-      ok('and it says so', (await ex.locator('.lf-aim').textContent()).includes('one more rep'));
+      ok('and it says so in four words', (await ex.locator('.lf-aim').textContent()) === 'Try 80 × 9');
       await ex.locator('.lf-chk').first().click();
       ok('ticking an empty set logs the aim', (await ex.locator('.lf-set:not(.is-hd) input').nth(1).inputValue()) === '9');
       ok('the rest clock names its target', /target 2–3 min/.test(await page.textContent('#lfRest')));
@@ -461,7 +461,11 @@ const freeze = (at) => `(() => {
       const ex = page.locator('.lf-session .lf-ex').first();
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
       ok('ten on every set moves the weight up 2.5 and the reps back to six', ph.join() === '82.5,6,82.5,6,82.5,6,82.5,6', ph);
-      ok('and says go up', (await ex.locator('.lf-aim').textContent()).includes('go up to 82.5'));
+      ok('and says so in four words', (await ex.locator('.lf-aim').textContent()) === 'Try 82.5 × 6');
+      await ex.locator('.lf-aim').click(); await settle(page);
+      ok('one tap on it fills every empty set with the aim', (await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '82.5,6,82.5,6,82.5,6,82.5,6');
+      await ex.locator('.lf-aim').click(); await settle(page);
+      ok('and a second tap changes nothing that is filled', (await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '82.5,6,82.5,6,82.5,6,82.5,6');
       await c.close();
     }
   }
@@ -1354,6 +1358,19 @@ const freeze = (at) => `(() => {
     ok('a week the flag says was lost is not crowned even if the progress was higher, a won one is, and a week kept before the flag still counts', got.length === 1 && /18 Oct|25 Oct/.test(got[0]) && !/11 Oct/.test(got[0]), got);
     const src2 = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
     ok('the rings put a goal hit first, then most days, then set targets met, then the longer run of weeks, and the creator is beaten the same way, never by kilos', /function frCmp\(a, b\) \{ return \(b\.met - a\.met\) \|\| \(a\.met && b\.met \? \(b\.n - a\.n\) \|\| \(b\.sf - a\.sf\) \|\| \(b\.st - a\.st\)/.test(src2) && /myDays > cDays \|\| \(myDays === cDays && mine > cStreak\)/.test(src2) && !/v8\[6\]/.test(src2.slice(src2.indexOf('function lfSlayCheck'), src2.indexOf('function frPullAll'))));
+    await c.close();
+  }
+
+  /* ── THE LOCK SCREEN: the rest shows there as a countdown, only when asked for ── */
+  {
+    const fsx = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('the rest can show on the lock screen: a silent sound plays for the rest and the phone shows a countdown and the next exercise', /function lfLockStart/.test(fsx) && /MediaMetadata\(\{ title: 'Rest', artist: nx \? 'Next: ' \+ nx\.n/.test(fsx) && /setPositionState\(\{ duration: rs\.lo/.test(fsx) && /lfLockAu\.loop = true/.test(fsx));
+    ok('it is off until asked for, says so is up when the rest is, and stops with the workout', /rl: false/.test(fsx) && /d\.rl = o\.rl === true/.test(fsx) && /title: 'Rest is up'/.test(fsx) && (fsx.match(/act = null; lfLockStop\(\)/g) || []).length === 3);
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [] }, '2026-11-02T07:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    ok('Settings has a Rest on lock screen switch, off to begin with', await page.locator('#lfRl button[data-a="0"][aria-pressed="true"]').count() === 1);
+    await page.click('#lfRl button[data-a="1"]'); await settle(page);
+    ok('and turning it on is kept', (await store(page)).rl === true);
     await c.close();
   }
 
