@@ -1031,15 +1031,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--rc) 22%, transparent), 0 8px 26px color-mix(in srgb, var(--rc) 40%, transparent); }
 .fr-ban.is-live .fr-ban-av { animation: fr-av-live 1.8s ease-in-out infinite; }
 @keyframes fr-av-live { 50% { box-shadow: 0 0 0 8px color-mix(in srgb, var(--rc) 14%, transparent), 0 8px 30px color-mix(in srgb, var(--rc) 60%, transparent); } }
-/* THE CROWN ON THE OWNER'S PICTURE: it drops in as the page settles, in the accent, and stays lit */
-.fr-ban-av.has-crown { position: relative; overflow: visible; }
-.fr-crown { position: absolute; left: 50%; top: -25px; width: 40px; height: 34px; margin-left: -20px; fill: #0b0b0e; stroke: var(--rc); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; overflow: visible;
-  filter: drop-shadow(0 0 3px var(--rc)) drop-shadow(0 0 9px color-mix(in srgb, var(--rc) 70%, transparent)); transform: rotate(-15deg); transform-origin: 50% 90%; animation: fr-crown-in .75s cubic-bezier(.3, 1.4, .5, 1) .35s both, fr-crown-glow 2.6s ease-in-out 1.2s infinite; }
-.fr-crown circle { fill: #fff; stroke: none; }
-.fr-crown .fr-crown-b { fill: none; stroke-width: 1.1; opacity: .8; }
-@keyframes fr-crown-in { 0% { opacity: 0; transform: translateY(-150px) rotate(-50deg) scale(1.7); } 12% { opacity: 1; } 62% { transform: translateY(5px) rotate(-10deg) scale(1); } 80% { transform: translateY(-3px) rotate(-18deg); } 100% { opacity: 1; transform: rotate(-15deg); } }
-@keyframes fr-crown-glow { 50% { filter: drop-shadow(0 0 4px var(--rc)) drop-shadow(0 0 16px var(--rc)); } }
-@media (prefers-reduced-motion: reduce) { .fr-crown { animation: none; transform: rotate(-15deg); } }
 .fr-ban-t { min-width: 0; }
 .fr-ban-t b { display: block; font-size: 24px; font-weight: 800; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-ban-t .fr-ago { margin: 2px 0 0; }
@@ -6112,7 +6103,6 @@ function frSheet(f) {
   s.el.setAttribute('aria-label', nm); s.el.style.setProperty('--rc', col);
   lfAccOn(s.el, frHue(st));
   /* the owner's profile: a tilted crown drops onto the picture (lfGlitch, lfBurst, lfSlash and lfDragon are entrances kept for later) */
-  if (st.ow === 1) { var av = $('.fr-ban-av', b); av.classList.add('has-crown'); av.insertAdjacentHTML('beforeend', '<svg class="fr-crown" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5z"/><path class="fr-crown-b" d="M5.6 17h12.8"/><circle cx="12" cy="5" r="1.1"/><circle cx="3" cy="8" r="1"/><circle cx="21" cy="8" r="1"/></svg>'); }
   if (rm) rm.addEventListener('click', function () {
     var i = FRS.list.indexOf(f); if (i < 0) return;
     FRS.list.splice(i, 1); if (FRS.no.indexOf(f.c) < 0) FRS.no.push(f.c); frSave(); s.close(true); lfRender();
