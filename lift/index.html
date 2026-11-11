@@ -2986,10 +2986,12 @@ function lfAim0(e, last) {
   /* the whole of a plain progression: every set at the top of the range, add weight and start the reps again; otherwise the same weight and one more rep */
   if (!bw && last.every(function (s) { return s.r >= hi; })) {
     var step = S.unit === 'lb' ? 5 * LB : 2.5, w = top.w + step;
-    return { up: 1, sets: last.map(function () { return { w: w, r: lo }; }), note: 'Try ' + fmtW(w) + ' × ' + lo };
+    var upS = last.map(function () { return { w: w, r: lo }; });
+    return { up: 1, sets: tg ? upS : last, fill: upS, note: 'Try ' + fmtW(w) + ' × ' + lo };
   }
   var sets = last.map(function (s) { return { w: s.w, r: bw ? s.r + 1 : Math.min(hi, Math.max(lo, s.r + 1)) }; });
-  return { sets: sets, note: 'Try ' + (bw ? 'BW' : fmtWS(sets[0].w)) + ' × ' + sets[0].r };
+  /* an exercise with no plan still ticks as last time; the suggestion is there, and one tap takes it */
+  return { sets: tg ? sets : last, fill: sets, note: 'Try ' + (bw ? 'BW' : fmtWS(sets[0].w)) + ' × ' + sets[0].r };
 }
 function lfRange(a, b) { return a === b ? String(a) : a + '–' + b; }
 function lfRestTxt(r) { return r.hi <= 120 ? lfRange(r.lo, r.hi) + 's' : lfRange(r.lo / 60, r.hi / 60) + ' min'; }
@@ -3189,7 +3191,7 @@ function lfPaintSession() {
     else if (!aim.sets.length) { $('.lf-aim', card).classList.add('is-info'); $('.lf-aim', card).disabled = true; }
     else $('.lf-aim', card).addEventListener('click', function () {
       /* ONE TAP FILLS WHAT IS STILL EMPTY with the aim, set by set, and leaves anything typed or ticked alone */
-      e.sets.forEach(function (q, qi) { if (q.ok || (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null)) return; var g2 = aim.sets[Math.min(qi, aim.sets.length - 1)]; q.w = g2.w; q.r = g2.r; });
+      e.sets.forEach(function (q, qi) { if (q.ok || (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null)) return; var fl = aim.fill || aim.sets, g2 = fl[Math.min(qi, fl.length - 1)]; q.w = g2.w; q.r = g2.r; });
       buzz(8); lfSaveAct(); lfPaintSession();
     });
     $('.lf-swp', card).addEventListener('click', function () { lfSwap(e); });
