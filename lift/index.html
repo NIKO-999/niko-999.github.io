@@ -3611,6 +3611,9 @@ function lfCardWorkout(w, prs) {
     var groups = [], last = null;
     e.sets.forEach(function (q) { var ws = fmtWS(q.w); if (last && last.w === ws) last.r.push(q.r); else { last = { w: ws, r: [q.r] }; groups.push(last); } });
     var txt = groups.map(function (g) { return g.w + ' ' + S.unit.replace(/^kg$|^lb$/, '') + '× ' + g.r.join(', '); }).join('   ·   ');
+    /* the warm-ups come first, as they were done */
+    var wu = (e.wu || []).filter(function (q) { return q && +q.r > 0; }).map(function (q) { return fmtWS(q.w) + ' × ' + q.r; });
+    if (wu.length) txt = 'Warm-up  ' + wu.join(', ') + '   ·   ' + txt;
     var dr = []; e.sets.forEach(function (q) { (q.ds || []).forEach(function (d) { dr.push(fmtWS(d.w) + ' × ' + d.r); }); });
     /* a drop set reads as a staircase down: Drop set ↓ 80 × 8 ↓ 60 × 10 */
     if (dr.length) txt += '   ·   Drop set  ' + dr.map(function (d) { return '↓ ' + d; }).join('  ');
