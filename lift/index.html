@@ -6711,11 +6711,11 @@ var BD_FX = { unbeat: 'jet', slayer: 'nebula', night: 'galaxy', dawn: 'sunrise',
   /* the newest: the three new finishes, holo, plasma and obsidian, on the long ones */
   wo250: 'crystal', wo500: 'plasma', ton25: 'plasma', wkvol: 'obsidian', v500k: 'molten', setwk100: 'holo', pr50: 'plasma', sig50: 'obsidian', sig100: 'holo',
   ex80: 'plasma', tgt12: 'holo', allmus4: 'obsidian', cardio100: 'plasma', cdh50: 'holo',
-  forge: 'inferno', stormc: 'storm', summit: 'ice', sands: 'marble', vein: 'crystal', wayf: 'emerald',
+  forge: 'inferno', stormc: 'storm', summit: 'ice', sands: 'marble', vein: 'crystal', wayf: 'emerald', dontmiss: 'prism',
   allmus: 'prism', dec31: 'galaxy', friday13: 'void', leap: 'opal', ironwk: 'inferno', plate4: 'storm' };
 /* MYTHIC: a tier past the halo, for the badges that take a year or more:
    a prism ring turning round it and sparks in orbit, crazy on purpose */
-var BD_MYTH = { forge: 1, stormc: 1, summit: 1, sands: 1, vein: 1, wayf: 1, unbeat: 1, slayer: 1, wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
+var BD_MYTH = { dontmiss: 1, forge: 1, stormc: 1, summit: 1, sands: 1, vein: 1, wayf: 1, unbeat: 1, slayer: 1, wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
 /* EXOTIC: the halo tier, for what takes many months */
 var BD_HALO = { twice: 1, wo250: 1, v1m: 1, ton25: 1, hr100: 1, sets2k: 1, rp50k: 1, mo6: 1, tgt12: 1, allmus4: 1, ex80: 1, sig100: 1, cdh50: 1, wo100: 1, st26: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
 var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
@@ -6863,6 +6863,7 @@ var BADGES = [
   ['sands', 'Time Keeper', 'mile', 'A hundred and fifty hours trained, all time.', '#f5b84a'],
   ['vein', 'Deep Vein', 'pr', 'A hundred and fifty new bests, all time.', '#62e6ff'],
   ['wayf', 'Wayfinder', 'mile', 'A hundred and twenty different exercises logged.', '#7fb4ff'],
+  ['dontmiss', "Don't Miss", 'streak', 'Every planned day, four weeks running.', '#ff9ad5'],
   /* THE OWNER: one of a kind, on one phone, and the only badge that moves */
   ['owner', 'Owner', 'rare', 'The one who built this.', '#ff5a1f'],
   /* THE CREATOR: orange glass and chrome, an eye with a star in it. One of one. */
@@ -6875,7 +6876,7 @@ var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, 
 /* a week in front: the stored win flag, or for a week kept before there was
    one, the old reading, so nothing already earned is taken back */
 function frWon(v) { return v.length > 5 ? !!v[5] && v[2] > 0 : v[0] > 0 && v[0] > v[1] && v[2] > 0; }
-var BD_PREVIEW = false;
+var BD_PREVIEW = true;
 function lfBadges() {
   var ws = woSorted(), out = {}, uk = S.unit === 'lb' ? LB : 1;
   function won(id, d) { if (!out[id]) out[id] = { d: d }; }
@@ -6903,7 +6904,7 @@ function lfBadges() {
   if (prDays.length >= 100) won('pr100', prDays[99]);
   for (var i = 0; i < prDays.length; i++) { var from = ymd(addDays(parseYmd(prDays[i]), -29)), c = 0; for (var j = 0; j <= i; j++) if (prDays[j] >= from) c++; if (c >= 10) { won('pr10', prDays[i]); break; } }
   /* week by week: the goal, a full week, and the targets */
-  var streak = 0, planned = lfProg().days.filter(function (x) { return !x.choice; }).length;
+  var streak = 0, fullRun = 0, planned = lfProg().days.filter(function (x) { return !x.choice; }).length;
   var fo = (S.focus || []).filter(function (f) { return f.lo > 0; }), pri = fo.filter(function (f) { return f.p; });
   if (!pri.length) pri = fo;
   var qf = fo.filter(function (f) { return f.m === 'Quads'; })[0], tStreak = 0, qn = 0, curMet = 0, thisMon = ymd(monday(today()));
@@ -6911,7 +6912,9 @@ function lfBadges() {
     for (var m = monday(parseYmd(ws[0].d)), end = today(); m <= end; m = addDays(m, 7)) {
       var a = ymd(m), b = ymd(addDays(m, 6)), wk = ws.filter(function (w) { return w.d >= a && w.d <= b; });
       var days = {}; wk.forEach(function (w) { days[w.d] = 1; });
-      if (planned && Object.keys(days).length >= planned) won('week', wk[wk.length - 1].d);
+      /* a week with every planned day in it; four of those in a row is the month. A week still under way is not a miss. */
+      if (planned && Object.keys(days).length >= planned) { won('week', wk[wk.length - 1].d); fullRun++; if (fullRun === 4) won('dontmiss', wk[wk.length - 1].d); }
+      else if (b < ymd(today())) fullRun = 0;
       wk = dayFirst(wk);
       if (wk.length >= S.goal) { won('goal', wk[S.goal - 1].d); streak++; var dd = wk[S.goal - 1].d; if (streak === 4) won('st4', dd); if (streak === 12) won('st12', dd); if (streak === 26) won('st26', dd); }
       else if (b < ymd(today())) streak = 0;
@@ -7103,14 +7106,14 @@ function lfBadges() {
     ['rp10k', repT, 1e4], ['rp50k', repT, 5e4], ['rp100k', repT, 1e5], ['mo3', moHit, 3], ['mo6', moHit, 6], ['mo12', moHit, 12], ['wo365', ws.length, 365], ['st52', stBest, 52], ['v10m', Math.round(vol / uk), 1e7]]
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
   prog.forge = [Math.min(setT, 1000), 1000]; prog.stormc = [Math.min(Math.round(vol / uk), 2e6), 2e6]; prog.summit = [Math.min(Math.round(cdm.walk / 60), 25), 25];
-  prog.sands = [Math.min(Math.floor(minT / 60), 150), 150]; prog.vein = [Math.min(prDays.length, 150), 150]; prog.wayf = [Math.min(exNN, 120), 120];
+  prog.sands = [Math.min(Math.floor(minT / 60), 150), 150]; prog.vein = [Math.min(prDays.length, 150), 150]; prog.wayf = [Math.min(exNN, 120), 120]; prog.dontmiss = [Math.min(fullRun, 4), 4];
   ['allmus', 'dec31', 'friday13', 'leap', 'ironwk', 'plate4', 'ton25', 'sets40'].forEach(function (k) { prog[k] = [0, 1]; });
   [['wo250', ws.length, 250], ['wo500', ws.length, 500], ['v500k', Math.round(vol / uk), 5e5], ['wkvol', Math.round(bestOf(wkV) / uk), 5e4], ['setwk100', bestOf(wkSt), 100],
     ['pr25', prDays.length, 25], ['pr50', prDays.length, 50], ['ex15', exNN, 15], ['ex80', exNN, 80], ['sig50', sigBest, 50], ['sig100', sigBest, 100], ['tgt12', tStreak, 12],
     ['allmus4', amBest, 4], ['post50', postN, 50], ['cdwk', bestOf(cdWk), 5], ['cardio100', cdW, 100], ['cdh50', Math.floor(cdTot / 60), 50]]
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
   /* A LOOK AT THE SIX SCENES: on the owner's phone only, and put away by setting this to false */
-  if (BD_PREVIEW && lfOwner()) ['forge', 'stormc', 'summit', 'sands', 'vein', 'wayf'].forEach(function (id) { won(id, ymd(today())); });
+  if (BD_PREVIEW && lfOwner()) ['dontmiss'].forEach(function (id) { won(id, ymd(today())); });
   /* the owner badge is not a thing anyone else can see they lack */
   return BADGES.filter(function (b) { return (b.id !== 'owner' && b.id !== 'creator' && b.id !== 'slayer') || out[b.id]; }).map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
@@ -7220,7 +7223,7 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'gear', stormc: 'trap', summit: 'tri', sands: 'hourglass', vein: 'gem', wayf: 'compass', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'gear', stormc: 'trap', summit: 'tri', sands: 'hourglass', vein: 'gem', wayf: 'compass', dontmiss: 'steps', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
   tgt12: 'rosette', allmus4: 'trid', post50: 'hextall', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
@@ -7237,7 +7240,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4'
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50',
   chest50: '50', chest100: '100', chest200: '200', bk50: '50', bk100: '100', bk200: '200', sh50: '50', sh100: '100', sh200: '200', arm50: '50', arm100: '100', arm200: '200',
-  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
+  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: '28', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
   sets500: '500', sets2k: '2k', sets5k: '5k', hr25: '25h', hr100: '100h', hr250: '250h', rp10k: '10k', rp50k: '50k', rp100k: '100k', mo3: '3', mo6: '6', mo12: '12', allmus: 'i:dumb', dec31: 'i:star', friday13: '13', leap: '29', ironwk: '10h', plate4: '4', wo365: '365', st52: '52', v10m: '10M', owner: 'i:flame',
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
@@ -7258,6 +7261,11 @@ function bdOutline(c, k, sc) {
   var S = function (x) { return x * sc; }, M = function (pts) { return pts.map(function (p) { return [S(p[0]), S(p[1])]; }); };
   if (k === 'circle') { for (var j = 0; j <= 160; j++) { var t = j / 160 * Math.PI * 2; if (j === 0) c.moveTo(S(.93), 0); else c.lineTo(S(.93 * Math.cos(t)), S(.93 * Math.sin(t))); } c.closePath(); }
   else if (k === 'hex') bdPoly(c, M(bdNgon(6, .97, 0)), S(.14));
+  /* a diamond cut in stairs: every step is seen from the middle, which the face is built out from */
+  else if (k === 'steps') bdPoly(c, M((function () { var n = 4, w = .98 / n, q = [[0, .98]], i;
+    for (i = 0; i < n; i++) { q.push([w * (i + 1), .98 - w * i]); q.push([w * (i + 1), .98 - w * (i + 1)]); }
+    q.push([.98, 0]); var br = q.slice().reverse().map(function (p) { return [p[0], -p[1]]; }).slice(1), right = q.concat(br);
+    return right.concat(right.slice(1, -1).reverse().map(function (p) { return [-p[0], p[1]]; })); })()), S(.02));
   else if (k === 'hexp') bdPoly(c, M(bdNgon(6, .98, Math.PI / 2)), S(.15));
   else if (k === 'oct') bdPoly(c, M(bdNgon(8, .97, Math.PI / 8)), S(.1));
   else if (k === 'tri') bdPoly(c, M([[0, .98], [.96, -.72], [-.96, -.72]]), S(.18));
@@ -8143,7 +8151,65 @@ function bdWayf(A) {
   });
   A.add(bdMotes(g, 50, .035, 0xcfeaff, function (k, t, p, o) { var f = (t * (.07 + bdR(k) * .1) + bdR(k + 40)) % 1; p[o] = (bdR(k + 1) - .5) * 2.7; p[o + 1] = -1.3 + f * 1.1 + Math.sin(t + k) * .05; p[o + 2] = (bdR(k + 3) - .5) * 1.0; }, .6));
 }
-var BD_SCENE = { forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
+/* DON'T MISS: bismuth, the one metal that grows in stairs. A hopper crystal
+   with six steps cut down into it, each step oxidised its own colour, the
+   whole of it stood on a corner. A light wanders over the stairs and the
+   metal shifts through pink, violet, blue and green as it passes. Round it
+   twenty-eight beads, one for every day of the month, with a bright one
+   running the ring. A tap sends the steps up in turn and turns it over. */
+function bdBismuth(A) {
+  var T = A.T, g = A.g, hi = A.hi, i, K = 6, S0 = 1.62, ST = .26;
+  A.add(bdSkyPlane(g, hi, function (x, N, t) {
+    x.globalCompositeOperation = 'lighter';
+    [[.34, .38, 255, 120, 200, .22, .9], [.66, .6, 120, 100, 255, .22, 1.3], [.5, .78, 60, 210, 230, .16, 1.1]].forEach(function (b, j) {
+      var cx = N * (b[0] + Math.sin(t * .3 * b[6] + j) * .08), cy = N * (b[1] + Math.cos(t * .25 * b[6] + j * 2) * .07), gr = x.createRadialGradient(cx, cy, 0, cx, cy, N * .42);
+      gr.addColorStop(0, 'rgba(' + b[2] + ',' + b[3] + ',' + b[4] + ',' + b[5] + ')'); gr.addColorStop(1, 'rgba(' + b[2] + ',' + b[3] + ',' + b[4] + ',0)'); x.fillStyle = gr; x.fillRect(0, 0, N, N);
+    });
+    for (i = 0; i < (hi ? 110 : 48); i++) { x.fillStyle = 'rgba(255,255,255,' + ((.25 + bdR(i + 3) * .6) * (.5 + .5 * Math.sin(t * (1 + bdR(i) * 2) + i))) + ')'; x.fillRect(N * bdR(i + 60), N * bdR(i + 120), 1.6, 1.6); }
+  }));
+  var pivot = new T.Group(); g.add(pivot);
+  var cr = new T.Group(); cr.rotation.z = Math.PI / 4; cr.scale.setScalar(.8); pivot.add(cr);
+  var front = new T.Group(), back = new T.Group(); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
+  var mats = [], FM = [], BM = [];
+  for (i = 0; i < K; i++) {
+    var s = (S0 - i * ST) / 2, top = .05 + (K - 1 - i) * .06, sh = new T.Shape();
+    sh.moveTo(-s, -s); sh.lineTo(s, -s); sh.lineTo(s, s); sh.lineTo(-s, s); sh.closePath();
+    if (i < K - 1) { var h = (S0 - (i + 1) * ST) / 2, ho = new T.Path(); ho.moveTo(-h, -h); ho.lineTo(-h, h); ho.lineTo(h, h); ho.lineTo(h, -h); ho.closePath(); sh.holes.push(ho); }
+    var geo = new T.ExtrudeGeometry(sh, { depth: top, bevelEnabled: true, bevelThickness: .012, bevelSize: .012, bevelSegments: hi ? 3 : 2 });
+    mats[i] = new T.MeshPhysicalMaterial({ color: 0xffffff, metalness: 1, roughness: .2, envMapIntensity: 1.1, clearcoat: .5, clearcoatRoughness: .12 });
+    FM[i] = new T.Mesh(geo, mats[i]); front.add(FM[i]); BM[i] = new T.Mesh(geo, mats[i]); back.add(BM[i]);
+  }
+  var lamp = new T.PointLight(0xffe0f4, 1.3, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
+  var cool = new T.PointLight(0x7fd8ff, .9, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
+  /* the month: twenty-eight beads, a bright one running the ring */
+  var ring = new T.Group(), beads = [], bm = []; g.add(ring);
+  for (i = 0; i < 28; i++) {
+    var a = i / 28 * Math.PI * 2, mt = new T.MeshBasicMaterial({ color: 0xffffff, transparent: true, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false }), bd = new T.Mesh(new T.SphereGeometry(1, 10, 8), mt);
+    bd.position.set(Math.cos(a) * 1.18, Math.sin(a) * 1.18, 0); ring.add(bd); beads.push(bd); bm.push(mt);
+  }
+  var tapAt = -99, pend = false, lastT = 0;
+  g.userData.tap = function () { pend = true; };
+  A.add(function (t) {
+    if (pend) { tapAt = t; pend = false; }
+    var u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0;
+    pivot.rotation.y = Math.sin(t * .5) * .34 + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .16; pivot.position.y = Math.sin(t * .8) * .045;
+    for (i = 0; i < K; i++) {
+      var hu = (([42, 335, 285, 235, 195, 160][i] + t * 4 + Math.sin(t * .5 + i * .7) * 14 + 360) % 360) / 360, lift = u >= 0 && u < 1.2 ? Math.max(0, Math.sin((u - i * .1) * Math.PI / .5)) * (u > i * .1 && u < i * .1 + .5 ? .09 : 0) : 0;
+      mats[i].color.setHSL(hu, .9, .46); mats[i].emissive.setHSL(hu, .9, .06);
+      FM[i].position.z = lift; BM[i].position.z = lift;
+    }
+    /* the wandering light is what makes the steps flash in turn */
+    lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = 1.3 + Math.sin(t * 1.3) * .4;
+    ring.rotation.z = t * .12; var ph = (t * 7) % 28;
+    for (i = 0; i < 28; i++) {
+      var d = (i - ph + 28) % 28, k2 = Math.exp(-d * .45), hb = ((i / 28 * 360 + t * 20) % 360) / 360;
+      beads[i].scale.setScalar(.022 + .04 * k2); bm[i].color.setHSL(hb, .8, .35 + .45 * k2); bm[i].opacity = .35 + .65 * k2;
+    }
+  });
+  A.add(bdMotes(g, 40, .04, 0xffb6e6, function (k, t, p, o) { var f = (t * (.06 + bdR(k) * .08) + bdR(k + 40)) % 1, a = bdR(k + 2) * 6.28 + t * .1; p[o] = Math.cos(a) * (.9 + bdR(k + 5) * .6); p[o + 1] = -1.4 + f * 2.8; p[o + 2] = (bdR(k + 3) - .5) * 1.0; }, .7));
+  A.add(bdMotes(g, 30, .035, 0x9fe8ff, function (k, t, p, o) { var f = (t * (.05 + bdR(k + 9) * .08) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28 - t * .12; p[o] = Math.cos(a) * (.8 + bdR(k + 15) * .6); p[o + 1] = 1.4 - f * 2.8; p[o + 2] = (bdR(k + 13) - .5) * 1.0; }, .6));
+}
+var BD_SCENE = { dontmiss: bdBismuth, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
@@ -8632,7 +8698,7 @@ function lfMedalCard() {
 var BD_COLL = [
   ['own', 'One of one', '#ff5a1f', ['owner', 'creator']],
   ['ses', 'Sessions', '#2f7bff', ['first', 'wo10', 'wo50', 'wo100', 'wo250', 'wo365', 'wo500', 'mon20', 'mo3', 'mo6', 'mo12', 'year', 'hr25', 'hr100', 'hr250', 'sands', 'long', 'ironwk', 'twice']],
-  ['con', 'Consistency', '#8b5cf6', ['goal', 'st4', 'st12', 'st26', 'st52', 'week', 'seven', 'zero', 'wkend', 'back', 'early', 'owl', 'night', 'dawn', 'winter', 'newyear', 'dec31', 'friday13', 'leap']],
+  ['con', 'Consistency', '#8b5cf6', ['goal', 'st4', 'st12', 'st26', 'st52', 'week', 'dontmiss', 'seven', 'zero', 'wkend', 'back', 'early', 'owl', 'night', 'dawn', 'winter', 'newyear', 'dec31', 'friday13', 'leap']],
   ['vol', 'Volume', '#ff8a1c', ['v100k', 'v500k', 'v1m', 'v5m', 'v10m', 'stormc', 'ton10', 'ton15', 'ton20', 'ton25', 'wkvol']],
   ['set', 'Sets & reps', '#0891b2', ['sets30', 'sets40', 'setwk100', 'sets500', 'sets2k', 'sets5k', 'forge', 'rep300', 'rep1k', 'rep2k', 'rp10k', 'rp50k', 'rp100k', 'century']],
   ['str', 'Strength', '#ef3b2d', ['pr', 'pr3', 'pr10', 'pr25', 'pr50', 'pr100', 'vein', 'onfire', 'plate3', 'plate4']],
