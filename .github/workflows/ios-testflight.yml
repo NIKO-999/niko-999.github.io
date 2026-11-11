@@ -23,6 +23,14 @@ jobs:
         with:
           node-version: 20
 
+      - name: Trim stray spaces from the secrets
+        # pasting on a phone often adds a space or a line break at either end
+        run: |
+          for v in BUNDLE_ID TEAM_ID KEY_ID ISSUER_ID; do
+            val="$(printf '%s' "${!v}" | tr -d '[:space:]')"
+            echo "$v=$val" >> "$GITHUB_ENV"
+          done
+
       - name: Check the secrets are there
         run: |
           for v in BUNDLE_ID TEAM_ID KEY_ID ISSUER_ID; do
