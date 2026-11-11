@@ -5651,6 +5651,70 @@ function lfMomentsRun() {
 function frBadges(st) {
   return (Array.isArray(st && st.bg) ? st.bg : []).filter(function (x) { return Array.isArray(x) && BADGE[x[0]]; }).slice(0, 3).map(function (x) { return { b: BADGE[x[0]], d: x[1], p: null, fr: 1 }; });
 }
+/* THE OWNER'S PROFILE OPENS WITH A DRAGON: a neon one, drawn in light the
+   way the flares are, that flies in over the page, swoops round it and flies
+   out. It is a canvas over the screen for three and a half seconds and then
+   it is gone, and it never takes a press. Its body is the path its head took,
+   so it follows itself, with a ripple running down it. */
+function lfDragon() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1), light = document.documentElement.getAttribute('data-mode') === 'light';
+  var cv = document.createElement('canvas'); cv.width = W * dpr; cv.height = H * dpr; cv.setAttribute('aria-hidden', 'true');
+  cv.style.cssText = 'position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:90;pointer-events:none';
+  document.body.appendChild(cv); var x = cv.getContext('2d'); x.scale(dpr, dpr);
+  var k = Math.min(W, 460) / 390;
+  /* where its head goes, as fractions of the screen: in from the left, up over the page, a loop, and out */
+  var P = [[-.3, .8], [-.05, .66], [.26, .4], [.58, .2], [.9, .24], [1.02, .42], [.82, .56], [.5, .5], [.22, .34], [.1, .1], [-.05, -.12], [-.35, -.3]];
+  function cr(p0, p1, p2, p3, t) { var t2 = t * t, t3 = t2 * t; return .5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3); }
+  function at(u) {
+    u = Math.max(0, Math.min(.9999, u)); var n = P.length - 1, f = u * n, i = Math.floor(f), t = f - i, a = P[Math.max(0, i - 1)], b = P[i], c = P[i + 1], d = P[Math.min(n, i + 2)];
+    return [cr(a[0], b[0], c[0], d[0], t) * W, cr(a[1], b[1], c[1], d[1], t) * H];
+  }
+  var T = 3.6, N = 54, du = .0078, t0 = performance.now(), raf = 0;
+  function pass(ws, cs) { return ws.map(function (w, i) { return [w, cs[i]]; }); }
+  /* a path drawn as neon: a wide soft glow, a coloured line, a white core */
+  function neon(draw, w, hue, a) {
+    var L = [[w * 3.4, .1, 62], [w * 1.9, .3, 60], [w, .95, 64], [w * .38, 1, 92]];
+    L.forEach(function (q) { x.lineWidth = q[0]; x.strokeStyle = 'hsla(' + hue + ',100%,' + (light ? 42 : q[2]) + '%,' + q[1] * a + ')'; x.beginPath(); draw(); x.stroke(); });
+  }
+  function frame(now) {
+    var tt = (now - t0) / 1000, e = tt / T, u = e * (1 + N * du) - 0;
+    x.clearRect(0, 0, W, H); x.globalCompositeOperation = light ? 'source-over' : 'lighter'; x.lineCap = x.lineJoin = 'round';
+    var pts = [];
+    for (var i = 0; i < N; i++) {
+      var ui = u - i * du; if (ui < 0 || ui > 1) { pts.push(null); continue; }
+      var p = at(ui), q = at(ui - .004), nx = q[1] - p[1], ny = p[0] - q[0], nl = Math.hypot(nx, ny) || 1, wig = Math.sin(i * .55 - tt * 9) * 7 * k * Math.min(1, i / 6) * (1 - i / N * .4);
+      pts.push([p[0] + nx / nl * wig, p[1] + ny / nl * wig, nx / nl, ny / nl]);
+    }
+    var fade = Math.min(1, Math.max(0, (T + .3 - tt) / .5));
+    for (var j = pts.length - 2; j >= 0; j--) {
+      var a = pts[j], b = pts[j + 1]; if (!a || !b) continue;
+      var f = j / N, w = (13 - 10.5 * f) * k, hue = 188 + f * 130;
+      neon(function () { x.moveTo(a[0], a[1]); x.lineTo(b[0], b[1]); }, w, hue, fade);
+      if (j % 2 === 0 && j > 2) { /* a spine along the back */
+        var sl = (11 - 8 * f) * k; neon(function () { x.moveTo(a[0], a[1]); x.lineTo(a[0] + a[2] * sl, a[1] + a[3] * sl); }, 1.6 * k, hue + 20, fade);
+      }
+    }
+    /* two pairs of legs */
+    [10, 27].forEach(function (j) { var a = pts[j]; if (!a) return; var f = j / N, hue = 188 + f * 130; [-1, 1].forEach(function (sg) { neon(function () { x.moveTo(a[0], a[1]); x.quadraticCurveTo(a[0] + sg * a[2] * 14 * k, a[1] + sg * a[3] * 14 * k, a[0] + sg * a[2] * 20 * k + a[3] * 7 * k, a[1] + sg * a[3] * 20 * k - a[2] * 7 * k); }, 1.8 * k, hue, fade); }); });
+    /* the head, in profile, turned the way it is going and kept the right way up */
+    var h = pts[0], h2 = pts[3] || pts[1];
+    if (h && h2) {
+      var ang = Math.atan2(h[1] - h2[1], h[0] - h2[0]); x.save(); x.translate(h[0], h[1]); x.rotate(ang); x.scale(k, Math.cos(ang) < 0 ? -k : k);
+      var hc = 186, hw = 2.4;
+      neon(function () { x.moveTo(-12, -7); x.lineTo(6, -10); x.lineTo(28, -6); x.lineTo(36, 0); x.lineTo(30, 3); x.lineTo(9, 5); x.lineTo(30, 9); x.lineTo(4, 11); x.lineTo(-9, 6); x.closePath(); }, hw, hc, fade);
+      neon(function () { x.moveTo(-6, -9); x.quadraticCurveTo(-24, -12, -38, -24); }, hw, hc + 40, fade);
+      neon(function () { x.moveTo(-1, -10); x.quadraticCurveTo(-14, -22, -26, -32); }, hw, hc + 60, fade);
+      neon(function () { x.moveTo(28, 2); x.bezierCurveTo(20, 24, -4, 22, -26, 36); }, 1.6, hc + 90, fade);
+      x.fillStyle = 'rgba(255,255,255,' + fade + ')'; x.beginPath(); x.arc(8, -3.5, 2.2, 0, 7); x.fill();
+      x.fillStyle = 'hsla(190,100%,70%,' + .35 * fade + ')'; x.beginPath(); x.arc(8, -3.5, 7, 0, 7); x.fill();
+      x.restore();
+    }
+    if (tt < T + .4) raf = requestAnimationFrame(frame); else cv.remove();
+  }
+  raf = requestAnimationFrame(frame);
+  return { stop: function () { cancelAnimationFrame(raf); cv.remove(); } };
+}
 function frSheet(f) {
   var st = f.s || {}, col = frColOf(st), nm = f.me ? (FRS.name || 'You') : (f.n || 'Friend');
   /* THE BANNER: their colour, their initial, their name, and the three
@@ -5765,9 +5829,11 @@ function frSheet(f) {
   var foot = null, rm = null;
   if (!f.me) { rm = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot = [rm]; }
 
-  var s = lfSheet({ title: '', body: b, foot: foot, full: true, cls: 'fr-prof' });
+  var dg = null, dt = 0, s = lfSheet({ title: '', body: b, foot: foot, full: true, cls: 'fr-prof', onClose: function () { clearTimeout(dt); if (dg) dg.stop(); } });
   s.el.setAttribute('aria-label', nm); s.el.style.setProperty('--rc', col);
   lfAccOn(s.el, frHue(st));
+  /* the owner's profile opens with a dragon */
+  if (st.ow === 1) dt = setTimeout(function () { dg = lfDragon(); }, 450);
   if (rm) rm.addEventListener('click', function () {
     var i = FRS.list.indexOf(f); if (i < 0) return;
     FRS.list.splice(i, 1); if (FRS.no.indexOf(f.c) < 0) FRS.no.push(f.c); frSave(); s.close(true); lfRender();
