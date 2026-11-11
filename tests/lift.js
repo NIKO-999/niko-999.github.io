@@ -1353,7 +1353,7 @@ const freeze = (at) => `(() => {
     const got = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent).filter((tx) => /^Crowned/.test(tx)));
     ok('a week the flag says was lost is not crowned even if the progress was higher, a won one is, and a week kept before the flag still counts', got.length === 1 && /18 Oct|25 Oct/.test(got[0]) && !/11 Oct/.test(got[0]), got);
     const src2 = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
-    ok('the rings put a goal hit first, then the longer run of weeks on goal, and the creator is beaten the same way, never by kilos', /b\.met - a\.met\) \|\| \(a\.met && b\.met \? b\.st - a\.st : 0\)/.test(src2) && /if \(!\(mine > cStreak\)\) return;/.test(src2) && !/v8\[6\]/.test(src2.slice(src2.indexOf('function lfSlayCheck'), src2.indexOf('function frPullAll'))));
+    ok('the rings put a goal hit first, then most days, then set targets met, then the longer run of weeks, and the creator is beaten the same way, never by kilos', /function frCmp\(a, b\) \{ return \(b\.met - a\.met\) \|\| \(a\.met && b\.met \? \(b\.n - a\.n\) \|\| \(b\.sf - a\.sf\) \|\| \(b\.st - a\.st\)/.test(src2) && /myDays > cDays \|\| \(myDays === cDays && mine > cStreak\)/.test(src2) && !/v8\[6\]/.test(src2.slice(src2.indexOf('function lfSlayCheck'), src2.indexOf('function frPullAll'))));
     await c.close();
   }
 

@@ -4935,8 +4935,8 @@ setTimeout(frLivePoll, 1200);
    of a new shape sends it once. */
 if (FRS.on && FRS.sv !== 3) { FRS.sv = 3; frSave(); setTimeout(function () { frPushNow(); }, 3000); }
 /* BEATING THE CREATOR. The last whole week, Monday to Sunday: you hit your
-   goal and so did the creator, and your run of weeks on goal is longer than
-   theirs. Kilos and days do not decide it, so a small goal reached first
+   goal and so did the creator, and you trained more days than them, or the same and a longer
+   run of weeks on goal. Kilos and days do not decide it, so a small goal reached first
    wins nothing. Their record must have been sent this week, or its weeks are
    not the weeks being compared. Once it happens it is kept: the date is the Sunday. */
 function lfSlayCheck(f) {
@@ -4948,7 +4948,8 @@ function lfSlayCheck(f) {
   var last = addDays(mon, -7), mine = 0;
   if (wkDays(last) < S.goal) return;
   for (var m = last, g = 0; g < 104 && wkDays(m) >= S.goal; m = addDays(m, -7), g++) mine++;
-  if (!(mine > cStreak)) return;
+  var myDays = wkDays(last), cDays = +tr.w8[6][0] || 0;
+  if (!(myDays > cDays || (myDays === cDays && mine > cStreak))) return;
   S.slay = ymd(addDays(mon, -1)); lfBCk = ''; lfSave();
   lfToast('You out-lasted the creator. Giant Slayer is yours'); setTimeout(lfMomentsRun, 600);
 }
@@ -5892,20 +5893,30 @@ function frFxNote(rows) {
   if (me && fr.length) {
     var k = function (f) { var w = frWeekOf(f.s); return Math.min(1000, Math.round(w.n / w.g * 1000)); };
     var my = k(me), best = Math.max.apply(null, fr.map(k)), all = my >= 1000 && fr.every(function (f) { return k(f) >= 1000; }) ? 1 : 0;
-    /* A WEEK IS WON BY HITTING YOUR GOAL, then by the longer run of weeks on it:
-       getting to two workouts first means nothing when two is all you aimed at */
-    var mst = +(me.s && me.s.streak) || 0, win = my >= 1000 && fr.every(function (f) { return k(f) < 1000 || (+(f.s && f.s.streak) || 0) < mst; }) ? 1 : 0;
+    /* A WEEK IS WON BY HITTING YOUR GOAL, then by days, set targets and the run
+       of weeks: getting to two workouts first means nothing when two is all you aimed at */
+    var ms = frStand(me), win = my >= 1000 && fr.every(function (f) { return frCmp(ms, frStand(f)) < 0; }) ? 1 : 0;
     var was = fx.wk[mon] || [], v = [my, best, fr.length, all || was[3] ? 1 : 0, was[4] || (all ? ymd(today()) : ''), win];
     if (JSON.stringify(v) !== JSON.stringify(was)) { fx.wk[mon] = v; ch = true; }
   }
   if (ch) { S.fx = fx; lfSave(); setTimeout(lfBadgeNew, 600); }
 }
+/* HOW A WEEK IS RANKED, for those who hit their goal: the most days trained
+   (seven beats six), then the most of their set targets met, then the longer
+   run of weeks on goal. All three level is a tie. */
+function frSetsMet(st) {
+  var mu = st && Array.isArray(st.mu) ? st.mu : [], got = 0, tg = 0;
+  mu.forEach(function (m) { var t = +m[2] || 0; if (t > 0) { tg += t; got += Math.min(t, +m[1] || 0); } });
+  return tg ? Math.round(got / tg * 1000) : 0;
+}
+function frStand(f) { var w = frWeekOf(f.s), k = f.gone ? -1 : Math.min(1, w.n / w.g); return { f: f, w: w, k: k, met: k >= 1, n: w.n, sf: frSetsMet(f.s), st: +(f.s && f.s.streak) || 0 }; }
+function frCmp(a, b) { return (b.met - a.met) || (a.met && b.met ? (b.n - a.n) || (b.sf - a.sf) || (b.st - a.st) : 0) || b.k - a.k || b.n - a.n; }
 function frRings(rows) {
   frFxNote(rows);
-  /* IN FRONT IS: a goal hit, then the longer run of weeks on goal. Until
-     anyone has hit theirs it is whoever is closest to their own */
-  var ls = rows.map(function (f) { var w = frWeekOf(f.s), k = f.gone ? -1 : Math.min(1, w.n / w.g); return { f: f, w: w, k: k, met: k >= 1, st: +(f.s && f.s.streak) || 0 }; })
-    .sort(function (a, b) { return (b.met - a.met) || (a.met && b.met ? b.st - a.st : 0) || b.k - a.k || b.w.n - a.w.n; });
+  /* IN FRONT IS: a goal hit, then most days, then most set targets met, then the
+     longer run of weeks on goal. Until anyone has hit theirs it is whoever is
+     closest to their own */
+  var ls = rows.map(frStand).sort(frCmp);
   var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div><div id="frBoard"></div></div>');
   var g = $('g', c), drawn = ls.filter(function (x) { return !x.f.gone; }).slice(0, 6), n = drawn.length;
   var sw = n > 4 ? 8 : 11, step = sw + 3, r0 = 69 - sw / 2;
@@ -5945,7 +5956,7 @@ function frRings(rows) {
      started yet says nothing. Training now stays on the ring itself. */
   var lead = ls.filter(function (x) { return !x.f.gone && x.k > 0; });
   if (lead.length) {
-    var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && (top.met ? lead[1].met && lead[1].st === top.st : !lead[1].met && lead[1].k === top.k && lead[1].w.n === top.w.n);
+    var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && frCmp(top, lead[1]) === 0;
     mid.hidden = false; mid.id = 'frRgLead';
     mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b>';
     $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
