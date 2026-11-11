@@ -4647,6 +4647,7 @@ function frLoad() {
       if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, 50)
         .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone, rx: Array.isArray(f.rx) ? f.rx : [] }; });
       d.rx = Array.isArray(o.rx) ? o.rx : [];
+      d.sv = +o.sv || 0;
       /* showing your sets while you train is on until you turn it off */
       if (o.live === false) d.live = false;
       /* codes you removed, so their add does not put them straight back */
@@ -4858,6 +4859,11 @@ function frSyncNow() {
   if (who.length && view !== 'fr') { lfBanner(IC_LINK, 'In sync', 'Training with ' + who.map(function (f) { return f.n || 'a friend'; }).slice(0, 2).join(' and ') + ' right now', frColOf(who[0].s)); buzz([10, 50, 10]); }
 }
 setTimeout(frLivePoll, 1200);
+/* WHAT YOUR RECORD CARRIES CHANGED (time, warm-ups, drops, cardio on each
+   workout), and a record is only sent when something changes. Without this a
+   friend would see the old shape until you next trained, so the first open
+   of a new shape sends it once. */
+if (FRS.on && FRS.sv !== 3) { FRS.sv = 3; frSave(); setTimeout(function () { frPushNow(); }, 3000); }
 /* BEATING THE CREATOR. The last whole week, Monday to Sunday: more kilos
    moved than the creator moved in it, and the creator has to have trained.
    Their record must have been sent this week, or its weeks are not the
