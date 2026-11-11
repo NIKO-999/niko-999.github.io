@@ -3616,7 +3616,7 @@ function lfCardWorkout(w, prs) {
     return [exName(e.id, e.n), txt.replace(/\s+×/g, ' ×')];
   });
   if (w.cd) lines.push(['Cardio', lfCdTxt(w.cd)]);
-  return { kicker: 'Lift  ·  ' + fmtDay(w.d), title: w.n, sub: w.s > 1e11 ? fmtAt(new Date(w.s)) + '  ·  ' + mins : mins,
+  return { kicker: 'Workout  ·  ' + fmtDay(w.d), title: w.n, sub: w.s > 1e11 ? fmtAt(new Date(w.s)) + '  ·  ' + mins : mins,
     hero: Math.round(toDisp(woVol(w))).toLocaleString(), heroL: S.unit + ' moved', stats: [[mins, 'time'], [String(woSets(w)), 'sets'], [fmtBig(woReps(w)), 'reps']], prs: prs || [], lines: lines };
 }
 /* THE PREVIEW IS THE CARD, so what you see is what goes out: Share opens the
