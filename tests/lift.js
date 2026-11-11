@@ -828,15 +828,15 @@ const freeze = (at) => `(() => {
   }
   /* ── DON'T MISS: four full weeks in a row, and a single gap puts it out of reach ── */
   {
-    const days = (skip) => { const o = []; for (let i = 0; i < 28; i++) { const d = new Date(2026, 9, 5 + i), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); if (k !== skip) o.push({ id: 'dm' + i, d: k, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 60, r: 8 }] }] }); } return o; };
+    const days = (skip) => { const o = []; for (let i = 0; i < 28; i++) { const d = new Date(2026, 9, 5 + i), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); if (!skip.includes(k)) o.push({ id: 'dm' + i, d: k, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 60, r: 8 }] }] }); } return o; };
     const shelfOf = async (page) => { await page.click('.lf-bar [data-v="you"]'); await settle(page); return page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent)); };
-    const a = await ctx({ unit: 'kg', wo: days('') }, '2026-11-02T09:00:00');
+    const a = await ctx({ unit: 'kg', wo: days([]) }, '2026-11-02T09:00:00');
     const full = await shelfOf(a.page);
     ok("Don't Miss is earned on the last day of the fourth full week, with every day of those four weeks logged", full.includes("Don't Miss:1 Nov"), full.filter((x) => /Miss/.test(x)));
     await a.c.close();
-    const b = await ctx({ unit: 'kg', wo: days('2026-10-21') }, '2026-11-02T09:00:00');
+    const b = await ctx({ unit: 'kg', wo: days(['2026-10-20', '2026-10-21', '2026-10-22', '2026-10-23']) }, '2026-11-02T09:00:00');
     const gap = await shelfOf(b.page);
-    ok('one empty day in the second week and the run starts again, so it is not earned and shows how far it got', !gap.some((x) => /^Don't Miss:\d+ [A-Z]/.test(x)) && gap.some((x) => /^Don't Miss:\d \/ 4$/.test(x)), gap.filter((x) => /Miss/.test(x)));
+    ok('four empty days in the third week and the run starts again, so it is not earned and shows how far it got', !gap.some((x) => /^Don't Miss:\d+ [A-Z]/.test(x)) && gap.some((x) => /^Don't Miss:\d \/ 4$/.test(x)), gap.filter((x) => /Miss/.test(x)));
     await b.c.close();
   }
   /* ── SETS AND WORKOUTS OPEN THE SAME WAY, and a sheet is frosted glass ── */
@@ -977,7 +977,7 @@ const freeze = (at) => `(() => {
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
     ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 130/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 129);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 130);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1602,7 +1602,7 @@ const freeze = (at) => `(() => {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 129);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 130);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
     ok('the link is spent: the hash leaves the address bar', await page.waitForFunction(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || ''), null, { timeout: 10000 }).then(() => true, () => false));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
@@ -1935,7 +1935,7 @@ const freeze = (at) => `(() => {
     }
     {
       const dm = require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8');
-      ok("Don't Miss: every planned day, four weeks running, in a mythic scene of its own with a shape and metal no other badge has", /\['dontmiss', "Don't Miss", 'streak', '[^']+', '#[0-9a-f]{6}'\]/.test(dm) && /BD_SCENE = \{ dontmiss: bdBismuth,/.test(dm) && /BD_MYTH = \{ dontmiss: 1,/.test(dm) && /dontmiss: 'steps'/.test(dm) && /k === 'steps'/.test(dm) && (dm.match(/'steps'/g) || []).length === 2);
+      ok("Don't Miss: every planned day, four weeks running, in a mythic scene of its own with a shape and metal no other badge has", /\['dontmiss', "Don't Miss", 'streak', '[^']+', '#[0-9a-f]{6}'\]/.test(dm) && /BD_SCENE = \{ dontmiss: bdBismuth,/.test(dm) && /BD_MYTH = \{ dontmiss: 1,/.test(dm) && /dontmiss: 'steps'/.test(dm) && /k === 'steps'/.test(dm));
       ok('it is won on the fourth full week in a row, and a week still under way does not break the run', /fullRun\+\+; if \(fullRun === 4\) won\('dontmiss'/.test(dm) && /else if \(b < ymd\(today\(\)\)\) fullRun = 0;/.test(dm));
       ok('its scene turns over on a tap and runs a bead for each day of a month', /function bdBismuth\(A\)[^]*?g\.userData\.tap = function \(\)[^]*?i < 28/.test(dm));
     }

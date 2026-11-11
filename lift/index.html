@@ -7264,7 +7264,8 @@ function bdOutline(c, k, sc) {
   /* a diamond cut in stairs: every step is seen from the middle, which the face is built out from */
   else if (k === 'steps') bdPoly(c, M((function () { var n = 4, w = .98 / n, q = [[0, .98]], i;
     for (i = 0; i < n; i++) { q.push([w * (i + 1), .98 - w * i]); q.push([w * (i + 1), .98 - w * (i + 1)]); }
-    q.push([.98, 0]); var br = q.slice().reverse().map(function (p) { return [p[0], -p[1]]; }).slice(1), right = q.concat(br);
+    /* the last step already ends on the tip, so it is not pushed again: a repeated point is a divide by zero in the corner rounding */
+    var br = q.slice().reverse().map(function (p) { return [p[0], -p[1]]; }).slice(1), right = q.concat(br);
     return right.concat(right.slice(1, -1).reverse().map(function (p) { return [-p[0], p[1]]; })); })()), S(.02));
   else if (k === 'hexp') bdPoly(c, M(bdNgon(6, .98, Math.PI / 2)), S(.15));
   else if (k === 'oct') bdPoly(c, M(bdNgon(8, .97, Math.PI / 8)), S(.1));
