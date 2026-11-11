@@ -496,6 +496,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 /* A SHEET WITH NO TITLE has nothing for the head row to say: the close
    button floats in the corner and the content starts under the grab. */
 .lf-sheet.no-title .lf-sh-hd { position: absolute; top: 12px; right: 8px; padding: 0; z-index: 2; }
+/* THE CLOSE BUTTON OF A SHEET WITH NO TITLE FLOATS OVER WHAT SCROLLS UNDER IT, so it is a disc of its own: a figure running up to the corner no longer printed over it. */
+.lf-sheet.no-title .lf-sh-hd .lf-x { background: color-mix(in srgb, var(--card2) 88%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 .lf-sheet.no-title .lf-sh-hd h2 { display: none; }
 .lf-x { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; }
 
@@ -523,7 +525,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-swp { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; margin-right: -8px; }
 .lf-swp svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .lf-from { display: block; margin: 0 0 6px; min-height: 32px; text-align: left; font-size: 12px; font-weight: 600; color: var(--today-ink); }
-.lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 40px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; align-content: center; }
+/* THE LINK BUTTON TOOK 40px FROM THE NAME, which is why long ones were cut to "Smith machine incline ...": a name now takes two lines before it is cut. */
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 44px; }
 .lf-burst { position: fixed; width: 0; height: 0; z-index: 90; pointer-events: none; }
 .lf-burst i { position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: var(--log-g, var(--log)); animation: lf-burst .75s cubic-bezier(.2,.7,.3,1) forwards; }
@@ -562,6 +565,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-fin.is-rev .lf-fin-vol { font-size: 40px; }
 .lf-fin.is-rev .lf-fin-vol small { font-size: 15px; }
 .lf-fin.is-rev .lf-fin-u { margin: 4px 0 14px; }
+#lfMonthSum .lf-fin-vol, #frWoFin .lf-fin-vol { margin-bottom: 16px; }
 .lf-fin.is-rev .lf-fin-l { margin-top: 14px; }
 .lf-fin-l .lf-cap { margin: 0 2px 8px; }
 .lf-fin-l .lf-tags { margin: 0; }
@@ -612,12 +616,19 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sheet.lf-wsh.is-miss { --log: #ff453a; --on-log: #ffffff; --today-ink: #ff6961; }
 .lf-wsh.is-miss .lf-ws-verdict { color: #ff6961; }
 .lf-wsh.is-miss .lf-ws-k { background: none; color: #ff6961 !important; animation: none; }
+/* ON A WHITE PAGE the review's pale red and its lime heading were nearly invisible: the same words, a shade deeper. */
+:root[data-mode="light"] .lf-ws-k { background-image: linear-gradient(90deg, var(--ink), var(--today-ink), var(--ink)); }
+:root[data-mode="light"] .lf-wsh.is-miss .lf-ws-verdict { color: #b3261e; }
+:root[data-mode="light"] .lf-wsh.is-miss .lf-ws-k { color: #b3261e !important; background: none; }
+:root[data-mode="light"] .lf-sheet.lf-wsh.is-miss { --today-ink: #b3261e; }
 .lf-ws-miss .lf-ws-mr { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 10px; padding: 12px 14px; border-radius: 14px; background: color-mix(in srgb, #ff453a 10%, var(--card)); margin-bottom: 8px; font-size: 14px; font-weight: 600; }
 .lf-ws-mr b { color: #ff6961; font-size: 14px; }
 .lf-ws-mr > i { grid-column: 1 / -1; height: 5px; border-radius: 5px; background: var(--card3); overflow: hidden; }
 .lf-ws-mr > i i { display: block; height: 100%; border-radius: inherit; background: #ff453a; }
 @media (prefers-reduced-motion: reduce) { .lf-ws-k, .lf-ws-ring, .lf-ws-ring.is-hit::after, .lf-ws-days .is-on i, .lf-wsh.is-met .lf-ws-ring::before, .lf-sheet.lf-wsh.is-met::before { animation: none; } .lf-ws-arc { transition: none; } }
 .fr-live { display: inline-flex; align-items: center; gap: 6px; color: var(--good); font-weight: 600; }
+button.fr-live { position: relative; }
+button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .fr-live::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); animation: fr-live 1.6s ease-out infinite; }
 @keyframes fr-live { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 100% { box-shadow: 0 0 0 8px transparent; } }
 @media (prefers-reduced-motion: reduce) { .lf-burst i, .fr-live::before, .lf-fin-ok { animation: none; } .lf-burst i, .lf-burst u, .lf-burst s { display: none; } }
@@ -770,6 +781,11 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-set.is-wu.is-done .lf-chk span { background: #fff; color: #111; }
 .lf-set.is-wu.is-done input { background: rgba(255,255,255,.1); }
 .lf-ex-ft button.lf-wu-add { color: #fff; }
+/* THE WARM-UP IS WHITE IN THE DARK AND A WHITE CHIP WITH DARK TYPE ON A WHITE PAGE: white on white was unreadable there. */
+:root[data-mode="light"] .lf-set.is-wu .lf-wu-n, :root[data-mode="light"] .lf-wu-l i { color: #111; background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.2); }
+:root[data-mode="light"] .lf-set.is-wu.is-done .lf-chk span { background: #fff; color: #111; box-shadow: inset 0 0 0 1.5px rgba(0,0,0,.3); }
+:root[data-mode="light"] .lf-set.is-wu.is-done input { background: #fff; }
+:root[data-mode="light"] .lf-ex-ft button.lf-wu-add { color: #111; background: #fff; box-shadow: inset 0 0 0 1px rgba(0,0,0,.18); }
 .lf-wu-l { margin: 2px 0 2px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--quiet); }
 .lf-wu-l i { font-style: normal; font-size: 10px; font-weight: 800; color: #fff; background: rgba(255,255,255,.16); border-radius: 5px; padding: 1px 5px; }
 .lf-ex { overflow: clip; }
@@ -1230,6 +1246,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-rx { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 8px; }
 .fr-rx-b { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; min-width: 64px; padding: 0 14px; border-radius: 999px; background: var(--card2); font-size: 20px; justify-content: center; }
 .fr-rx-b b { font-size: 14px; font-weight: 600; color: var(--dim); }
+.fr-rx-b b:empty { display: none; }
 .fr-rx-b[aria-pressed="true"] { background: var(--ink); }
 .fr-rx-b[aria-pressed="true"] b { color: var(--on-ink); }
 .fr-rx-b:disabled { opacity: 1; }
@@ -1252,8 +1269,9 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-wk.is-rd .lf-wn b { color: var(--ink); }
 #lfRecRest { margin-top: 10px; }
 #lfRecRest + #lfRecAlt { margin-top: 8px; }
-.lf-rq { margin: 12px 0 2px; }
+.lf-rq { margin: 12px 0 12px; }
 .lf-rq-o { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+.lf-rq-o .lf-rq-b:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .lf-rq-b { background: var(--card2); border-radius: var(--r-s); padding: 10px 12px; text-align: left; display: grid; gap: 2px; min-height: 56px; }
 .lf-rq-b b { font-size: 13px; font-weight: 600; }
 .lf-rq-b span { font-size: 11px; color: var(--dim); line-height: 1.3; }
@@ -1548,7 +1566,7 @@ var PROGRAM_SX = [
   { id: 's-wed', dow: 3, n: 'Legs A', sp: 'Quads, hamstrings, calves and arms', ex: [['legext', 4, 12, 15], ['bss', 3, 10, 12, 'each side'], ['squat', 4, 8, 12], ['seatcurl', 3, 10, 15], ['sldl', 3, 10, 15], ['stdcurl', 2, 10, 12, 'each side'], ['calfseat', 3, 15, 20], ['calfstand', 3, 12, 20], ['woodchop', 2, 10, 15], ['btbcurl', 2, 12, 15], ['revcurl', 2, 12, 15], ['fconc', 2, 12, 15]] },
   { id: 's-thu', dow: 4, n: 'Push B', sp: 'Shoulders, chest and triceps', ex: [['dbshp', 3, 8, 10], ['latraise', 3, 10, 15], ['cablat', 3, 8, 12, 'each side'], ['facepull', 2, 10, 15], ['smithinc', 3, 6, 10], ['cfly', 3, 12, 15], ['incdb', 3, 8, 12], ['tripush', 2, 10, 12], ['sapush', 2, 8, 12, 'each side'], ['pecdeck', 2, 10, 12], ['triover', 2, 8, 12]] },
   { id: 's-fri', dow: 5, n: 'Pull B', sp: 'Back thickness and biceps', ex: [['bbrow', 3, 6, 10], ['seatrow', 3, 6, 10], ['latpd', 3, 6, 10], ['pullupbw', 2, 5, 8], ['straight', 2, 8, 12], ['lowrow', 2, 8, 12], ['kelso', 2, 8, 12], ['hammer', 3, 8, 12], ['cablecurl', 3, 8, 12], ['mpreacher', 2, 10, 12], ['shrug', 2, 10, 12]] },
-  { id: 's-sat', dow: 6, n: 'Legs B', sp: 'Quads, hamstrings, calves and adductors', ex: [['squat', 4, 8, 12], ['sllp', 3, 10, 12, 'each side'], ['legext', 3, 10, 12], ['lyingcurl', 3, 10, 12], ['calfstand', 3, 8, 15], ['calfseat', 3, 10, 15], ['rdl', 3, 8, 12], ['adduct', 3, 10, 12]] }
+  { id: 's-sat', dow: 6, n: 'Legs B', sp: 'Quads, hamstrings, calves, adductors', ex: [['squat', 4, 8, 12], ['sllp', 3, 10, 12, 'each side'], ['legext', 3, 10, 12], ['lyingcurl', 3, 10, 12], ['calfstand', 3, 8, 15], ['calfseat', 3, 10, 15], ['rdl', 3, 8, 12], ['adduct', 3, 10, 12]] }
 ];
 /* THE LEG FOCUSED SPLIT: the whole body over six days, legs three times —
    heavy, sweep, then a calf and isolation day — with the upper body kept

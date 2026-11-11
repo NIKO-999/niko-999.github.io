@@ -466,6 +466,20 @@ const freeze = (at) => `(() => {
     }
   }
 
+  /* ── THE AUDIT: things found off-centre, cut short or unreadable, and kept fixed ── */
+  {
+    const srcA = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('an exercise name takes two lines before it is cut, now that the card header has three buttons', /\.lf-ex-hd button\.lf-ex-n \{[^}]*-webkit-line-clamp: 2/.test(srcA) && !/\.lf-ex-hd button\.lf-ex-n \{[^}]*white-space: nowrap/.test(srcA));
+    ok('three recovery answers do not leave the last one half a row', /\.lf-rq-o \.lf-rq-b:last-child:nth-child\(odd\) \{ grid-column: 1 \/ -1; \}/.test(srcA));
+    ok('the warm-up has a white-page face of its own, and the empty reaction count takes no room', /:root\[data-mode="light"\] \.lf-set\.is-wu \.lf-wu-n/.test(srcA) && /\.fr-rx-b b:empty \{ display: none; \}/.test(srcA));
+    ok('a review on a white page has its red and its heading a shade deeper', /:root\[data-mode="light"\] \.lf-wsh\.is-miss \.lf-ws-k \{ color: #b3261e/.test(srcA));
+    ok('a close button over scrolling content is a disc of its own, and the live label has a real target', /\.lf-sheet\.no-title \.lf-sh-hd \.lf-x \{ background:/.test(srcA) && /button\.fr-live::after \{ content: ''; position: absolute; inset: -14px -8px; \}/.test(srcA));
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    await page.click('#lfGo'); await settle(page);
+    const names = await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => [e.scrollWidth > e.clientWidth + 1, e.scrollHeight > e.clientHeight + 1]));
+    ok('no exercise name in a normal Monday is cut off', names.every((q) => !q[0] && !q[1]), names);
+    await c.close();
+  }
   /* ── SUPERSETS: linked from a card or by the plan, round by round, in a darker accent ── */
   {
     const srcSS = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
