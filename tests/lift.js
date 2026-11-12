@@ -2159,6 +2159,12 @@ const freeze = (at) => `(() => {
     await page.evaluate((a) => localStorage.setItem('lift.active.v1', JSON.stringify(a)), act); await page.reload(); await page.waitForTimeout(1500);
     const where = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), cards = [...document.querySelectorAll('.lf-session .lf-ex')], c = cards.find((x) => x.dataset.ex === 'dbcurl'); return bd && c ? { top: Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top), st: Math.round(bd.scrollTop), first: cards[0].dataset.ex } : null; });
     ok('the workout opens on the exercise you were part way through, with its card at the top of the list', where && where.st > 0 && where.top >= 0 && where.top < 80, where);
+    await page.evaluate(() => { document.querySelector('.lf-session .lf-sh-bd').scrollTo(0, 0); }); await page.waitForTimeout(300);
+    const away = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), c = [...document.querySelectorAll('.lf-session .lf-ex')].find((x) => x.dataset.ex === 'dbcurl'); return Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top); });
+    ok('Current set sits in the head under the title, in the accent like Guide, a button of its own', await page.evaluate(() => { const n = document.querySelector('.lf-session #lfNow'), g = document.querySelector('.lf-session #lfGuide'), t = document.querySelector('.lf-session .lf-ss-name'); if (!n || !g || !t) return false; const a = n.getBoundingClientRect(), b = t.getBoundingClientRect(); return a.top >= b.bottom - 8 && a.height >= 30 && getComputedStyle(n).color === getComputedStyle(g).color && /Current set/.test(n.textContent) && getComputedStyle(n).display !== 'none'; }));
+    await page.evaluate(() => document.querySelector('.lf-session #lfNow').click()); await page.waitForTimeout(900);
+    const back = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), c = [...document.querySelectorAll('.lf-session .lf-ex')].find((x) => x.dataset.ex === 'dbcurl'); return Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top); });
+    ok('pressing it from the top of the list takes you straight to the set you are on', away > 200 && back >= 0 && back < 80, [away, back]);
     await c.close();
   }
   /* ── THE WORKOUT GUIDE: a film of supersets, warm-ups, drop sets, removing a set and swapping ── */
