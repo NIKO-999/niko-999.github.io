@@ -37,7 +37,7 @@ const freeze = (at) => `(() => {
      visit only, so this does it each time one appears. The one check
      about folding uses newCtx and starts them shut. */
   const newCtx = browser.newContext.bind(browser);
-  browser.newContext = async (o) => { const c = await newCtx(o); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfFocus', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
+  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); if (!('tour' in o)) { o.tour = true; v = JSON.stringify(o); } } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfFocus', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
@@ -792,7 +792,7 @@ const freeze = (at) => `(() => {
     const kp = await require('crypto').webcrypto.subtle.generateKey({ name: 'ECDH', namedCurve: 'P-256' }, true, ['deriveBits']);
     const pk = Buffer.from(await require('crypto').webcrypto.subtle.exportKey('raw', kp.publicKey)).toString('base64url');
     const au = Buffer.from(require('crypto').randomBytes(16)).toString('base64url');
-    await c.addInitScript(`(() => { if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', 1); localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg' })); localStorage.setItem('lift.push.v1', JSON.stringify({ id: '${'c'.repeat(32)}', tok: '${'d'.repeat(32)}', ep: 'https://web.push.apple.com/x', pk: '${pk}', au: '${au}' })); } })();`);
+    await c.addInitScript(`(() => { if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', 1); localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg', tour: true })); localStorage.setItem('lift.push.v1', JSON.stringify({ id: '${'c'.repeat(32)}', tok: '${'d'.repeat(32)}', ep: 'https://web.push.apple.com/x', pk: '${pk}', au: '${au}' })); } })();`);
     const puts = [];
     await c.route('https://sched.nikorapullin.workers.dev/**', async (rt) => { puts.push({ u: rt.request().url(), b: JSON.parse(rt.request().postData() || 'null') }); rt.fulfill({ status: 200, body: '{}' }); });
     const page = await c.newPage();
@@ -942,7 +942,7 @@ const freeze = (at) => `(() => {
   {
     const c = await browser.newContext(PHONE);
     await c.addInitScript(freeze('2026-11-02T07:00:00'));
-    await c.addInitScript(`(() => { if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', 1); localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg' }));
+    await c.addInitScript(`(() => { if (!sessionStorage.getItem('s')) { sessionStorage.setItem('s', 1); localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg', tour: true }));
       localStorage.setItem('lift.fr.v1', JSON.stringify({ on: true, code: 'K7PQ2M4X', key: '${'a'.repeat(32)}', name: 'Niko', list: [] }));
       localStorage.setItem('lift.push.v1', JSON.stringify({ id: '${'c'.repeat(32)}', tok: '${'d'.repeat(32)}', ep: 'https://web.push.apple.com/x', pk: 'BPk', au: 'AUu' })); } })();`);
     const puts = [];
