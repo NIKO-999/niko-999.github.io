@@ -970,13 +970,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @keyframes lf-heat { from { filter: drop-shadow(0 0 10px #ff5a1f) drop-shadow(0 0 22px rgba(255,90,20,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.5)); } to { filter: drop-shadow(0 0 16px #ffb347) drop-shadow(0 0 34px rgba(255,60,0,.8)) drop-shadow(0 2px 4px rgba(0,0,0,.5)) brightness(1.08); } }
 /* the mythic halo is a rainbow; a storm is blue and white */
 .lf-coin.is-fx.is-t4.is-tm::before { background: conic-gradient(from 0deg, #1d3fd0, #8fb8ff, #fff, #4f7dff, #12206a, #1d3fd0); }
-.lf-orb { position: absolute; inset: -9%; pointer-events: none; animation: lf-orb var(--ls, 4s) linear infinite; }
-.lf-orb i { position: absolute; left: 50%; top: 0; width: 7%; height: 7%; margin: -3.5% 0 0 -3.5%; border-radius: 50%; background: var(--lc); box-shadow: 0 0 9px 3px var(--lc); }
-.lf-orb i::after { content: ''; position: absolute; right: 70%; top: 22%; width: 700%; height: 56%; border-radius: 50%; background: linear-gradient(to left, var(--lc), transparent); opacity: .7; }
-.lf-orb i:last-child { top: 100%; background: var(--lc2); box-shadow: 0 0 9px 3px var(--lc2); }
-.lf-orb i:last-child::after { right: auto; left: 70%; background: linear-gradient(to right, var(--lc2), transparent); }
-@keyframes lf-orb { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .lf-orb { animation: none; } }
 .lf-tp { position: absolute; inset: -6%; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mix-blend-mode: screen; overflow: hidden; }
 .lf-tp svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .lf-tp path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: lf-tp-strike 2.4s linear infinite; animation-delay: var(--d, 0s); }
@@ -7020,7 +7013,7 @@ function lfPushOff() {
 var BD_TIER = { wo50: 2, wo100: 3, st12: 2, st26: 3, v1m: 2, v5m: 3, pr10: 2, pr100: 3, abs50: 2, abs100: 3, duo10: 2, duo50: 3, lead3: 2, lead10: 3,
   ton15: 2, ton20: 3, rep1k: 2, rep2k: 3, leg100: 2, leg200: 3,
   chest100: 2, chest200: 3, bk100: 2, bk200: 3, sh100: 2, sh200: 3, arm100: 2, arm200: 3,
-  sets2k: 2, sets5k: 3, hr100: 2, hr250: 3, rp50k: 2, rp100k: 3, mo6: 2, mo12: 3 };
+  sets2k: 2, sets5k: 3, hr100: 2, hr250: 3, rp50k: 2, rp100k: 3, mo6: 2, mo12: 3, ss2: 2, ss3: 3, ds2: 2, ds3: 3, wu2: 2, wu3: 3 };
 /* THE HARDER, THE FINER. A badge's look climbs with how long it takes to
    win, and the level label stays only on the runs of three:
      plain    the first of anything
@@ -7043,14 +7036,14 @@ var BD_FX = { unbeat: 'jet', slayer: 'nebula', night: 'galaxy', dawn: 'sunrise',
   /* the newest: the three new finishes, holo, plasma and obsidian, on the long ones */
   wo250: 'crystal', wo500: 'plasma', ton25: 'plasma', wkvol: 'obsidian', v500k: 'molten', setwk100: 'holo', pr50: 'plasma', sig50: 'obsidian', sig100: 'holo',
   ex80: 'plasma', tgt12: 'holo', allmus4: 'obsidian', cardio100: 'plasma', cdh50: 'holo',
-  forge: 'inferno', stormc: 'storm', summit: 'ice', sands: 'marble', vein: 'crystal', wayf: 'emerald', dontmiss: 'tempest', drakefire: 'inferno', phoenix: 'sunrise', leviathan: 'aurora', ouroboros: 'emerald', koipond: 'opal', eclipse: 'obsidian', moonrise: 'galaxy', colossus: 'molten', atlas: 'ice', zodiac: 'prism',
+  forge: 'inferno', stormc: 'storm', summit: 'ice', sands: 'marble', vein: 'crystal', wayf: 'emerald', dontmiss: 'tempest', ss2: 'aurora', ss3: 'neon', ssx: 'holo', ssm: 'prism', ds2: 'molten', ds3: 'lava', dsx: 'ice', dsm: 'crystal', wu2: 'opal', wu3: 'carbon', wux: 'sunrise', wum: 'inferno', drakefire: 'inferno', phoenix: 'sunrise', leviathan: 'aurora', ouroboros: 'emerald', koipond: 'opal', eclipse: 'obsidian', moonrise: 'galaxy', colossus: 'molten', atlas: 'ice', zodiac: 'prism',
   allmus: 'prism', dec31: 'galaxy', friday13: 'void', leap: 'opal', ironwk: 'inferno', plate4: 'storm' };
 /* MYTHIC: a tier past the halo, for the badges that take a year or more:
    a prism ring turning round it and sparks in orbit, crazy on purpose */
-var BD_MYTH = { drakefire: 1, phoenix: 1, leviathan: 1, ouroboros: 1, koipond: 1, eclipse: 1, moonrise: 1, colossus: 1, atlas: 1, zodiac: 1, dontmiss: 1, forge: 1, stormc: 1, summit: 1, sands: 1, vein: 1, wayf: 1, unbeat: 1, slayer: 1, wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
+var BD_MYTH = { ssm: 1, dsm: 1, wum: 1, drakefire: 1, phoenix: 1, leviathan: 1, ouroboros: 1, koipond: 1, eclipse: 1, moonrise: 1, colossus: 1, atlas: 1, zodiac: 1, dontmiss: 1, forge: 1, stormc: 1, summit: 1, sands: 1, vein: 1, wayf: 1, unbeat: 1, slayer: 1, wo365: 1, wo500: 1, st52: 1, v5m: 1, v10m: 1, sets5k: 1, hr250: 1, rp100k: 1, mo12: 1 };
 /* EXOTIC: the halo tier, for what takes many months */
-var BD_HALO = { twice: 1, wo250: 1, v1m: 1, ton25: 1, hr100: 1, sets2k: 1, rp50k: 1, mo6: 1, tgt12: 1, allmus4: 1, ex80: 1, sig100: 1, cdh50: 1, wo100: 1, st26: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
-var BD_SHEEN = { wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
+var BD_HALO = { ssx: 1, dsx: 1, wux: 1, twice: 1, wo250: 1, v1m: 1, ton25: 1, hr100: 1, sets2k: 1, rp50k: 1, mo6: 1, tgt12: 1, allmus4: 1, ex80: 1, sig100: 1, cdh50: 1, wo100: 1, st26: 1, pr100: 1, abs100: 1, duo50: 1, lead10: 1, ton20: 1, rep2k: 1, leg200: 1, year: 1, chest200: 1, bk200: 1, sh200: 1, arm200: 1 };
+var BD_SHEEN = { ss1: 1, ds1: 1, wu1: 1, wo10: 1, st4: 1, tgtall: 1, tgt4: 1, quad: 1, v100k: 1, stair10: 1, incl10: 1, abs10: 1, early: 1, owl: 1, ton10: 1, rep300: 1, seven: 1,
   explore: 1, wkend: 1, cardio25: 1, sets40: 1, pr25: 1, post50: 1, cdwk: 1, leg50: 1, sets30: 1, plate3: 1, week: 1, squad: 1, long: 1, pr3: 1,
   chest50: 1, bk50: 1, sh50: 1, arm50: 1, sets500: 1, hr25: 1, rp10k: 1, mo3: 1 };
 /* the light each finish gives off */
@@ -7196,7 +7189,23 @@ var BADGES = [
   ['vein', 'Deep Vein', 'pr', 'A hundred and fifty new bests, all time.', '#62e6ff'],
   ['wayf', 'Wayfinder', 'mile', 'A hundred and twenty different exercises logged.', '#7fb4ff'],
   ['dontmiss', "Don't Miss", 'streak', 'Every planned day, four weeks running.', '#ff9ad5'],
-  /* THE LIVING RELICS: ten mythic ones, each with its own metal, painting and creature */
+  /* THE TECHNIQUE MEDALS: supersets, drop sets and warm-ups, each five deep: a first, a second, a third, an exotic and a mythic */
+  ['ss1', 'Back to Back', 'feat', 'Five supersets logged.', '#4ac8ff'],
+  ['ss2', 'Double Time', 'feat', 'Twenty-five supersets.', '#4ac8ff'],
+  ['ss3', 'Linked Up', 'feat', 'A hundred supersets.', '#4ac8ff'],
+  ['ssx', 'Tandem', 'feat', 'Two hundred and fifty supersets.', '#4ac8ff'],
+  ['ssm', 'Gemini', 'feat', 'Six hundred supersets.', '#c060ff'],
+  ['ds1', 'Drop It', 'feat', 'Five drop sets logged.', '#5ab8ff'],
+  ['ds2', 'Falling Weight', 'feat', 'Twenty-five drop sets.', '#5ab8ff'],
+  ['ds3', 'Free Fall', 'feat', 'A hundred drop sets.', '#5ab8ff'],
+  ['dsx', 'Cascade', 'feat', 'Two hundred and fifty drop sets.', '#5ab8ff'],
+  ['dsm', 'Avalanche', 'feat', 'Six hundred drop sets.', '#9fe0ff'],
+  ['wu1', 'Warmed Up', 'feat', 'Twenty-five warm-up sets logged.', '#ffb347'],
+  ['wu2', 'Primed', 'feat', 'A hundred warm-up sets.', '#ffb347'],
+  ['wu3', 'Ready', 'feat', 'Three hundred warm-up sets.', '#ffb347'],
+  ['wux', 'Ember', 'feat', 'Seven hundred and fifty warm-up sets.', '#ffb347'],
+  ['wum', 'Ignition', 'feat', 'Fifteen hundred warm-up sets.', '#ff7a20'],
+  /* THE LIVING RELICS: ten mythic ones, each with its own metal and a painting inside it */
   ['drakefire', 'Drakefire', 'mile', 'Seven hundred and fifty sessions.', '#ff6a2a'],
   ['phoenix', 'Phoenix', 'streak', 'Back after a month away, ten sessions in the next thirty days.', '#ffb040'],
   ['leviathan', 'Leviathan', 'volume', 'Twenty-five million moved.', '#2ad8c8'],
@@ -7413,6 +7422,17 @@ function lfBadges() {
     for (var pj = pi; pj < ws.length && ws[pj].d <= pEnd; pj++) { pn++; if (pn === 10) { won('phoenix', ws[pj].d); break; } }
     if (pn > phBest) phBest = pn;
   }
+  /* THE TECHNIQUE MEDALS: a superset is a group of two or more exercises linked in a workout, a drop set is a set with a drop on it, and a warm-up is a warm-up set. Each is won on the day its count is reached. */
+  var tcn = { ss: 0, ds: 0, wu: 0 };
+  ws.forEach(function (w) {
+    var grp = {}; w.x.forEach(function (e) { if (e.ss) grp[e.ss] = (grp[e.ss] || 0) + 1; });
+    var nss = Object.keys(grp).filter(function (k) { return grp[k] > 1; }).length, nds = 0, nwu = 0;
+    w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.ds && q.ds.length) nds++; }); (e.wu || []).forEach(function (q) { if (q && +q.r > 0) nwu++; }); });
+    [['ss', nss, [5, 25, 100, 250, 600]], ['ds', nds, [5, 25, 100, 250, 600]], ['wu', nwu, [25, 100, 300, 750, 1500]]].forEach(function (c) {
+      var was = tcn[c[0]], now = was + c[1]; tcn[c[0]] = now;
+      c[2].forEach(function (th, i) { if (was < th && now >= th) won(c[0] + (i === 3 ? 'x' : i === 4 ? 'm' : i + 1), w.d); });
+    });
+  });
   var own = lfOwner(); if (own) { won('owner', own); won('creator', own); }
   if (S.slay) won('slayer', S.slay);
   if (vol >= 1e7 * uk) { var vv = 0; ws.some(function (w) { vv += woVol(w); if (vv >= 1e7 * uk) { won('v10m', w.d); return true; } return false; }); }
@@ -7461,6 +7481,7 @@ function lfBadges() {
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
   prog.forge = [Math.min(setT, 1000), 1000]; prog.stormc = [Math.min(Math.round(vol / uk), 2e6), 2e6]; prog.summit = [Math.min(Math.round(cdm.walk / 60), 25), 25];
   prog.sands = [Math.min(Math.floor(minT / 60), 150), 150]; prog.vein = [Math.min(prDays.length, 150), 150]; prog.wayf = [Math.min(exNN, 120), 120]; prog.dontmiss = [Math.min(fullRun, 4), 4];
+  [['ss', [5, 25, 100, 250, 600]], ['ds', [5, 25, 100, 250, 600]], ['wu', [25, 100, 300, 750, 1500]]].forEach(function (c) { c[1].forEach(function (th, i) { prog[c[0] + (i === 3 ? 'x' : i === 4 ? 'm' : i + 1)] = [Math.min(tcn[c[0]], th), th]; }); });
   prog.drakefire = [Math.min(ws.length, 750), 750]; prog.phoenix = [Math.min(phBest, 10), 10]; prog.leviathan = [Math.min(Math.round(vol / uk), 25e6), 25e6]; prog.ouroboros = [Math.min(stBest, 104), 104];
   prog.eclipse = [Math.min(earlyN, 100), 100]; prog.moonrise = [Math.min(owlN, 100), 100]; prog.colossus = [0, 1]; prog.atlas = [0, 1];
   ['allmus', 'dec31', 'friday13', 'leap', 'ironwk', 'plate4', 'ton25', 'sets40'].forEach(function (k) { prog[k] = [0, 1]; });
@@ -7579,7 +7600,7 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'gear', stormc: 'trap', summit: 'tri', sands: 'hourglass', vein: 'gem', wayf: 'compass', dontmiss: 'steps', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'gear', stormc: 'trap', summit: 'tri', sands: 'hourglass', vein: 'gem', wayf: 'compass', dontmiss: 'steps', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'drop', ds2: 'drop', ds3: 'drop', dsx: 'drop', dsm: 'drop', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
   tgt12: 'rosette', allmus4: 'trid', post50: 'hextall', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
@@ -7596,7 +7617,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4'
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50',
   chest50: '50', chest100: '100', chest200: '200', bk50: '50', bk100: '100', bk200: '200', sh50: '50', sh100: '100', sh200: '200', arm50: '50', arm100: '100', arm200: '200',
-  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: 'i:check', drakefire: 'i:flame', phoenix: 'i:flame', leviathan: 'i:weight', ouroboros: 'i:ring', koipond: 'i:ramp', eclipse: 'i:sun', moonrise: 'i:moon', colossus: 'i:weight', atlas: 'i:dumb', zodiac: 'i:star', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
+  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: 'i:check', ss1: 'i:pair', ss2: 'i:pair', ss3: 'i:pair', ssx: 'i:pair', ssm: 'i:pair', ds1: 'i:ramp', ds2: 'i:ramp', ds3: 'i:ramp', dsx: 'i:ramp', dsm: 'i:ramp', wu1: 'i:flame', wu2: 'i:flame', wu3: 'i:flame', wux: 'i:flame', wum: 'i:flame', drakefire: 'i:flame', phoenix: 'i:flame', leviathan: 'i:weight', ouroboros: 'i:ring', koipond: 'i:ramp', eclipse: 'i:sun', moonrise: 'i:moon', colossus: 'i:weight', atlas: 'i:dumb', zodiac: 'i:star', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
   sets500: '500', sets2k: '2k', sets5k: '5k', hr25: '25h', hr100: '100h', hr250: '250h', rp10k: '10k', rp50k: '50k', rp100k: '100k', mo3: '3', mo6: '6', mo12: '12', allmus: 'i:dumb', dec31: 'i:star', friday13: '13', leap: '29', ironwk: '10h', plate4: '4', wo365: '365', st52: '52', v10m: '10M', owner: 'i:flame',
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
@@ -8636,280 +8657,250 @@ function bdTempest(A) {
   });
   A.add(bdMotes(g, 36, .035, 0xbfd6ff, function (k, t, p, o) { var f = (t * (.05 + bdR(k + 9) * .08) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28 - t * .12; p[o] = Math.cos(a) * (.8 + bdR(k + 15) * .6); p[o + 1] = 1.4 - f * 2.8; p[o + 2] = (bdR(k + 13) - .5) * 1.0; }, .55));
 }
-/* THE LIVING RELICS. Ten mythic badges cut from the Tempest's idea and each its own thing: six stepped slabs of metal, a pattern of light painted across all of them as one sheet, and a creature or a machine of its own going round it. They share this one builder and differ in the shape, the metal, the pattern, what orbits and how it answers a tap, so a new one is a spec and not a new scene. */
-function bdEm(T, col, ei) { return new T.MeshStandardMaterial({ color: 0x000000, emissive: col, emissiveIntensity: ei || 1.2, metalness: 0, roughness: 1 }); }
-function bdAdd(T, col, op) { return new T.MeshBasicMaterial({ color: col, transparent: true, opacity: op == null ? 1 : op, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false, side: T.DoubleSide }); }
-/* a body of spheres, each where the head was a moment ago */
-function bdChain(A, o) {
-  var T = A.T, grp = new T.Group(), segs = [], geo = new T.SphereGeometry(1, A.hi ? 14 : 9, A.hi ? 10 : 7), i, head = null, Y = new T.Vector3(0, 1, 0), d = new T.Vector3();
-  A.g.add(grp);
-  for (i = 0; i < o.n; i++) { var m = new T.Mesh(geo, o.mat(i)); m.scale.setScalar(o.size(i)); grp.add(m); segs.push(m); }
-  if (o.head) { head = o.head; grp.add(head); }
-  A.add(function (t) {
-    for (i = 0; i < o.n; i++) { var p = o.path(t - i * o.lag); segs[i].position.set(p[0], p[1], p[2]); }
-    if (head) { var p0 = o.path(t), p1 = o.path(t - .04); head.position.set(p0[0], p0[1], p0[2]); d.set(p0[0] - p1[0], p0[1] - p1[1], p0[2] - p1[2]).normalize(); head.quaternion.setFromUnitVectors(Y, d); }
-    if (o.fn) o.fn(t, segs, grp);
-  });
-  return { segs: segs, grp: grp };
+/* THE RELICS. Exotic and mythic badges cut from one idea: seven stepped slabs of metal in a shape of their own, with a picture of light painted across all of them as one sheet. Nothing circles outside the metal and nothing grows out of it: the badge is the thing, with a soft glow behind it and depth in its steps. An EXOTIC one is a pattern that moves, calm, nothing alive in it. A MYTHIC one has something happening inside the metal itself, and no two do the same thing: a fuse burning to a fireball, two strands braiding, a storm of ice. A new one is a spec: a shape, a metal, a painting. */
+function bdRelicPts(sp, r) {
+  var i, o = [], a;
+  if (sp.n === 'kite') return [[0, 1.15 * r], [.82 * r, .22 * r], [.52 * r, -.95 * r], [0, -1.2 * r], [-.52 * r, -.95 * r], [-.82 * r, .22 * r]];
+  if (sp.n === 'shield') return [[0, 1.2 * r], [.9 * r, .86 * r], [.9 * r, -.05 * r], [0, -1.2 * r], [-.9 * r, -.05 * r], [-.9 * r, .86 * r]];
+  if (sp.n === 'drop') { o.push([0, 1.3 * r]); for (a = 35; a >= -215; a -= 17) o.push([Math.cos(a * Math.PI / 180) * .8 * r, (-.3 + Math.sin(a * Math.PI / 180) * .8) * r]); return o; }
+  if (sp.n === 'star') { for (i = 0; i < 16; i++) { a = (sp.rot || 0) + i / 16 * Math.PI * 2; o.push([Math.cos(a) * r * (i % 2 ? .74 : 1.04), Math.sin(a) * r * (i % 2 ? .74 : 1.04)]); } return o; }
+  return bdNgon(sp.sides || 8, r, sp.rot || 0);
 }
-/* two flat wings on a group that faces where it is going */
-function bdWings(T, col, span, chord) {
-  var g = new T.Group(), sh = new T.Shape(); sh.moveTo(0, chord * .4); sh.lineTo(span, chord * .1); sh.lineTo(span * .8, -chord * .5); sh.lineTo(span * .42, -chord * .2); sh.lineTo(0, -chord * .5); sh.closePath();
-  var geo = new T.ShapeGeometry(sh), mat = bdAdd(T, col, .75);
-  var L = new T.Mesh(geo, mat), R = new T.Mesh(geo, mat); R.scale.x = -1; g.add(L); g.add(R);
-  g.userData.flap = function (f) { L.rotation.y = -f; R.rotation.y = f; };
-  return g;
-}
-var bdZ = null;
-function bdFace(g, w, p0, p1) { if (!bdZ) bdZ = new BD3.Vector3(0, 0, 1); var d = new BD3.Vector3(p0[0] - p1[0], p0[1] - p1[1], p0[2] - p1[2]).normalize(); g.position.set(p0[0], p0[1], p0[2]); g.quaternion.setFromUnitVectors(bdZ, d); }
-
-/* the paintings, drawn in the middle of a sheet where one unit is u pixels; v is how lit the badge is just now */
+/* the paintings, drawn from the middle of the sheet where one unit is u pixels; v is how lit the badge is just after a tap */
 var BDR = {
-  /* DRAKEFIRE: scales that run with heat in waves, a dragon in a ring of fire */
-  drakefire: { n: 'hex', rot: 0, hue: 0.04, sat: 0.62, rgh: .12, lamp: 0xffb070, cool: 0xff4a1a, mote: 0xff8a2a,
+  /* MYTHIC. DRAKEFIRE: heat runs out through the scales in waves, and embers rise out of the metal */
+  drakefire: { n: 'ngon', sides: 6, rot: 0, hue: .04, sat: .62, rgh: .12, lamp: 0xffb070, cool: 0xff4a1a, glow: 0xff5a1a,
     paint: function (x, N, t, v, u) {
-      var sw = u * .17, sh = sw * .62, r, c; x.lineWidth = u * .013;
+      var sw = u * .17, sh = sw * .62, r, c, k; x.lineWidth = u * .013;
       for (r = -9; r <= 9; r++) for (c = -6; c <= 6; c++) {
         var cx = c * sw + (r & 1 ? sw / 2 : 0), cy = r * sh; if (cx * cx + cy * cy > u * u * 1.1) continue;
-        var I = Math.min(1, Math.pow(Math.sin(t * 1.5 - (cx * .9 + cy * .6) / u * 3.2) * .5 + .5, 3) * .85 + v * .7);
-        x.strokeStyle = 'hsla(' + (12 + 28 * I) + ',100%,' + (30 + 36 * I) + '%,' + (.4 + .6 * I) + ')'; x.beginPath(); x.arc(cx, cy, sw * .52, 0, Math.PI); x.stroke();
+        var d = Math.sqrt(cx * cx + cy * cy) / u, I = Math.min(1, Math.pow(Math.sin(t * 2.1 - d * 6) * .5 + .5, 3) * .9 + v * .7);
+        x.strokeStyle = 'hsla(' + (10 + 30 * I) + ',100%,' + (28 + 40 * I) + '%,' + (.35 + .65 * I) + ')'; x.beginPath(); x.arc(cx, cy, sw * .52, 0, Math.PI); x.stroke();
       }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, n = hi ? 24 : 16, i;
-      function path(t) { var a = t * .5, x = Math.cos(a) * 1.28, y = Math.sin(a) * .52 + Math.sin(a * 2) * .08, z = Math.sin(a) * .55 + .1, c = Math.cos(.5), s = Math.sin(.5); return [x * c - y * s, x * s + y * c, z]; }
-      var head = new T.Group(), hm = bdEm(T, 0xff5a1a, 1.4), cone = new T.Mesh(new T.ConeGeometry(.055, .18, 10), hm); head.add(cone);
-      [-1, 1].forEach(function (sd) { var h = new T.Mesh(new T.ConeGeometry(.02, .14, 6), bdEm(T, 0xffd27a, 1)); h.position.set(sd * .06, -.07, .04); h.rotation.z = -sd * .5; head.add(h); var e = new T.Mesh(new T.SphereGeometry(.018, 6, 6), bdAdd(T, 0xffffff)); e.position.set(sd * .04, .02, .06); head.add(e); });
-      var ch = bdChain(A, { n: n, lag: .085, path: path, head: head, size: function (k) { return .058 * (1 - k / n * .72) + .008; }, mat: function (k) { return bdEm(T, new T.Color().setHSL(.02 + k / n * .07, 1, .42), 1.1); } });
-      var wg = bdWings(T, 0xff6a1a, .36, .22); g.add(wg);
-      A.add(function (t) { var p = path(t - .22), q = path(t - .27); bdFace(wg, 0, p, q); wg.userData.flap(Math.sin(t * 7) * .75 + .3); });
-      A.add(bdMotes(g, hi ? 80 : 44, .05, 0xff8a2a, function (k, t, p, o) { var f = (k / (hi ? 80 : 44) + t * 2.2) % 1, q = path(t + f * .35); p[o] = q[0] + (bdR(k + 5) - .5) * f * .3; p[o + 1] = q[1] + (bdR(k + 9) - .5) * f * .3 + f * .08; p[o + 2] = q[2] + (bdR(k + 13) - .5) * f * .3; }, .9));
+      for (k = 0; k < 34; k++) { var f = (t * (.12 + bdR(k + 2) * .16) + bdR(k + 9)) % 1; x.fillStyle = 'rgba(255,' + (150 + 100 * f | 0) + ',60,' + (1 - f) + ')'; x.beginPath(); x.arc((bdR(k) - .5) * 1.6 * u + Math.sin(t * 2 + k) * u * .03, (1 - f * 2) * u * .95, u * (.012 + .01 * bdR(k + 5)), 0, 6.3); x.fill(); }
     } },
-  /* PHOENIX: flame ribbons climbing a kite of gold, a firebird looping through it */
-  phoenix: { n: 'kite', rot: 0, hue: 0.11, sat: 0.72, rgh: .1, lamp: 0xffe0a0, cool: 0xff5a2a, mote: 0xffc060,
+  /* MYTHIC. PHOENIX: flame climbing the whole face, sparks leaving the tips */
+  phoenix: { n: 'kite', hue: .11, sat: .72, rgh: .1, lamp: 0xffe0a0, cool: 0xff5a2a, glow: 0xffa020,
     paint: function (x, N, t, v, u) {
-      var k, y, px, py; x.lineCap = 'round';
-      for (k = 0; k < 16; k++) {
-        var x0 = (k / 15 - .5) * 1.7 * u, ph = bdR(k + 3) * 6.28, sp = .5 + bdR(k + 8) * .5, last = null;
+      var k, y, last, f; x.lineCap = 'round';
+      for (k = 0; k < 18; k++) {
+        var x0 = (k / 17 - .5) * 1.7 * u, ph = bdR(k + 3) * 6.28, sp = .6 + bdR(k + 8) * .6; last = null;
         for (y = u * .95; y > -u * .95; y -= u * .05) {
-          var f = (y / u + .95) / 1.9, fx = x0 + Math.sin(y * .011 + t * 2.2 * sp + ph) * u * .07 * (1 - Math.abs(f - .5)), I = Math.min(1, (1 - f) * 1.2 + .2 + v * .6) * (.55 + .45 * Math.sin(t * 3 + k));
-          if (last) { x.strokeStyle = 'hsla(' + (8 + 44 * (1 - f)) + ',100%,' + (35 + 30 * I) + '%,' + (.35 + .6 * I) + ')'; x.lineWidth = u * (.018 + .02 * (1 - f)); x.beginPath(); x.moveTo(last[0], last[1]); x.lineTo(fx, y); x.stroke(); }
+          f = (y / u + .95) / 1.9; var fx = x0 + Math.sin(y * .011 + t * 2.6 * sp + ph) * u * .08 * (1 - Math.abs(f - .5)), I = Math.min(1, (1 - f) * 1.2 + .2 + v * .6) * (.55 + .45 * Math.sin(t * 3 + k));
+          if (last) { x.strokeStyle = 'hsla(' + (8 + 44 * (1 - f)) + ',100%,' + (35 + 30 * I) + '%,' + (.35 + .6 * I) + ')'; x.lineWidth = u * (.02 + .024 * (1 - f)); x.beginPath(); x.moveTo(last[0], last[1]); x.lineTo(fx, y); x.stroke(); }
           last = [fx, y];
         }
       }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, n = hi ? 14 : 10;
-      function path(t) { var a = t * .62; return [Math.sin(a) * 1.2, Math.cos(a) * 1.0 + Math.sin(a * 2) * .08, Math.cos(a * .5) * .45 + .1]; }
-      var head = new T.Group(); head.add(new T.Mesh(new T.ConeGeometry(.05, .2, 8), bdEm(T, 0xffd060, 1.2)));
-      bdChain(A, { n: n, lag: .06, path: path, head: head, size: function (k) { return .068 * (1 - k / n * .6) + .008; }, mat: function (k) { return bdEm(T, new T.Color().setHSL(.1 - k / n * .09, 1, .5), 1.3); } });
-      var wg = bdWings(T, 0xff8a2a, .55, .3); g.add(wg);
-      A.add(function (t) { bdFace(wg, 0, path(t - .08), path(t - .12)); wg.userData.flap(Math.sin(t * 5.5) * .85 + .2); });
-      var NT = hi ? 90 : 50;
-      A.add(bdMotes(g, NT, .06, 0xffb040, function (k, t, p, o) { var q = path(t - k / NT * .9); p[o] = q[0] + (bdR(k + 3) - .5) * .12; p[o + 1] = q[1] + (bdR(k + 5) - .5) * .12 - k / NT * .1; p[o + 2] = q[2] + (bdR(k + 7) - .5) * .1; }, .9));
-      A.add(bdMotes(g, 36, .04, 0xff3a1a, function (k, t, p, o) { var q = path(t - k / 36 * .9 - .03); p[o] = q[0] + (bdR(k + 33) - .5) * .25; p[o + 1] = q[1] + (bdR(k + 35) - .5) * .25 - k / 36 * .2; p[o + 2] = q[2]; }, .8));
+      for (k = 0; k < 40; k++) { f = (t * (.2 + bdR(k + 2) * .3) + bdR(k + 9)) % 1; x.fillStyle = 'rgba(255,230,140,' + (1 - f) + ')'; x.beginPath(); x.arc((bdR(k) - .5) * 1.6 * u, u * .9 - f * u * 1.8, u * .014, 0, 6.3); x.fill(); }
     } },
-  /* LEVIATHAN: the sea running through teal steel, a serpent weaving in front and behind */
-  leviathan: { n: 'oct', rot: Math.PI / 8, hue: 0.5, sat: 0.62, rgh: .1, lamp: 0xa0f0ff, cool: 0x1aa8c8, mote: 0x7fe8ff,
+  /* MYTHIC. LEVIATHAN: the deep running through teal steel, a sonar ping going out every few seconds */
+  leviathan: { n: 'shield', rs: .92, hue: .5, sat: .62, rgh: .1, lamp: 0xa0f0ff, cool: 0x1aa8c8, glow: 0x18c8c0,
     paint: function (x, N, t, v, u) {
       var k, i; x.lineWidth = u * .012;
       for (k = -9; k <= 9; k++) {
-        x.strokeStyle = 'hsla(' + (178 + 14 * Math.sin(k)) + ',90%,' + (42 + 20 * v) + '%,' + (.45 + .3 * Math.sin(t + k)) + ')'; x.beginPath();
-        for (i = -20; i <= 20; i++) { var px = i * u * .05, py = k * u * .105 + Math.sin(px / u * 5.5 + t * 1.6 + k * .7) * u * .045; if (i === -20) x.moveTo(px, py); else x.lineTo(px, py); } x.stroke();
+        x.beginPath();
+        for (i = -20; i <= 20; i++) { var px = i * u * .05, ph = px / u * 5.5 + t * 1.6 + k * .7, py = k * u * .105 + Math.sin(ph) * u * .045; if (i === -20) x.moveTo(px, py); else x.lineTo(px, py); }
+        x.strokeStyle = 'hsla(' + (178 + 14 * Math.sin(k)) + ',90%,' + (40 + 20 * v) + '%,' + (.4 + .3 * Math.sin(t + k)) + ')'; x.stroke();
       }
+      for (i = 0; i < 3; i++) { var f = (t * .3 + i / 3) % 1; x.strokeStyle = 'rgba(160,255,240,' + ((1 - f) * .8) + ')'; x.lineWidth = u * .02 * (1 - f) + u * .004; x.beginPath(); x.arc(0, 0, f * u * 1.1, 0, 6.3); x.stroke(); }
       for (i = 0; i < 40; i++) { var bl = Math.pow(Math.sin(t * (.8 + bdR(i) * 1.5) + i) * .5 + .5, 3); x.fillStyle = 'rgba(150,255,240,' + (.15 + .85 * bl) + ')'; x.beginPath(); x.arc((bdR(i + 1) - .5) * 1.7 * u, (bdR(i + 50) - .5) * 1.7 * u, u * (.01 + .015 * bl), 0, 6.3); x.fill(); }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, n = hi ? 30 : 20;
-      function path(t) { var a = t * .42; return [Math.cos(a) * 1.28, Math.sin(a * 2) * .55, Math.sin(a) * .6]; }
-      var head = new T.Group(), jaw = new T.Mesh(new T.ConeGeometry(.07, .22, 10), bdEm(T, 0x2ad8c8, 1.2)); head.add(jaw);
-      [-1, 1].forEach(function (sd) { var e = new T.Mesh(new T.SphereGeometry(.024, 6, 6), bdAdd(T, 0xffffff)); e.position.set(sd * .06, -.03, .06); head.add(e); });
-      var fins = [], fm = bdEm(T, 0x36e8d8, 1);
-      var ch = bdChain(A, { n: n, lag: .1, path: path, head: head, size: function (k) { return .03 + .04 * Math.sin(Math.PI * (k + 2) / (n + 4)); }, mat: function (k) { return bdEm(T, 0x1a9a9a, 1); },
-        fn: function (t, segs) { for (var i = 0; i < n; i++) { segs[i].material.emissiveIntensity = .6 + .9 * (Math.sin(t * 3 - i * .5) * .5 + .5); if (i % 3 === 0 && fins[i / 3]) fins[i / 3].position.set(segs[i].position.x, segs[i].position.y + segs[i].scale.x * 1.1, segs[i].position.z); } } });
-      for (var i = 0; i < n; i += 3) { var f = new T.Mesh(new T.ConeGeometry(.03, .14, 5), fm); ch.grp.add(f); fins[i / 3] = f; }
-      A.add(bdMotes(g, hi ? 70 : 40, .035, 0x9ff8ff, function (k, t, p, o) { var f = (t * (.06 + bdR(k + 2) * .08) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28; p[o] = Math.cos(a) * (.7 + bdR(k + 15) * .9); p[o + 1] = -1.3 + f * 2.6; p[o + 2] = Math.sin(a) * .8; }, .8));
     } },
-  /* OUROBOROS: runes turning in opposite directions, the serpent that swallows its tail */
-  ouroboros: { n: 'ngon', sides: 48, rot: 0, hue: 0.33, sat: 0.52, rgh: .1, lamp: 0xe8ffb0, cool: 0x3adf6a, mote: 0xc8ff7a,
+  /* MYTHIC. OUROBOROS: runes turning against each other round a serpent that is eating its own tail, all of it inside the metal */
+  ouroboros: { n: 'ngon', sides: 10, rot: Math.PI / 10, hue: .33, sat: .52, rgh: .1, lamp: 0xe8ffb0, cool: 0x3adf6a, glow: 0x4aff7a,
     paint: function (x, N, t, v, u) {
-      var r, i; x.lineCap = 'butt';
-      [.28, .44, .6, .76, .9].forEach(function (rr, k) { x.lineWidth = u * (.035 + .01 * (k % 2)); x.setLineDash([u * (.04 + .02 * k), u * (.05 + .03 * (k % 3))]); x.lineDashOffset = t * u * .12 * (k % 2 ? 1 : -1) * (1 + k * .2); x.strokeStyle = 'hsla(' + (k % 2 ? 48 : 130) + ',90%,' + (45 + 20 * v) + '%,' + (.55 + .3 * Math.sin(t * 1.3 + k)) + ')'; x.beginPath(); x.arc(0, 0, rr * u, 0, 6.2832); x.stroke(); });
-      x.setLineDash([]); x.lineWidth = u * .015;
-      for (i = 0; i < 6; i++) { var a = i / 6 * 6.2832 + t * .2; x.strokeStyle = 'hsla(48,90%,' + (50 + 20 * v) + '%,.7)'; x.beginPath(); x.ellipse(Math.cos(a) * u * .15, Math.sin(a) * u * .15, u * .22, u * .1, a, 0, 6.2832); x.stroke(); }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, n = hi ? 48 : 34, ring = new T.Group(); g.add(ring);
-      var gm = bdEm(T, 0x2ee86a, 1.1), om = bdEm(T, 0xe8c040, 1.2), segs = [], i, head = new T.Group();
-      head.add(new T.Mesh(new T.ConeGeometry(.1, .3, 10), bdEm(T, 0x7affa0, 1.3)));
-      [-1, 1].forEach(function (sd) { var e = new T.Mesh(new T.SphereGeometry(.024, 6, 6), bdAdd(T, 0xff4a2a)); e.position.set(sd * .06, -.04, .06); head.add(e); });
-      ring.add(head); var geo = new T.SphereGeometry(1, 10, 8);
-      for (i = 0; i < n; i++) { var m = new T.Mesh(geo, i % 2 ? gm : om); m.scale.setScalar(.018 + .062 * Math.pow(1 - i / n, .6)); ring.add(m); segs.push(m); }
-      var Y = new T.Vector3(0, 1, 0), d = new T.Vector3();
-      A.add(function (t) {
-        var th0 = t * .3, R = 1.24, i;
-        for (i = 0; i < n; i++) { var a = th0 - i / n * Math.PI * 2 * .94; segs[i].position.set(Math.cos(a) * R, Math.sin(a) * R, .1 + Math.sin(a * 3 + t) * .05); }
-        head.position.set(Math.cos(th0 + .12) * R, Math.sin(th0 + .12) * R, .1); d.set(-Math.sin(th0), Math.cos(th0), 0); head.quaternion.setFromUnitVectors(Y, d);
-        ring.rotation.x = Math.sin(t * .5) * .35; ring.rotation.y = Math.cos(t * .4) * .35;
-      });
-      A.add(bdMotes(g, 40, .035, 0xc8ff7a, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .25 * (k % 2 ? 1 : -1), r = 1.05 + bdR(k + 4) * .4; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .6; }, .8));
+      var i; x.lineCap = 'butt';
+      [.26, .4, .86].forEach(function (rr, k) { x.lineWidth = u * .03; x.setLineDash([u * .04, u * .06]); x.lineDashOffset = t * u * .1 * (k % 2 ? 1 : -1); x.strokeStyle = 'hsla(' + (k % 2 ? 48 : 130) + ',90%,' + (45 + 20 * v) + '%,.6)'; x.beginPath(); x.arc(0, 0, rr * u, 0, 6.3); x.stroke(); });
+      x.setLineDash([]);
+      var th = t * .55, R = .62 * u;
+      for (i = 0; i < 46; i++) {
+        var a = th - i * .125, w = u * (.015 + .05 * Math.pow(1 - i / 46, .7));
+        x.fillStyle = i % 2 ? 'hsla(130,90%,' + (50 + 15 * v) + '%,1)' : 'hsla(48,90%,' + (55 + 12 * v) + '%,1)'; x.beginPath(); x.arc(Math.cos(a) * R, Math.sin(a) * R, w, 0, 6.3); x.fill();
+      }
+      var hx = Math.cos(th + .1) * R, hy = Math.sin(th + .1) * R; x.fillStyle = 'hsla(130,100%,70%,1)'; x.beginPath(); x.arc(hx, hy, u * .075, 0, 6.3); x.fill(); x.fillStyle = '#ff4a2a'; x.beginPath(); x.arc(hx + Math.cos(th) * u * .02, hy + Math.sin(th) * u * .02, u * .018, 0, 6.3); x.fill();
     } },
-  /* KOI POND: ripples spreading across pearl, two koi swimming round a lotus of light */
-  koipond: { n: 'ngon', sides: 40, rot: 0, hue: 0.93, sat: 0.38, rgh: .08, lamp: 0xffe0f0, cool: 0xff7ab0, mote: 0xffc8e0,
+  /* MYTHIC. KOI POND: two koi swimming through ripples, in the metal */
+  koipond: { n: 'ngon', sides: 7, rot: Math.PI / 2, hue: .93, sat: .4, rgh: .08, lamp: 0xffe0f0, cool: 0xff7ab0, glow: 0xff7ab8,
     paint: function (x, N, t, v, u) {
-      var k, i; x.lineWidth = u * .014;
-      for (k = 0; k < 5; k++) for (i = 0; i < 3; i++) { var f = (t * .22 + i / 3 + bdR(k) * .5) % 1, cx = (bdR(k + 1) - .5) * u * 1.1, cy = (bdR(k + 6) - .5) * u * 1.1; x.strokeStyle = 'rgba(255,' + (170 + 60 * f) + ',' + (210 + 40 * f) + ',' + ((1 - f) * (.6 + v * .4)) + ')'; x.beginPath(); x.arc(cx, cy, f * u * .6, 0, 6.2832); x.stroke(); }
-      for (i = 0; i < 12; i++) { var a = i / 12 * 6.2832 + t * .15, rot = i % 2 ? 1 : .6; x.save(); x.rotate(a); x.strokeStyle = 'hsla(' + (330 + 14 * (i % 2)) + ',90%,' + (62 + 14 * v) + '%,' + (.5 + .3 * Math.sin(t * 1.4 + i)) + ')'; x.lineWidth = u * .016; x.beginPath(); x.ellipse(u * .34 * rot, 0, u * .2 * rot, u * .07, 0, 0, 6.2832); x.stroke(); x.restore(); }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, n = hi ? 9 : 7;
-      [[0, 0xff5a3a, 0xffffff], [Math.PI, 0xffb030, 0xffffff]].forEach(function (cfg, fi) {
-        function path(t) { var a = cfg[0] + t * .4 * (fi ? -1 : 1), R = 1.16 + .06 * Math.sin(t * .8 + fi); return [Math.cos(a) * R, Math.sin(a) * R * .8, Math.sin(a * 2 + fi) * .3 + .05]; }
-        var head = new T.Mesh(new T.SphereGeometry(.095, 10, 8), bdEm(T, cfg[1], 1.1));
-        bdChain(A, { n: n, lag: .07, path: path, head: head, size: function (k) { return .085 * (1 - k / n * .65) + .014; }, mat: function (k) { return bdEm(T, k % 3 === 1 ? cfg[2] : cfg[1], 1); } });
-        var tail = bdWings(T, cfg[1], .17, .2); g.add(tail);
-        A.add(function (t) { var p = path(t - n * .07), q = path(t - n * .07 - .05); bdFace(tail, 0, p, q); tail.userData.flap(Math.sin(t * 6) * .6); });
+      var k, i, j; x.lineWidth = u * .014;
+      for (k = 0; k < 4; k++) for (i = 0; i < 3; i++) { var f = (t * .2 + i / 3 + bdR(k) * .5) % 1; x.strokeStyle = 'rgba(255,' + (170 + 60 * f | 0) + ',' + (210 + 40 * f | 0) + ',' + ((1 - f) * (.55 + v * .4)) + ')'; x.beginPath(); x.arc((bdR(k + 1) - .5) * u * 1.1, (bdR(k + 6) - .5) * u * 1.1, f * u * .6, 0, 6.3); x.stroke(); }
+      [[0, .55, 'rgba(255,90,60,1)', 'rgba(255,255,255,1)', 1], [Math.PI, .34, 'rgba(255,190,50,1)', 'rgba(255,255,255,1)', -1]].forEach(function (c) {
+        var th = c[0] + t * .45 * c[4], R = c[1] * u;
+        for (j = 0; j < 8; j++) { var a = th - j * .17 * c[4], wb = u * (.075 * (1 - j / 8 * .6)) , p = [Math.cos(a) * R, Math.sin(a) * R]; x.fillStyle = j % 3 === 1 ? c[3] : c[2]; x.beginPath(); x.ellipse(p[0], p[1], wb * 1.3, wb, a + Math.PI / 2 * c[4], 0, 6.3); x.fill(); }
+        var ta = th - 8 * .17 * c[4], tp = [Math.cos(ta) * R, Math.sin(ta) * R], sw = Math.sin(t * 6) * .5; x.fillStyle = c[2]; x.beginPath(); x.moveTo(tp[0], tp[1]); x.lineTo(tp[0] + Math.cos(ta + sw) * u * .12, tp[1] + Math.sin(ta + sw) * u * .12 + u * .05); x.lineTo(tp[0] + Math.cos(ta - sw) * u * .12, tp[1] + Math.sin(ta - sw) * u * .12 - u * .05); x.closePath(); x.fill();
       });
-      A.add(bdMotes(g, hi ? 50 : 30, .035, 0xffd0e8, function (k, t, p, o) { var f = (t * (.05 + bdR(k + 2) * .06) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28; p[o] = Math.cos(a) * (.5 + bdR(k + 15) * 1); p[o + 1] = 1.3 - f * 2.6; p[o + 2] = Math.sin(a) * .7; }, .8));
     } },
-  /* ECLIPSE: a corona turning on black gold, a moon that crosses the face */
-  eclipse: { n: 'ngon', sides: 40, rot: 0, hue: 0.12, sat: 0.62, rgh: .09, lamp: 0xfff0b0, cool: 0xffb020, mote: 0xffe08a,
+  /* MYTHIC. ECLIPSE: a corona on black gold, and a moon that crosses and lights the diamond ring */
+  eclipse: { n: 'ngon', sides: 40, rot: 0, hue: .12, sat: .62, rgh: .09, lamp: 0xfff0b0, cool: 0xffb020, glow: 0xffc030,
     paint: function (x, N, t, v, u) {
-      var i, a; x.globalCompositeOperation = 'lighter';
-      for (i = 0; i < 40; i++) { a = i / 40 * 6.2832 + t * .12; var L = u * (i % 2 ? .62 : .86) * (.9 + .15 * Math.sin(t * 2 + i) + v * .2); x.strokeStyle = 'hsla(' + (42 + 6 * (i % 2)) + ',100%,' + (55 + 15 * v) + '%,' + (i % 2 ? .45 : .8) + ')'; x.lineWidth = u * (i % 2 ? .012 : .02); x.beginPath(); x.moveTo(Math.cos(a) * u * .42, Math.sin(a) * u * .42); x.lineTo(Math.cos(a) * L, Math.sin(a) * L); x.stroke(); }
-      var cg = x.createRadialGradient(0, 0, u * .34, 0, 0, u * .55); cg.addColorStop(0, 'rgba(255,230,150,.9)'); cg.addColorStop(1, 'rgba(255,170,40,0)'); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .55, 0, 6.2832); x.fill();
-      x.globalCompositeOperation = 'source-over'; x.fillStyle = '#000'; x.beginPath(); x.arc(0, 0, u * .34, 0, 6.2832); x.fill(); x.globalCompositeOperation = 'lighter';
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, i, rays = new T.Group(); g.add(rays);
-      var rm = bdAdd(T, 0xff9a20, .6), rg = new T.ConeGeometry(.026, .3, 6), ra = [];
-      for (i = 0; i < 36; i++) { var r = new T.Mesh(rg, rm); rays.add(r); ra.push(r); }
-      var moon = new T.Mesh(new T.SphereGeometry(.5, 24, 18), new T.MeshBasicMaterial({ color: 0x000000 })), rim = new T.Mesh(new T.TorusGeometry(.5, .02, 8, 48), bdAdd(T, 0xffd878, .9)); moon.add(rim);
-      g.add(moon);
-      A.add(function (t) {
-        var i, L;
-        for (i = 0; i < 36; i++) { var a = i / 36 * 6.2832 + t * .15, R = 1.18 + (i % 2) * .08 + Math.sin(t * 2 + i) * .04; ra[i].position.set(Math.cos(a) * R, Math.sin(a) * R, 0); ra[i].rotation.z = a - Math.PI / 2; ra[i].scale.y = .5 + (i % 2) * .4 + Math.sin(t * 2.6 + i * 1.7) * .15; }
-        var p = (t * .09) % 1, x = (p - .5) * 4.4; moon.position.set(x, Math.sin(x * .7) * .25, .55); rim.rotation.z = t;
-      });
-      A.add(bdMotes(g, 50, .04, 0xffe08a, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .3, r = 1.1 + bdR(k + 4) * .5; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .8; }, .8));
+      var i, a, p = (t * .1) % 1, mx = (p - .5) * 2.8 * u, my = Math.sin(p * 6.28) * u * .08, near = Math.max(0, 1 - Math.abs(mx) / (u * .5));
+      for (i = 0; i < 40; i++) { a = i / 40 * 6.2832 + t * .12; var L = u * (i % 2 ? .62 : .86) * (.9 + .15 * Math.sin(t * 2 + i) + v * .2 + near * .3); x.strokeStyle = 'hsla(' + (42 + 6 * (i % 2)) + ',100%,' + (55 + 15 * v) + '%,' + (i % 2 ? .45 : .8) + ')'; x.lineWidth = u * (i % 2 ? .012 : .02); x.beginPath(); x.moveTo(Math.cos(a) * u * .42, Math.sin(a) * u * .42); x.lineTo(Math.cos(a) * L, Math.sin(a) * L); x.stroke(); }
+      var cg = x.createRadialGradient(0, 0, u * .34, 0, 0, u * (.55 + near * .2)); cg.addColorStop(0, 'rgba(255,230,150,.9)'); cg.addColorStop(1, 'rgba(255,170,40,0)'); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .75, 0, 6.3); x.fill();
+      x.globalCompositeOperation = 'source-over'; x.fillStyle = '#000'; x.beginPath(); x.arc(0, 0, u * .34, 0, 6.3); x.fill();
+      x.fillStyle = '#000'; x.beginPath(); x.arc(mx, my, u * .4, 0, 6.3); x.fill(); x.globalCompositeOperation = 'lighter';
+      x.strokeStyle = 'rgba(255,235,170,.9)'; x.lineWidth = u * .015; x.beginPath(); x.arc(mx, my, u * .4, 0, 6.3); x.stroke();
     } },
-  /* MOONRISE: a moon through its phases over violet steel, moths round it */
-  moonrise: { n: 'oct', rot: Math.PI / 8, hue: 0.7, sat: 0.48, rgh: .08, lamp: 0xe0d8ff, cool: 0x7a5aff, mote: 0xd8d0ff,
+  /* MYTHIC. MOONRISE: a moon through its phases, moths turning round it, stars waking */
+  moonrise: { n: 'ngon', sides: 4, rot: 0, rs: .95, hue: .7, sat: .48, rgh: .08, lamp: 0xe0d8ff, cool: 0x7a5aff, glow: 0x8a6aff,
     paint: function (x, N, t, v, u) {
-      var i, ph = Math.sin(t * .45) * .5; x.fillStyle = 'rgba(220,210,255,' + (.8 + v * .2) + ')'; x.beginPath(); x.arc(0, 0, u * .55, 0, 6.2832); x.fill();
-      x.globalCompositeOperation = 'source-over'; x.fillStyle = '#000'; x.beginPath(); x.arc(ph * u * 1.1, -ph * u * .15, u * .5, 0, 6.2832); x.fill(); x.globalCompositeOperation = 'lighter';
-      var gl = x.createRadialGradient(0, 0, u * .4, 0, 0, u * .95); gl.addColorStop(0, 'rgba(150,120,255,.35)'); gl.addColorStop(1, 'rgba(100,70,255,0)'); x.fillStyle = gl; x.beginPath(); x.arc(0, 0, u * .95, 0, 6.2832); x.fill();
-      for (i = 0; i < 46; i++) { var tw = Math.pow(Math.sin(t * (1 + bdR(i) * 2) + i) * .5 + .5, 2); x.fillStyle = 'rgba(235,230,255,' + (.2 + .8 * tw) + ')'; var sx = (bdR(i + 1) - .5) * 1.8 * u, sy = (bdR(i + 60) - .5) * 1.8 * u, sr = u * (.008 + .012 * tw); x.fillRect(sx - sr, sy - sr, sr * 2, sr * 2); }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, i, moons = new T.Group(); g.add(moons);
-      var mm = new T.Mesh(new T.SphereGeometry(.2, 20, 14), new T.MeshStandardMaterial({ color: 0xe8e2ff, emissive: 0xb8a8ff, emissiveIntensity: .9, roughness: .8 })), halo = new T.Sprite(new T.SpriteMaterial({ map: bdDotTex(), color: 0x9a80ff, transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false })); halo.scale.set(1.1, 1.1, 1);
-      moons.add(mm); moons.add(halo);
-      var mo = [], N = 7; for (i = 0; i < N; i++) { var w = bdWings(T, 0xd8d0ff, .13, .1); g.add(w); mo.push(w); }
-      A.add(function (t) {
-        var a = t * .28, mx = Math.cos(a) * 1.2, my = Math.sin(a) * .6 + .1, mz = Math.sin(a) * .5; moons.position.set(mx, my, mz);
-        for (var i = 0; i < N; i++) { var s = t * (1.1 + i * .13) + i * 2, p = [mx + Math.sin(s) * (.38 + .08 * i % 3), my + Math.cos(s * 1.3) * .3, mz + Math.sin(s * .9 + i) * .35], q = [mx + Math.sin(s - .1) * (.38 + .08 * i % 3), my + Math.cos((s - .1) * 1.3) * .3, mz + Math.sin((s - .1) * .9 + i) * .35]; bdFace(mo[i], 0, p, q); mo[i].userData.flap(Math.sin(t * 16 + i) * 1); }
-      });
-      A.add(bdMotes(g, 60, .035, 0xe0d8ff, function (k, t, p, o) { var a = bdR(k) * 6.28, r = bdR(k + 4) * 1.6; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r * .8; p[o + 2] = -.4 + (bdR(k + 8)) * .5; }, .7));
+      var i, ph = Math.sin(t * .45) * .5; x.fillStyle = 'rgba(220,210,255,' + (.8 + v * .2) + ')'; x.beginPath(); x.arc(0, 0, u * .5, 0, 6.3); x.fill();
+      x.globalCompositeOperation = 'source-over'; x.fillStyle = '#000'; x.beginPath(); x.arc(ph * u * 1.05, -ph * u * .15, u * .46, 0, 6.3); x.fill(); x.globalCompositeOperation = 'lighter';
+      var gl = x.createRadialGradient(0, 0, u * .4, 0, 0, u * .95); gl.addColorStop(0, 'rgba(150,120,255,.35)'); gl.addColorStop(1, 'rgba(100,70,255,0)'); x.fillStyle = gl; x.beginPath(); x.arc(0, 0, u * .95, 0, 6.3); x.fill();
+      for (i = 0; i < 40; i++) { var tw = Math.pow(Math.sin(t * (1 + bdR(i) * 2) + i) * .5 + .5, 2); x.fillStyle = 'rgba(235,230,255,' + (.2 + .8 * tw) + ')'; var sr = u * (.008 + .012 * tw); x.fillRect((bdR(i + 1) - .5) * 1.7 * u - sr, (bdR(i + 60) - .5) * 1.7 * u - sr, sr * 2, sr * 2); }
+      for (i = 0; i < 5; i++) { var s = t * (.6 + i * .13) + i * 1.9, mx = Math.cos(s) * u * (.62 + .1 * Math.sin(i)), my = Math.sin(s * 1.3) * u * .55, fl = Math.sin(t * 14 + i) * .6 + .7; x.strokeStyle = 'rgba(225,215,255,.95)'; x.lineWidth = u * .016; x.beginPath(); x.moveTo(mx - u * .05, my - u * .03 * fl); x.lineTo(mx, my); x.lineTo(mx + u * .05, my - u * .03 * fl); x.stroke(); }
     } },
-  /* COLOSSUS: black rock with a fire in it, cracks that run and flare, shards in orbit */
-  colossus: { n: 'oct', rot: Math.PI / 8, hue: 0.03, sat: 0.18, rgh: .38, met: .85, lamp: 0xffb070, cool: 0xff3a1a, mote: 0xff7a2a,
+  /* MYTHIC. COLOSSUS: black rock with a fire in it: the cracks run, flare and breathe */
+  colossus: { n: 'ngon', sides: 8, rot: Math.PI / 8, hue: .03, sat: .18, rgh: .38, met: .85, lamp: 0xffb070, cool: 0xff3a1a, glow: 0xff5a1a,
     paint: function (x, N, t, v, u) {
       var k, j; x.lineCap = x.lineJoin = 'round';
+      var cg = x.createRadialGradient(0, 0, 0, 0, 0, u * .5); cg.addColorStop(0, 'rgba(255,120,20,' + (.35 + .25 * Math.sin(t * 1.6) + v * .3) + ')'); cg.addColorStop(1, 'rgba(255,60,0,0)'); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .5, 0, 6.3); x.fill();
       for (k = 0; k < 9; k++) {
         var a = k / 9 * 6.2832 + bdR(k) * .6, pts = [[0, 0]], px = 0, py = 0, aa = a;
         for (j = 1; j <= 9; j++) { aa += (bdR(k * 7 + j) - .5) * .9; px += Math.cos(aa) * u * .11; py += Math.sin(aa) * u * .11; pts.push([px, py]); }
         var pul = .5 + .5 * Math.sin(t * 1.8 + k * 1.3), run = (t * .6 + k * .13) % 1;
         [[.05, 'rgba(255,60,0,' + (.25 + .3 * pul + v * .3) + ')'], [.022, 'rgba(255,150,30,' + (.55 + .35 * pul) + ')'], [.008, 'rgba(255,240,170,' + (.7 + .3 * pul) + ')']].forEach(function (s) { x.lineWidth = u * s[0]; x.strokeStyle = s[1]; x.beginPath(); pts.forEach(function (q, i) { if (i) x.lineTo(q[0], q[1]); else x.moveTo(q[0], q[1]); }); x.stroke(); });
-        var ri = Math.floor(run * 9), q0 = pts[ri]; x.fillStyle = 'rgba(255,250,200,.95)'; x.beginPath(); x.arc(q0[0], q0[1], u * .02, 0, 6.3); x.fill();
+        var q0 = pts[Math.floor(run * 9)]; x.fillStyle = 'rgba(255,250,200,.95)'; x.beginPath(); x.arc(q0[0], q0[1], u * .02, 0, 6.3); x.fill();
       }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, hi = A.hi, i, N = hi ? 10 : 7, sh = [], geo = new T.OctahedronGeometry(1, 0);
-      var rock = new T.MeshStandardMaterial({ color: 0x1c1410, emissive: 0xff4a10, emissiveIntensity: .6, metalness: .1, roughness: .9, flatShading: true });
-      for (i = 0; i < N; i++) { var m = new T.Mesh(geo, rock); m.scale.set(.07 + bdR(i) * .1, .1 + bdR(i + 3) * .1, .07 + bdR(i + 5) * .08); g.add(m); sh.push(m); }
-      A.add(function (t) { rock.emissiveIntensity = .5 + .4 * Math.sin(t * 2.2); for (var i = 0; i < N; i++) { var a = t * .3 * (i % 2 ? 1 : -1) + i / N * 6.28, R = 1.15 + .12 * bdR(i + 9); sh[i].position.set(Math.cos(a) * R, Math.sin(a * .7 + i) * .5, Math.sin(a) * R * .45); sh[i].rotation.set(t * (.5 + bdR(i)), t * (.4 + bdR(i + 2)), i); } });
-      A.add(bdMotes(g, hi ? 70 : 40, .04, 0xff7a2a, function (k, t, p, o) { var f = (t * (.1 + bdR(k + 2) * .14) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28; p[o] = Math.cos(a) * (.4 + bdR(k + 15) * 1); p[o + 1] = -1.2 + f * 2.5; p[o + 2] = Math.sin(a) * .6; }, .85));
     } },
-  /* ATLAS: a globe's meridians turning in gold and blue, armillary rings round it */
-  atlas: { n: 'ngon', sides: 5, rot: Math.PI / 2, hue: 0.6, sat: 0.62, rgh: .08, lamp: 0xd0e8ff, cool: 0x3a8aff, mote: 0xc0e0ff,
+  /* MYTHIC. ATLAS: a globe turning in gold and blue, armillary rings tilting round it, painted into the steel */
+  atlas: { n: 'ngon', sides: 5, rot: Math.PI / 2, rs: 1.04, hue: .6, sat: .62, rgh: .08, lamp: 0xd0e8ff, cool: 0x3a8aff, glow: 0x3a90ff,
     paint: function (x, N, t, v, u) {
-      var k, R = u * .78; x.lineWidth = u * .014;
-      x.strokeStyle = 'rgba(255,210,110,' + (.7 + v * .3) + ')'; x.beginPath(); x.arc(0, 0, R, 0, 6.2832); x.stroke();
-      for (k = 0; k < 6; k++) { var a = t * .35 + k * Math.PI / 6, w = Math.abs(Math.cos(a)) * R; x.strokeStyle = 'hsla(' + (208 + 20 * Math.sin(k)) + ',90%,' + (58 + 16 * v) + '%,' + (.5 + .4 * Math.abs(Math.sin(a))) + ')'; x.beginPath(); x.ellipse(0, 0, Math.max(1, w), R, 0, 0, 6.2832); x.stroke(); }
-      for (k = -3; k <= 3; k++) { var yy = k / 4 * R, rw = Math.sqrt(Math.max(0, R * R - yy * yy)); x.strokeStyle = 'rgba(255,210,110,.45)'; x.beginPath(); x.ellipse(0, yy, rw, rw * .12, 0, 0, 6.2832); x.stroke(); }
-      for (k = 0; k < 30; k++) { var tw = Math.pow(Math.sin(t * (1 + bdR(k) * 2) + k) * .5 + .5, 2); x.fillStyle = 'rgba(210,232,255,' + (.2 + .8 * tw) + ')'; x.fillRect((bdR(k + 1) - .5) * 1.8 * u, (bdR(k + 40) - .5) * 1.8 * u, u * .02, u * .02); }
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, rings = [], i, gold = new T.MeshPhysicalMaterial({ color: 0xe6b84a, metalness: 1, roughness: .2, envMapIntensity: 1.6 }), pl = [];
-      [[1.3, 0, .3, .5], [1.38, 1.1, 0, -.4], [1.46, .5, .9, .3]].forEach(function (c, k) { var r = new T.Mesh(new T.TorusGeometry(c[0], .014, 8, 90), gold), gr = new T.Group(); gr.add(r); var ball = new T.Mesh(new T.SphereGeometry(.05, 12, 10), bdEm(T, k ? 0x8ac4ff : 0xffd878, 1.2)); gr.add(ball); gr.rotation.set(c[1], c[2], 0); g.add(gr); rings.push([gr, c[3], ball, c[0]]); });
-      A.add(function (t) { for (var i = 0; i < 3; i++) { var q = rings[i], a = t * .5 * (i % 2 ? -1 : 1) + i * 2; q[0].rotation.z += q[1] * .004; q[2].position.set(Math.cos(a) * q[3], Math.sin(a) * q[3], 0); } });
-      A.add(bdMotes(g, 50, .035, 0xc0e0ff, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .1, r = 1.1 + bdR(k + 4) * .8; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .8; }, .75));
+      var k, R = u * .62; x.lineWidth = u * .014;
+      x.strokeStyle = 'rgba(255,210,110,' + (.7 + v * .3) + ')'; x.beginPath(); x.arc(0, 0, R, 0, 6.3); x.stroke();
+      for (k = 0; k < 6; k++) { var a = t * .35 + k * Math.PI / 6, w = Math.abs(Math.cos(a)) * R; x.strokeStyle = 'hsla(' + (208 + 20 * Math.sin(k)) + ',90%,' + (58 + 16 * v) + '%,' + (.5 + .4 * Math.abs(Math.sin(a))) + ')'; x.beginPath(); x.ellipse(0, 0, Math.max(1, w), R, 0, 0, 6.3); x.stroke(); }
+      for (k = -2; k <= 2; k++) { var yy = k / 3 * R, rw = Math.sqrt(Math.max(0, R * R - yy * yy)); x.strokeStyle = 'rgba(255,210,110,.4)'; x.beginPath(); x.ellipse(0, yy, rw, rw * .12, 0, 0, 6.3); x.stroke(); }
+      [[.82, .5, 0, 1], [.92, -.4, 1.1, -1], [.74, .9, .5, 1]].forEach(function (c, i) {
+        var tilt = c[2] + Math.sin(t * .3 + i) * .35; x.strokeStyle = 'rgba(240,200,90,.85)'; x.lineWidth = u * .018; x.beginPath(); x.ellipse(0, 0, c[0] * u, c[0] * u * Math.abs(Math.cos(tilt)) * .4 + u * .05, c[1] * 1.5 + t * .1 * c[3], 0, 6.3); x.stroke();
+        var pa = t * (.6 + i * .2) * c[3] + i * 2; x.fillStyle = i ? 'rgba(140,200,255,1)' : 'rgba(255,220,120,1)'; x.beginPath(); x.arc(Math.cos(pa) * c[0] * u, Math.sin(pa) * c[0] * u * Math.abs(Math.cos(tilt)) * .4, u * .035, 0, 6.3); x.fill();
+      });
     } },
-  /* ZODIAC: twelve points, a star drawn through them, the whole sky turning */
-  zodiac: { n: 'ngon', sides: 12, rot: Math.PI / 12, hue: 0.8, sat: 0.5, rgh: .07, lamp: 0xffe0ff, cool: 0xc04aff, mote: 0xffc0ff,
+  /* MYTHIC. ZODIAC: twelve points with a star drawn through them, the whole sky turning, a falling star every few seconds */
+  zodiac: { n: 'ngon', sides: 12, rot: Math.PI / 12, hue: .8, sat: .5, rgh: .07, lamp: 0xffe0ff, cool: 0xc04aff, glow: 0xd050ff,
     paint: function (x, N, t, v, u) {
       var k, a, b; x.lineWidth = u * .012;
       for (k = 0; k < 12; k++) { a = k / 12 * 6.2832 + t * .12; b = (k + 5) / 12 * 6.2832 + t * .12; x.strokeStyle = 'hsla(' + (290 + 30 * Math.sin(k + t)) + ',90%,' + (62 + 15 * v) + '%,' + (.55 + .35 * Math.sin(t * 1.5 + k)) + ')'; x.beginPath(); x.moveTo(Math.cos(a) * u * .8, Math.sin(a) * u * .8); x.lineTo(Math.cos(b) * u * .8, Math.sin(b) * u * .8); x.stroke(); }
       for (k = 0; k < 12; k++) { a = k / 12 * 6.2832 - t * .2; x.strokeStyle = 'rgba(255,200,255,.4)'; x.beginPath(); x.moveTo(Math.cos(a) * u * .3, Math.sin(a) * u * .3); x.lineTo(Math.cos(a) * u * .88, Math.sin(a) * u * .88); x.stroke(); x.fillStyle = 'rgba(255,230,255,' + (.5 + .5 * Math.sin(t * 2 + k)) + ')'; x.beginPath(); x.arc(Math.cos(a) * u * .88, Math.sin(a) * u * .88, u * (.025 + .015 * Math.sin(t * 2 + k)), 0, 6.3); x.fill(); }
       x.strokeStyle = 'rgba(255,255,255,.6)'; x.beginPath(); x.arc(0, 0, u * .3, 0, 6.3); x.stroke();
-    },
-    orb: function (A, st) {
-      var T = A.T, g = A.g, i, ring = new T.Group(), ring2 = new T.Group(); g.add(ring); g.add(ring2);
-      var nodes = [], pos = [], lp = [];
-      for (i = 0; i < 12; i++) { var a = i / 12 * 6.2832; pos.push([Math.cos(a) * 1.3, Math.sin(a) * 1.3, 0]); var s = new T.Mesh(new T.SphereGeometry(1, 10, 8), bdAdd(T, 0xffd8ff)); s.position.set(pos[i][0], pos[i][1], 0); ring.add(s); nodes.push(s); }
-      for (i = 0; i < 12; i++) { var j = (i + 5) % 12; lp.push(pos[i][0], pos[i][1], 0, pos[j][0], pos[j][1], 0); }
-      var lg = new T.BufferGeometry(); lg.setAttribute('position', new T.BufferAttribute(new Float32Array(lp), 3)); ring.add(new T.LineSegments(lg, new T.LineBasicMaterial({ color: 0xff9aff, transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false })));
-      var n2 = []; for (i = 0; i < 12; i++) { var a2 = i / 12 * 6.2832 + .26, s2 = new T.Mesh(new T.SphereGeometry(.03, 8, 6), bdAdd(T, 0x9ad0ff)); s2.position.set(Math.cos(a2) * 1.46, Math.sin(a2) * 1.46, 0); ring2.add(s2); n2.push(s2); }
-      A.add(function (t) { ring.rotation.z = t * .12; ring2.rotation.z = -t * .18; ring.rotation.x = Math.sin(t * .4) * .3; ring2.rotation.y = Math.cos(t * .35) * .3; for (var i = 0; i < 12; i++) { nodes[i].scale.setScalar(.018 + .02 * (Math.sin(t * 2.4 + i) * .5 + .5) + .02 * st.v); } });
-      A.add(bdMotes(g, 60, .03, 0xffc0ff, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .08, r = 1.05 + bdR(k + 4) * .8; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .9; }, .75));
+      var f = (t * .45) % 1, sy = -u * .9 + f * u * 1.8, sx = -u * .9 + f * u * 1.3; var sg = x.createLinearGradient(sx - u * .5, sy - u * .35, sx, sy); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(1, 'rgba(255,255,255,' + (1 - Math.abs(f - .5) * 1.6) + ')'); x.strokeStyle = sg; x.lineWidth = u * .02; x.beginPath(); x.moveTo(sx - u * .5, sy - u * .35); x.lineTo(sx, sy); x.stroke();
+    } },
+  /* MYTHIC. GEMINI (supersets): two strands braiding up the face, flaring where they cross */
+  ssm: { n: 'ngon', sides: 6, rot: Math.PI / 6, hue: .85, sat: .5, rgh: .06, lamp: 0xffd0ff, cool: 0x30d0ff, glow: 0xc060ff,
+    paint: function (x, N, t, v, u) {
+      var y, k, cols = ['rgba(60,220,255,', 'rgba(255,90,230,'], lastA = null, lastB = null;
+      x.lineCap = 'round';
+      for (k = 0; k < 2; k++) {
+        var last = null; for (y = -u * .95; y <= u * .95; y += u * .03) {
+          var ph = y / u * 5 - t * 2.6, px = Math.sin(ph + k * Math.PI) * u * .42, depth = Math.cos(ph + k * Math.PI);
+          if (last) { x.strokeStyle = cols[k] + (.5 + .45 * depth + v * .2) + ')'; x.lineWidth = u * (.035 + .02 * depth); x.beginPath(); x.moveTo(last[0], last[1]); x.lineTo(px, y); x.stroke(); }
+          last = [px, y];
+        }
+      }
+      for (y = -u * .9; y <= u * .9; y += u * .06) { var p = y / u * 5 - t * 2.6; if (Math.abs(Math.sin(p)) < .09) { var g = x.createRadialGradient(0, y, 0, 0, y, u * .16); g.addColorStop(0, 'rgba(255,255,255,.95)'); g.addColorStop(1, 'rgba(255,150,255,0)'); x.fillStyle = g; x.beginPath(); x.arc(0, y, u * .16, 0, 6.3); x.fill(); } }
+      for (k = 0; k < 18; k++) { var f = (t * (.25 + bdR(k) * .3) + bdR(k + 4)) % 1; x.fillStyle = 'rgba(255,255,255,' + (1 - f) * .8 + ')'; x.beginPath(); x.arc((bdR(k + 9) - .5) * u * 1.3, u * .9 - f * u * 1.8, u * .012, 0, 6.3); x.fill(); }
+    } },
+  /* MYTHIC. AVALANCHE (drop sets): ice falls through the metal, faster as it goes, and bursts where it lands */
+  dsm: { n: 'ngon', sides: 3, rot: -Math.PI / 2, rs: 1.2, hue: .56, sat: .45, rgh: .07, lamp: 0xe0f4ff, cool: 0x60c8ff, glow: 0x70d0ff,
+    paint: function (x, N, t, v, u) {
+      var k, surge = Math.pow(Math.max(0, Math.sin(t * 1.15)), 10);
+      var wash = x.createLinearGradient(0, -u, 0, u); wash.addColorStop(0, 'rgba(180,230,255,' + (.05 + surge * .3) + ')'); wash.addColorStop(1, 'rgba(120,200,255,' + (.2 + surge * .5) + ')'); x.fillStyle = wash; x.fillRect(-u * 1.2, -u * 1.2, u * 2.4, u * 2.4);
+      for (k = 0; k < 46; k++) {
+        var sp = .35 + bdR(k + 2) * .6, f = (t * sp + bdR(k + 7)) % 1, y = -u * 1.05 + f * f * u * 2.1, px = (bdR(k) - .5) * 1.7 * u + Math.sin(t + k) * u * .02, len = u * (.04 + .22 * f), w = u * (.012 + .018 * bdR(k + 11));
+        x.strokeStyle = 'rgba(' + (190 + 60 * bdR(k)) + ',' + (230 + 20 * bdR(k + 3)) + ',255,' + (.35 + .6 * f) + ')'; x.lineWidth = w; x.beginPath(); x.moveTo(px, y - len); x.lineTo(px, y); x.stroke();
+        if (f > .93) { var b = (f - .93) / .07; x.strokeStyle = 'rgba(255,255,255,' + (1 - b) + ')'; x.lineWidth = u * .012; for (var j = 0; j < 6; j++) { var aa = Math.PI + j / 5 * Math.PI; x.beginPath(); x.moveTo(px, y); x.lineTo(px + Math.cos(aa) * u * .14 * b, y + Math.sin(aa) * u * .08 * b); x.stroke(); } }
+      }
+    } },
+  /* MYTHIC. IGNITION (warm-up sets): a spark runs the fuse in to the middle and the whole face goes up */
+  wum: { n: 'star', rot: Math.PI / 16, hue: .07, sat: .7, rgh: .09, lamp: 0xffe0a0, cool: 0xff5a1a, glow: 0xff7a20,
+    paint: function (x, N, t, v, u) {
+      var P = 4.4, ph = (t % P) / P, run = Math.min(1, ph / .62), boom = ph > .62 ? (ph - .62) / .38 : 0, i, last = null;
+      var turns = 3.2; x.lineCap = 'round';
+      for (i = 0; i <= 120; i++) { var f = i / 120, a = f * turns * 6.2832, r = (1 - f) * u * .86 + u * .06; if (f > run) break; var px = Math.cos(a) * r, py = Math.sin(a) * r; if (last) { x.strokeStyle = 'rgba(255,' + (120 + 100 * f | 0) + ',40,' + (.25 + .7 * (f / Math.max(.01, run))) + ')'; x.lineWidth = u * (.012 + .03 * (f / Math.max(.01, run))); x.beginPath(); x.moveTo(last[0], last[1]); x.lineTo(px, py); x.stroke(); } last = [px, py]; }
+      if (last && !boom) { var hg = x.createRadialGradient(last[0], last[1], 0, last[0], last[1], u * .12); hg.addColorStop(0, 'rgba(255,255,230,1)'); hg.addColorStop(1, 'rgba(255,150,30,0)'); x.fillStyle = hg; x.beginPath(); x.arc(last[0], last[1], u * .12, 0, 6.3); x.fill(); }
+      x.strokeStyle = 'rgba(120,50,20,.7)'; x.lineWidth = u * .008; x.beginPath(); for (i = 0; i <= 120; i++) { var f2 = i / 120, a2 = f2 * turns * 6.2832, r2 = (1 - f2) * u * .86 + u * .06; if (i) x.lineTo(Math.cos(a2) * r2, Math.sin(a2) * r2); else x.moveTo(Math.cos(a2) * r2, Math.sin(a2) * r2); } x.stroke();
+      if (boom > 0) {
+        var fb = x.createRadialGradient(0, 0, 0, 0, 0, u * (.2 + boom * 1.1)); fb.addColorStop(0, 'rgba(255,255,230,' + (1 - boom) + ')'); fb.addColorStop(.4, 'rgba(255,170,40,' + (.8 * (1 - boom)) + ')'); fb.addColorStop(1, 'rgba(255,60,0,0)'); x.fillStyle = fb; x.beginPath(); x.arc(0, 0, u * 1.4, 0, 6.3); x.fill();
+        for (i = 0; i < 24; i++) { var ra = i / 24 * 6.2832; x.strokeStyle = 'rgba(255,' + (200 - 80 * boom | 0) + ',80,' + (1 - boom) + ')'; x.lineWidth = u * .02; x.beginPath(); x.moveTo(Math.cos(ra) * u * boom * .5, Math.sin(ra) * u * boom * .5); x.lineTo(Math.cos(ra) * u * (.2 + boom * 1.1), Math.sin(ra) * u * (.2 + boom * 1.1)); x.stroke(); }
+      } else if (ph > .62 - .001) { }
+      x.fillStyle = 'rgba(255,120,30,' + (.12 + .06 * Math.sin(t * 5)) + ')'; x.beginPath(); x.arc(0, 0, u * .07, 0, 6.3); x.fill();
+    } },
+  /* EXOTIC. TANDEM (supersets): two links of light turning together on blue steel, the rings of a chain. Calm, and nothing alive in it */
+  ssx: { n: 'ngon', sides: 4, rot: Math.PI / 4, rs: .98, hue: .56, sat: .55, rgh: .1, lamp: 0xd0f0ff, cool: 0x3aa8ff, glow: 0x3aa0ff, calm: 1,
+    paint: function (x, N, t, v, u) {
+      var k, a = t * .28; x.lineCap = 'round';
+      for (k = 0; k < 3; k++) {
+        var s = 1 - k * .22, al = (.9 - k * .22) * (.75 + .25 * Math.sin(t * 1.2 + k)); x.lineWidth = u * (.05 - k * .01);
+        [[-1, 'rgba(70,190,255,'], [1, 'rgba(150,235,255,']].forEach(function (L) { x.strokeStyle = L[1] + al + ')'; x.beginPath(); x.ellipse(L[0] * u * .27 * s, 0, u * .46 * s, u * .46 * s, 0, 0, 6.3); x.stroke(); });
+        x.save(); x.rotate(a * (k % 2 ? -1 : 1)); x.restore();
+      }
+      x.fillStyle = 'rgba(190,240,255,.55)'; for (k = 0; k < 28; k++) { var b = k / 28 * 6.2832 + a; x.beginPath(); x.arc(Math.cos(b) * u * .86, Math.sin(b) * u * .86, u * .012, 0, 6.3); x.fill(); }
+      x.strokeStyle = 'rgba(120,210,255,' + (.25 + .15 * Math.sin(t * 1.4)) + ')'; x.lineWidth = u * .01; for (k = -4; k <= 4; k++) { x.beginPath(); x.moveTo(-u, k * u * .2 + Math.sin(t + k) * u * .01); x.lineTo(u, k * u * .2 + Math.sin(t + k + 2) * u * .01); x.stroke(); }
+    } },
+  /* EXOTIC. CASCADE (drop sets): steps of light falling down a staircase of steel, each lower step slower. Calm */
+  dsx: { n: 'drop', rs: .96, hue: .58, sat: .5, rgh: .09, lamp: 0xdff2ff, cool: 0x5ab8ff, glow: 0x5ab4ff, calm: 1,
+    paint: function (x, N, t, v, u) {
+      var k, j; x.lineCap = 'butt';
+      for (k = 0; k < 9; k++) {
+        var yy = (-.8 + k * .2) * u, sp = .5 - k * .04;
+        x.strokeStyle = 'rgba(' + (110 + k * 14) + ',' + (190 + k * 6) + ',255,' + (.55 - k * .02) + ')'; x.lineWidth = u * .05; x.setLineDash([u * .22, u * .1]); x.lineDashOffset = -t * u * sp; x.beginPath(); x.moveTo(-u, yy); x.lineTo(u, yy); x.stroke();
+      }
+      x.setLineDash([]); x.lineWidth = u * .012;
+      for (j = -5; j <= 5; j++) { var f = (t * .22 + j * .17) % 1; x.strokeStyle = 'rgba(230,248,255,' + (.2 + .45 * Math.sin(f * Math.PI)) + ')'; x.beginPath(); x.moveTo(j * u * .17, -u * 1.1 + f * u * 2.2); x.lineTo(j * u * .17, -u * 1.1 + f * u * 2.2 + u * .22); x.stroke(); }
+    } },
+  /* EXOTIC. EMBER (warm-ups): heat breathing out through triangles of amber, ring after ring. Calm */
+  wux: { n: 'ngon', sides: 3, rot: Math.PI / 2, rs: 1.2, hue: .09, sat: .66, rgh: .1, lamp: 0xffe8b0, cool: 0xff9a2a, glow: 0xffa030, calm: 1,
+    paint: function (x, N, t, v, u) {
+      var k, i; x.lineJoin = 'round';
+      for (k = 0; k < 7; k++) {
+        var f = (t * .18 + k / 7) % 1, r = (.1 + f * .95) * u; x.strokeStyle = 'rgba(255,' + (150 + 70 * (1 - f) | 0) + ',50,' + ((1 - f) * (.8 + v * .2)) + ')'; x.lineWidth = u * (.05 * (1 - f) + .012); x.beginPath();
+        for (i = 0; i < 3; i++) { var a = Math.PI / 2 + i * 2.0944; if (i) x.lineTo(Math.cos(a) * r, Math.sin(a) * r); else x.moveTo(Math.cos(a) * r, Math.sin(a) * r); } x.closePath(); x.stroke();
+      }
+      for (k = 0; k < 30; k++) { var g = (t * (.1 + bdR(k) * .1) + bdR(k + 5)) % 1; x.fillStyle = 'rgba(255,214,120,' + (.2 + .5 * Math.sin(g * Math.PI)) + ')'; x.beginPath(); x.arc((bdR(k + 1) - .5) * 1.5 * u, (bdR(k + 40) - .5) * 1.5 * u - g * u * .1, u * .012, 0, 6.3); x.fill(); }
     } }
 };
-/* the stepped body of a relic: the same six slabs as the Tempest, cut to the spec's shape, with the spec's painting lit across all of them */
+/* the stepped body of a relic and the light across it */
 function bdRelic(id) {
   var sp = BDR[id];
   return function (A) {
-    var T = A.T, g = A.g, hi = A.hi, i, K = 6, TT = .07, HOLE = [.38, .31, .24, .17, .1], tapV = { v: 0 }, st = { v: 0 }, pend = false, tapAt = -99;
-    var EN = hi ? 512 : 384, ec = document.createElement('canvas'); ec.width = ec.height = EN; var ex = ec.getContext('2d'), etx = new T.CanvasTexture(ec), U = EN / 1.8;
+    var T = A.T, g = A.g, hi = A.hi, i, K = 7, TT = .085, HOLE = [.38, .32, .26, .2, .14, .08], pend = false, tapAt = -99, st = { v: 0 };
+    var EN = hi ? 512 : 384, ec = document.createElement('canvas'); ec.width = ec.height = EN; var ex = ec.getContext('2d'), etx = new T.CanvasTexture(ec), U = EN / 1.8, lastDraw = -1;
     etx.encoding = T.sRGBEncoding; etx.wrapS = etx.wrapT = T.ClampToEdgeWrapping; etx.repeat.set(1 / 1.8, 1 / 1.8); etx.offset.set(.5, .5);
-    var lastDraw = -1;
     function paint(t, v) {
       ex.setTransform(1, 0, 0, 1, 0, 0); ex.globalCompositeOperation = 'source-over'; ex.fillStyle = '#000'; ex.fillRect(0, 0, EN, EN);
       ex.translate(EN / 2, EN / 2); ex.globalCompositeOperation = 'lighter'; ex.lineCap = ex.lineJoin = 'round'; sp.paint(ex, EN, t, v, U); etx.needsUpdate = true;
     }
-    function outline(r) {
-      if (sp.n === 'kite') return [[0, 1.15 * r], [.82 * r, .22 * r], [.52 * r, -.95 * r], [0, -1.2 * r], [-.52 * r, -.95 * r], [-.82 * r, .22 * r]];
-      return bdNgon(sp.n === 'hex' ? 6 : sp.n === 'oct' ? 8 : sp.sides || 8, r, sp.rot || 0);
-    }
-    var mats = [], sm = [], FM = [], BM = [], front = new T.Group(), back = new T.Group(), cr = new T.Group(), pivot = new T.Group();
-    g.add(pivot); pivot.add(cr); cr.scale.setScalar(.82); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
+    var mats = [], sm = [], FM = [], BM = [], front = new T.Group(), back = new T.Group(), cr = new T.Group(), pivot = new T.Group(), rs = sp.rs || 1;
+    g.add(pivot); pivot.add(cr); cr.scale.setScalar(.8); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
     for (i = 0; i < K; i++) {
-      var R = (.707 + i * .0877) * (sp.n === 'kite' ? 1 : .98), baseC = new T.Color().setHSL(sp.hue, sp.sat, .2 - i * .028), sh = new T.Shape(), pts = outline(R); pts.forEach(function (q, j) { if (j) sh.lineTo(q[0], q[1]); else sh.moveTo(q[0], q[1]); }); sh.closePath();
-      if (i < K - 1) { var hp = outline(HOLE[i] * 1.414), ho = new T.Path(); hp.slice().reverse().forEach(function (q, j) { if (j) ho.lineTo(q[0], q[1]); else ho.moveTo(q[0], q[1]); }); ho.closePath(); sh.holes.push(ho); }
-      var geo = new T.ExtrudeGeometry(sh, { depth: TT, bevelEnabled: true, bevelThickness: .014, bevelSize: .014, bevelSegments: hi ? 4 : 3 });
+      var R = (.707 + i * .073) * rs, baseC = new T.Color().setHSL(sp.hue, sp.sat, .22 - i * .026), sh = new T.Shape(), pts = bdRelicPts(sp, R);
+      pts.forEach(function (q, j) { if (j) sh.lineTo(q[0], q[1]); else sh.moveTo(q[0], q[1]); }); sh.closePath();
+      if (i < K - 1) { var hp = bdRelicPts(sp, HOLE[i] * 1.414 * rs), ho = new T.Path(); hp.slice().reverse().forEach(function (q, j) { if (j) ho.lineTo(q[0], q[1]); else ho.moveTo(q[0], q[1]); }); ho.closePath(); sh.holes.push(ho); }
+      var geo = new T.ExtrudeGeometry(sh, { depth: TT, bevelEnabled: true, bevelThickness: .016, bevelSize: .016, bevelSegments: hi ? 4 : 3 });
       var mk = function (map) { return new T.MeshPhysicalMaterial({ color: baseC, metalness: sp.met || 1, roughness: sp.rgh, envMapIntensity: 2, clearcoat: 1, clearcoatRoughness: .05, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
       mats[i] = mk(etx); sm[i] = mk(null);
       FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); FM[i].position.z = (K - 1 - i) * TT; front.add(FM[i]);
       BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); BM[i].position.z = (K - 1 - i) * TT; back.add(BM[i]);
     }
     var lamp = new T.PointLight(sp.lamp, 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
-    var cool = new T.PointLight(sp.cool, .9, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
+    var cool = new T.PointLight(sp.cool, 1, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
+    var rim = new T.PointLight(sp.cool, .6, 3); rim.position.set(1.2, .9, -.5); g.add(rim);
+    /* the only thing outside the metal: a soft glow behind it */
+    var glow = new T.Sprite(new T.SpriteMaterial({ map: bdDotTex(), color: sp.glow, transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false })); glow.scale.set(3.6, 3.6, 1); glow.position.z = -.7; g.add(glow);
     g.userData.tap = function () { pend = true; };
-    sp.orb(A, st);
     A.add(function (t) {
       if (pend) { tapAt = t; pend = false; }
-      var u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0, v = u >= 0 && u < 1.6 ? Math.exp(-u * 2.2) : 0, pu = .5 + .5 * Math.sin(t * .9); st.v = v;
+      var u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0, v = u >= 0 && u < 1.6 ? Math.exp(-u * 2.2) : 0, pu = .5 + .5 * Math.sin(t * .9);
       if (t - lastDraw > (v > .03 ? .034 : .05) || t < lastDraw) { lastDraw = t; paint(t, v); }
-      pivot.rotation.y = Math.sin(t * .5) * .34 + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .16; pivot.position.y = Math.sin(t * .8) * .045;
-      for (var i = 0; i < K; i++) { var w = .3 + .7 * Math.max(0, 1 - Math.abs(((t * 1.6) % 3) * 2 - i) / 1.4); mats[i].emissiveIntensity = 1.7 + .7 * pu * w + 1.6 * v; var lift = u >= 0 && u < 1.2 && u > i * .1 && u < i * .1 + .5 ? Math.sin((u - i * .1) * Math.PI / .5) * .09 : 0; FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift; }
+      pivot.rotation.y = Math.sin(t * .5) * (sp.calm ? .34 : .44) + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .18; pivot.position.y = Math.sin(t * .8) * .045;
+      for (var i = 0; i < K; i++) {
+        var lift = u >= 0 && u < 1.2 && u > i * .09 && u < i * .09 + .5 ? Math.sin((u - i * .09) * Math.PI / .5) * .1 : 0;
+        mats[i].emissiveIntensity = (1.9 - i * .12) * (.85 + .3 * pu) + 1.4 * v; FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift;
+      }
       lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .9 + Math.sin(t * 1.3) * .3 + v;
+      glow.material.opacity = .5 + .12 * Math.sin(t * 1.1) + .3 * v;
     });
   };
 }
 
-var BD_ORB = { drakefire: ['#ff7a2a', '#ffd27a', 3.2], phoenix: ['#ffb040', '#ff4a2a', 2.6], leviathan: ['#2ad8c8', '#9ff8ff', 4.4], ouroboros: ['#6aea8a', '#e8c040', 5.2], koipond: ['#ff8ac0', '#ffe0f0', 4.8],
-  eclipse: ['#ffcf5a', '#fff0b0', 6], moonrise: ['#a898ff', '#e0d8ff', 5.6], colossus: ['#ff5a2a', '#ffb070', 3.8], atlas: ['#6aa8ff', '#ffd878', 4.2], zodiac: ['#d86aff', '#ffc0ff', 5] };
-var BD_SCENE = { drakefire: bdRelic('drakefire'), phoenix: bdRelic('phoenix'), leviathan: bdRelic('leviathan'), ouroboros: bdRelic('ouroboros'), koipond: bdRelic('koipond'), eclipse: bdRelic('eclipse'), moonrise: bdRelic('moonrise'), colossus: bdRelic('colossus'), atlas: bdRelic('atlas'), zodiac: bdRelic('zodiac'), dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
+var BD_SCENE = { ssx: bdRelic('ssx'), ssm: bdRelic('ssm'), dsx: bdRelic('dsx'), dsm: bdRelic('dsm'), wux: bdRelic('wux'), wum: bdRelic('wum'), drakefire: bdRelic('drakefire'), phoenix: bdRelic('phoenix'), leviathan: bdRelic('leviathan'), ouroboros: bdRelic('ouroboros'), koipond: bdRelic('koipond'), eclipse: bdRelic('eclipse'), moonrise: bdRelic('moonrise'), colossus: bdRelic('colossus'), atlas: bdRelic('atlas'), zodiac: bdRelic('zodiac'), dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
@@ -9200,7 +9191,7 @@ function lfCoinBtn(x, size) {
   if (x.d && !x.fr && lfShow().indexOf(x.b.id) >= 0) b.classList.add('is-sc');
   b.setAttribute('aria-label', x.b.n + (x.b.lv ? ', level ' + x.b.lv : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
   bdStill(x, $('img', b));
-  if (x.d && x.b.t === 4) b.appendChild(el('<u class="lf-myth" aria-hidden="true"><s></s><s></s></u>'));
+  if (x.d && x.b.t === 4 && !BDR[x.b.id]) b.appendChild(el('<u class="lf-myth" aria-hidden="true"><s></s><s></s></u>'));
   if (x.d && x.b.t === 5 && x.b.id !== 'creator') {
     /* the molten light is masked to the badge's own picture, so it flows through the badge and nowhere else */
     var lv = el('<u class="lf-lava" aria-hidden="true"><s></s><i></i></u>'), emb = el('<u class="lf-embers" aria-hidden="true"><s></s><s></s><s></s><s></s><s></s><s></s></u>'), im = $('img', b);
@@ -9216,8 +9207,6 @@ function lfCoinBtn(x, size) {
     tim.addEventListener('load', tMask); tMask();
     b.appendChild(tp); b.classList.add('is-tm');
   }
-  /* THE LIVING RELICS RUN ON THE COIN TOO: a comet of the badge's own light goes round it, two for some, a glow breathes behind. Nobody has to open it. */
-  if (x.d && BD_ORB[x.b.id]) { var ob = BD_ORB[x.b.id]; b.appendChild(el('<u class="lf-orb" aria-hidden="true" style="--lc:' + ob[0] + ';--lc2:' + ob[1] + ';--ls:' + ob[2] + 's"><i></i><i></i></u>')); }
   b.addEventListener('pointerdown', function () { bdBuildLive(x); }, { passive: true });
   b.addEventListener('click', function (e) { e.stopPropagation(); lfCoinView(x); });
   return b;
@@ -9417,6 +9406,7 @@ var BD_COLL = [
   ['bod', 'Body parts', '#10b981', ['tgt1', 'tgtall', 'tgt4', 'tgt12', 'quad', 'allmus', 'allmus4', 'zodiac', 'chest50', 'chest100', 'chest200', 'bk50', 'bk100', 'bk200', 'sh50', 'sh100', 'sh200',
     'arm50', 'arm100', 'arm200', 'leg50', 'leg100', 'leg200', 'post50', 'abs10', 'abs50', 'abs100']],
   ['car', 'Cardio', '#06b6d4', ['stair10', 'stairhr', 'incl10', 'inclhr', 'cardio25', 'cdwk', 'cardio100', 'cdh50', 'summit', 'lungs', 'koipond']],
+  ['tec', 'Technique', '#38bdf8', ['ss1', 'ss2', 'ss3', 'ssx', 'ssm', 'ds1', 'ds2', 'ds3', 'dsx', 'dsm', 'wu1', 'wu2', 'wu3', 'wux', 'wum']],
   ['fri', 'Friends', '#6366f1', ['duo1', 'duo10', 'duo50', 'lead1', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer', 'unbeat']]
 ];
 function lfBadgeCard() {
