@@ -46,7 +46,8 @@ const freeze = (at) => `(() => {
     /* and so does the goal-hit screen, which goes over everything the moment a week reaches its goal */
     if (seed && !('wkDone' in seed)) seed = Object.assign({ wkDone: '9999-12-31' }, seed);
     /* and so do the milestones: a full-screen moment over a check that is not about it is a check that cannot press */
-    seed = Object.assign({ mseen: RK_SEEN }, seed || {});
+    /* and the workout guide, which opens over the first workout */
+    seed = Object.assign({ mseen: RK_SEEN, tour: true }, seed || {});
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     /* frames are put away in the app for now; the suite keeps them on so everything about them is still walked */
     await c.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
@@ -2124,6 +2125,32 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => document.activeElement.blur());
     await show(); await page.waitForTimeout(1200);
     ok('and reloads by itself once you are not', await page.evaluate(() => window.__same !== 1));
+    await c.close();
+  }
+
+  /* ── THE WORKOUT GUIDE: a film of supersets, warm-ups, drop sets, removing a set and swapping ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 4, wo: [], tour: false }, '2026-10-30T18:00:00');
+    await page.click('#lfGo'); await page.waitForSelector('.lf-tr-stage', { timeout: 6000 }).catch(() => {});
+    const g1 = [await page.locator('.lf-tr-stage').count(), await page.locator('.lf-session').count()];
+    ok('the first workout opens the guide once, over the session', g1[0] === 1 && g1[1] === 1, g1);
+    ok('five scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
+    await page.click('.lf-tr-segs button:nth-child(2)'); await page.waitForTimeout(3800);
+    ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
+    await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);
+    ok('the drop scene hangs a drop row off the first set', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[1].classList.contains('is-drop'); }));
+    await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3000);
+    ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
+    await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
+    ok('closing it leaves the workout', await page.locator('.lf-tr-stage').count() === 0 && await page.locator('.lf-session').count() === 1 && await page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).tour === true));
+    await page.evaluate(() => { const s = document.querySelector('.lf-session .lf-x'); });
+    await c.close();
+  }
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 4, wo: [] });
+    await page.click('.lf-bar [data-v="you"]'); await page.waitForTimeout(300);
+    await page.click('#lfTourBtn'); await page.waitForTimeout(400);
+    ok('You has the guide, and it opens from there with no workout going', await page.locator('.lf-tr-stage').count() === 1);
     await c.close();
   }
 

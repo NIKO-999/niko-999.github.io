@@ -791,6 +791,28 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-wu-l { margin: 2px 0 2px; display: flex; gap: 8px; align-items: center; font-size: 12.5px; color: var(--quiet); }
 .lf-wu-l i { font-style: normal; font-size: 10px; font-weight: 800; color: #fff; background: rgba(255,255,255,.16); border-radius: 5px; padding: 1px 5px; }
 .lf-ex { overflow: clip; }
+/* THE WORKOUT GUIDE: a short film made of the real rows, with a finger doing what you would do */
+.lf-tr-stage { position: relative; height: 340px; overflow: hidden; pointer-events: none; }
+.lf-tr-stage .lf-ex { margin-top: 0; margin-bottom: 10px; transition: opacity .4s, transform .4s; }
+.lf-tr-stage .lf-set { transition: transform .5s ease, opacity .4s; }
+.lf-tr-stage .lf-ex-n { transition: opacity .25s; }
+.lf-tr-f { position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.45); border: 2px solid rgba(255,255,255,.9); box-shadow: 0 4px 14px rgba(0,0,0,.45); transition: transform .6s cubic-bezier(.4, 0, .2, 1), scale .2s, background .2s; z-index: 3; }
+.lf-tr-f.is-tap { scale: .72; background: rgba(255,255,255,.9); }
+.lf-tr-in { animation: lf-tr-in .45s ease-out; }
+@keyframes lf-tr-in { from { opacity: 0; transform: translateY(-10px); } }
+.lf-tr-segs { display: flex; gap: 6px; margin: 0 0 8px; }
+.lf-tr-segs button { flex: 1; height: 26px; position: relative; background: none; border: 0; padding: 0; cursor: pointer; }
+.lf-tr-segs button::before, .lf-tr-segs button::after { content: ''; position: absolute; left: 0; top: 11px; height: 4px; border-radius: 2px; }
+.lf-tr-segs button::before { right: 0; background: var(--card2); }
+.lf-tr-segs button::after { width: 0; background: var(--log-g, var(--log)); }
+.lf-tr-segs button.is-done::after { width: 100%; }
+.lf-tr-segs button.is-on::after { animation: lf-tr-fill var(--d, 6s) linear forwards; }
+@keyframes lf-tr-fill { to { width: 100%; } }
+.lf-tr-cap { min-height: 96px; margin-top: 10px; }
+.lf-tr-cap b { display: block; font-size: 19px; letter-spacing: -.01em; margin-bottom: 4px; }
+.lf-tr-cap p { margin: 0; color: var(--dim); font-size: 15px; line-height: 1.4; }
+@media (prefers-reduced-motion: reduce) { .lf-tr-stage *, .lf-tr-segs button::after { transition: none !important; animation: none !important; } }
+
 .lf-set.is-sw { position: relative; touch-action: pan-y; }
 .lf-set.is-sw::after { content: 'Remove'; position: absolute; top: 2px; bottom: 2px; left: calc(100% + 10px); width: 120px; border-radius: 12px; display: flex; align-items: center; padding-left: 16px;
   font-size: 13px; font-weight: 700; color: #fff; background: linear-gradient(90deg, #ff453a, #ff2d55); opacity: var(--sw, 0); box-shadow: 0 0 calc(var(--sw, 0) * 22px) rgba(255,69,58,.6); pointer-events: none; }
@@ -1905,7 +1927,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, prog: 'ul', focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, rl: false, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, prog: 'ul', focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, rl: false, tour: false, lk: {}, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -1917,7 +1939,7 @@ function lfClean(o) {
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
-  d.ra = o.ra !== false; d.rl = o.rl === true;
+  d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true;
   if (PROG_IDS.indexOf(o.prog) >= 0) d.prog = o.prog;
   /* which badges have been announced; absent means badges are new to this phone */
   /* VERSUS FRIENDS, kept: sessions you trained in step with a friend, by
@@ -2235,6 +2257,85 @@ function lfAsk(title, text, yes, onYes) {
   no.addEventListener('click', function () { s.close(); });
   go.addEventListener('click', function () { s.close(true); onYes(); });
   return s;
+}
+
+/* THE WORKOUT GUIDE. Supersets, warm-ups, drop sets, taking a set out, swapping an exercise: none of it is written on the screen, so a film of it is. Five short scenes, each the real card and the real rows with a finger doing the press, one after another, and any can be jumped to. It opens once, over your first workout, and always from You. */
+var TOUR = [
+  ['Superset', 'Tap the link on an exercise to pair it with the next one. Do a set of each, back to back, then rest.', 6300],
+  ['Warm-up', '+ Warm-up puts a lighter set above your first. It is not counted as a set and does not start the rest timer.', 5600],
+  ['Drop set', '+ Drop set goes right after a set. Lower the weight and keep going straight away.', 6000],
+  ['Remove a set', 'Swipe a set to the left to take it out. Warm-ups and drop sets go the same way.', 5000],
+  ['Swap or remove', 'The arrows swap it for a different exercise. The cross takes it out of the workout.', 5400]
+];
+var TR_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>';
+var TR_SWAP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg>';
+var TR_DROP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4v8a3 3 0 0 0 3 3h9M14 10l4 5-4 5"/></svg>';
+function trRow(kind, n, prev, w, r, done) {
+  var lead = kind === 'wu' ? '<span class="lf-sn lf-wu-n">W</span>' : kind === 'dr' ? '<span class="lf-sn lf-dr-n">' + TR_DROP + '</span>' : '<span class="lf-sn">' + n + '</span>';
+  return '<div class="lf-set' + (kind === 'wu' ? ' is-wu' : kind === 'dr' ? ' is-drop' : '') + (done ? ' is-done' : '') + '" data-k="' + (kind || 's') + '">' + lead + '<span class="lf-prev lf-num">' + prev + '</span><input readonly tabindex="-1" value="' + w + '" /><input readonly tabindex="-1" value="' + r + '" /><span class="lf-chk"><span>' + IC.check + '</span></span></div>';
+}
+function trCard(id, name, rows, foot) {
+  return '<div class="lf-ex" data-t="' + id + '"><div class="lf-ex-hd"><button type="button" class="lf-ex-n" tabindex="-1">' + name + '</button><button type="button" class="lf-swp" tabindex="-1">' + TR_SWAP + '</button><button type="button" class="lf-ssb" tabindex="-1">' + TR_LINK + '</button><button type="button" class="lf-x" tabindex="-1">' + IC.x + '</button></div>'
+    + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-set is-hd"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div><div class="tr-rows">' + rows + '</div>'
+    + (foot ? '<div class="lf-ex-ft"><button type="button" tabindex="-1">+ Add set</button><button type="button" class="lf-drop-add" tabindex="-1">+ Drop set</button><button type="button" class="lf-wu-add" tabindex="-1">+ Warm-up</button></div>' : '') + '</div>';
+}
+function lfTour() {
+  var at = 0, timers = [], stage, f, segs, cap, back, next, reduced = false, sh;
+  try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var body = el('<div><div class="lf-tr-segs" role="tablist"></div><div class="lf-tr-stage" inert aria-hidden="true"></div><div class="lf-tr-cap" aria-live="polite"><b></b><p></p></div></div>');
+  segs = $('.lf-tr-segs', body); stage = $('.lf-tr-stage', body); cap = $('.lf-tr-cap', body);
+  TOUR.forEach(function (t, i) { var b = el('<button type="button" role="tab"></button>'); b.setAttribute('aria-label', t[0]); b.addEventListener('click', function () { play(i); }); segs.appendChild(b); });
+  back = el('<button type="button" class="lf-btn">Back</button>'); next = el('<button type="button" class="lf-btn is-log">Next</button>');
+  back.addEventListener('click', function () { play(Math.max(0, at - 1)); });
+  next.addEventListener('click', function () { if (at >= TOUR.length - 1) sh.close(); else play(at + 1); });
+  function clear() { timers.forEach(clearTimeout); timers = []; }
+  function T(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function q(sel) { return $(sel, stage); }
+  function aim(sel, dx) { var n = q(sel); if (!n) return; var a = stage.getBoundingClientRect(), r = n.getBoundingClientRect(); f.style.transform = 'translate(' + (r.left - a.left + r.width / 2 - 17 + (dx || 0)) + 'px,' + (r.top - a.top + r.height / 2 - 17) + 'px)'; }
+  function press(sel, ms, fn) { T(ms, function () { aim(sel); }); T(ms + 650, function () { f.classList.add('is-tap'); }); T(ms + 760, function () { if (fn) fn(); }); T(ms + 930, function () { f.classList.remove('is-tap'); }); }
+  function tick(row) { if (row) { row.classList.add('is-done', 'is-pop'); } }
+  function play(i) {
+    clear(); at = i; stage.textContent = '';
+    $$('button', segs).forEach(function (b, j) { b.classList.toggle('is-done', j < i); b.classList.toggle('is-on', false); b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
+    var on = $$('button', segs)[i]; on.style.setProperty('--d', TOUR[i][2] + 'ms'); void on.offsetWidth; on.classList.add('is-on');
+    $('b', cap).textContent = TOUR[i][0]; $('p', cap).textContent = TOUR[i][1];
+    back.disabled = i === 0; next.textContent = i === TOUR.length - 1 ? 'Done' : 'Next';
+    var html = '';
+    if (i === 0) html = trCard('a', 'Incline dumbbell press', trRow('', 1, '30×10', '32', '10'), 0) + trCard('b', 'Cable flyes', trRow('', 1, '14×12', '15', '12'), 0);
+    else if (i === 1) html = trCard('a', 'Barbell bench press', trRow('', 1, '60×8', '60', '8') + trRow('', 2, '60×8', '60', '8'), 1);
+    else if (i === 2) html = trCard('a', 'Lat pulldown', trRow('', 1, '70×10', '70', '10') + trRow('', 2, '70×9', '70', '9'), 1);
+    else if (i === 3) html = trCard('a', 'Shoulder press', trRow('', 1, '24×10', '24', '10', 1) + trRow('', 2, '24×9', '24', '9') + trRow('', 3, '24×8', '24', '8'), 1);
+    else html = trCard('a', 'Hack squat', trRow('', 1, '80×10', '80', '10') + trRow('', 2, '80×9', '80', '9'), 1);
+    stage.innerHTML = html; f = el('<i class="lf-tr-f" aria-hidden="true"></i>'); stage.appendChild(f);
+    f.style.transition = 'none'; f.style.transform = 'translate(' + (stage.clientWidth / 2 - 17) + 'px,' + (stage.clientHeight + 10) + 'px)'; void f.offsetWidth; f.style.transition = '';
+    var A = q('[data-t="a"]'), B = q('[data-t="b"]');
+    if (i === 0) {
+      press('[data-t="a"] .lf-ssb', 500, function () { [A, B].forEach(function (c) { c.classList.add('is-ss'); }); $('.lf-ssb', A).setAttribute('aria-pressed', 'true'); $('.lf-ssb', B).setAttribute('aria-pressed', 'true'); });
+      press('[data-t="a"] .lf-chk', 2300, function () { tick($('.lf-set[data-k="s"]', A)); });
+      press('[data-t="b"] .lf-chk', 3900, function () { tick($('.lf-set[data-k="s"]', B)); });
+    } else if (i === 1) {
+      press('.lf-wu-add', 500, function () { var r = el(trRow('wu', 0, 'Warm-up', '20', '10')); r.classList.add('lf-tr-in'); var rows = q('.tr-rows'); rows.insertBefore(r, rows.firstChild); });
+      press('.is-wu .lf-chk', 2500, function () { tick(q('.is-wu')); });
+    } else if (i === 2) {
+      press('.lf-set[data-k="s"] .lf-chk', 500, function () { tick(q('.lf-set[data-k="s"]')); });
+      press('.lf-drop-add', 2100, function () { var r = el(trRow('dr', 0, 'Drop 1', '55', '8')); r.classList.add('lf-tr-in'); var s0 = q('.lf-set[data-k="s"]'); s0.parentNode.insertBefore(r, s0.nextSibling); });
+      press('.is-drop .lf-chk', 3800, function () { tick(q('.is-drop')); });
+    } else if (i === 3) {
+      var rows3 = $$('.lf-set[data-k="s"]', stage), r2 = rows3[1];
+      T(500, function () { aim('.lf-set[data-k="s"]:nth-child(2) input', 40); });
+      T(1200, function () { f.classList.add('is-tap'); });
+      T(1500, function () { r2.classList.add('is-sw'); r2.style.transform = 'translateX(-130px)'; r2.style.setProperty('--sw', 1); aim('.lf-set[data-k="s"]:nth-child(2) input', -90); });
+      T(2500, function () { f.classList.remove('is-tap'); r2.style.opacity = 0; });
+      T(3000, function () { r2.style.height = r2.offsetHeight + 'px'; void r2.offsetHeight; r2.style.transition = 'height .35s ease, margin .35s'; r2.style.height = '0px'; r2.style.minHeight = '0px'; var n3 = $('.lf-sn', rows3[2]); if (n3) n3.textContent = '2'; });
+    } else {
+      press('.lf-swp', 500, function () { var n = q('.lf-ex-n'); n.style.opacity = 0; T(260, function () { n.textContent = 'Leg press'; n.style.opacity = 1; }); });
+      press('.lf-x', 2800, function () { A.style.opacity = 0; A.style.transform = 'scale(.94)'; });
+    }
+    T(TOUR[i][2], function () { if (reduced) return; play(i >= TOUR.length - 1 ? i : i + 1); });
+  }
+  sh = lfSheet({ title: 'How a workout works', body: body, foot: [back, next], onClose: function () { clear(); } });
+  play(0);
+  return sh;
 }
 
 var toastT = null;
@@ -2961,6 +3062,7 @@ function lfStart(rt) {
   if (cut) act.cut = 1;
   lfSaveAct(); buzz(15);
   lfRender(); lfOpenSession();
+  if (!S.tour) { S.tour = true; lfSave(); setTimeout(function () { if (sessSheet && !stack.some(function (x) { return x !== sessSheet; })) lfTour(); }, 2400); }
 }
 /* A new exercise comes in with the program's set count, or as many as
    last time, or three if it is new to you — empty, with the AIM as the
@@ -4504,7 +4606,9 @@ function lfRenderYou() {
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest on lock screen</span><div class="lf-seg" id="lfRl"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest and reaction alerts</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
+    + '<span class="lf-flab">Workout guide</span><button type="button" class="lf-btn is-full" id="lfTourBtn">Supersets, warm-ups, drop sets and more</button>'
     + '</div>');
+  $('#lfTourBtn', c).addEventListener('click', function () { lfTour(); });
   /* ON SHOWS AS ON, and the same press turns it off. */
   $('#lfPush', c).textContent = LPU ? 'On · turn off' : 'Turn on';
   $('#lfPush', c).classList.toggle('is-ink', !LPU);
