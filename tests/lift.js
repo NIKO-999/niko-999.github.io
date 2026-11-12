@@ -2183,11 +2183,13 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await page.waitForSelector('.lf-tr-stage', { timeout: 6000 }).catch(() => {});
     const g1 = [await page.locator('.lf-tr-stage').count(), await page.locator('.lf-session').count()];
     ok('the first workout opens the guide once, over the session', g1[0] === 1 && g1[1] === 1, g1);
-    ok('five scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
+    ok('six scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove","Current exercise"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
     await page.click('.lf-tr-segs button:nth-child(2)'); await page.waitForTimeout(3800);
     ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
     await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);
     ok('the drop scene hangs a drop row off the first set', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[1].classList.contains('is-drop'); }));
+    await page.click('.lf-tr-segs button:nth-child(6)'); await page.waitForTimeout(2600);
+    ok('the current-exercise scene lights the target on the second card and slides it to the top', await page.evaluate(() => { const b = document.querySelector('.lf-tr-stage [data-t="b"] .lf-curb'), sl = document.querySelector('.lf-tr-stage .tr-slide'); return b.getAttribute('aria-pressed') === 'true' && /translateY\(-/.test(sl.style.transform); }));
     await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3800);
     ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
