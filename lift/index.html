@@ -508,9 +508,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-x { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; }
 
 /* ── the session ── */
-.lf-ss-hd { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.lf-ss-hd .lf-nowset { flex: 0 0 100%; height: 36px; margin: -6px 0 0; padding: 0 0 0 19px; }
-.lf-ss-hd .lf-nowset.is-none { display: none; }
+.lf-ss-hd { display: flex; align-items: center; gap: 10px; }
 .lf-ss-name { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 18px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; }
 .lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
 .lf-session .lf-sh-ft { flex-wrap: wrap; }
@@ -530,6 +528,10 @@ body.lf-v-home .lf-glow { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
+.lf-curb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; flex: none; }
+.lf-curb::before { content: ''; position: absolute; inset: -6px -3px; }
+.lf-curb svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lf-curb[aria-pressed="true"] { color: var(--log); background: color-mix(in srgb, var(--log) 18%, transparent); }
 .lf-swp { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; margin-right: -8px; }
 .lf-swp svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .lf-from { display: block; margin: 0 0 6px; min-height: 32px; text-align: left; font-size: 12px; font-weight: 600; color: var(--today-ink); }
@@ -3141,13 +3143,11 @@ function lfOpenSession() {
   if (!act) return;
   if (sessSheet) return;
   lfPbWas = {};
-  var head = el('<div class="lf-ss-hd" style="width:100%"><span class="lf-rec" aria-hidden="true"></span><input class="lf-ss-name" aria-label="Workout name" maxlength="40" /><button type="button" class="lf-howto" id="lfGuide" aria-label="How to use this"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.600v6.800l5.500-3.400z" fill="currentColor"/></svg><span>Guide</span></button><span class="lf-ss-time" id="lfClock"></span><button type="button" class="lf-x" aria-label="Minimise">' + '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' + '</button><button type="button" class="lf-howto lf-nowset" id="lfNow"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.200" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Current set</span></button></div>');
+  var head = el('<div class="lf-ss-hd" style="width:100%"><span class="lf-rec" aria-hidden="true"></span><input class="lf-ss-name" aria-label="Workout name" maxlength="40" /><button type="button" class="lf-howto" id="lfGuide" aria-label="How to use this"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M10 8.600v6.800l5.500-3.400z" fill="currentColor"/></svg><span>Guide</span></button><span class="lf-ss-time" id="lfClock"></span><button type="button" class="lf-x" aria-label="Minimise">' + '<svg class="lf-ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' + '</button></div>');
   $('input', head).value = act.n;
   $('input', head).addEventListener('input', function (e) { act.n = e.target.value.slice(0, 40) || 'Workout'; lfSaveAct(); });
   var body = el('<div><div id="lfExList"></div></div>');
   $('#lfGuide', head).addEventListener('click', function () { lfTour(); });
-  /* one press takes you to the set you are on, wherever you have scrolled to, and the next press takes you to the one after it */
-  $('#lfNow', head).addEventListener('click', function () { lfScrollCur(true); });
   /* THE REST TIMER LIVES IN THE FOOT, so it is on screen wherever you
      have scrolled to in the workout — it was the first line of the list
      and went off the top the moment you moved past the first exercise. */
@@ -3231,7 +3231,10 @@ function lfScrollCur(smooth) {
   var cards = $$('.lf-ex', list), cur = null;
   var openSet = function (c) { return $('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', c); };
   /* the exercise you were just on keeps you while it has a set left, and on coming back it is the one the work says */
-  var want = lfCurExId || (act ? lfResumeEx() : '');
+  var pin = act && act.cur && cards.some(function (c) { return c.dataset.ex === act.cur && openSet(c); }) ? act.cur : '';
+  /* in a superset the partner that owes its set still takes you across, pinned or not */
+  if (pin && lfCurExId && lfCurExId !== pin) { var pe = act.x.filter(function (q) { return q.id === pin; })[0], ce = act.x.filter(function (q) { return q.id === lfCurExId; })[0]; if (pe && ce && pe.ss && pe.ss === ce.ss) pin = lfCurExId; }
+  var want = pin || lfCurExId || (act ? lfResumeEx() : '');
   for (var j = 0; j < cards.length && want; j++) if (cards[j].dataset.ex === want && openSet(cards[j])) { cur = cards[j]; break; }
   for (var i = 0; i < cards.length && !cur; i++) if (openSet(cards[i])) cur = cards[i];
   if (!cur) return;
@@ -3309,12 +3312,13 @@ function lfPaintSession() {
     /* on opening, the sheet is still sliding up a frame later: placed again once it has arrived */
     if (cg === 2) [180, 420].forEach(function (t) { setTimeout(function () { lfScrollCur(false); }, t); }); }
   list.textContent = '';
-  var nowB = $('#lfNow'); if (nowB) nowB.classList.toggle('is-none', !act.x.some(function (e) { return e.sets.some(function (q) { return !q.ok; }); }));
+  /* a pinned exercise lets go of the pin when it has nothing left to do */
+  if (act.cur && !act.x.some(function (e) { return e.id === act.cur && e.sets.some(function (q) { return !q.ok; }); })) { act.cur = ''; lfSaveAct(); }
   ord.forEach(function (e) {
     var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
     var aim = lfAim(e);
-    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-ssb" aria-label="Superset with the next exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
+    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-curb" aria-label="Make this the current exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.200" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-ssb" aria-label="Superset with the next exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
       + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><button type="button" class="lf-aim"></button>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
@@ -3331,6 +3335,10 @@ function lfPaintSession() {
       card.insertBefore(sl, $('.lf-tg', card));
     }
     $('.lf-ex-n', card).textContent = e.n;
+    /* THE CURRENT EXERCISE IS YOURS TO PICK. The target on a card pins it: the list goes there now, the app comes back to it, and it stays the one until you pin another or take the pin off. It wears the accent while it is. */
+    var curB = $('.lf-curb', card), isCur = act.cur === e.id;
+    curB.setAttribute('aria-pressed', isCur ? 'true' : 'false'); curB.setAttribute('aria-label', isCur ? 'Current exercise. Press to let go' : 'Make this the current exercise');
+    curB.addEventListener('click', function () { act.cur = act.cur === e.id ? '' : e.id; lfCurExId = ''; lfSaveAct(); lfCurGo = act.cur ? 1 : 0; lfPaintSession(); });
     /* the bar starts where it was before this repaint and slides to now */
     var pbK = ei + ':' + e.id, pbNow = e.sets.length ? e.sets.filter(function (q) { return q.ok; }).length / e.sets.length * 100 : 0, pbI = $('.lf-ex-pb i', card);
     pbI.style.width = (pbK in lfPbWas ? lfPbWas[pbK] : pbNow) + '%'; lfPbWas[pbK] = pbNow;
