@@ -346,6 +346,10 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ssb::before { content: ''; position: absolute; inset: -6px -3px; }
 .lf-ssb svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .lf-ssb[aria-pressed="true"] { background: var(--ss); color: #fff; }
+.lf-ssb.is-pend { background: var(--ss); color: #fff; box-shadow: 0 0 0 2px var(--log); animation: lf-pend 1.2s ease-in-out infinite; }
+.lf-ssb.is-pick { color: var(--log); box-shadow: inset 0 0 0 1.5px var(--log); }
+@keyframes lf-pend { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--log) 35%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .lf-ssb.is-pend { animation: none; } }
 .lf-ex.is-ss { box-shadow: inset 4px 0 0 var(--ss); }
 .lf-ss-l { display: flex; align-items: center; gap: 8px; margin: 2px 0 2px; font-size: 12.5px; color: var(--dim); }
 .lf-ss-l i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ss); }
@@ -2281,7 +2285,7 @@ function lfAsk(title, text, yes, onYes) {
 
 /* THE WORKOUT GUIDE. Supersets, warm-ups, drop sets, taking a set out, swapping an exercise: none of it is written on the screen, so a film of it is. Five short scenes, each the real card and the real rows with a finger doing the press, one after another, and any can be jumped to. It opens once, over your first workout, and always from You. */
 var TOUR = [
-  ['Superset', 'Tap the link on an exercise to pair it with the next one. Do a set of each, back to back, then rest.', 6300],
+  ['Superset', 'Tap the link on one exercise, then the link on the one to pair it with. Do a set of each, back to back, then rest.', 7600],
   ['Warm-up', '+ Warm-up puts a lighter set above your first. It is not counted as a set and does not start the rest timer.', 5600],
   ['Drop set', '+ Drop set goes right after a set. Lower the weight and keep going straight away.', 6000],
   ['Remove a set', 'Swipe a set to the left to take it out. Warm-ups and drop sets go the same way.', 5000],
@@ -2330,9 +2334,10 @@ function lfTour() {
     f.style.transition = 'none'; f.style.transform = 'translate(' + (stage.clientWidth / 2 - 17) + 'px,' + (stage.clientHeight + 10) + 'px)'; void f.offsetWidth; f.style.transition = '';
     var A = q('[data-t="a"]'), B = q('[data-t="b"]');
     if (i === 0) {
-      press('[data-t="a"] .lf-ssb', 500, function () { [A, B].forEach(function (c) { c.classList.add('is-ss'); }); $('.lf-ssb', A).setAttribute('aria-pressed', 'true'); $('.lf-ssb', B).setAttribute('aria-pressed', 'true'); });
-      press('[data-t="a"] .lf-chk', 2300, function () { tick($('.lf-set[data-k="s"]', A)); });
-      press('[data-t="b"] .lf-chk', 3900, function () { tick($('.lf-set[data-k="s"]', B)); });
+      press('[data-t="a"] .lf-ssb', 500, function () { $('.lf-ssb', A).classList.add('is-pend'); $('.lf-ssb', B).classList.add('is-pick'); });
+      press('[data-t="b"] .lf-ssb', 2100, function () { [A, B].forEach(function (c) { c.classList.add('is-ss'); var k = $('.lf-ssb', c); k.classList.remove('is-pend', 'is-pick'); k.setAttribute('aria-pressed', 'true'); }); });
+      press('[data-t="a"] .lf-chk', 3700, function () { tick($('.lf-set[data-k="s"]', A)); });
+      press('[data-t="b"] .lf-chk', 5300, function () { tick($('.lf-set[data-k="s"]', B)); });
     } else if (i === 1) {
       press('.lf-wu-add', 500, function () { var r = el(trRow('wu', 0, 'Warm-up', '20', '10')); r.classList.add('lf-tr-in'); var rows = q('.tr-rows'); rows.insertBefore(r, rows.firstChild); });
       press('.is-wu .lf-chk', 2500, function () { tick(q('.is-wu')); });
@@ -3064,7 +3069,7 @@ function lfStart(rt) {
   var nToday = act ? 0 : woOn(ymd(today())).length;
   if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
-  lfAgainOk = 0; lfCurExId = '';
+  lfAgainOk = 0; lfCurExId = ''; lfSsPend = null;
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() >= 1 && !!rt, half = lfRc() >= 2;
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -3249,12 +3254,21 @@ function lfSsNext(e, si) {
   for (var k = 1; k < g.length; k++) { var c = g[(i + k) % g.length]; if (c.sets[si] && !c.sets[si].ok) return c; }
   return null;
 }
+/* PAIRING IS TWO PRESSES, NEVER A GUESS. The link on an exercise says "this one"; the link on another says "with that one", and the two are joined, wherever they are in the workout. It used to pair with whatever sat below, which was right only by luck. A pressed link that has found no partner yet is lit and ringed, and pressing it again lets it go. A linked exercise's link takes it out. */
+var lfSsPend = null;
 function lfSsToggle(e) {
-  if (e.ss) { var gid = e.ss; delete e.ss; if (act.x.filter(function (q) { return q.ss === gid; }).length < 2) act.x.forEach(function (q) { if (q.ss === gid) delete q.ss; }); }
+  if (e.ss) {
+    var gid = e.ss; delete e.ss; lfSsPend = null;
+    if (act.x.filter(function (q) { return q.ss === gid; }).length < 2) act.x.forEach(function (q) { if (q.ss === gid) delete q.ss; });
+  } else if (lfSsPend && act.x.indexOf(lfSsPend) < 0) { lfSsPend = null; lfSsToggle(e); return; }
+  else if (!lfSsPend) {
+    if (act.x.length < 2) { lfToast('Add another exercise to superset with'); return; }
+    lfSsPend = e; lfToast('Now tap the link on the exercise to pair it with');
+  } else if (lfSsPend === e) lfSsPend = null;
   else {
-    var ord = lfOrd || act.x, i = ord.indexOf(e), nx = ord[i + 1] || ord[i - 1];
-    if (!nx || nx === e) { lfToast('Add another exercise to superset with'); return; }
-    var id = nx.ss || 'm' + Date.now().toString(36).slice(-5); e.ss = id; nx.ss = id;
+    var p = lfSsPend, id = e.ss || p.ss || 'm' + Date.now().toString(36).slice(-5), old = p.ss;
+    act.x.forEach(function (q) { if (old && q.ss === old) q.ss = id; });
+    e.ss = id; p.ss = id; lfSsPend = null;
   }
   lfSaveAct(); lfPaintSession();
 }
@@ -3305,7 +3319,11 @@ function lfPaintSession() {
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
     var ssb = $('.lf-ssb', card), ssg = e.ss ? lfSsGroup(e) : [];
-    ssb.setAttribute('aria-pressed', ssg.length > 1 ? 'true' : 'false'); ssb.setAttribute('aria-label', ssg.length > 1 ? 'Take out of the superset' : 'Superset with the next exercise');
+    if (lfSsPend && act.x.indexOf(lfSsPend) < 0) lfSsPend = null;
+    var pend = lfSsPend === e, pick = lfSsPend && !pend;
+    ssb.setAttribute('aria-pressed', ssg.length > 1 ? 'true' : 'false');
+    ssb.setAttribute('aria-label', ssg.length > 1 ? 'Take out of the superset' : pend ? 'Cancel the superset' : pick ? 'Superset with ' + lfSsPend.n : 'Superset this exercise');
+    ssb.classList.toggle('is-pend', !!pend); ssb.classList.toggle('is-pick', !!pick);
     ssb.addEventListener('click', function () { lfSsToggle(e); });
     if (ssg.length > 1) {
       card.classList.add('is-ss');

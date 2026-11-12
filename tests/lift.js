@@ -508,7 +508,13 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await settle(page);
     ok('no exercise is linked to start with', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb').count() >= 3);
     await page.locator('.lf-ssb').first().click(); await settle(page);
-    ok('the link button joins an exercise to the one below it', await page.locator('.lf-ex.is-ss').count() === 2 && /Superset with/.test(await page.locator('.lf-ss-l').first().textContent()));
+    ok('the first press only picks it: nothing is linked yet, it is lit, and the others offer themselves', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb.is-pend').count() === 1 && await page.locator('.lf-ssb.is-pick').count() >= 2);
+    await page.locator('.lf-ssb').nth(2).click(); await settle(page);
+    const ids = await page.$$eval('.lf-ex', (x) => x.map((e) => e.classList.contains('is-ss')));
+    ok('the second press joins it to THAT exercise, not the one below: the first and third are linked, the second is not', JSON.stringify(ids.slice(0, 3)) === '[true,false,true]' && await page.locator('.lf-ssb.is-pend').count() === 0 && /Superset with/.test(await page.locator('.lf-ss-l').first().textContent()), ids);
+    await page.locator('.lf-ssb').first().click(); await settle(page);
+    ok('pressing the first and then the same one again lets go without linking anything', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb.is-pend').count() === 0);
+    await page.locator('.lf-ssb').first().click(); await settle(page); await page.locator('.lf-ssb').nth(1).click(); await settle(page);
     await page.locator('.lf-ssb').first().click(); await settle(page);
     ok('pressed again it takes them out, and neither is left linked to nothing', await page.locator('.lf-ex.is-ss').count() === 0);
     await c.close();
@@ -2178,7 +2184,7 @@ const freeze = (at) => `(() => {
     ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
     await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);
     ok('the drop scene hangs a drop row off the first set', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[1].classList.contains('is-drop'); }));
-    await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3000);
+    await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3800);
     ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
     ok('the guide is a button in the workout head beside the name, in the accent, a 44px target', await page.evaluate(() => { const g = document.querySelector('.lf-session #lfGuide'), n = document.querySelector('.lf-session .lf-ss-name'); if (!g || !n) return false; const a = g.getBoundingClientRect(), b = n.getBoundingClientRect(); return getComputedStyle(g).position === 'static' && a.height >= 44 && Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 6 && a.left >= b.right - 1 && getComputedStyle(g).color !== getComputedStyle(n).color; }));
