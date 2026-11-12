@@ -2146,7 +2146,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3000);
     ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
-    ok('the workout has a How to use this row at the top of its body, above the first exercise', await page.evaluate(() => { const g = document.querySelector('.lf-session #lfGuide'), e = document.querySelector('.lf-session #lfExList'); return !!g && !!e && g.getBoundingClientRect().bottom <= e.getBoundingClientRect().top + 1 && g.getBoundingClientRect().height >= 44; }));
+    ok('the guide is a button in the workout head beside the name, in the accent, a 44px target', await page.evaluate(() => { const g = document.querySelector('.lf-session #lfGuide'), n = document.querySelector('.lf-session .lf-ss-name'); if (!g || !n) return false; const a = g.getBoundingClientRect(), b = n.getBoundingClientRect(); return getComputedStyle(g).position === 'static' && a.height >= 44 && Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 6 && a.left >= b.right - 1 && getComputedStyle(g).color !== getComputedStyle(n).color; }));
     await page.evaluate(() => document.querySelector('.lf-session #lfGuide').click()); await page.waitForTimeout(500);
     ok('and pressing it opens the guide', await page.locator('.lf-tr-stage').count() === 1 && await page.locator('.lf-session').count() === 1);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
