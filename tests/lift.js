@@ -511,7 +511,7 @@ const freeze = (at) => `(() => {
     ok('the first press only picks it: nothing is linked yet, it is lit, and the others offer themselves', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb.is-pend').count() === 1 && await page.locator('.lf-ssb.is-pick').count() >= 2);
     await page.locator('.lf-ssb').nth(2).click(); await settle(page);
     const ids = await page.$$eval('.lf-ex', (x) => x.map((e) => e.classList.contains('is-ss')));
-    ok('the second press joins it to THAT exercise, not the one below: the first and third are linked, the second is not', JSON.stringify(ids.slice(0, 3)) === '[true,false,true]' && await page.locator('.lf-ssb.is-pend').count() === 0 && /Superset with/.test(await page.locator('.lf-ss-l').first().textContent()), ids);
+    ok('the second press joins it to THAT exercise, and the partner moves to sit right under the first: the two are the first two cards', JSON.stringify(ids.slice(0, 3)) === '[true,true,false]' && await page.locator('.lf-ssb.is-pend').count() === 0 && /Superset with/.test(await page.locator('.lf-ss-l').first().textContent()), ids);
     await page.locator('.lf-ssb').first().click(); await settle(page);
     ok('pressing the first and then the same one again lets go without linking anything', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb.is-pend').count() === 0);
     await page.locator('.lf-ssb').first().click(); await settle(page); await page.locator('.lf-ssb').nth(1).click(); await settle(page);

@@ -3278,6 +3278,14 @@ function lfSsToggle(e) {
     var p = lfSsPend, id = e.ss || p.ss || 'm' + Date.now().toString(36).slice(-5), old = p.ss;
     act.x.forEach(function (q) { if (old && q.ss === old) q.ss = id; });
     e.ss = id; p.ss = id; lfSsPend = null;
+    /* AND THE PARTNER MOVES TO SIT RIGHT UNDER THE FIRST, with the rest of its group, in the list you see and in the workout itself, so a pair is always one block */
+    var grp = act.x.filter(function (q) { return q.ss === id && q !== p; });
+    var seat = function (arr) {
+      if (arr.indexOf(p) < 0) return arr;
+      var out = []; arr.forEach(function (q) { if (q === p) { out.push(p); grp.forEach(function (g) { out.push(g); }); } else if (grp.indexOf(q) < 0) out.push(q); });
+      return out;
+    };
+    act.x = seat(act.x); if (lfOrd) lfOrd = seat(lfOrd);
   }
   lfSaveAct(); lfPaintSession();
 }
