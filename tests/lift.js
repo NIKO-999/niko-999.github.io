@@ -889,6 +889,8 @@ const freeze = (at) => `(() => {
     ok('Phoenix: ten sessions inside the thirty days after a month away', shelf.includes('Phoenix:19 Aug'), shelf.filter((x) => /Phoenix/.test(x)));
     ok('Colossus: forty thousand in one session', shelf.includes('Colossus:2 Sep'), shelf.filter((x) => /Colossus/.test(x)));
     ok('Atlas: a barbell lift of 225', shelf.includes('Atlas:5 Sep'), shelf.filter((x) => /Atlas/.test(x)));
+    ok('no relic moves its creature by a speed that changes with the tap: that teleports it, because the angle is the speed times the whole time so far', !/t \* \([^)]*st\.v/.test(src.slice(src.indexOf('var BDR = {'), src.indexOf('function bdRelic'))) && !/\(t \* \([^)]*st\.v/.test(src));
+    ok('and only Don\'t Miss is shown on the owner phone: the ten new ones are locked until earned', /if \(BD_PREVIEW && lfOwner\(\)\) \['dontmiss'\]\.forEach\(/.test(src));
     ok('the long ones show how far along they are, and are not earned', ['Drakefire', 'Leviathan', 'Ouroboros', 'Koi Pond', 'Eclipse', 'Moonrise', 'Zodiac'].every((n) => shelf.some((x) => x.indexOf(n + ':') === 0 && /\d/.test(x) && !/[A-Z][a-z]{2}$/.test(x) || x.indexOf(n + ':') === 0 && /\//.test(x))), shelf.filter((x) => /Drakefire|Leviathan|Ouroboros|Koi|Eclipse|Moonrise|Zodiac/.test(x)));
     await c.close();
   }

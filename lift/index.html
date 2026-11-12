@@ -7461,7 +7461,7 @@ function lfBadges() {
     ['allmus4', amBest, 4], ['zodiac', amBest, 8], ['koipond', Math.floor(cdTot / 60), 100], ['post50', postN, 50], ['cdwk', bestOf(cdWk), 5], ['cardio100', cdW, 100], ['cdh50', Math.floor(cdTot / 60), 50]]
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
   /* A LOOK AT THE SIX SCENES: on the owner's phone only, and put away by setting this to false */
-  if (BD_PREVIEW && lfOwner()) ['dontmiss', 'drakefire', 'phoenix', 'leviathan', 'ouroboros', 'koipond', 'eclipse', 'moonrise', 'colossus', 'atlas', 'zodiac'].forEach(function (id) { won(id, ymd(today())); });
+  if (BD_PREVIEW && lfOwner()) ['dontmiss'].forEach(function (id) { won(id, ymd(today())); });
   /* the owner badge is not a thing anyone else can see they lack */
   return BADGES.filter(function (b) { return (b.id !== 'owner' && b.id !== 'creator' && b.id !== 'slayer') || out[b.id]; }).map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
@@ -8661,14 +8661,15 @@ var BDR = {
   drakefire: { n: 'hex', rot: 0, hue: 0.04, sat: 0.62, rgh: .12, lamp: 0xffb070, cool: 0xff4a1a, mote: 0xff8a2a,
     paint: function (x, N, t, v, u) {
       var sw = u * .17, sh = sw * .62, r, c; x.lineWidth = u * .013;
-      for (r = -10; r <= 10; r++) for (c = -8; c <= 8; c++) {
-        var cx = c * sw + (r & 1 ? sw / 2 : 0), cy = r * sh, I = Math.min(1, Math.pow(Math.sin(t * 1.5 - (cx * .9 + cy * .6) / u * 3.2) * .5 + .5, 3) * .85 + v * .7);
+      for (r = -9; r <= 9; r++) for (c = -6; c <= 6; c++) {
+        var cx = c * sw + (r & 1 ? sw / 2 : 0), cy = r * sh; if (cx * cx + cy * cy > u * u * 1.1) continue;
+        var I = Math.min(1, Math.pow(Math.sin(t * 1.5 - (cx * .9 + cy * .6) / u * 3.2) * .5 + .5, 3) * .85 + v * .7);
         x.strokeStyle = 'hsla(' + (12 + 28 * I) + ',100%,' + (30 + 36 * I) + '%,' + (.4 + .6 * I) + ')'; x.beginPath(); x.arc(cx, cy, sw * .52, 0, Math.PI); x.stroke();
       }
     },
     orb: function (A, st) {
       var T = A.T, g = A.g, hi = A.hi, n = hi ? 24 : 16, i;
-      function path(t) { var a = t * (.5 + st.v * .5), x = Math.cos(a) * 1.28, y = Math.sin(a) * .52 + Math.sin(a * 2) * .08, z = Math.sin(a) * .55 + .1, c = Math.cos(.5), s = Math.sin(.5); return [x * c - y * s, x * s + y * c, z]; }
+      function path(t) { var a = t * .5, x = Math.cos(a) * 1.28, y = Math.sin(a) * .52 + Math.sin(a * 2) * .08, z = Math.sin(a) * .55 + .1, c = Math.cos(.5), s = Math.sin(.5); return [x * c - y * s, x * s + y * c, z]; }
       var head = new T.Group(), hm = bdEm(T, 0xff5a1a, 1.4), cone = new T.Mesh(new T.ConeGeometry(.055, .18, 10), hm); head.add(cone);
       [-1, 1].forEach(function (sd) { var h = new T.Mesh(new T.ConeGeometry(.02, .14, 6), bdEm(T, 0xffd27a, 1)); h.position.set(sd * .06, -.07, .04); h.rotation.z = -sd * .5; head.add(h); var e = new T.Mesh(new T.SphereGeometry(.018, 6, 6), bdAdd(T, 0xffffff)); e.position.set(sd * .04, .02, .06); head.add(e); });
       var ch = bdChain(A, { n: n, lag: .085, path: path, head: head, size: function (k) { return .058 * (1 - k / n * .72) + .008; }, mat: function (k) { return bdEm(T, new T.Color().setHSL(.02 + k / n * .07, 1, .42), 1.1); } });
@@ -8691,7 +8692,7 @@ var BDR = {
     },
     orb: function (A, st) {
       var T = A.T, g = A.g, hi = A.hi, n = hi ? 14 : 10;
-      function path(t) { var a = t * (.62 + st.v * .5); return [Math.sin(a) * 1.2, Math.cos(a) * 1.0 + Math.sin(a * 2) * .08, Math.cos(a * .5) * .45 + .1]; }
+      function path(t) { var a = t * .62; return [Math.sin(a) * 1.2, Math.cos(a) * 1.0 + Math.sin(a * 2) * .08, Math.cos(a * .5) * .45 + .1]; }
       var head = new T.Group(); head.add(new T.Mesh(new T.ConeGeometry(.05, .2, 8), bdEm(T, 0xffd060, 1.2)));
       bdChain(A, { n: n, lag: .06, path: path, head: head, size: function (k) { return .068 * (1 - k / n * .6) + .008; }, mat: function (k) { return bdEm(T, new T.Color().setHSL(.1 - k / n * .09, 1, .5), 1.3); } });
       var wg = bdWings(T, 0xff8a2a, .55, .3); g.add(wg);
@@ -8712,7 +8713,7 @@ var BDR = {
     },
     orb: function (A, st) {
       var T = A.T, g = A.g, hi = A.hi, n = hi ? 30 : 20;
-      function path(t) { var a = t * (.42 + st.v * .4); return [Math.cos(a) * 1.28, Math.sin(a * 2) * .55, Math.sin(a) * .6]; }
+      function path(t) { var a = t * .42; return [Math.cos(a) * 1.28, Math.sin(a * 2) * .55, Math.sin(a) * .6]; }
       var head = new T.Group(), jaw = new T.Mesh(new T.ConeGeometry(.07, .22, 10), bdEm(T, 0x2ad8c8, 1.2)); head.add(jaw);
       [-1, 1].forEach(function (sd) { var e = new T.Mesh(new T.SphereGeometry(.024, 6, 6), bdAdd(T, 0xffffff)); e.position.set(sd * .06, -.03, .06); head.add(e); });
       var fins = [], fm = bdEm(T, 0x36e8d8, 1);
@@ -8738,7 +8739,7 @@ var BDR = {
       for (i = 0; i < n; i++) { var m = new T.Mesh(geo, i % 2 ? gm : om); m.scale.setScalar(.018 + .062 * Math.pow(1 - i / n, .6)); ring.add(m); segs.push(m); }
       var Y = new T.Vector3(0, 1, 0), d = new T.Vector3();
       A.add(function (t) {
-        var th0 = t * (.3 + st.v * .6), R = 1.24, i;
+        var th0 = t * .3, R = 1.24, i;
         for (i = 0; i < n; i++) { var a = th0 - i / n * Math.PI * 2 * .94; segs[i].position.set(Math.cos(a) * R, Math.sin(a) * R, .1 + Math.sin(a * 3 + t) * .05); }
         head.position.set(Math.cos(th0 + .12) * R, Math.sin(th0 + .12) * R, .1); d.set(-Math.sin(th0), Math.cos(th0), 0); head.quaternion.setFromUnitVectors(Y, d);
         ring.rotation.x = Math.sin(t * .5) * .35; ring.rotation.y = Math.cos(t * .4) * .35;
@@ -8755,7 +8756,7 @@ var BDR = {
     orb: function (A, st) {
       var T = A.T, g = A.g, hi = A.hi, n = hi ? 9 : 7;
       [[0, 0xff5a3a, 0xffffff], [Math.PI, 0xffb030, 0xffffff]].forEach(function (cfg, fi) {
-        function path(t) { var a = cfg[0] + t * (.4 + st.v * .5) * (fi ? -1 : 1), R = 1.16 + .06 * Math.sin(t * .8 + fi); return [Math.cos(a) * R, Math.sin(a) * R * .8, Math.sin(a * 2 + fi) * .3 + .05]; }
+        function path(t) { var a = cfg[0] + t * .4 * (fi ? -1 : 1), R = 1.16 + .06 * Math.sin(t * .8 + fi); return [Math.cos(a) * R, Math.sin(a) * R * .8, Math.sin(a * 2 + fi) * .3 + .05]; }
         var head = new T.Mesh(new T.SphereGeometry(.095, 10, 8), bdEm(T, cfg[1], 1.1));
         bdChain(A, { n: n, lag: .07, path: path, head: head, size: function (k) { return .085 * (1 - k / n * .65) + .014; }, mat: function (k) { return bdEm(T, k % 3 === 1 ? cfg[2] : cfg[1], 1); } });
         var tail = bdWings(T, cfg[1], .17, .2); g.add(tail);
@@ -8780,7 +8781,7 @@ var BDR = {
       A.add(function (t) {
         var i, L;
         for (i = 0; i < 36; i++) { var a = i / 36 * 6.2832 + t * .15, R = 1.18 + (i % 2) * .08 + Math.sin(t * 2 + i) * .04; ra[i].position.set(Math.cos(a) * R, Math.sin(a) * R, 0); ra[i].rotation.z = a - Math.PI / 2; ra[i].scale.y = .5 + (i % 2) * .4 + Math.sin(t * 2.6 + i * 1.7) * .15; }
-        var p = (t * (.09 + st.v * .1)) % 1, x = (p - .5) * 4.4; moon.position.set(x, Math.sin(x * .7) * .25, .55); rim.rotation.z = t;
+        var p = (t * .09) % 1, x = (p - .5) * 4.4; moon.position.set(x, Math.sin(x * .7) * .25, .55); rim.rotation.z = t;
       });
       A.add(bdMotes(g, 50, .04, 0xffe08a, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .3, r = 1.1 + bdR(k + 4) * .5; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .8; }, .8));
     } },
@@ -8798,7 +8799,7 @@ var BDR = {
       moons.add(mm); moons.add(halo);
       var mo = [], N = 7; for (i = 0; i < N; i++) { var w = bdWings(T, 0xd8d0ff, .13, .1); g.add(w); mo.push(w); }
       A.add(function (t) {
-        var a = t * (.28 + st.v * .3), mx = Math.cos(a) * 1.2, my = Math.sin(a) * .6 + .1, mz = Math.sin(a) * .5; moons.position.set(mx, my, mz);
+        var a = t * .28, mx = Math.cos(a) * 1.2, my = Math.sin(a) * .6 + .1, mz = Math.sin(a) * .5; moons.position.set(mx, my, mz);
         for (var i = 0; i < N; i++) { var s = t * (1.1 + i * .13) + i * 2, p = [mx + Math.sin(s) * (.38 + .08 * i % 3), my + Math.cos(s * 1.3) * .3, mz + Math.sin(s * .9 + i) * .35], q = [mx + Math.sin(s - .1) * (.38 + .08 * i % 3), my + Math.cos((s - .1) * 1.3) * .3, mz + Math.sin((s - .1) * .9 + i) * .35]; bdFace(mo[i], 0, p, q); mo[i].userData.flap(Math.sin(t * 16 + i) * 1); }
       });
       A.add(bdMotes(g, 60, .035, 0xe0d8ff, function (k, t, p, o) { var a = bdR(k) * 6.28, r = bdR(k + 4) * 1.6; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r * .8; p[o + 2] = -.4 + (bdR(k + 8)) * .5; }, .7));
@@ -8819,7 +8820,7 @@ var BDR = {
       var T = A.T, g = A.g, hi = A.hi, i, N = hi ? 10 : 7, sh = [], geo = new T.OctahedronGeometry(1, 0);
       var rock = new T.MeshStandardMaterial({ color: 0x1c1410, emissive: 0xff4a10, emissiveIntensity: .6, metalness: .1, roughness: .9, flatShading: true });
       for (i = 0; i < N; i++) { var m = new T.Mesh(geo, rock); m.scale.set(.07 + bdR(i) * .1, .1 + bdR(i + 3) * .1, .07 + bdR(i + 5) * .08); g.add(m); sh.push(m); }
-      A.add(function (t) { rock.emissiveIntensity = .5 + .4 * Math.sin(t * 2.2); for (var i = 0; i < N; i++) { var a = t * (.3 + st.v * .4) * (i % 2 ? 1 : -1) + i / N * 6.28, R = 1.15 + .12 * bdR(i + 9); sh[i].position.set(Math.cos(a) * R, Math.sin(a * .7 + i) * .5, Math.sin(a) * R * .45); sh[i].rotation.set(t * (.5 + bdR(i)), t * (.4 + bdR(i + 2)), i); } });
+      A.add(function (t) { rock.emissiveIntensity = .5 + .4 * Math.sin(t * 2.2); for (var i = 0; i < N; i++) { var a = t * .3 * (i % 2 ? 1 : -1) + i / N * 6.28, R = 1.15 + .12 * bdR(i + 9); sh[i].position.set(Math.cos(a) * R, Math.sin(a * .7 + i) * .5, Math.sin(a) * R * .45); sh[i].rotation.set(t * (.5 + bdR(i)), t * (.4 + bdR(i + 2)), i); } });
       A.add(bdMotes(g, hi ? 70 : 40, .04, 0xff7a2a, function (k, t, p, o) { var f = (t * (.1 + bdR(k + 2) * .14) + bdR(k + 70)) % 1, a = bdR(k + 12) * 6.28; p[o] = Math.cos(a) * (.4 + bdR(k + 15) * 1); p[o + 1] = -1.2 + f * 2.5; p[o + 2] = Math.sin(a) * .6; }, .85));
     } },
   /* ATLAS: a globe's meridians turning in gold and blue, armillary rings round it */
@@ -8834,7 +8835,7 @@ var BDR = {
     orb: function (A, st) {
       var T = A.T, g = A.g, rings = [], i, gold = new T.MeshPhysicalMaterial({ color: 0xe6b84a, metalness: 1, roughness: .2, envMapIntensity: 1.6 }), pl = [];
       [[1.3, 0, .3, .5], [1.38, 1.1, 0, -.4], [1.46, .5, .9, .3]].forEach(function (c, k) { var r = new T.Mesh(new T.TorusGeometry(c[0], .014, 8, 90), gold), gr = new T.Group(); gr.add(r); var ball = new T.Mesh(new T.SphereGeometry(.05, 12, 10), bdEm(T, k ? 0x8ac4ff : 0xffd878, 1.2)); gr.add(ball); gr.rotation.set(c[1], c[2], 0); g.add(gr); rings.push([gr, c[3], ball, c[0]]); });
-      A.add(function (t) { for (var i = 0; i < 3; i++) { var q = rings[i], a = t * (.5 + st.v * .5) * (i % 2 ? -1 : 1) + i * 2; q[0].rotation.z += q[1] * .004; q[2].position.set(Math.cos(a) * q[3], Math.sin(a) * q[3], 0); } });
+      A.add(function (t) { for (var i = 0; i < 3; i++) { var q = rings[i], a = t * .5 * (i % 2 ? -1 : 1) + i * 2; q[0].rotation.z += q[1] * .004; q[2].position.set(Math.cos(a) * q[3], Math.sin(a) * q[3], 0); } });
       A.add(bdMotes(g, 50, .035, 0xc0e0ff, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .1, r = 1.1 + bdR(k + 4) * .8; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .8; }, .75));
     } },
   /* ZODIAC: twelve points, a star drawn through them, the whole sky turning */
@@ -8852,7 +8853,7 @@ var BDR = {
       for (i = 0; i < 12; i++) { var j = (i + 5) % 12; lp.push(pos[i][0], pos[i][1], 0, pos[j][0], pos[j][1], 0); }
       var lg = new T.BufferGeometry(); lg.setAttribute('position', new T.BufferAttribute(new Float32Array(lp), 3)); ring.add(new T.LineSegments(lg, new T.LineBasicMaterial({ color: 0xff9aff, transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false })));
       var n2 = []; for (i = 0; i < 12; i++) { var a2 = i / 12 * 6.2832 + .26, s2 = new T.Mesh(new T.SphereGeometry(.03, 8, 6), bdAdd(T, 0x9ad0ff)); s2.position.set(Math.cos(a2) * 1.46, Math.sin(a2) * 1.46, 0); ring2.add(s2); n2.push(s2); }
-      A.add(function (t) { ring.rotation.z = t * (.12 + st.v * .3); ring2.rotation.z = -t * .18; ring.rotation.x = Math.sin(t * .4) * .3; ring2.rotation.y = Math.cos(t * .35) * .3; for (var i = 0; i < 12; i++) { nodes[i].scale.setScalar(.018 + .02 * (Math.sin(t * 2.4 + i) * .5 + .5) + .02 * st.v); } });
+      A.add(function (t) { ring.rotation.z = t * .12; ring2.rotation.z = -t * .18; ring.rotation.x = Math.sin(t * .4) * .3; ring2.rotation.y = Math.cos(t * .35) * .3; for (var i = 0; i < 12; i++) { nodes[i].scale.setScalar(.018 + .02 * (Math.sin(t * 2.4 + i) * .5 + .5) + .02 * st.v); } });
       A.add(bdMotes(g, 60, .03, 0xffc0ff, function (k, t, p, o) { var a = bdR(k) * 6.28 + t * .08, r = 1.05 + bdR(k + 4) * .8; p[o] = Math.cos(a) * r; p[o + 1] = Math.sin(a) * r; p[o + 2] = (bdR(k + 8) - .5) * .9; }, .75));
     } }
 };
@@ -8890,7 +8891,7 @@ function bdRelic(id) {
     A.add(function (t) {
       if (pend) { tapAt = t; pend = false; }
       var u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0, v = u >= 0 && u < 1.6 ? Math.exp(-u * 2.2) : 0, pu = .5 + .5 * Math.sin(t * .9); st.v = v;
-      if (t - lastDraw > .05 || t < lastDraw || v > .03) { lastDraw = t; paint(t, v); }
+      if (t - lastDraw > (v > .03 ? .034 : .05) || t < lastDraw) { lastDraw = t; paint(t, v); }
       pivot.rotation.y = Math.sin(t * .5) * .34 + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .16; pivot.position.y = Math.sin(t * .8) * .045;
       for (var i = 0; i < K; i++) { var w = .3 + .7 * Math.max(0, 1 - Math.abs(((t * 1.6) % 3) * 2 - i) / 1.4); mats[i].emissiveIntensity = 1.7 + .7 * pu * w + 1.6 * v; var lift = u >= 0 && u < 1.2 && u > i * .1 && u < i * .1 + .5 ? Math.sin((u - i * .1) * Math.PI / .5) * .09 : 0; FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift; }
       lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .9 + Math.sin(t * 1.3) * .3 + v;
