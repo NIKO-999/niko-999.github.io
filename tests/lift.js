@@ -2146,6 +2146,10 @@ const freeze = (at) => `(() => {
     await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3000);
     ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
+    ok('the workout has a How to use this row at the top of its body, above the first exercise', await page.evaluate(() => { const g = document.querySelector('.lf-session #lfGuide'), e = document.querySelector('.lf-session #lfExList'); return !!g && !!e && g.getBoundingClientRect().bottom <= e.getBoundingClientRect().top + 1 && g.getBoundingClientRect().height >= 44; }));
+    await page.evaluate(() => document.querySelector('.lf-session #lfGuide').click()); await page.waitForTimeout(500);
+    ok('and pressing it opens the guide', await page.locator('.lf-tr-stage').count() === 1 && await page.locator('.lf-session').count() === 1);
+    await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
     ok('closing it leaves the workout', await page.locator('.lf-tr-stage').count() === 0 && await page.locator('.lf-session').count() === 1 && await page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).tour === true));
     await page.evaluate(() => { const s = document.querySelector('.lf-session .lf-x'); });
     await c.close();
