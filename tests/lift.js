@@ -239,6 +239,7 @@ const freeze = (at) => `(() => {
   await cd.locator('.lf-cd-f').fill('12'); await cd.locator('.lf-cd-f').press('Tab');
   ok('minutes off the ladder go in the field', (await page.locator('#lfCardio .lf-cd-sum').textContent()) === '12 min stairmaster');
   await page.click('#lfFinish'); await page.waitForTimeout(800);
+  ok('finishing sets off the celebration: one full-screen canvas that never takes a press, with rings', await page.evaluate(() => window.lfCels) === 1 && await page.evaluate(() => { const w = document.querySelector('.lf-cel-w'); return !!w && getComputedStyle(w).pointerEvents === 'none' && !!w.querySelector('canvas') && w.querySelectorAll('.lf-cel-ring').length >= 2 && w.getBoundingClientRect().width === innerWidth; }));
   s = await store(page);
   ok('the workout carries its cardio', JSON.stringify(s.wo[0].cd) === '{"k":"stairs","m":12}' && s.ck === 'stairs', s.wo[0].cd);
   ok('the summary says it', /\+ 12 min stairmaster/.test(await top(page).textContent()));
