@@ -2151,6 +2151,16 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── COMING BACK TO A WORKOUT lands on the set you were on, not the top of the list ── */
+  {
+    const mk = (id, n, ok) => ({ id, n, sets: [0, 1, 2, 3].map((i) => ({ w: 40, r: 10, ok: i < ok ? 1 : 0 })) });
+    const act = { id: 'ra', s: Date.now() - 600000, n: 'Weak points', rt: null, rest: Date.now() - 20000, restEx: 'dbcurl', x: [mk('calf', 'Seated calf raises', 0), mk('dbcurl', 'Dumbbell curls', 1), mk('abs', 'Cable crunches', 0)] };
+    const { c, page } = await ctx({ unit: 'kg', goal: 4, wo: [] });
+    await page.evaluate((a) => localStorage.setItem('lift.active.v1', JSON.stringify(a)), act); await page.reload(); await page.waitForTimeout(1500);
+    const where = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), cards = [...document.querySelectorAll('.lf-session .lf-ex')], c = cards.find((x) => x.dataset.ex === 'dbcurl'); return bd && c ? { top: Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top), st: Math.round(bd.scrollTop), first: cards[0].dataset.ex } : null; });
+    ok('the workout opens on the exercise you were part way through, with its card at the top of the list', where && where.st > 0 && where.top >= 0 && where.top < 80, where);
+    await c.close();
+  }
   /* ── THE WORKOUT GUIDE: a film of supersets, warm-ups, drop sets, removing a set and swapping ── */
   {
     const { c, page } = await ctx({ unit: 'kg', goal: 4, wo: [], tour: false }, '2026-10-30T18:00:00');

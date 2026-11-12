@@ -3205,12 +3205,25 @@ function lfSessOrder(fresh) {
   act.x.forEach(function (e) { if (lfOrd.indexOf(e) < 0) lfOrd.unshift(e); });
   return lfOrd;
 }
+/* WHERE YOU WERE, WHEN THE APP COMES BACK. Nothing remembers which exercise you had your thumb on, but the work says: the one you were part way through, and of those the one you ticked last (the rest timer keeps it). In a superset it is the partner that owes its set. With nothing part way it is simply the first with a set left, as before. */
+function lfResumeEx() {
+  var ok = function (q) { return q.ok; }, no = function (q) { return !q.ok; };
+  var part = act.x.filter(function (e) { return e.sets.some(ok) && e.sets.some(no); });
+  var last = (act.restEx && part.filter(function (e) { return e.id === act.restEx; })[0]) || part[part.length - 1];
+  if (!last) return '';
+  if (last.ss) {
+    var n = function (e) { return e.sets.filter(ok).length; }, back = lfSsGroup(last).filter(function (q) { return q.sets.some(no); }).sort(function (a, b) { return n(a) - n(b); })[0];
+    if (back && n(back) < n(last)) return back.id;
+  }
+  return last.id;
+}
 function lfScrollCur(smooth) {
   var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
   var cards = $$('.lf-ex', list), cur = null;
   var openSet = function (c) { return $('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', c); };
-  /* the exercise you were just on keeps you while it has a set left */
-  for (var j = 0; j < cards.length && lfCurExId; j++) if (cards[j].dataset.ex === lfCurExId && openSet(cards[j])) { cur = cards[j]; break; }
+  /* the exercise you were just on keeps you while it has a set left, and on coming back it is the one the work says */
+  var want = lfCurExId || (act ? lfResumeEx() : '');
+  for (var j = 0; j < cards.length && want; j++) if (cards[j].dataset.ex === want && openSet(cards[j])) { cur = cards[j]; break; }
   for (var i = 0; i < cards.length && !cur; i++) if (openSet(cards[i])) cur = cards[i];
   if (!cur) return;
   var to = Math.max(0, bd.scrollTop + cur.getBoundingClientRect().top - bd.getBoundingClientRect().top - 8);
