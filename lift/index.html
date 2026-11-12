@@ -2278,6 +2278,7 @@ function lfToday() {
 
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
+  var mvc = lfMoveCard(); if (mvc) root.appendChild(mvc);
   root.appendChild(lfTodayCard());
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
@@ -4543,6 +4544,14 @@ function lfRenderYou() {
   var bk = el('<div class="lf-card"><div class="lf-lab" style="margin-bottom:10px">Backup</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfCopy">Copy a backup</button><button type="button" class="lf-btn" style="flex:1" id="lfRestore">Restore</button></div></div>');
   $('#lfCopy', bk).addEventListener('click', lfCopy);
   $('#lfRestore', bk).addEventListener('click', lfRestore);
+  /* in the app: bring it over; on the web: send it. A copy that has moved says so, and can be taken back */
+  var mvb = LF_NATIVE ? el('<button type="button" class="lf-btn is-full lf-mvb" style="margin-top:10px">Move from the web version</button>')
+    : lfMoved() ? el('<div id="lfMoved" style="margin-top:12px"><p class="lf-lab" style="margin:0 0 8px;text-transform:none;letter-spacing:0;font-size:13px">Moved to the app. This copy has stopped sharing with friends, so it does not clash with the app.</p><button type="button" class="lf-btn is-full" id="lfMoveBack">Keep using this copy</button></div>')
+    : el('<button type="button" class="lf-btn is-full lf-mvb" style="margin-top:10px">Move to the iPhone app</button>');
+  bk.appendChild(mvb);
+  if (LF_NATIVE) mvb.addEventListener('click', lfMoveIn);
+  else if (lfMoved()) $('#lfMoveBack', bk).addEventListener('click', function () { try { localStorage.removeItem(LF_MV); } catch (e) {} lfRender(); if (typeof frPushNow === 'function') frPushNow(); });
+  else mvb.addEventListener('click', lfMoveOut);
   root.appendChild(bk);
 }
 /* A CARD THAT FOLDS: its title is a button inside the heading, it says
@@ -4706,20 +4715,79 @@ function lfRestore() {
   var b = el('<div><p class="lf-lab" style="margin:0 0 10px">Paste a backup. It replaces everything on this phone.</p><textarea class="lf-field" style="height:200px;padding:12px;font-size:14px" aria-label="Backup"></textarea></div>');
   var go = el('<button type="button" class="lf-btn is-log is-full">Restore</button>');
   var s = lfSheet({ title: 'Restore', body: b, foot: [go] });
-  go.addEventListener('click', function () {
-    /* THE OWNER'S CODE goes in here too. A Home Screen app keeps its own
-       storage and has no address bar, so the unlock link opened in Safari
-       never reaches it: pasting the code or the link here does */
-    if (/owner-k7q4x9lz/.test($('textarea', b).value)) {
-      try { if (!lfOwner()) localStorage.setItem('lift.owner.v1', ymd(today())); } catch (e) {}
-      s.close(true); lfRender(); lfToast('Owner badge unlocked'); buzz([20, 60, 20, 60, 40]); return;
-    }
-    var o; try { o = JSON.parse($('textarea', b).value); } catch (e) { lfToast('That is not a backup'); return; }
-    if (!o || typeof o !== 'object' || !Array.isArray(o.wo)) { lfToast('That is not a backup'); return; }
-    var snap = JSON.stringify(S);
-    S = lfClean(o); lfSave(); s.close(true); lfRender();
-    lfToast('Restored', function () { S = lfClean(JSON.parse(snap)); lfSave(); lfRender(); });
-  });
+  go.addEventListener('click', function () { lfApplyBackup($('textarea', b).value, s); });
+}
+/* what moving takes with it: the whole record, plus the few settings that are not in it */
+function lfMoveBundle() {
+  var o = JSON.parse(JSON.stringify(S)), mv = {};
+  try {
+    var fr = localStorage.getItem('lift.fr.v1'); if (fr) mv.fr = fr;
+    var ac = localStorage.getItem('lift.accent.v1'); if (ac !== null && ac !== '') mv.accent = ac;
+    var md = localStorage.getItem('lift.mode.v1'); if (md) mv.mode = md;
+    var ow = localStorage.getItem('lift.owner.v1'); if (ow) mv.ow = ow;
+  } catch (e) {}
+  o.mv = mv; return JSON.stringify(o);
+}
+/* the extras are checked as strictly as everything else is: a pasted record is not trusted */
+function lfApplyMv(mv) {
+  var did = false;
+  function put(k, v) { try { localStorage.setItem(k, v); did = true; } catch (e) {} }
+  if (typeof mv.fr === 'string') { var f; try { f = JSON.parse(mv.fr); } catch (e) {} if (f && f.on === true && /^[A-HJ-NP-Z2-9]{8}$/.test(f.code) && /^[0-9a-f]{32}$/.test(f.key)) put('lift.fr.v1', mv.fr); }
+  if (typeof mv.accent === 'string' && /^\d{1,4}$/.test(mv.accent)) put('lift.accent.v1', mv.accent);
+  if (typeof mv.mode === 'string' && /^(auto|light|dark)$/.test(mv.mode)) put('lift.mode.v1', mv.mode);
+  if (typeof mv.ow === 'string' && /^\d{4}-\d\d-\d\d$/.test(mv.ow)) put('lift.owner.v1', mv.ow);
+  return did;
+}
+function lfApplyBackup(txt, sh) {
+  /* THE OWNER'S CODE goes in here too. A Home Screen app keeps its own
+     storage and has no address bar, so the unlock link opened in Safari
+     never reaches it: pasting the code or the link here does */
+  if (/owner-k7q4x9lz/.test(txt)) {
+    try { if (!lfOwner()) localStorage.setItem('lift.owner.v1', ymd(today())); } catch (e) {}
+    if (sh) sh.close(true); lfRender(); lfToast('Owner badge unlocked'); buzz([20, 60, 20, 60, 40]); return true;
+  }
+  var o; try { o = JSON.parse(txt); } catch (e) { lfToast('That is not a backup'); return false; }
+  if (!o || typeof o !== 'object' || !Array.isArray(o.wo)) { lfToast('That is not a backup'); return false; }
+  var snap = JSON.stringify(S), mv = o.mv && typeof o.mv === 'object' ? o.mv : null;
+  S = lfClean(o); lfSave();
+  if (mv && lfApplyMv(mv)) {
+    /* friends, colour and the rest are read once at the start, so the page begins again with all of it in place */
+    try { localStorage.removeItem(LF_MV); localStorage.setItem(LF_MVC, '1'); } catch (e) {}
+    if (sh) sh.close(true); lfToast('Moved. Your workouts, streak and friends came with you.'); setTimeout(function () { location.reload(); }, 700); return true;
+  }
+  if (sh) sh.close(true); lfRender();
+  lfToast('Restored', function () { S = lfClean(JSON.parse(snap)); lfSave(); lfRender(); });
+  return true;
+}
+/* the web side: copy everything, and stop posting to friends from here */
+function lfMoveOut() {
+  var txt = lfMoveBundle();
+  var done = function () { try { localStorage.setItem(LF_MV, ymd(today())); } catch (e) {} lfToast('Copied. Open Lift on your iPhone and it brings everything over.'); lfRender(); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, function () { lfShowText(txt); done(); });
+  else { lfShowText(txt); done(); }
+}
+/* the app side: take what was copied, or open the paste sheet if the phone will not hand it over */
+function lfMoveIn() {
+  if (navigator.clipboard && navigator.clipboard.readText) navigator.clipboard.readText().then(function (t) {
+    if (!t || !/"wo"\s*:/.test(t)) { lfToast('Nothing copied yet. In Lift on the web: You, then Move to the iPhone app.'); lfRestore(); return; }
+    lfApplyBackup(t, null);
+  }, function () { lfRestore(); });
+  else lfRestore();
+}
+/* the card on Today: in the app while it is empty, on the web once the App Store page is live */
+function lfMoveCard() {
+  var seen = false; try { seen = localStorage.getItem(LF_MVC) === '1'; } catch (e) {}
+  if (seen) return null;
+  var c, go, no;
+  if (LF_NATIVE && !S.wo.length) {
+    c = el('<div class="lf-card" id="lfMoveCard"><b style="display:block;font-size:19px;margin-bottom:4px">Coming from Lift on the web?</b><p class="lf-lab" style="margin:0 0 12px;text-transform:none;letter-spacing:0;font-size:13px">Open it there, go to You, tap Move to the iPhone app, then come back and paste. Your workouts, streak and friends come with you.</p><div style="display:flex;gap:10px"><button type="button" class="lf-btn is-log lf-mvg" style="flex:1">Paste and move</button><button type="button" class="lf-btn lf-mvn">Not now</button></div></div>');
+    $('.lf-mvg', c).addEventListener('click', lfMoveIn);
+  } else if (!LF_NATIVE && LF_APP_LIVE && S.wo.length && !lfMoved()) {
+    c = el('<div class="lf-card" id="lfMoveCardW"><b style="display:block;font-size:19px;margin-bottom:4px">Lift is on the App Store</b><p class="lf-lab" style="margin:0 0 12px;text-transform:none;letter-spacing:0;font-size:13px">Move your workouts, streak and friends over in one tap. Nothing starts again.</p><div style="display:flex;gap:10px"><button type="button" class="lf-btn is-log lf-mvg" style="flex:1">Move to the app</button><button type="button" class="lf-btn lf-mvn">Later</button></div></div>');
+    $('.lf-mvg', c).addEventListener('click', function () { lfMoveOut(); setTimeout(function () { window.open(LF_APP_URL, '_blank'); }, 400); });
+  } else return null;
+  $('.lf-mvn', c).addEventListener('click', function () { try { localStorage.setItem(LF_MVC, '1'); } catch (e) {} lfRender(); });
+  return c;
 }
 
 /* ═══════════ FRIENDS ═══════════
@@ -4738,6 +4806,11 @@ function lfRestore() {
    Its own key, `lift.fr.v1`, and NOT in the backup: the code and key
    are this phone's identity, and a restore onto a second phone should
    not make two phones post as one. */
+/* MOVING FROM THE WEB TO THE APP. The app keeps its own storage, apart from Safari's and the Home Screen's, so what you have built up does not follow you by itself. One tap here copies it, and one tap there pastes it: the workouts (the streak is worked out from them and your goal, so it carries on), the settings, your friends, your colour. The friend identity goes too, so nobody has to add you again; the copy you moved FROM then stops posting under it, or two copies would take turns overwriting each other. The web banner is off until the day the App Store page is live. */
+var LF_APP_LIVE = false, LF_APP_URL = 'https://apps.apple.com/app/id6833453418';
+var LF_NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+var LF_MV = 'lift.moved.v1', LF_MVC = 'lift.movecard.v1';
+function lfMoved() { try { return /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem(LF_MV) || ''); } catch (e) { return false; } }
 var FR_URL = 'https://sched.nikorapullin.workers.dev';
 var FRK = 'lift.fr.v1';
 var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -4853,7 +4926,7 @@ function frQueue() { if (!FRS.on) return; clearTimeout(frT); frT = setTimeout(fr
 var frRetryT = 0, frRetryN = 0;
 function frPushNow() { if (!FRS.on) return; clearTimeout(frT); frPush(); }
 function frPush() {
-  if (!FRS.on) return;
+  if (!FRS.on || lfMoved()) return;
   var body = { n: FRS.name || 'Lifter', s: frStats() };
   /* with notifications on, the server is told where to reach this phone
      when a friend reacts — the address and its public keys, nothing else */

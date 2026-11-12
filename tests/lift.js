@@ -826,6 +826,33 @@ const freeze = (at) => `(() => {
     ok('and so does the volume card', await top(page).locator('#lfVolTrend').count() === 1);
     await c.close();
   }
+  /* ── MOVING TO THE APP: everything comes across, friends included, and the copy that moved stops posting under that identity ── */
+  {
+    const pad2 = (n) => String(n).padStart(2, '0');
+    const wos = []; for (let i = 1; i <= 20; i++) { if (i % 7 === 0) continue; const d = new Date(2026, 9, 30 - i); wos.push({ id: 'mv' + i, d: d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()), s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 80, r: 8 }] }] }); }
+    const base = { unit: 'kg', goal: 3, wo: wos, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, bseen: { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1, v7: 1, v8: 1, v9: 1, v10: 1 } };
+    const frId = { on: true, code: 'K7PQ2M4X', key: 'a'.repeat(32), name: 'Alex Morgan', list: [], rx: [], no: [] };
+    const mkCtx = async (init) => { const c = await browser.newContext(PHONE); await c.addInitScript(freeze('2026-10-30T18:00:00')); await c.route(/workers\.dev/, (r) => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': '*' }, body: '{}' })); await c.addInitScript(`new MutationObserver(() => { const v = document.querySelector('.lf-cv'); if (v) v.querySelector('.lf-cv-x').click(); }).observe(document, { childList: true, subtree: true });`); await c.addInitScript(init); return c; };
+    const wc = await mkCtx(`if (!localStorage.getItem('lift.v1')) { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(base))}); localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify(frId))}); localStorage.setItem('lift.accent.v1', '200'); } window.__clip = ''; Object.defineProperty(navigator, 'clipboard', { value: { writeText: (t) => { window.__clip = t; return Promise.resolve(); }, readText: () => Promise.resolve(window.__clip) }, configurable: true });`);
+    const wp = await wc.newPage(); await wp.goto(URL); await wp.waitForTimeout(700);
+    ok('the web version offers no banner until the App Store page is live, and the move button is under Backup', await wp.locator('#lfMoveCard, #lfMoveCardW').count() === 0 && (await (async () => { await wp.click('.lf-bar [data-v="you"]'); await wp.waitForTimeout(500); return wp.locator('.lf-mvb').count(); })()) === 1);
+    await wp.locator('.lf-mvb').click(); await wp.waitForTimeout(700);
+    const clip = await wp.evaluate(() => window.__clip), bun = JSON.parse(clip || '{}');
+    ok('moving copies the whole record, with the friend identity, colour and settings that are not in a backup', Array.isArray(bun.wo) && bun.wo.length === wos.length && bun.mv && JSON.parse(bun.mv.fr).code === 'K7PQ2M4X' && bun.mv.accent === '200', Object.keys(bun.mv || {}));
+    ok('and the copy that moved says so, and stops sharing under that identity', await wp.locator('#lfMoved').count() === 1 && !!(await wp.evaluate(() => localStorage.getItem('lift.moved.v1'))) && /function frPush\(\) \{\s*if \(!FRS\.on \|\| lfMoved\(\)\) return;/.test(require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8')));
+    const ac = await mkCtx(`window.Capacitor = { isNativePlatform: () => true }; Object.defineProperty(navigator, 'clipboard', { value: { readText: () => Promise.resolve(${JSON.stringify(clip)}), writeText: () => Promise.resolve() }, configurable: true }); if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(Object.assign({}, base, { wo: [] })))});`);
+    const ap = await ac.newPage(); await ap.goto(URL); await ap.waitForTimeout(900);
+    ok('an empty app offers to bring it over, right on Today', await ap.locator('#lfMoveCard').count() === 1);
+    await ap.locator('.lf-mvg').click(); await ap.waitForTimeout(2200);
+    const got = await ap.evaluate(() => ({ wo: JSON.parse(localStorage.getItem('lift.v1')).wo.length, fr: JSON.parse(localStorage.getItem('lift.fr.v1')), ac: localStorage.getItem('lift.accent.v1') }));
+    ok('one tap brings it across: the workouts, the same friend code and key, the colour', got.wo === wos.length && got.fr.code === 'K7PQ2M4X' && got.fr.key === 'a'.repeat(32) && got.fr.on === true && got.ac === '200', got);
+    ok('and the offer is gone once there is something in it', await ap.locator('#lfMoveCard').count() === 0);
+    const bad = await mkCtx(`window.Capacitor = { isNativePlatform: () => true }; if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(Object.assign({}, base, { wo: [] })))}); Object.defineProperty(navigator, 'clipboard', { value: { readText: () => Promise.resolve(${JSON.stringify(JSON.stringify(Object.assign({}, base, { mv: { fr: JSON.stringify({ on: true, code: 'bad', key: 'x' }), accent: 'evil', mode: 'x', ow: 'nope' } })))}) }, configurable: true });`);
+    const bp = await bad.newPage(); await bp.goto(URL); await bp.waitForTimeout(800); await bp.locator('.lf-mvg').click(); await bp.waitForTimeout(2200);
+    const kept = await bp.evaluate(() => ({ fr: localStorage.getItem('lift.fr.v1'), ac: localStorage.getItem('lift.accent.v1'), md: localStorage.getItem('lift.mode.v1'), ow: localStorage.getItem('lift.owner.v1'), wo: JSON.parse(localStorage.getItem('lift.v1')).wo.length }));
+    ok('what is pasted is not trusted: a damaged identity, colour, mode or owner date is dropped, and the workouts still arrive', kept.fr === null && kept.ac === null && kept.md === null && kept.ow === null && kept.wo === wos.length, kept);
+    await wc.close(); await ac.close(); await bad.close();
+  }
   /* ── DON'T MISS: four full weeks in a row, and a single gap puts it out of reach ── */
   {
     const days = (skip) => { const o = []; for (let i = 0; i < 28; i++) { const d = new Date(2026, 9, 5 + i), k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); if (!skip.includes(k)) o.push({ id: 'dm' + i, d: k, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 60, r: 8 }] }] }); } return o; };
