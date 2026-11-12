@@ -1023,7 +1023,7 @@ const freeze = (at) => `(() => {
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
     ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 140/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 130);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 140);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1981,7 +1981,7 @@ const freeze = (at) => `(() => {
     }
     {
       const dm = require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8');
-      ok("Don't Miss: every planned day, four weeks running, in a mythic scene of its own with a shape and metal no other badge has", /\['dontmiss', "Don't Miss", 'streak', '[^']+', '#[0-9a-f]{6}'\]/.test(dm) && /BD_SCENE = \{ dontmiss: bdTempest,/.test(dm) && /BD_MYTH = \{ dontmiss: 1,/.test(dm) && /dontmiss: 'steps'/.test(dm) && /k === 'steps'/.test(dm));
+      ok("Don't Miss: every planned day, four weeks running, in a mythic scene of its own with a shape and metal no other badge has", /\['dontmiss', "Don't Miss", 'streak', '[^']+', '#[0-9a-f]{6}'\]/.test(dm) && /BD_SCENE = \{[^}]*dontmiss: bdTempest,/.test(dm) && /BD_MYTH = \{[^}]*dontmiss: 1,/.test(dm) && /dontmiss: 'steps'/.test(dm) && /k === 'steps'/.test(dm));
       ok('it is won on the fourth full week in a row, and a week still under way does not break the run', /fullRun\+\+; if \(fullRun === 4\) won\('dontmiss'/.test(dm) && /else if \(b < ymd\(today\(\)\)\) fullRun = 0;/.test(dm));
       ok('its scene turns over on a tap and runs a bead for each day of a month', /function bdTempest\(A\)[^]*?g\.userData\.tap = function \(\)[^]*?i < 28/.test(dm));
     }
