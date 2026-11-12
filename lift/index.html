@@ -8870,11 +8870,11 @@ function bdRelic(id) {
     var mats = [], sm = [], FM = [], BM = [], front = new T.Group(), back = new T.Group(), cr = new T.Group(), pivot = new T.Group(), rs = sp.rs || 1;
     g.add(pivot); pivot.add(cr); cr.scale.setScalar(.8); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
     for (i = 0; i < K; i++) {
-      var R = (.707 + i * .073) * rs, baseC = new T.Color().setHSL(sp.hue, sp.sat, .22 - i * .026), sh = new T.Shape(), pts = bdRelicPts(sp, R);
+      var R = (.707 + i * .073) * rs, baseC = new T.Color().setHSL(sp.hue, sp.sat, .13 - i * .014), sh = new T.Shape(), pts = bdRelicPts(sp, R);
       pts.forEach(function (q, j) { if (j) sh.lineTo(q[0], q[1]); else sh.moveTo(q[0], q[1]); }); sh.closePath();
       if (i < K - 1) { var hp = bdRelicPts(sp, HOLE[i] * 1.414 * rs), ho = new T.Path(); hp.slice().reverse().forEach(function (q, j) { if (j) ho.lineTo(q[0], q[1]); else ho.moveTo(q[0], q[1]); }); ho.closePath(); sh.holes.push(ho); }
       var geo = new T.ExtrudeGeometry(sh, { depth: TT, bevelEnabled: true, bevelThickness: .016, bevelSize: .016, bevelSegments: hi ? 4 : 3 });
-      var mk = function (map) { return new T.MeshPhysicalMaterial({ color: baseC, metalness: sp.met || 1, roughness: sp.rgh, envMapIntensity: 2, clearcoat: 1, clearcoatRoughness: .05, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
+      var mk = function (map) { return new T.MeshPhysicalMaterial({ color: baseC, metalness: sp.met || 1, roughness: sp.rgh, envMapIntensity: 1.5, clearcoat: 1, clearcoatRoughness: .05, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
       mats[i] = mk(etx); sm[i] = mk(null);
       FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); FM[i].position.z = (K - 1 - i) * TT; front.add(FM[i]);
       BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); BM[i].position.z = (K - 1 - i) * TT; back.add(BM[i]);
@@ -8892,10 +8892,10 @@ function bdRelic(id) {
       pivot.rotation.y = Math.sin(t * .5) * (sp.calm ? .34 : .44) + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .18; pivot.position.y = Math.sin(t * .8) * .045;
       for (var i = 0; i < K; i++) {
         var lift = u >= 0 && u < 1.2 && u > i * .09 && u < i * .09 + .5 ? Math.sin((u - i * .09) * Math.PI / .5) * .1 : 0;
-        mats[i].emissiveIntensity = (1.9 - i * .12) * (.85 + .3 * pu) + 1.4 * v; FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift;
+        mats[i].emissiveIntensity = (2.5 - i * .16) * (.85 + .3 * pu) + 1.4 * v; FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift;
       }
-      lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .9 + Math.sin(t * 1.3) * .3 + v;
-      glow.material.opacity = .5 + .12 * Math.sin(t * 1.1) + .3 * v;
+      lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .6 + Math.sin(t * 1.3) * .2 + v;
+      glow.material.opacity = .42 + .1 * Math.sin(t * 1.1) + .3 * v;
     });
   };
 }
