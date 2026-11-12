@@ -3247,23 +3247,6 @@ function lfSwap(e) {
     lfSwapTo(e, id);
   }, 'Swap ' + e.n);
 }
-/* in Settings: every swap there is, each with the way back */
-function lfSwapRows() {
-  var sw = S.sw || {}, rows = [];
-  Object.keys(sw).forEach(function (rid) { var rt = rtById(rid); Object.keys(sw[rid]).forEach(function (a) { rows.push([rid, a, sw[rid][a], rt ? rt.n : 'Workout']); }); });
-  if (!rows.length) return null;
-  var w = el('<div class="rk-rows" id="lfSwaps"></div>');
-  rows.forEach(function (q) {
-    var b = el('<button type="button" class="lf-btn is-full rk-set"><span></span><b></b></button>'); b.dataset.rt = q[0]; b.dataset.ex = q[1];
-    $('span', b).textContent = q[3] + ': ' + exName(q[1]) + ' → ' + exName(q[2]); $('b', b).textContent = 'Back to original';
-    b.addEventListener('click', function () {
-      if (S.sw && S.sw[q[0]]) { delete S.sw[q[0]][q[1]]; if (!Object.keys(S.sw[q[0]]).length) delete S.sw[q[0]]; if (!Object.keys(S.sw).length) delete S.sw; }
-      lfSave(); lfRender(); lfToast('Back to ' + exName(q[1]));
-    });
-    w.appendChild(b);
-  });
-  return w;
-}
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
   /* THE LIST IS REBUILT, AND A REBUILT LIST HAS NO HEIGHT FOR A MOMENT, so the
@@ -4246,6 +4229,16 @@ function lfRoutineForm(rt) {
 }
 
 /* A day of the split, read before you start it. */
+function lfUnswap(rt, id, swd, day) {
+  var back = el('<button type="button" class="lf-btn is-log is-full"></button>'), view = el('<button type="button" class="lf-btn is-full" style="margin-top:10px"></button>');
+  back.textContent = 'Revert to ' + exName(id); view.textContent = 'View ' + exName(swd);
+  var u = lfSheet({ title: exName(swd), body: el('<div></div>'), foot: [view, back] });
+  view.addEventListener('click', function () { lfExSheet(swd); });
+  back.addEventListener('click', function () {
+    if (S.sw && S.sw[rt.id]) { delete S.sw[rt.id][id]; if (!Object.keys(S.sw[rt.id]).length) delete S.sw[rt.id]; if (!Object.keys(S.sw).length) delete S.sw; }
+    lfSave(); u.close(true); if (day) day.close(true); lfRender(); lfDaySpec(rt);
+  });
+}
 function lfDaySpec(rt) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = DOW_LONG[rt.dow] + ' · ' + rt.sp;
@@ -4264,10 +4257,13 @@ function lfDaySpec(rt) {
   rt.ex.forEach(function (id) {
     var t = rt.tg[id], rs = lfRestOf(id), last = lastFor(id);
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
-    $('b', li).textContent = exName(id);
+    var swd = S.sw && S.sw[rt.id] && S.sw[rt.id][id];
+    $('b', li).textContent = exName(swd || id);
+    if (swd) $('b', li).style.color = 'var(--log)';
     $('span', li).textContent = rs.rir + ' · rest ' + lfRestTxt(rs) + (last ? ' · last ' + fmtWS(last[0].w) + '×' + last[0].r : '');
     $('.lf-li-r', li).textContent = lfTgTxt(t);
-    li.addEventListener('click', function () { lfExSheet(id); });
+    /* a swapped slot is the only place the swap can be undone: its name is in the accent, and pressing it offers the way back */
+    li.addEventListener('click', function () { if (swd) lfUnswap(rt, id, swd, s); else lfExSheet(id); });
     $('.lf-list', b).appendChild(li);
   });
   var go = el('<button type="button" class="lf-btn is-log is-full"></button>');
@@ -4632,7 +4628,6 @@ function lfRenderYou() {
     $('#lfGoal', c).appendChild(g);
   }
   c.appendChild(el('<span class="lf-flab">Name and profile</span>')); c.appendChild(lfRkRows());
-  { var swr = lfSwapRows(); if (swr) { c.appendChild(el('<span class="lf-flab">Swapped exercises</span>')); c.appendChild(swr); } }
   if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfThemeCard());

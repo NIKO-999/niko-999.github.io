@@ -2014,11 +2014,15 @@ const freeze = (at) => `(() => {
     await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Front squat' }).first().click(); await page.waitForTimeout(500);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    const row = await page.$$eval('#lfSwaps .rk-set', (x) => x.map((e) => e.querySelector('span').textContent + '|' + e.querySelector('b').textContent));
-    ok('Settings lists every swap, each with Back to original', row.length === 1 && /Pendulum squat → Front squat/.test(row[0]) && /Back to original$/.test(row[0]), row);
-    await page.click('#lfSwaps .rk-set'); await settle(page);
+    ok('Settings no longer lists swaps', await page.locator('#lfSwaps').count() === 0 && !/Swapped exercises/.test(await page.textContent('#lfYou')));
+    await page.click('.lf-bar [data-v="lib"]'); await settle(page);
+    await page.click('#lfSplit .lf-li >> nth=4'); await settle(page);
+    const sw = top(page).locator('.lf-li', { hasText: 'Front squat' });
+    ok('the day page shows the swapped exercise in the accent', await sw.count() === 1 && await sw.locator('b').evaluate((e) => getComputedStyle(e).color !== getComputedStyle(document.body).color));
+    await sw.click(); await settle(page);
+    await top(page).locator('.lf-btn.is-log', { hasText: 'Revert to Pendulum squat' }).click(); await settle(page);
     st = await store(page);
-    ok('and pressing it puts the program back', !st.sw && await page.locator('#lfSwaps').count() === 0, st.sw);
+    ok('and pressing it offers Revert, which puts the program back', !st.sw && await top(page).locator('.lf-li', { hasText: 'Pendulum squat' }).count() === 1, st.sw);
     await c.close();
   }
   {
