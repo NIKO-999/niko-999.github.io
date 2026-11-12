@@ -926,6 +926,18 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @keyframes lf-flick { from { opacity: .82; } to { opacity: 1; } }
 .lf-coin.is-fx.is-t5 img { animation: lf-heat 2.2s ease-in-out infinite alternate; }
 @keyframes lf-heat { from { filter: drop-shadow(0 0 10px #ff5a1f) drop-shadow(0 0 22px rgba(255,90,20,.6)) drop-shadow(0 2px 4px rgba(0,0,0,.5)); } to { filter: drop-shadow(0 0 16px #ffb347) drop-shadow(0 0 34px rgba(255,60,0,.8)) drop-shadow(0 2px 4px rgba(0,0,0,.5)) brightness(1.08); } }
+/* the mythic halo is a rainbow; a storm is blue and white */
+.lf-coin.is-fx.is-t4.is-tm::before { background: conic-gradient(from 0deg, #1d3fd0, #8fb8ff, #fff, #4f7dff, #12206a, #1d3fd0); }
+.lf-tp { position: absolute; inset: -6%; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mix-blend-mode: screen; overflow: hidden; }
+.lf-tp svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lf-tp path { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: lf-tp-strike 2.4s linear infinite; animation-delay: var(--d, 0s); }
+.lf-tp .b path { animation-delay: calc(var(--d, 0s) + 1.2s); }
+.lf-tp path.g { stroke: rgba(70, 120, 255, .7); stroke-width: 5; filter: blur(1.2px); }
+.lf-tp path.c { stroke: #fff; stroke-width: 1.7; }
+.lf-tp::after { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(104deg, transparent 0 7px, rgba(130, 175, 255, .5) 7px 8px, transparent 8px 15px); background-size: 15px 15px; opacity: .55; animation: lf-tp-rain 1s linear infinite; }
+@keyframes lf-tp-strike { 0%, 12% { opacity: 0; stroke-dashoffset: 1; } 14% { opacity: 1; stroke-dashoffset: 0; } 18% { opacity: .2; stroke-dashoffset: 0; } 21% { opacity: .95; stroke-dashoffset: 0; } 32%, 100% { opacity: 0; stroke-dashoffset: 0; } }
+@keyframes lf-tp-rain { to { background-position: -4px 15px; } }
+@media (prefers-reduced-motion: reduce) { .lf-tp path { animation: none; opacity: .5; stroke-dashoffset: 0; } .lf-tp::after { animation: none; } }
 .lf-lava { position: absolute; inset: 0; pointer-events: none; -webkit-mask-size: 100% 100%; mask-size: 100% 100%; mix-blend-mode: screen; overflow: hidden; border-radius: 50%; }
 .lf-lava s { position: absolute; inset: -60%; opacity: .8;
   background: radial-gradient(18% 9% at 30% 40%, #ffe08a, transparent 70%), radial-gradient(14% 22% at 70% 30%, #ff8a1f, transparent 70%), radial-gradient(20% 12% at 55% 75%, #ffd04a, transparent 72%),
@@ -1939,8 +1951,9 @@ function lfClean(o) {
     if (Object.keys(swo).length) d.sw = swo;
   }
   if (o.shn === true) d.shn = true;
-  if (Array.isArray(o.show)) d.show = o.show.filter(function (k, i, a) { return typeof k === 'string' && /^[a-z0-9]{2,8}$/.test(k) && a.indexOf(k) === i; }).slice(0, 3);
-  if (o.bseen && typeof o.bseen === 'object') { d.bseen = {}; Object.keys(o.bseen).forEach(function (k) { if (/^[a-z0-9]{2,8}$/.test(k)) d.bseen[k] = 1; }); }
+  if (Array.isArray(o.show)) d.show = o.show.filter(function (k, i, a) { return typeof k === 'string' && /^[a-z0-9]{2,16}$/.test(k) && a.indexOf(k) === i; }).slice(0, 3);
+  if (o.bseen && typeof o.bseen === 'object') { d.bseen = {}; /* ids run to nine letters (landslide, cardio100): a limit of eight forgot those every load, and the badge was announced again and again */
+    Object.keys(o.bseen).forEach(function (k) { if (/^[a-z0-9]{2,16}$/.test(k)) d.bseen[k] = 1; }); }
   /* A REST DAY taken on purpose, a date and nothing else. */
   /* 1 is a rest day you took; 2 is one filled in because nothing was logged. */
   if (o.rd && typeof o.rd === 'object') Object.keys(o.rd).forEach(function (k) { if (/^\d{4}-\d\d-\d\d$/.test(k) && o.rd[k]) d.rd[k] = o.rd[k] === 2 ? 2 : 1; });
@@ -8185,7 +8198,7 @@ function bdWayf(A) {
    over. One clock drives the sky, the metal and the light, so they agree
    about when it struck. */
 function bdTempest(A) {
-  var T = A.T, g = A.g, hi = A.hi, i, K = 6, S0 = 1.62, ST = .26, tapT = -99, tapN = 0;
+  var T = A.T, g = A.g, hi = A.hi, i, K = 6, tapT = -99, tapN = 0;
   /* when it strikes: a strike a little under every two and a half seconds,
      three flickers each, and a tap adds one of its own */
   function sk(t) {
@@ -8239,17 +8252,21 @@ function bdTempest(A) {
     }
     etx.needsUpdate = true;
   }
-  var mats = [], sm = [], FM = [], BM = [], BASE = [0x20242e, 0x171a22, 0x11141a, 0x0c0e13, 0x090b0f, 0x06070a];
+  /* THE SHAPE: six slabs a side, stacked like stairs both ways. The rim is the smallest and the highest; each slab down is wider outside and
+     tighter inside, so the face steps DOWN into the middle (the hopper) and the edge steps OUT toward the belt, where it is widest. From the side
+     it is a faceted gem with terraces, never a slab. */
+  var mats = [], sm = [], FM = [], BM = [], TT = .07, HOLE = [.38, .31, .24, .17, .1], BASE = [0x2a2f3a, 0x20242e, 0x171a22, 0x11141a, 0x0c0e13, 0x08090d];
   for (i = 0; i < K; i++) {
-    var s = (S0 - i * ST) / 2, top = .05 + (K - 1 - i) * .06, sh = new T.Shape();
+    var s = (1 + i * .124) / 2, sh = new T.Shape();
     sh.moveTo(-s, -s); sh.lineTo(s, -s); sh.lineTo(s, s); sh.lineTo(-s, s); sh.closePath();
-    if (i < K - 1) { var h = (S0 - (i + 1) * ST) / 2, ho = new T.Path(); ho.moveTo(-h, -h); ho.lineTo(-h, h); ho.lineTo(h, h); ho.lineTo(h, -h); ho.closePath(); sh.holes.push(ho); }
-    var geo = new T.ExtrudeGeometry(sh, { depth: top, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: hi ? 4 : 3 });
+    if (i < K - 1) { var h = HOLE[i], ho = new T.Path(); ho.moveTo(-h, -h); ho.lineTo(-h, h); ho.lineTo(h, h); ho.lineTo(h, -h); ho.closePath(); sh.holes.push(ho); }
+    var geo = new T.ExtrudeGeometry(sh, { depth: TT, bevelEnabled: true, bevelThickness: .014, bevelSize: .014, bevelSegments: hi ? 4 : 3 });
     /* black chrome: no colour to speak of, a mirror's roughness, a clear coat on top, and an environment to reflect;
        the faces carry the weather, the walls only catch the flash */
     var mk = function (map) { return new T.MeshPhysicalMaterial({ color: BASE[i], metalness: 1, roughness: .07, envMapIntensity: 2, clearcoat: 1, clearcoatRoughness: .03, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
     mats[i] = mk(etx); sm[i] = mk(null);
-    FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); front.add(FM[i]); BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); back.add(BM[i]);
+    FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); FM[i].position.z = (K - 1 - i) * TT; front.add(FM[i]);
+    BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); BM[i].position.z = (K - 1 - i) * TT; back.add(BM[i]);
   }
   /* the lights: a glint wandering over the mirror, a cold fill, and the flash itself */
   var lamp = new T.PointLight(0xcfe0ff, 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
@@ -8274,7 +8291,7 @@ function bdTempest(A) {
       /* the flash runs inward down the steps, each one lit as it passes */
       var w = v * (.3 + .7 * Math.max(0, 1 - Math.abs(f.since * 14 - i) / 1.6)), lift = u >= 0 && u < 1.2 ? Math.max(0, Math.sin((u - i * .1) * Math.PI / .5)) * (u > i * .1 && u < i * .1 + .5 ? .09 : 0) : 0;
       mats[i].emissiveIntensity = 1 + 2.4 * w; sm[i].emissive.setRGB(.1 * w, .24 * w, .6 * w);
-      FM[i].position.z = lift; BM[i].position.z = lift;
+      FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift;
     }
     lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .9 + Math.sin(t * 1.3) * .3;
     fl.intensity = v * 1.6; fl.position.set(Math.sin(f.key * 3.1) * .6, .5, 1.5);
@@ -8535,7 +8552,7 @@ function bdDb() {
 function bdDbGet(k) { return bdDb().then(function (db) { return db ? new Promise(function (res) { try { var q = db.transaction('s').objectStore('s').get(BD_VER + ':' + k); q.onsuccess = function () { res(q.result || null); }; q.onerror = function () { res(null); }; } catch (e) { res(null); } }) : null; }); }
 function bdDbPut(k, v) { bdDb().then(function (db) { if (db) try { db.transaction('s', 'readwrite').objectStore('s').put(v, BD_VER + ':' + k); } catch (e) {} }); }
 /* Don't Miss changed its look after phones had saved a picture of it: the suffix is its look's version, so only it is drawn again */
-function bdKey(x) { return x.b.id + (x.b.id === 'dontmiss' ? ':tm2' : '') + (x.d ? ':' + x.d : ':lock') + (x.b.gl ? ':' + x.b.gl : '') + (x.p && x.b.k === 'month' ? ':' + x.p.join('/') : ''); }
+function bdKey(x) { return x.b.id + (x.b.id === 'dontmiss' ? ':tm3' : '') + (x.d ? ':' + x.d : ':lock') + (x.b.gl ? ':' + x.b.gl : '') + (x.p && x.b.k === 'month' ? ':' + x.p.join('/') : ''); }
 function bdStill(x, img) {
   var key = bdKey(x);
   if (bdStills[key]) { img.src = bdStills[key]; return; }
@@ -8584,6 +8601,14 @@ function lfCoinBtn(x, size) {
     var setMask = function () { if (im.src) { var u = 'url("' + im.src + '")'; lv.style.webkitMaskImage = u; lv.style.maskImage = u; } };
     im.addEventListener('load', setMask); setMask();
     b.appendChild(lv); b.appendChild(emb); b.appendChild(el('<u class="lf-spk" aria-hidden="true"><s></s><s></s><s></s><s></s></u>')); b.insertBefore(el('<u class="lf-rays" aria-hidden="true"></u>'), b.firstChild);
+  }
+  /* DON'T MISS RUNS ITS STORM ON THE COIN: a bolt forks through the black chrome every second or so and rain slides across it, masked to the badge's own picture so it stays inside the metal. Nobody has to open it: a friend on your profile sees it as they arrive. */
+  if (x.d && x.b.id === 'dontmiss') {
+    var tp = el('<u class="lf-tp" aria-hidden="true"><svg viewBox="0 0 100 100"><g class="a"><path class="g" pathLength="1" d="M52 8 L44 24 L56 38 L46 52 L58 66 L48 80 L51 94"/><path class="g" pathLength="1" d="M56 38 L72 48 L66 58"/><path class="g" pathLength="1" d="M46 52 L30 60 L34 72"/><path class="c" pathLength="1" d="M52 8 L44 24 L56 38 L46 52 L58 66 L48 80 L51 94"/><path class="c" pathLength="1" d="M56 38 L72 48 L66 58"/><path class="c" pathLength="1" d="M46 52 L30 60 L34 72"/></g><g class="b"><path class="g" pathLength="1" d="M40 10 L50 28 L42 42 L54 56 L44 70 L50 90"/><path class="g" pathLength="1" d="M42 42 L26 50 L30 62"/><path class="g" pathLength="1" d="M54 56 L70 64 L64 76"/><path class="c" pathLength="1" d="M40 10 L50 28 L42 42 L54 56 L44 70 L50 90"/><path class="c" pathLength="1" d="M42 42 L26 50 L30 62"/><path class="c" pathLength="1" d="M54 56 L70 64 L64 76"/></g></svg></u>'), tim = $('img', b);
+    tp.style.setProperty('--d', '-' + (Math.random() * 2.4).toFixed(2) + 's');
+    var tMask = function () { if (tim.src) { var u = 'url("' + tim.src + '")'; tp.style.webkitMaskImage = u; tp.style.maskImage = u; } };
+    tim.addEventListener('load', tMask); tMask();
+    b.appendChild(tp); b.classList.add('is-tm');
   }
   b.addEventListener('pointerdown', function () { bdBuildLive(x); }, { passive: true });
   b.addEventListener('click', function (e) { e.stopPropagation(); lfCoinView(x); });
