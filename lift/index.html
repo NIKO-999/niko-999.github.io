@@ -1600,7 +1600,7 @@ var PROGRAMS = {
   gl: { n: 'Conditioning', s: 'Conditioning', days: lfMkProg(PROGRAM_GL) },
   qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) },
   gf: { n: 'Glute focus', s: 'Glute focus', days: lfMkProg(PROGRAM_GF) },
-  sx: { n: "AJ's routine", s: "AJ's routine", days: lfMkProg(PROGRAM_SX) }
+  sx: { n: 'Superset split', s: 'Superset split', days: lfMkProg(PROGRAM_SX) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
 var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx'];
@@ -6317,14 +6317,24 @@ function frRings(rows) {
     var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && frCmp(top, lead[1]) === 0;
     mid.hidden = false; mid.id = 'frRgLead';
     mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b>';
-    $('b', mid).textContent = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
-    mid.setAttribute('aria-label', (tie ? 'Tied' : $('b', mid).textContent) + ' in front this week');
+    var nm = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
+    $('b', mid).textContent = nm;
+    /* THE NAME HAS TO FIT THE HOLE IN THE RINGS. With five friends the free middle is about 41px across, and a full name at 15px is nearly twice that, so it ran out over the rings. It is sized to the hole: the whole name if it fits at 11px or more, else the first name, never smaller than 10px, and the crown steps down with it. The full name stays in the spoken label. */
+    (function () {
+      var rin = Math.max(8, r0 - (n - 1) * step), D = Math.floor(2 * (rin - sw / 2 - 1) * 1.2 * .84), nb = $('b', mid), cw = $('.fr-rg-cr', mid), cv = document.createElement('canvas').getContext('2d'), fam = getComputedStyle(document.body).fontFamily;
+      var fit = function (t) { cv.font = '800 15px ' + fam; return Math.min(15, 15 * D / Math.max(1, cv.measureText(t).width)); };
+      var pick = nm, px = fit(nm), first = nm.split(/\s+/)[0];
+      if (px < 11 && first && first !== nm) { pick = first; px = fit(first); }
+      px = Math.max(10, px); nb.textContent = pick; nb.style.fontSize = px.toFixed(1) + 'px'; nb.style.maxWidth = (D + 8) + 'px';
+      if (cw) { var cs = D >= 56 ? 20 : 14; cw.style.width = cw.style.height = cs + 'px'; }
+    })();
+    mid.setAttribute('aria-label', nm + ' in front this week');
     mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
     /* THE CROWN OPENS WHOEVER IS WEARING IT: press the middle and their
        profile comes up, the same one their name on the board opens */
     if (!tie) {
       mid.classList.add('is-tap'); mid.setAttribute('role', 'button'); mid.tabIndex = 0;
-      mid.setAttribute('aria-label', $('b', mid).textContent + ' in front this week. Open their profile');
+      mid.setAttribute('aria-label', nm + ' in front this week. Open their profile');
       var openTop = function () { buzz(8); if (top.f.me) frSheet({ n: FRS.name || 'You', s: top.f.s || {}, me: 1 }); else frSheet(top.f); };
       mid.addEventListener('click', openTop);
       mid.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTop(); } });

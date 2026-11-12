@@ -1136,7 +1136,7 @@ const freeze = (at) => `(() => {
     ok('the six-day push, pull, legs split runs Monday to Saturday from the spreadsheet', sx.join() === 'Mon · Push A,Tue · Pull A,Wed · Legs A,Thu · Push B,Fri · Pull B,Sat · Legs B', sx);
     const sxSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
     const sxOk = await page.evaluate(() => { const bad = []; PROGRAMS.sx.days.forEach((d) => { const seen = {}; d.ex.forEach((id) => { if (!exById(id)) bad.push(d.id + ':' + id); if (seen[id]) bad.push(d.id + ' twice:' + id); seen[id] = 1; }); }); return { bad, n: PROGRAMS.sx.days.map((d) => d.ex.length).join() }; }).catch(() => null);
-    ok('every exercise in it exists and none is in a day twice', /var PROGRAM_SX = \[/.test(sxSrc) && /sx: \{ n: "AJ's routine"/.test(sxSrc) && /'s-mon': \['Push A: chest, shoulders and triceps'/.test(sxSrc), sxOk);
+    ok('every exercise in it exists and none is in a day twice', /var PROGRAM_SX = \[/.test(sxSrc) && /sx: \{ n: 'Superset split'/.test(sxSrc) && /'s-mon': \['Push A: chest, shoulders and triceps'/.test(sxSrc), sxOk);
     await page.click('#lfProg [data-p="gl"]'); await settle(page);
     await page.click('#lfSplit .lf-li >> nth=5'); await settle(page);
     const sat = await top(page).textContent();
