@@ -3632,13 +3632,12 @@ function lfCardDraw(sp) {
   }
   return cv;
 }
-/* what a finished workout says on the card: every set, grouped by weight */
+/* what a finished workout says on the card: every set, one by one */
 function lfCardWorkout(w, prs) {
   var mins = w.s > 1e11 && w.e > w.s ? fmtDur(w.e - w.s) : '—';
   var lines = w.x.filter(function (e) { return e.sets.length; }).map(function (e) {
-    var groups = [], last = null;
-    e.sets.forEach(function (q) { var ws = fmtWS(q.w); if (last && last.w === ws) last.r.push(q.r); else { last = { w: ws, r: [q.r] }; groups.push(last); } });
-    var txt = groups.map(function (g) { return g.w + ' ' + S.unit.replace(/^kg$|^lb$/, '') + '× ' + g.r.join(', '); }).join('   ·   ');
+    /* every set on its own, in the order it was done, even when the weight repeats */
+    var txt = e.sets.map(function (q) { return fmtWS(q.w) + ' × ' + q.r; }).join('  ·  ');
     /* the warm-ups come first, as they were done */
     var wu = (e.wu || []).filter(function (q) { return q && +q.r > 0; }).map(function (q) { return fmtWS(q.w) + ' × ' + q.r; });
     if (wu.length) txt = 'Warm-up  ' + wu.join(', ') + '   ·   ' + txt;
