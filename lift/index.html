@@ -4078,7 +4078,22 @@ function lfWeekSheet(m) {
   });
   if (met && prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (met ? 'On to next week' : 'Done') + '</button>');
-  var s = lfSheet({ title: '', body: b, foot: [done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
+  var shr = el('<button type="button" class="lf-btn is-full" id="lfWsShare">Share to story</button>');
+  var s = lfSheet({ title: '', body: b, foot: [shr, done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
+  /* THE WEEK AS A CARD: everything the review has, workouts with their hour included, and what was achieved: the targets, the streak, the records and the badges won */
+  shr.addEventListener('click', function () {
+    var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= a && x.d <= z; }), cl = [];
+    ws.slice().sort(function (x, y) { return x.d < y.d ? -1 : x.d > y.d ? 1 : (x.s || 0) - (y.s || 0); }).forEach(function (w) {
+      var at = w.s > 1e11 ? fmtAt(new Date(w.s)) : '', du = w.s > 1e11 && w.e > w.s ? fmtDur(w.e - w.s) : '';
+      cl.push([w.n || 'Workout', [fmtDay(w.d), at, du, fmtBig(toDisp(woVol(w))) + ' ' + S.unit].filter(Boolean).join('  ·  ')]);
+    });
+    if (S.goal > 0) cl.push(['Goal', gd + ' of ' + S.goal + ' workouts' + (hit ? '  ·  hit' : '')]);
+    if (streak > 0) cl.push(['Streak', streak + (streak === 1 ? ' week' : ' weeks') + ' in a row on goal']);
+    if (top) cl.push(['Most trained', top + '  ·  ' + lfSetsN(mu[top]) + ' sets']);
+    if (got.length) cl.push([got.length === 1 ? 'Badge won' : 'Badges won', got.map(function (x) { return x.b.n; }).join(', ')]);
+    lfShareCardSheet({ kicker: 'Workout  ·  Week in review', title: range, sub: st.wo + (st.wo === 1 ? ' session' : ' sessions') + '  ·  ' + (S.goal > 0 ? (met ? 'every target hit' : 'goal ' + gd + '/' + S.goal) : (mins ? fmtDur(mins * 60000) : '')),
+      hero: Math.round(toDisp(st.vol)).toLocaleString(), heroL: S.unit + ' moved', stats: [[String(st.sets), 'sets'], [fmtBig(st.reps), 'reps'], [mins ? fmtDur(mins * 60000) : '—', 'time']], prs: prs, lines: cl }, 'lift-week-' + a);
+  });
   /* the week's glow wears a luxury colour's effect too, when the week was met */
   s.el.setAttribute('aria-label', 'Week in review, ' + range);
   done.addEventListener('click', function () { s.close(); });
