@@ -190,12 +190,12 @@ const freeze = (at) => `(() => {
   ok('picking a routine makes it today, for today', (await store(page)).pick.d === '2026-10-30');
   ok('today is the routine', (await page.textContent('#lfPick')).trim() === 'Push' && /Push, Pull, Legs/.test(await page.textContent('.lf-sub')));
   ok('and says two exercises', /2 exercises/.test(await page.textContent('.lf-chips')));
+  /* sampled every frame from inside the page, so a loaded machine cannot make the first look come late */
+  await page.evaluate(() => { window.__rise = []; const f = () => { const s = document.querySelector('.lf-session'); if (s) window.__rise.push(s.getBoundingClientRect().top); if (window.__rise.length < 90) requestAnimationFrame(f); }; requestAnimationFrame(f); });
   await page.click('#lfGo');
-  await page.waitForTimeout(40);
-  const mid = await page.$eval('.lf-session', (e) => e.getBoundingClientRect().top);
-  await settle(page);
-  const end = await page.$eval('.lf-session', (e) => e.getBoundingClientRect().top);
-  ok('the session rises from the foot of the screen', mid > end && end < 60, { mid, end });
+  await settle(page); await page.waitForTimeout(400);
+  const rise = await page.evaluate(() => window.__rise), mid = rise[0], end = rise[rise.length - 1];
+  ok('the session rises from the foot of the screen', mid > end + 150 && end < 60, { mid, end });
   ok('carrying the routine\'s two exercises', (await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent))).join() === 'Bench press,Overhead press');
   ok('with three sets each when they are new', (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length))).join() === '3,3');
   ok('its finish button is the lime one', await page.$eval('#lfFinish', (b) => getComputedStyle(b).backgroundColor) === 'rgb(163, 230, 53)');
