@@ -8209,11 +8209,13 @@ function bdFront(b, trim) {
   var C = CI.data, O = OI.data, H = HI.data, Z = ZI.data;
   /* AN EXOTIC OR A MYTHIC keeps its whole baked medal, and three more masks are cut from it: where the bright bands are, where the dark ones are, and where the main colour is. Two of them are given something to do. */
   var anim = !lock && (b.t === 3 || b.t === 4) && !!fx, RG = null;
-  if (anim) { RG = bdCv(); RG.x = RG.getContext('2d'); RG.im = RG.x.createImageData(BD_FACE, BD_FACE); }
+  var PT = null;
+  if (anim) { RG = bdCv(); RG.x = RG.getContext('2d'); RG.im = RG.x.createImageData(BD_FACE, BD_FACE); PT = bdCv(); PT.x = PT.getContext('2d'); PT.im = PT.x.createImageData(BD_FACE, BD_FACE); }
   for (var y = 0; y < BD_FACE; y++) for (var xx = 0; xx < BD_FACE; xx++) {
     var q = y * BD_FACE + xx, i = q * 4, ux = (xx - u) / u, uy = (u - y) / u;
     if (S[i + 3] < 128) { C[i + 3] = 0; O[i + 1] = 30; O[i + 2] = 255; O[i + 3] = 255; H[i] = H[i + 1] = H[i + 2] = 255; H[i + 3] = 255; Z[i + 3] = 255; continue; }
     var mf = MF[q], gv = GV[q], en;
+    if (anim) { var pk = gv >= .82 ? (fx === 'tempest' ? 'g' : 'c') : pf(ux, uy), pcc = bdFx(fx, pk === 'b' ? 'c' : pk, ux, uy, 0), pd = PT.im.data; pd[i] = pcc[0]; pd[i + 1] = pcc[1]; pd[i + 2] = pcc[2]; pd[i + 3] = 255; }
     if (anim && (gv < .82 ? pf(ux, uy) !== 'b' : fx === 'tempest')) { var rr = RG.im.data, rw = (1 - mf) * 255; rr[i] = rr[i + 1] = rr[i + 2] = rw; rr[i + 3] = 255; }
     if (gv >= .82) en = fx === 'tempest' ? bdFx(fx, 'g', ux, uy, 0) : Ai;
     else if (fx) en = bdFx(fx, pf(ux, uy), ux, uy, q);
@@ -8235,11 +8237,10 @@ function bdFront(b, trim) {
     H[i] = H[i + 1] = H[i + 2] = hh * 255; H[i + 3] = 255;
     Z[i] = Z[i + 1] = Z[i + 2] = (1 - mf) * 255 * (fx === 'tempest' ? .12 : 1); Z[i + 3] = 255;
   }
-  if (anim) RG.x.putImageData(RG.im, 0, 0);
-  var gmap = null; if (anim && fx === 'tempest') { gmap = new Uint8Array(192 * 192); for (var gj = 0; gj < 192; gj++) for (var gi = 0; gi < 192; gi++) gmap[gj * 192 + gi] = GV[Math.floor(gj * BD_FACE / 192) * BD_FACE + Math.floor(gi * BD_FACE / 192)] >= .82 ? 1 : 0; }
+  if (anim) { RG.x.putImageData(RG.im, 0, 0); PT.x.putImageData(PT.im, 0, 0); }
   cc.putImageData(CI, 0, 0); oc.putImageData(OI, 0, 0); hc.putImageData(HI, 0, 0); gz.putImageData(ZI, 0, 0);
   var sm = bdCv(), smc = sm.getContext('2d'); bdBlur(sm, hgt, 1.2, true);
-  return { col: bdTex(col, true), orm: bdTex(orm), n: bdNorm(smc.getImageData(0, 0, BD_FACE, BD_FACE).data, 22), glaze: bdTex(glz), reg: anim ? bdTex(RG) : null, pf: pf, gm: gmap };
+  return { col: bdTex(col, true), orm: bdTex(orm), n: bdNorm(smc.getImageData(0, 0, BD_FACE, BD_FACE).data, 22), glaze: bdTex(glz), reg: anim ? bdTex(RG) : null, pat: anim ? bdTex(PT, true) : null };
 }
 /* the back: plain polished metal, the date engraved into it */
 function bdBack(b, trim) {
@@ -8339,7 +8340,7 @@ function bdDrop(g) {
   if (!g) return;
   g.traverse(function (o) {
     if (o.geometry) o.geometry.dispose();
-    [].concat(o.material || []).forEach(function (m) { ['map', 'metalnessMap', 'roughnessMap', 'bdNorm', 'clearcoatMap'].forEach(function (k) { if (m[k]) m[k].dispose(); }); m.dispose(); });
+    [].concat(o.material || []).forEach(function (m) { ['map', 'metalnessMap', 'roughnessMap', 'bdNorm', 'clearcoatMap', 'alphaMap'].forEach(function (k) { if (m[k]) m[k].dispose(); }); m.dispose(); });
   });
 }
 /* a face as rings from the centre to the bdOutline, so the back can dish inwards */
@@ -8494,16 +8495,17 @@ var BD_SCENE = {};
 var bdExoOrder = null;
 function bdExoIx(id) { if (!bdExoOrder) { var m = {}; Object.keys(BD_HALO).concat(Object.keys(BD_MYTH)).forEach(function (k) { m[k] = 1; }); bdExoOrder = Object.keys(m).sort(); } var i = bdExoOrder.indexOf(id); return i < 0 ? id.length : i; }
 function bdMoveFace(g, flat, zf, mp, b) {
-  var M = 192, ec = document.createElement('canvas'); ec.width = ec.height = M; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec), im = ex.createImageData(M, M), d = im.data, ks = [], ix = bdExoIx(b.id), dir = ix % 2 ? 1 : -1, fx = b.fx;
-  et.encoding = BD3.sRGBEncoding;
-  for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) ks.push(mp.f.gm && mp.f.gm[j * M + i] ? 'g' : mp.f.pf(i / (M - 1) * 2 - 1, 1 - j / (M - 1) * 2));
-  function paint(t) {
-    var sx = Math.sin(t * .15 + ix) * .32, sy = Math.cos(t * .11 + ix * 2) * .32 + t * .018 * dir;
-    for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) { var q = j * M + i, k = q * 4; if (ks[q] === 'b') { d[k + 3] = 0; continue; } var c = bdFx(fx, ks[q], i / (M - 1) * 2 - 1 + sx, 1 - j / (M - 1) * 2 + sy, 0); d[k] = c[0] * .86; d[k + 1] = c[1] * .86; d[k + 2] = c[2] * .86; d[k + 3] = 255; }
-    ex.putImageData(im, 0, 0); et.needsUpdate = true;
-  }
-  var m = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, alphaMap: mp.f.reg, transparent: true, depthWrite: false, toneMapped: false })); m.position.z = zf + .003; m.renderOrder = 6; g.add(m);
-  paint(0); return paint;
+  /* the pattern is baked once at the face's own resolution, and a shader reads it back through a flowing offset every frame, so the lines stay as crisp as the baked ones and the motion is the graphics card's, smooth at any frame rate */
+  var ix = bdExoIx(b.id), uT = { value: 0 }, uP = { value: ix * 1.7 }, dir = ix % 2 ? 1 : -1;
+  var mat = new BD3.MeshBasicMaterial({ map: mp.f.pat, alphaMap: mp.f.reg, transparent: true, depthWrite: false, toneMapped: false });
+  mat.map.wrapS = mat.map.wrapT = BD3.ClampToEdgeWrapping;
+  mat.onBeforeCompile = function (sh) {
+    sh.uniforms.uT = uT; sh.uniforms.uP = uP;
+    sh.fragmentShader = 'uniform float uT; uniform float uP;\nvec2 bdWarp(vec2 p) { float t = uT * ' + (dir * .55).toFixed(2) + ' + uP; return vec2(sin(p.y * 7.0 + t * .9) + .5 * sin(p.y * 19.0 - t * 1.3), cos(p.x * 6.0 + t * .75) + .5 * cos(p.x * 17.0 + t * 1.1)) * .0075 + vec2(sin(t * .22), cos(t * .17)) * .035; }\n' +
+      sh.fragmentShader.replace('texture2D( map, vUv )', 'texture2D( map, vUv + bdWarp( vUv ) )').replace('diffuseColor *= texelColor;', 'diffuseColor *= texelColor * .9;');
+  };
+  var m = new BD3.Mesh(flat(), mat); m.position.z = zf + .003; m.renderOrder = 6; g.add(m);
+  return function (t) { uT.value = t; };
 }
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
@@ -8528,9 +8530,9 @@ function bdMake(b, m, n, pre) {
   var tro = !!BD_TRO[b.sh];
   var f = new BD3.Mesh(tro ? flat() : bdPolar(shp, 0), face(mp.f)); f.position.z = zf + (tro ? .001 : 0); g.add(f);
   var bk = new BD3.Mesh(tro ? flat() : bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf - (tro ? .001 : 0); g.add(bk);
-  if ((b.t === 3 || b.t === 4) && b.fx && !lock && mp.f.reg && mp.f.pf) {
+  if ((b.t === 3 || b.t === 4) && b.fx && !lock && mp.f.reg && mp.f.pat) {
     var paintMove = bdMoveFace(g, flat, zf, mp, b), last = -9;
-    g.userData.cr = function (t) { if (t - last < .08) return; last = t; paintMove(t); };
+    g.userData.cr = function (t) { paintMove(t); };
   }
   /* THE OWNER'S IS GLASS, the only badge that is: a clear body that
      catches the light at every edge, with the lava suspended inside it in
@@ -8745,7 +8747,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd14', bdDbP = null;
+var BD_VER = 'd16', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
@@ -8777,9 +8779,15 @@ function bdPump() {
       var vh = window.innerHeight, bi = 0, bd = 1e12; bdQ.forEach(function (q, i) { var r = q[1].getBoundingClientRect(), d = !r.height ? 1e9 : r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; if (d < bd) { bd = d; bi = i; } });
       var j = bdQ.splice(bi, 1)[0]; if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
-        var aw = bdMake(bdSpec(j[0]), 'silver', 384); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
-        var du = bd3.r.domElement.toDataURL('image/webp', .9); if (du.indexOf('data:image/webp') !== 0) du = bd3.r.domElement.toDataURL('image/png');
-        bdStills[j[2]] = du; bdDbPut(j[2], du); bd3.s.remove(aw); bdDrop(aw); bd3.r.renderLists.dispose();
+        /* one badge that will not draw must never stop the rest, nor stay in the scene to be drawn over every one after it */
+        var aw = null;
+        try {
+          aw = bdMake(bdSpec(j[0]), 'silver', 384); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
+          var du = bd3.r.domElement.toDataURL('image/webp', .9); if (du.indexOf('data:image/webp') !== 0) du = bd3.r.domElement.toDataURL('image/png');
+          bdStills[j[2]] = du; bdDbPut(j[2], du);
+        } catch (e) { }
+        if (aw) { bd3.s.remove(aw); bdDrop(aw); } bd3.r.renderLists.dispose();
+        if (!bdStills[j[2]]) { (window.requestIdleCallback || function (f) { return setTimeout(f, 16); })(next, { timeout: 400 }); return; }
       }
       j[1].src = bdStills[j[2]];
       /* the same picture may be waiting in more than one place */
