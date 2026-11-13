@@ -8479,61 +8479,25 @@ function bdScene(b, n, build) {
 
 /* Every medal is a coin; the one scene left is not in this table (Giant Slayer is built apart), so nothing is drawn as a statue. */
 var BD_SCENE = {};
-/* THE MOVING LIGHT OF AN EXOTIC. A coin keeps its own finish and a sheet of light is laid over its face that never stops moving: HOLO is real foil, a spectrum sliding across in bands; every other finish gets one of six slow patterns in its own colour, which one decided by the badge. Additive and held low, so the number and the picture under it stay as readable as before. */
-function bdExoHue(h, l, a) { return 'hsla(' + ((h % 360) + 360) % 360 + ',100%,' + l + '%,' + a + ')'; }
-var BD_EXO = [
-  /* ripples breathing out from the middle */
-  function (x, u, t, h, h2) { for (var k = 0; k < 5; k++) { var p = ((t * .18 + k / 5) % 1), r = p * u * 1.25; x.strokeStyle = bdExoHue(h + k * 14, 62, .5 * (1 - p)); x.lineWidth = u * (.02 + .03 * (1 - p)); x.beginPath(); x.arc(0, 0, Math.max(.1, r), 0, 6.3); x.stroke(); } },
-  /* a lattice of diamonds drifting corner to corner */
-  function (x, u, t, h, h2) { var s = u * .34, o = (t * .1 % 1) * s; x.lineWidth = u * .014; for (var k = -8; k < 9; k++) { x.strokeStyle = bdExoHue(k % 2 ? h : h2, 62, .42); x.beginPath(); x.moveTo(-u * 1.4 + k * s + o, -u * 1.4); x.lineTo(u * 1.4 + k * s + o, u * 1.4); x.moveTo(u * 1.4 + k * s + o, -u * 1.4); x.lineTo(-u * 1.4 + k * s + o, u * 1.4); x.stroke(); } },
-  /* rays turning slowly, a spoke at a time brighter */
-  function (x, u, t, h, h2) { var n = 14; for (var k = 0; k < n; k++) { var a = k / n * 6.2832 + t * .16, lit = .5 + .5 * Math.sin(t * 1.3 + k * .9); x.fillStyle = bdExoHue(k % 2 ? h : h2, 58, .1 + .34 * lit); x.beginPath(); x.moveTo(0, 0); x.arc(0, 0, u * 1.4, a, a + 6.2832 / n * .55); x.closePath(); x.fill(); } },
-  /* soft waves of light rolling upward */
-  function (x, u, t, h, h2) { for (var k = 0; k < 9; k++) { var y0 = ((k / 9 - t * .07) % 1 + 1) % 1 * 2.6 * u - 1.3 * u; x.strokeStyle = bdExoHue(k % 2 ? h : h2, 62, .5); x.lineWidth = u * .03; x.beginPath(); for (var q = -1.4; q <= 1.4; q += .1) { var yy = y0 + Math.sin(q * 3 + t * 1.4 + k) * u * .07; if (q < -1.35) x.moveTo(q * u, yy); else x.lineTo(q * u, yy); } x.stroke(); } },
-  /* a scan of colour sweeping across in a wide soft band */
-  function (x, u, t, h, h2) { var ph = ((t * .16) % 1) * 3.2 - 1.6, gd = x.createLinearGradient((ph - .5) * u, -u * .5, (ph + .5) * u, u * .5); gd.addColorStop(0, bdExoHue(h, 55, 0)); gd.addColorStop(.5, bdExoHue(h2, 70, .55)); gd.addColorStop(1, bdExoHue(h, 55, 0)); x.fillStyle = gd; x.fillRect(-u * 1.5, -u * 1.5, u * 3, u * 3); x.strokeStyle = bdExoHue(h, 60, .28); x.lineWidth = u * .012; for (var k = -9; k < 10; k++) { x.beginPath(); x.moveTo(k * u * .2, -u * 1.4); x.lineTo(k * u * .2 + u * .5, u * 1.4); x.stroke(); } },
-  /* sparks rising through the metal and fading */
-  function (x, u, t, h, h2) { for (var k = 0; k < 26; k++) { var p = ((t * (.07 + bdR(k) * .08) + bdR(k + 40)) % 1), px = (bdR(k + 9) * 2 - 1) * u * 1.05 + Math.sin(t + k) * u * .04, py = (.9 - p * 1.8) * u, r = u * (.02 + .035 * bdR(k + 3)); x.fillStyle = bdExoHue(k % 2 ? h : h2, 70, Math.sin(p * Math.PI) * .85); x.beginPath(); x.arc(px, py, r, 0, 6.3); x.fill(); } },
-  /* hexagons pulsing inward, one inside the next */
-  function (x, u, t, h, h2) { for (var k = 0; k < 6; k++) { var p = ((t * .2 + k / 6) % 1), r = u * 1.3 * (1 - p); x.strokeStyle = bdExoHue(k % 2 ? h : h2, 62, .55 * Math.sin(p * Math.PI)); x.lineWidth = u * .03; x.beginPath(); for (var q = 0; q < 6; q++) { var a = q * 1.0472 + t * .1; x[q ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); } x.closePath(); x.stroke(); } },
-  /* beads circling the middle on two rings, opposite ways */
-  function (x, u, t, h, h2) { for (var ring = 0; ring < 2; ring++) for (var k = 0; k < 7; k++) { var a = k / 7 * 6.2832 + t * (ring ? -.5 : .4), r = u * (.45 + ring * .35); x.fillStyle = bdExoHue(ring ? h2 : h, 68, .85); x.beginPath(); x.arc(Math.cos(a) * r, Math.sin(a) * r, u * .045, 0, 6.3); x.fill(); x.strokeStyle = bdExoHue(ring ? h2 : h, 60, .22); x.lineWidth = u * .01; x.beginPath(); x.arc(0, 0, r, 0, 6.3); x.stroke(); } },
-  /* two ribbons braiding across, trading places */
-  function (x, u, t, h, h2) { for (var w = 0; w < 4; w++) { x.strokeStyle = bdExoHue(w % 2 ? h : h2, 62, .5); x.lineWidth = u * .05; x.beginPath(); for (var q = -1.4; q <= 1.4; q += .06) { var yy = Math.sin(q * 2.6 + t * .9 + w * 1.57) * u * .42 + (w - 1.5) * u * .12; if (q < -1.35) x.moveTo(q * u, yy); else x.lineTo(q * u, yy); } x.stroke(); } },
-  /* a radar sweep with a fading trail */
-  function (x, u, t, h, h2) { var a0 = t * .9; for (var k = 0; k < 14; k++) { x.fillStyle = bdExoHue(h + k * 3, 60, .5 * (1 - k / 14)); x.beginPath(); x.moveTo(0, 0); x.arc(0, 0, u * 1.4, a0 - k * .07, a0 - k * .07 + .08); x.closePath(); x.fill(); } x.strokeStyle = bdExoHue(h2, 70, .3); x.lineWidth = u * .012; for (var r = 1; r < 4; r++) { x.beginPath(); x.arc(0, 0, u * r * .38, 0, 6.3); x.stroke(); } },
-  /* fine streaks of light falling at a slant */
-  function (x, u, t, h, h2) { for (var k = 0; k < 22; k++) { var px = (bdR(k) * 2.6 - 1.3) * u, p = ((t * (.25 + bdR(k + 5) * .3) + bdR(k + 20)) % 1), py = (p * 3 - 1.5) * u; x.strokeStyle = bdExoHue(k % 2 ? h : h2, 70, .7 * Math.sin(p * Math.PI)); x.lineWidth = u * .02; x.beginPath(); x.moveTo(px, py); x.lineTo(px - u * .12, py + u * .3); x.stroke(); } },
-  /* a grid of dots that breathes in waves */
-  function (x, u, t, h, h2) { for (var i = -6; i <= 6; i++) for (var j = -6; j <= 6; j++) { var d = Math.hypot(i, j), a = .5 + .5 * Math.sin(d * .9 - t * 2.2); x.fillStyle = bdExoHue((i + j) % 2 ? h : h2, 66, .15 + .6 * a); x.beginPath(); x.arc(i * u * .2, j * u * .2, u * (.015 + .03 * a), 0, 6.3); x.fill(); } }
-];
-var bdExoOrder = null;
+/* THE MOVING LIGHT OF AN EXOTIC AND A MYTHIC IS THE FINISH ITSELF. The coin's own pattern (the holo foil, the obsidian sheen, the plasma arcs) is sampled again every frame through a coordinate that slowly turns and drifts, so the real pattern slides across the face; no sparks, stars, beads or rings are drawn on top. Black is nothing under additive light, so the number and the picture stay clear. A mythic samples it twice, the second time the other way round and a little finer, so the two cross. */
+var bdExoOrder = null, bdExoSm = null;
 function bdExoIx(id) { if (!bdExoOrder) { var m = {}; Object.keys(BD_HALO).concat(Object.keys(BD_MYTH)).forEach(function (k) { m[k] = 1; }); bdExoOrder = Object.keys(m).sort(); } var i = bdExoOrder.indexOf(id); return i < 0 ? id.length : i; }
-function bdExoPaint(ctx, N, t, b) {
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.clearRect(0, 0, N, N); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, N, N);
-  var u = N / 2; ctx.translate(u, u); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = ctx.lineJoin = 'round';
-  if (b.fx === 'holo') {
-    /* foil: bands of the whole spectrum, each hue sliding on its own, and a fine ruling over them that flickers as it moves */
-    var hx = bdExoIx(b.id), nb = 9 + hx % 7; ctx.rotate((hx % 6) * .5); for (var k = 0; k < nb; k++) { var ph = ((k / nb + t * (.04 + (hx % 4) * .02)) % 1) * 3 - 1.5; ctx.fillStyle = bdExoHue(((k / nb) * 360 + t * 40 + hx * 31) % 360, 58, .55); ctx.beginPath(); ctx.moveTo((ph - .12) * u, -u * 1.5); ctx.lineTo((ph + .12) * u, -u * 1.5); ctx.lineTo((ph + .12) * u - u * .9, u * 1.5); ctx.lineTo((ph - .12) * u - u * .9, u * 1.5); ctx.closePath(); ctx.fill(); }
-    ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = u * .012; for (var j = -20; j < 21; j++) { var o = ((t * .5) % 1) * u * .05; ctx.beginPath(); ctx.moveTo(j * u * .08 + o, -u * 1.4); ctx.lineTo(j * u * .08 + o - u * .7, u * 1.4); ctx.stroke(); }
-    var gp = ((t * .22) % 1) * 3.4 - 1.7, gg = ctx.createLinearGradient((gp - .25) * u, -u * .25, (gp + .25) * u, u * .25); gg.addColorStop(0, 'rgba(255,255,255,0)'); gg.addColorStop(.5, 'rgba(255,255,255,.7)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = gg; ctx.fillRect(-u * 1.5, -u * 1.5, u * 3, u * 3);
-  } else {
-    /* every one its own: a place in the sorted run of exotics and mythics decides the pattern, and walks the hue round the wheel by the golden angle, so no two share both */
-    var ix = bdExoIx(b.id), h = (ix * 137.508 + 20) % 360, i = ix;
-    BD_EXO[i % BD_EXO.length](ctx, u, t * (.85 + (ix % 5) * .09), h, h + 40 + (ix % 4) * 30);
-    /* a mythic carries a second pattern over the first, turned the other way in colour, so it is never the exotic's one thing */
-    if (b.t === 4) BD_EXO[(i * 5 + 7) % BD_EXO.length === i % BD_EXO.length ? (i + 5) % BD_EXO.length : (i * 5 + 7) % BD_EXO.length](ctx, u, t * 1.3 + 3, h + 150, h + 200 + (i % 3) * 30);
+function bdExoPass(img, M, fx, t, sc, rot, dx, dy, w) {
+  var d = img.data, cs = Math.cos(rot), sn = Math.sin(rot);
+  for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) {
+    var ux = (i / (M - 1) * 2 - 1), uy = (j / (M - 1) * 2 - 1), x = (ux * cs - uy * sn) * sc + dx, y = (ux * sn + uy * cs) * sc + dy, c = bdFx(fx, 'f', x, y, 0), k = (j * M + i) * 4;
+    d[k] = Math.min(255, d[k] + c[0] * w); d[k + 1] = Math.min(255, d[k + 1] + c[1] * w); d[k + 2] = Math.min(255, d[k + 2] + c[2] * w); d[k + 3] = 255;
   }
-  if (b.t === 4) {
-    /* WHAT MAKES A MYTHIC: a slow aurora breathing over the whole face, three comets of light chasing round the rim, and stars that open and close across it. An exotic has one of these things; a mythic has all of them. */
-    var mx = bdExoIx(b.id), mh = (mx * 137.508 + 20) % 360, br = .5 + .5 * Math.sin(t * .7 + mx), ag = ctx.createRadialGradient(Math.cos(t * .3) * u * .3, Math.sin(t * .4) * u * .3, 0, 0, 0, u * 1.3);
-    ag.addColorStop(0, bdExoHue(mh + 160, 60, .22 * br)); ag.addColorStop(.6, bdExoHue(mh + 60, 55, .12)); ag.addColorStop(1, bdExoHue(mh, 50, 0)); ctx.fillStyle = ag; ctx.fillRect(-u, -u, u * 2, u * 2);
-    for (var cm = 0; cm < 3; cm++) for (var tr = 0; tr < 16; tr++) { var ca = t * (.8 + cm * .15) * (cm % 2 ? -1 : 1) + cm * 2.0944 - tr * .045 * (cm % 2 ? -1 : 1); ctx.strokeStyle = bdExoHue(mh + cm * 50, 72, .9 * (1 - tr / 16)); ctx.lineWidth = u * .05 * (1 - tr / 20); ctx.beginPath(); ctx.arc(0, 0, u * .93, ca, ca + .06 * (cm % 2 ? -1 : 1)); ctx.stroke(); }
-    for (var st = 0; st < 8; st++) { var sa = .5 + .5 * Math.sin(t * (1.2 + bdR(st) * 1.4) + st * 2.1), sx = (bdR(st + 60) * 2 - 1) * u * .8, sy = (bdR(st + 90) * 2 - 1) * u * .8, sr = u * (.03 + .05 * sa); ctx.fillStyle = 'rgba(255,255,255,' + (.12 + .5 * sa) + ')'; ctx.beginPath(); ctx.moveTo(sx, sy - sr * 2); ctx.lineTo(sx + sr * .35, sy - sr * .35); ctx.lineTo(sx + sr * 2, sy); ctx.lineTo(sx + sr * .35, sy + sr * .35); ctx.lineTo(sx, sy + sr * 2); ctx.lineTo(sx - sr * .35, sy + sr * .35); ctx.lineTo(sx - sr * 2, sy); ctx.lineTo(sx - sr * .35, sy - sr * .35); ctx.closePath(); ctx.fill(); }
-  }
-  ctx.globalCompositeOperation = 'source-over';
 }
-var BD_EXOHUE = { ice: 195, aurora: 150, neon: 320, opal: 270, galaxy: 255, emerald: 145, lava: 18, molten: 28, sunrise: 38, carbon: 200, plasma: 285, crystal: 190, obsidian: 40, nebula: 280, prism: 300, void: 25, inferno: 14, circuit: 150, marble: 45, storm: 200, tempest: 215, magma: 15 };
+function bdExoPaint(ctx, N, t, b) {
+  var M = 72, ix = bdExoIx(b.id), dir = ix % 2 ? 1 : -1;
+  if (!bdExoSm) { bdExoSm = document.createElement('canvas'); bdExoSm.width = bdExoSm.height = M; }
+  var sx = bdExoSm.getContext('2d'), img = sx.createImageData(M, M), sc = .85 + (ix % 5) * .12;
+  bdExoPass(img, M, b.fx, t, sc, dir * (t * .12 + ix), Math.sin(t * .21 + ix) * .5, t * .09 * dir, b.t === 4 ? .3 : .38);
+  if (b.t === 4) bdExoPass(img, M, b.fx, t, sc * 1.35, -dir * (t * .09 + ix * 2), Math.cos(t * .17 + ix) * .5, -t * .11 * dir, .24);
+  sx.putImageData(img, 0, 0);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, N, N); ctx.imageSmoothingEnabled = true; ctx.drawImage(bdExoSm, 0, 0, N, N);
+}
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
@@ -8559,7 +8523,7 @@ function bdMake(b, m, n, pre) {
   var bk = new BD3.Mesh(tro ? flat() : bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf - (tro ? .001 : 0); g.add(bk);
   if ((b.t === 3 || b.t === 4) && b.fx && !lock) {
     var ec = document.createElement('canvas'); ec.width = ec.height = 256; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec); et.encoding = BD3.sRGBEncoding;
-    [[zf + .003, 0], [-zf - .003, Math.PI]].forEach(function (zr) { var mh = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, transparent: true, opacity: (b.fx === 'holo' ? .44 : .32) + (b.t === 4 ? .1 : 0), blending: BD3.AdditiveBlending, depthWrite: false, toneMapped: false })); mh.position.z = zr[0]; mh.rotation.y = zr[1]; mh.renderOrder = 6; g.add(mh); });
+    [[zf + .003, 0], [-zf - .003, Math.PI]].forEach(function (zr) { var mh = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, transparent: true, opacity: 1, blending: BD3.AdditiveBlending, depthWrite: false, toneMapped: false })); mh.position.z = zr[0]; mh.rotation.y = zr[1]; mh.renderOrder = 6; g.add(mh); });
     var last = -9; bdExoPaint(ex, 256, 0, b); et.needsUpdate = true;
     g.userData.cr = function (t) { if (t - last < .04) return; last = t; bdExoPaint(ex, 256, t, b); et.needsUpdate = true; };
   }
@@ -8804,7 +8768,9 @@ function bdPump() {
     if (!bd3) { var r = bdRenderer(360, 360, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bd3 = { r: r, s: sc, c: cam }; }
     (function next() {
       if (bdViewOn) { bdBusy = false; return; }
-      var j = bdQ.shift(); if (!j) { bdBusy = false; return; }
+      /* the badge nearest the screen goes first, so what you are looking at fills in before what is far down the shelf */
+      var vh = window.innerHeight, bi = 0, bd = 1e12; bdQ.forEach(function (q, i) { var r = q[1].getBoundingClientRect(), d = !r.height ? 1e9 : r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; if (d < bd) { bd = d; bi = i; } });
+      var j = bdQ.splice(bi, 1)[0]; if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
         var aw = bdMake(bdSpec(j[0]), 'silver', 384); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
         var du = bd3.r.domElement.toDataURL('image/webp', .9); if (du.indexOf('data:image/webp') !== 0) du = bd3.r.domElement.toDataURL('image/png');
@@ -8830,7 +8796,6 @@ function lfCoinBtn(x, size) {
   if (x.d && !x.fr && lfShow().indexOf(x.b.id) >= 0) b.classList.add('is-sc');
   b.setAttribute('aria-label', x.b.n + (x.b.lv ? ', level ' + x.b.lv : '') + (x.d ? ', earned ' + fmtDay(x.d) : ', not yet earned') + '. Open');
   bdStill(x, $('img', b));
-  if (x.d && x.b.t === 4 && !BD_SCENE[x.b.id]) b.appendChild(el('<u class="lf-myth" aria-hidden="true"><s></s><s></s></u>'));
   if (x.d && x.b.t === 5 && x.b.id !== 'creator') {
     /* the molten light is masked to the badge's own picture, so it flows through the badge and nowhere else */
     var lv = el('<u class="lf-lava" aria-hidden="true"><s></s><i></i></u>'), emb = el('<u class="lf-embers" aria-hidden="true"><s></s><s></s><s></s><s></s><s></s><s></s></u>'), im = $('img', b);
