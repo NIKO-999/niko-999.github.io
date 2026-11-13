@@ -7732,10 +7732,11 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'scallop', stormc: 'trap', summit: 'hex', sands: 'coin24', vein: 'oct', wayf: 'sun', dontmiss: 'hept', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'drop', ds2: 'drop', ds3: 'drop', dsx: 'drop', dsm: 'drop', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'scallop', stormc: 'trap', summit: 'hex', sands: 'coin24', vein: 'oct', wayf: 'sun', dontmiss: 'hept', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'scallop', ds2: 'scallop', ds3: 'scallop', dsx: 'scallop', dsm: 'scallop', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
+  abs200: 'oct', abs400: 'burst',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
-  tgt12: 'rosette', allmus4: 'trid', post50: 'hextall', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
+  tgt12: 'rosette', allmus4: 'trid', post50: 'hex', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
 /* the two machines share a colour and each has its own pattern: treads for the stairs, a gradient for the incline */
 var BD_PT = { stair10: 'stairs', stairhr: 'stairs', incl10: 'incline', inclhr: 'incline', cdwk: 'incline', cardio100: 'stairs', cdh50: 'incline' };
 /* a glyph a smaller face has to make room for: how big, and how far down */
@@ -8742,7 +8743,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd17', bdDbP = null;
+var BD_VER = 'd19', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
@@ -8771,7 +8772,7 @@ function bdPump() {
     (function next() {
       if (bdViewOn) { bdBusy = false; return; }
       /* the badge nearest the screen goes first, so what you are looking at fills in before what is far down the shelf */
-      var vh = window.innerHeight, bi = 0, bd = 1e12; bdQ.forEach(function (q, i) { var r = q[1].getBoundingClientRect(), d = !r.height ? 1e9 : r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; if (d < bd) { bd = d; bi = i; } });
+      var vh = window.innerHeight, bi = 0, bd = 1e12; bdQ.forEach(function (q, i) { var r = (q[1].parentNode || q[1]).getBoundingClientRect(), d = !r.height ? 1e9 : r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; if (d < bd) { bd = d; bi = i; } });
       var j = bdQ.splice(bi, 1)[0]; if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
         /* one badge that will not draw must never stop the rest, nor stay in the scene to be drawn over every one after it */
