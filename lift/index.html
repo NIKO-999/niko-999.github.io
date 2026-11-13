@@ -951,9 +951,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @keyframes lf-breathe { 0%, 100% { opacity: .5; transform: scale(.94); } 50% { opacity: .95; transform: scale(1.04); } }
 .lf-cv-stage.is-fx { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 40%, transparent), transparent 75%); }
 .lf-cv-tier.is-fx { color: #0d0a14; background: var(--gl); }
-.lf-coin.is-fx.is-t3::before { inset: -18%; background: conic-gradient(from 0deg, transparent 0 8%, color-mix(in srgb, var(--gl) 70%, transparent) 20%, rgba(255,255,255,.5) 26%, color-mix(in srgb, var(--gl) 70%, transparent) 32%, transparent 46% 58%, color-mix(in srgb, var(--gl) 60%, transparent) 72%, rgba(255,255,255,.4) 77%, color-mix(in srgb, var(--gl) 60%, transparent) 82%, transparent 94%);
-  -webkit-mask: radial-gradient(closest-side, transparent 58%, #000 70%, #000 88%, transparent 100%); mask: radial-gradient(closest-side, transparent 58%, #000 70%, #000 88%, transparent 100%);
-  filter: blur(3px); opacity: 1; animation: lf-halo 7s linear infinite; }
+.lf-coin.is-fx.is-t3::before { inset: -26%; filter: blur(8px); opacity: .9; }
 .lf-coin.is-fx.is-t3 img { filter: drop-shadow(0 0 12px color-mix(in srgb, var(--gl) 85%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
 .lf-cv-stage.is-fx.is-t3 { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 58%, transparent), color-mix(in srgb, var(--gl) 18%, transparent) 55%, transparent 80%); }
 .lf-coin.is-sn img { filter: drop-shadow(0 0 9px color-mix(in srgb, var(--gl) 60%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); }
@@ -8203,10 +8201,14 @@ function bdFront(b, trim) {
   var cc = col.getContext('2d'), oc = orm.getContext('2d'), hc = hgt.getContext('2d'), gz = glz.getContext('2d');
   var CI = cc.createImageData(BD_FACE, BD_FACE), OI = oc.createImageData(BD_FACE, BD_FACE), HI = hc.createImageData(BD_FACE, BD_FACE), ZI = gz.createImageData(BD_FACE, BD_FACE);
   var C = CI.data, O = OI.data, H = HI.data, Z = ZI.data;
+  /* AN EXOTIC OR A MYTHIC keeps its whole baked medal, and three more masks are cut from it: where the bright bands are, where the dark ones are, and where the main colour is. Two of them are given something to do. */
+  var anim = !lock && (b.t === 3 || b.t === 4) && !!fx, RG = null;
+  if (anim) { RG = { b: bdCv(), d: bdCv(), c: bdCv() }; ['b', 'd', 'c'].forEach(function (k) { var cx = RG[k].getContext('2d'); RG[k].x = cx; RG[k].im = cx.createImageData(BD_FACE, BD_FACE); }); }
   for (var y = 0; y < BD_FACE; y++) for (var xx = 0; xx < BD_FACE; xx++) {
     var q = y * BD_FACE + xx, i = q * 4, ux = (xx - u) / u, uy = (u - y) / u;
     if (S[i + 3] < 128) { C[i + 3] = 0; O[i + 1] = 30; O[i + 2] = 255; O[i + 3] = 255; H[i] = H[i + 1] = H[i + 2] = 255; H[i + 3] = 255; Z[i + 3] = 255; continue; }
     var mf = MF[q], gv = GV[q], en;
+    if (anim && gv < .82) { var rk = pf(ux, uy), rr = RG[rk === 'b' || rk === 'd' ? rk : 'c'].im.data, rw = (1 - mf) * 255; rr[i] = rr[i + 1] = rr[i + 2] = rw; rr[i + 3] = 255; }
     if (gv >= .82) en = Ai;
     else if (fx) en = bdFx(fx, pf(ux, uy), ux, uy, q);
     else if (sn) {
@@ -8227,9 +8229,10 @@ function bdFront(b, trim) {
     H[i] = H[i + 1] = H[i + 2] = hh * 255; H[i + 3] = 255;
     Z[i] = Z[i + 1] = Z[i + 2] = (1 - mf) * 255; Z[i + 3] = 255;
   }
+  if (anim) ['b', 'd', 'c'].forEach(function (k) { RG[k].x.putImageData(RG[k].im, 0, 0); });
   cc.putImageData(CI, 0, 0); oc.putImageData(OI, 0, 0); hc.putImageData(HI, 0, 0); gz.putImageData(ZI, 0, 0);
   var sm = bdCv(), smc = sm.getContext('2d'); bdBlur(sm, hgt, 1.2, true);
-  return { col: bdTex(col, true), orm: bdTex(orm), n: bdNorm(smc.getImageData(0, 0, BD_FACE, BD_FACE).data, 22), glaze: bdTex(glz) };
+  return { col: bdTex(col, true), orm: bdTex(orm), n: bdNorm(smc.getImageData(0, 0, BD_FACE, BD_FACE).data, 22), glaze: bdTex(glz), reg: anim ? { b: bdTex(RG.b), d: bdTex(RG.d), c: bdTex(RG.c) } : null };
 }
 /* the back: plain polished metal, the date engraved into it */
 function bdBack(b, trim) {
@@ -8479,24 +8482,49 @@ function bdScene(b, n, build) {
 
 /* Every medal is a coin; the one scene left is not in this table (Giant Slayer is built apart), so nothing is drawn as a statue. */
 var BD_SCENE = {};
-/* THE MOVING LIGHT OF AN EXOTIC AND A MYTHIC IS THE FINISH ITSELF. The coin's own pattern (the holo foil, the obsidian sheen, the plasma arcs) is sampled again every frame through a coordinate that slowly turns and drifts, so the real pattern slides across the face; no sparks, stars, beads or rings are drawn on top. Black is nothing under additive light, so the number and the picture stay clear. A mythic samples it twice, the second time the other way round and a little finer, so the two cross. */
-var bdExoOrder = null, bdExoSm = null;
+/* THE MOVING PARTS OF AN EXOTIC AND A MYTHIC. The medal stays as it was baked, every colour of it; two of its coloured regions are given something to do, and what they do is chosen from the colour of the finish: blue is water and lightning, orange is lava and slow flame, purple is a nebula with rocks drifting through, green is slow aurora, and the foil finishes slide their own spectrum. Each is drawn only inside its own region, in light, so the rest of the medal is untouched. */
+var bdExoOrder = null;
 function bdExoIx(id) { if (!bdExoOrder) { var m = {}; Object.keys(BD_HALO).concat(Object.keys(BD_MYTH)).forEach(function (k) { m[k] = 1; }); bdExoOrder = Object.keys(m).sort(); } var i = bdExoOrder.indexOf(id); return i < 0 ? id.length : i; }
-function bdExoPass(img, M, fx, t, sc, rot, dx, dy, w) {
-  var d = img.data, cs = Math.cos(rot), sn = Math.sin(rot);
-  for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) {
-    var ux = (i / (M - 1) * 2 - 1), uy = (j / (M - 1) * 2 - 1), x = (ux * cs - uy * sn) * sc + dx, y = (ux * sn + uy * cs) * sc + dy, c = bdFx(fx, 'f', x, y, 0), k = (j * M + i) * 4;
-    d[k] = Math.min(255, d[k] + c[0] * w); d[k + 1] = Math.min(255, d[k + 1] + c[1] * w); d[k + 2] = Math.min(255, d[k + 2] + c[2] * w); d[k + 3] = 255;
-  }
+function bdHsl(h, l, a) { return 'hsla(' + (((h % 360) + 360) % 360) + ',100%,' + l + '%,' + a + ')'; }
+function bdGlowHue(fx) { var c = bdHex(BD_FXGL[fx] || '#8d93a6'), r = c[0] / 255, g = c[1] / 255, b = c[2] / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (d < .12) return -1; var h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return (h * 60 + 360) % 360; }
+var BD_MOVE = {
+  /* water: long waves rolling across */
+  waves: function (x, u, t, h) { for (var k = 0; k < 9; k++) { var y0 = ((k / 9 + t * .035) % 1) * 2.8 * u - 1.4 * u; x.strokeStyle = bdHsl(h + (k % 3) * 12, 62, .55); x.lineWidth = u * .045; x.beginPath(); for (var q = -1.4; q <= 1.4; q += .07) { var yy = y0 + Math.sin(q * 2.6 + t * .8 + k * .9) * u * .09; if (q < -1.35) x.moveTo(q * u, yy); else x.lineTo(q * u, yy); } x.stroke(); } },
+  /* a strike of lightning every couple of seconds, branching, gone in a breath */
+  lightning: function (x, u, t, h) { var P = 2.4, n = Math.floor(t / P), f = (t % P) / P, a = f < .16 ? 1 - f / .16 : 0; if (a <= 0) return; var sd = n * 7.3, px = (bdR(sd) * 1.6 - .8) * u, py = -u * 1.4; x.lineJoin = 'round'; [[u * .09, .22], [u * .03, 1]].forEach(function (w) { x.strokeStyle = bdHsl(h, w[1] > .5 ? 92 : 62, a * w[1]); x.lineWidth = w[0]; x.beginPath(); var qx = px, qy = py; x.moveTo(qx, qy); for (var k = 1; k <= 11; k++) { qx += (bdR(sd + k) - .5) * u * .34; qy = py + k / 11 * u * 2.8; x.lineTo(qx, qy); } x.stroke(); }); },
+  /* lava: slow molten masses rising, cooling to red at the top */
+  lava: function (x, u, t, h) { for (var k = 0; k < 8; k++) { var p = ((t * (.025 + bdR(k) * .02) + bdR(k + 11)) % 1), cx = (bdR(k + 3) * 2 - 1) * u * .95 + Math.sin(t * .3 + k) * u * .08, cy = (1 - p * 2.2) * u * 1.2, r = u * (.38 + bdR(k + 5) * .3), g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, bdHsl(h + 18, 62, .7 * Math.sin(Math.min(1, p * 1.15) * Math.PI))); g.addColorStop(1, bdHsl(h - 8, 45, 0)); x.fillStyle = g; x.fillRect(cx - r, cy - r, r * 2, r * 2); } },
+  /* slow flame: tall tongues swaying and rising */
+  flame: function (x, u, t, h) { for (var k = 0; k < 7; k++) { var bx = (k / 6 * 2 - 1) * u * .95, ph = t * (.5 + bdR(k) * .35) + k * 1.7, hh = u * (.7 + .35 * Math.sin(ph)), sw = Math.sin(ph * .8) * u * .1, g = x.createLinearGradient(0, u * 1.2, 0, u * 1.2 - hh * 1.6); g.addColorStop(0, bdHsl(h + 10, 55, .7)); g.addColorStop(.5, bdHsl(h + 30, 62, .35)); g.addColorStop(1, bdHsl(h + 45, 70, 0)); x.fillStyle = g; x.beginPath(); x.moveTo(bx - u * .17, u * 1.2); x.quadraticCurveTo(bx - u * .12 + sw, u * 1.2 - hh * .8, bx + sw * 1.6, u * 1.2 - hh * 1.6); x.quadraticCurveTo(bx + u * .12 + sw, u * 1.2 - hh * .8, bx + u * .17, u * 1.2); x.closePath(); x.fill(); } },
+  /* a nebula: clouds of colour drifting through each other, and a faint grain of far stars that breathe */
+  nebula: function (x, u, t, h) { for (var k = 0; k < 5; k++) { var cx = Math.cos(t * (.04 + k * .01) + k * 1.9) * u * .8, cy = Math.sin(t * (.05 + k * .008) + k * 2.3) * u * .8, r = u * (.7 + (k % 2) * .25), g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, bdHsl(h + (k % 2 ? 55 : 0), 58, .5)); g.addColorStop(1, bdHsl(h, 40, 0)); x.fillStyle = g; x.fillRect(cx - r, cy - r, r * 2, r * 2); } for (var s = 0; s < 40; s++) { var tw = .5 + .5 * Math.sin(t * (.6 + bdR(s) * .9) + s * 3.1); x.fillStyle = 'rgba(255,255,255,' + .55 * tw * tw + ')'; x.fillRect((bdR(s + 30) * 2 - 1) * u * 1.3, (bdR(s + 70) * 2 - 1) * u * 1.3, u * .012, u * .012); } },
+  /* rocks drifting diagonally through, turning, edged with light and trailing a thin tail */
+  rocks: function (x, u, t, h) { for (var k = 0; k < 4; k++) { var sp = .03 + bdR(k) * .03, p = ((t * sp + bdR(k + 9)) % 1), px = (p * 3.2 - 1.6) * u, py = (-.9 + bdR(k + 2) * 1.8 + p * .5) * u, r = u * (.1 + bdR(k + 6) * .12), a = t * (.25 + bdR(k + 4) * .3) + k; x.strokeStyle = bdHsl(h + 20, 78, .5); x.lineWidth = u * .012; x.beginPath(); x.moveTo(px, py); x.lineTo(px - u * .6, py - u * .19); x.stroke(); x.strokeStyle = bdHsl(h + 40, 85, .75); x.lineWidth = u * .02; x.fillStyle = bdHsl(h, 30, .12); x.beginPath(); for (var v = 0; v < 8; v++) { var va = a + v / 8 * 6.2832, vr = r * (.7 + .3 * bdR(k * 9 + v)); x[v ? 'lineTo' : 'moveTo'](px + Math.cos(va) * vr, py + Math.sin(va) * vr); } x.closePath(); x.fill(); x.stroke(); } },
+  /* slow aurora: tall curtains of light swaying */
+  aurora: function (x, u, t, h) { for (var k = 0; k < 5; k++) { var cx = (k / 4 * 2 - 1) * u * .9 + Math.sin(t * .22 + k * 1.3) * u * .22, wd = u * (.3 + .1 * Math.sin(t * .17 + k)), g = x.createLinearGradient(cx - wd, 0, cx + wd, 0); g.addColorStop(0, bdHsl(h + k * 14, 55, 0)); g.addColorStop(.5, bdHsl(h + k * 14, 62, .5 * (.6 + .4 * Math.sin(t * .35 + k * 2)))); g.addColorStop(1, bdHsl(h + k * 14, 55, 0)); x.fillStyle = g; x.fillRect(cx - wd, -u * 1.3, wd * 2, u * 2.6); } },
+  /* mist: slow soft clouds, for a colour with nothing to say but calm */
+  mist: function (x, u, t, h) { for (var k = 0; k < 4; k++) { var cx = Math.cos(t * .05 + k * 1.7) * u * .7, cy = Math.sin(t * .04 + k * 2.1) * u * .7, r = u * .8, g = x.createRadialGradient(cx, cy, 0, cx, cy, r); g.addColorStop(0, bdHsl(h + k * 12, 60, .4)); g.addColorStop(1, bdHsl(h, 40, 0)); x.fillStyle = g; x.fillRect(cx - r, cy - r, r * 2, r * 2); } },
+  /* foil: the spectrum in broad bands sliding at a slant */
+  foil: function (x, u, t, h) { for (var k = 0; k < 10; k++) { var ph = ((k / 10 + t * .045) % 1) * 3 - 1.5; x.fillStyle = bdHsl((k / 10) * 360 + t * 12, 60, .6); x.beginPath(); x.moveTo((ph - .13) * u, -u * 1.5); x.lineTo((ph + .13) * u, -u * 1.5); x.lineTo((ph + .13) * u - u * .9, u * 1.5); x.lineTo((ph - .13) * u - u * .9, u * 1.5); x.closePath(); x.fill(); } },
+  /* a wide soft band of light sweeping across, for metals */
+  sheen: function (x, u, t, h) { var ph = ((t * .09) % 1) * 3.4 - 1.7, g = x.createLinearGradient((ph - .35) * u, -u * .35, (ph + .35) * u, u * .35); g.addColorStop(0, bdHsl(h, 60, 0)); g.addColorStop(.5, bdHsl(h, 70, .7)); g.addColorStop(1, bdHsl(h, 60, 0)); x.fillStyle = g; x.fillRect(-u * 1.5, -u * 1.5, u * 3, u * 3); }
+};
+/* which two moving parts a finish gets, by its colour */
+function bdMoves(fx) {
+  if (fx === 'holo' || fx === 'prism' || fx === 'opal') return [['foil', 0], ['sheen', 200]];
+  var h = bdGlowHue(fx);
+  if (h < 0) return [['sheen', 210], ['mist', 220]];
+  if (h < 50 || h > 340) return [['lava', h], ['flame', h]];
+  if (h < 90) return [['sheen', h], ['aurora', h]];
+  if (h < 175) return [['aurora', h], ['mist', h + 20]];
+  if (h < 262) return [['waves', h], ['lightning', h + 10]];
+  return [['nebula', h], ['rocks', h]];
 }
-function bdExoPaint(ctx, N, t, b) {
-  var M = 72, ix = bdExoIx(b.id), dir = ix % 2 ? 1 : -1;
-  if (!bdExoSm) { bdExoSm = document.createElement('canvas'); bdExoSm.width = bdExoSm.height = M; }
-  var sx = bdExoSm.getContext('2d'), img = sx.createImageData(M, M), sc = .85 + (ix % 5) * .12;
-  bdExoPass(img, M, b.fx, t, sc, dir * (t * .12 + ix), Math.sin(t * .21 + ix) * .5, t * .09 * dir, b.t === 4 ? .75 : 1);
-  if (b.t === 4) bdExoPass(img, M, b.fx, t, sc * 1.35, -dir * (t * .09 + ix * 2), Math.cos(t * .17 + ix) * .5, -t * .11 * dir, .4);
-  sx.putImageData(img, 0, 0);
-  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, N, N); ctx.imageSmoothingEnabled = true; ctx.drawImage(bdExoSm, 0, 0, N, N);
+function bdMoveLayer(g, flat, zf, region, kind, hue) {
+  var ec = document.createElement('canvas'); ec.width = ec.height = 192; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec), u = 96; et.encoding = BD3.sRGBEncoding;
+  function paint(t) { ex.setTransform(1, 0, 0, 1, 0, 0); ex.globalCompositeOperation = 'source-over'; ex.fillStyle = '#000'; ex.fillRect(0, 0, 192, 192); ex.translate(u, u); ex.globalCompositeOperation = 'lighter'; ex.lineCap = ex.lineJoin = 'round'; BD_MOVE[kind](ex, u, t, hue); }
+  var m = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, alphaMap: region, transparent: true, blending: BD3.AdditiveBlending, depthWrite: false, toneMapped: false, opacity: .85 })); m.position.z = zf + .003; m.renderOrder = 6; g.add(m);
+  paint(0); et.needsUpdate = true; return function (t) { paint(t); et.needsUpdate = true; };
 }
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
@@ -8521,12 +8549,11 @@ function bdMake(b, m, n, pre) {
   var tro = !!BD_TRO[b.sh];
   var f = new BD3.Mesh(tro ? flat() : bdPolar(shp, 0), face(mp.f)); f.position.z = zf + (tro ? .001 : 0); g.add(f);
   var bk = new BD3.Mesh(tro ? flat() : bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf - (tro ? .001 : 0); g.add(bk);
-  if ((b.t === 3 || b.t === 4) && b.fx && !lock && mp.f.glaze) {
-    /* THE ENAMEL ITSELF MOVES: the moving pattern is laid over the face through the enamel's own mask, opaque, so it stands where the baked pattern stood; the walls, the number and the picture are not in the mask and stay metal. Nothing is drawn on top of the pattern. */
-    var ec = document.createElement('canvas'); ec.width = ec.height = 256; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec); et.encoding = BD3.sRGBEncoding;
-    var em = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, alphaMap: mp.f.glaze, transparent: true, depthWrite: false, toneMapped: false })); em.position.z = zf + .003; em.renderOrder = 6; g.add(em);
-    var last = -9; bdExoPaint(ex, 256, 0, b); et.needsUpdate = true;
-    g.userData.cr = function (t) { if (t - last < .04) return; last = t; bdExoPaint(ex, 256, t, b); et.needsUpdate = true; };
+  if ((b.t === 3 || b.t === 4) && b.fx && !lock && mp.f.reg) {
+    /* two of the medal's coloured regions move, chosen by the badge's place in the run so neighbours differ; the rest of it is as it was baked */
+    var mv = bdMoves(b.fx), ixx = bdExoIx(b.id), RN = ['d', 'c', 'b'], ra = RN[ixx % 3], rb = RN[(ixx + 1 + (ixx >> 2) % 2) % 3];
+    var ticks = [bdMoveLayer(g, flat, zf, mp.f.reg[ra], mv[0][0], mv[0][1]), bdMoveLayer(g, flat, zf + .001, mp.f.reg[rb], mv[1][0], mv[1][1])], last = -9;
+    g.userData.cr = function (t) { if (t - last < .045) return; last = t; ticks[0](t); ticks[1](t); };
   }
   /* THE OWNER'S IS GLASS, the only badge that is: a clear body that
      catches the light at every edge, with the lava suspended inside it in
@@ -8741,7 +8768,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd7', bdDbP = null;
+var BD_VER = 'd8', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
