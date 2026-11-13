@@ -618,6 +618,11 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ws-ic .lf-ic { width: 16px; height: 16px; }
 .lf-ws-l.is-fire .lf-ws-ic { color: #ff8a3d; background: color-mix(in srgb, #ff8a3d 18%, transparent); }
 .lf-ws-l.is-crown .lf-ws-ic { color: #f5c542; background: color-mix(in srgb, #f5c542 18%, transparent); }
+.lf-ws-wos { text-align: left; }
+.lf-ws-wo { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 14px; background: var(--card); margin-top: 8px; }
+.lf-ws-wo b { display: block; font-size: 14px; font-weight: 700; }
+.lf-ws-wo span { display: block; font-size: 11px; color: var(--dim); margin-top: 2px; }
+.lf-ws-wo em { font-style: normal; font-size: 13px; font-weight: 600; color: var(--dim); white-space: nowrap; }
 .lf-ws-coins { display: flex; flex-wrap: wrap; gap: 14px; }
 .lf-ws-coins .lf-bdi { width: 76px; text-align: center; }
 .lf-ws-coins .lf-bdi b { font-size: 11px; }
@@ -3935,7 +3940,6 @@ function lfMonthSheet(m) {
   b.appendChild(ln);
   if (d.prs.length) { var pl = el('<div class="lf-fin-l" id="lfMoPr"><div class="lf-cap">Records this month</div><div class="lf-tags"></div></div>'); d.prs.slice(0, 12).forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
   var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= d.a && x.d <= d.z; });
-  if (got.length) { var bl = el('<div class="lf-fin-l" id="lfMoBg"><div class="lf-cap">Badges this month</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfMoDone">On to ' + MON[(m.getMonth() + 1) % 12] + '</button>');
   var shr = el('<button type="button" class="lf-btn is-full" id="lfMoShare">Share to story</button>');
   var s = lfSheet({ title: '', body: b, foot: [shr, done], full: true, cls: 'lf-wsh' }); if (met) s.el.classList.add('is-met');
@@ -4025,6 +4029,15 @@ function lfWeekSheet(m) {
     days.appendChild(dv);
   }
   b.appendChild(lfSum([[st.sets, 'sets'], [fmtBig(st.reps), 'reps'], [mins ? fmtDur(mins * 60000) : '—', 'time']]));
+  /* EVERY WORKOUT OF THE WEEK, with the day and the hour it was started */
+  var wl = el('<div class="lf-fin-l lf-ws-wos" id="lfWsWos"><div class="lf-cap">Workouts</div></div>');
+  ws.slice().sort(function (x, y) { return x.d < y.d ? -1 : x.d > y.d ? 1 : (x.s || 0) - (y.s || 0); }).forEach(function (w) {
+    var at = w.s > 1e11 ? new Date(w.s).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '', du = w.s > 1e11 && w.e > w.s ? fmtDur(w.e - w.s) : '';
+    var row = el('<div class="lf-ws-wo"><div><b></b><span></span></div><em class="lf-num"></em></div>');
+    $('b', row).textContent = w.n || 'Workout'; $('span', row).textContent = [fmtDay(w.d), at, du].filter(Boolean).join(' · ');
+    $('em', row).textContent = fmtBig(toDisp(woVol(w))) + ' ' + S.unit; wl.appendChild(row);
+  });
+  if (ws.length) b.appendChild(wl);
   /* the lines that make a week a week */
   var ln = el('<div class="lf-ws-lines"></div>');
   function line(ic, txt, cls) { var x = el('<div class="lf-ws-l"><span class="lf-ws-ic"></span><span></span></div>'); $('.lf-ws-ic', x).innerHTML = ic; $('span:last-child', x).textContent = txt; if (cls) x.classList.add(cls); ln.appendChild(x); }
@@ -4064,8 +4077,6 @@ function lfWeekSheet(m) {
     if (before >= 0 && inW > 0 && inW > before + 1e-9 && lfPrOk(z, inW, before)) prs.push(exName(id, exIds[id]));
   });
   if (met && prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
-  var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= a && x.d <= z; });
-  if (met && got.length) { var bl = el('<div class="lf-fin-l" id="lfWsBg"><div class="lf-cap">Badges this week</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (met ? 'On to next week' : 'Done') + '</button>');
   var s = lfSheet({ title: '', body: b, foot: [done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
   /* the week's glow wears a luxury colour's effect too, when the week was met */
