@@ -1030,9 +1030,9 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @media (prefers-reduced-motion: reduce) { .lf-coin.is-fx.is-t5::before, .lf-coin.is-fx.is-t5 img, .lf-lava s, .lf-lava i, .lf-spk s, .lf-embers s, .lf-cv-stage.is-fx.is-t5::before, .lf-cv-tier.is-owner { animation: none; } }
 /* MYTHIC: a prism ring turning round it, sparks in orbit the other way,
    and the badge itself breathing through the colours of its finish */
-.lf-coin.is-fx.is-t4::before { inset: -22%; background: conic-gradient(from 0deg, #ff4f8b, #ffb347, #fff36b, #3dffb0, #4fc3ff, #a26bff, #ff4f8b);
-  -webkit-mask: radial-gradient(closest-side, transparent 62%, #000 70%, #000 84%, transparent 96%); mask: radial-gradient(closest-side, transparent 62%, #000 70%, #000 84%, transparent 96%);
-  filter: blur(2px) saturate(1.3); opacity: .9; animation: lf-halo 4s linear infinite; }
+.lf-coin.is-fx.is-t4::before { inset: -34%; background: conic-gradient(from 0deg, #ff4f8b, #ffb347, #fff36b, #3dffb0, #4fc3ff, #a26bff, #ff4f8b);
+  -webkit-mask: radial-gradient(closest-side, #000 35%, transparent 100%); mask: radial-gradient(closest-side, #000 35%, transparent 100%);
+  filter: blur(7px) saturate(1.3); opacity: .62; animation: lf-halo 8s linear infinite; }
 .lf-coin.is-fx.is-t4 img { animation: lf-mythg 3s ease-in-out infinite alternate; }
 @keyframes lf-mythg { from { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--gl) 90%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)); } to { filter: drop-shadow(0 0 18px #fff) drop-shadow(0 0 26px color-mix(in srgb, var(--gl) 80%, transparent)) drop-shadow(0 2px 4px rgba(0,0,0,.4)) saturate(1.25); } }
 .lf-myth { position: absolute; inset: -26%; border-radius: 50%; pointer-events: none; }
@@ -1040,9 +1040,9 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
   background: radial-gradient(circle at 50% 3%, #fff 0 2px, transparent 4px), radial-gradient(circle at 97% 50%, #fff36b 0 1.6px, transparent 3.5px), radial-gradient(circle at 50% 97%, #fff 0 1.8px, transparent 3.5px), radial-gradient(circle at 3% 50%, #4fc3ff 0 1.6px, transparent 3.5px); }
 .lf-myth s + s { animation-duration: 9s; animation-direction: normal; transform: rotate(45deg); background: radial-gradient(circle at 50% 6%, #ff4f8b 0 1.4px, transparent 3px), radial-gradient(circle at 94% 50%, #fff 0 1.2px, transparent 3px), radial-gradient(circle at 50% 94%, #3dffb0 0 1.4px, transparent 3px), radial-gradient(circle at 6% 50%, #fff 0 1.2px, transparent 3px); }
 .lf-cv-stage.is-fx.is-t4 { background: radial-gradient(closest-side, color-mix(in srgb, var(--gl) 60%, transparent), transparent 70%); }
-.lf-cv-stage.is-fx.is-t4::before { content: ''; position: absolute; left: 50%; top: 50%; width: min(92%, 92vh); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
-  background: conic-gradient(from 0deg, #ff4f8b, #ffb347, #fff36b, #3dffb0, #4fc3ff, #a26bff, #ff4f8b); -webkit-mask: radial-gradient(closest-side, transparent 80%, #000 86%, #000 92%, transparent 100%); mask: radial-gradient(closest-side, transparent 80%, #000 86%, #000 92%, transparent 100%);
-  filter: blur(3px); opacity: .85; animation: lf-mythspin 6s linear infinite; }
+.lf-cv-stage.is-fx.is-t4::before { content: ''; position: absolute; left: 50%; top: 50%; width: min(120%, 120vh); aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 0deg, #ff4f8b, #ffb347, #fff36b, #3dffb0, #4fc3ff, #a26bff, #ff4f8b); -webkit-mask: radial-gradient(closest-side, #000 30%, transparent 100%); mask: radial-gradient(closest-side, #000 30%, transparent 100%);
+  filter: blur(16px) saturate(1.3); opacity: .6; animation: lf-mythspin 10s linear infinite; }
 /* a scene is an object in its own weather: no ring round it */
 .lf-cv-stage.is-scene::before, .lf-coin.is-scene::before { display: none; }
 .lf-coin.is-scene .lf-myth { display: none; }
