@@ -1092,6 +1092,20 @@ const freeze = (at) => `(() => {
     ok('the trophy case is put away for now', await page.locator('#lfRecords').count() === 0);
     await c.close();
   }
+  /* the exotic and mythic monthly medals */
+  {
+    const wo = []; let n = 0;
+    for (let d = new Date('2026-08-03T12:00:00'); d <= new Date('2026-10-30T12:00:00'); d.setDate(d.getDate() + 1)) {
+      if ([1, 2, 4, 5].indexOf(d.getDay()) < 0) continue; n++;
+      wo.push({ id: 'x' + n, d: d.toISOString().slice(0, 10), s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100 + n * 2, r: 8 }] }] });
+    }
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await page.click('#lfMedals h3 > button'); await settle(page);
+    const mm = await page.$$eval('#lfMedals .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent + ':' + (/is-t4/.test(e.querySelector('.lf-coin').className) ? 4 : /is-t3/.test(e.querySelector('.lf-coin').className) ? 3 : 0)));
+    ok('a month with a session over the goal every week is an exotic medal, and the biggest month yet, with three to compare, is a mythic one', mm.join() === 'October 2026:Record month:4,September 2026:Above the goal:3,August 2026:Above the goal:3', mm);
+    await c.close();
+  }
   /* cardio, body weight and abs badges */
   {
     const wo = [];

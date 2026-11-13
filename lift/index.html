@@ -7662,6 +7662,8 @@ var BD_KIND = {
   month: { n: 'Monthly medal', c: '#84cc16' }
 };
 /* A MONTH WEARS ITS OWN COLOUR, so a year of medals is twelve different things */
+/* a month's finish, for the exotic and the mythic medal: the colour of the month, in the finish nearest it */
+var MONTH_FX = ['ice', 'neon', 'aurora', 'plasma', 'emerald', 'sunrise', 'inferno', 'storm', 'molten', 'galaxy', 'opal', 'holo'];
 var MONTH_C = ['#3b82f6', '#ec4899', '#14b8a6', '#a855f7', '#22c55e', '#f59e0b', '#ef4444', '#06b6d4', '#f97316', '#8b5cf6', '#84cc16', '#0ea5e9'];
 /* ── the award: polished metal walls, enamel between them, a dished mirror back ── */
 var BD_FACE = 1024, BD_RF = 1;   /* a face maps its texture across ±BD_RF */
@@ -9003,22 +9005,33 @@ function lfRecordCard() {
 function lfMedals() {
   var ws = woSorted(), out = [];
   if (!ws.length) return out;
-  var t = today(), first = parseYmd(ws[0].d), m0 = new Date(first.getFullYear(), first.getMonth(), 1);
+  var t = today(), first = parseYmd(ws[0].d), m0 = new Date(first.getFullYear(), first.getMonth(), 1), bestVol = 0, seen = 0;
   for (var m = m0; m <= t; m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) {
     var y = m.getFullYear(), mo = m.getMonth(), weeks = [], d = new Date(y, mo, 1);
     while (d.getDay() !== 1) d = addDays(d, 1);
     for (; d.getMonth() === mo; d = addDays(d, 7)) weeks.push(d);
-    var met = 0, done = 0, last = '', cur = y === t.getFullYear() && mo === t.getMonth();
+    var met = 0, done = 0, last = '', cur = y === t.getFullYear() && mo === t.getMonth(), wkMin = 99;
     weeks.forEach(function (wk) {
       var a = ymd(wk), b = ymd(addDays(wk, 6)), these = ws.filter(function (w) { return w.d >= a && w.d <= b; });
       these = dayFirst(these);
+      wkMin = Math.min(wkMin, these.length);
       if (these.length >= S.goal) { met++; last = these[S.goal - 1].d; }
       if (b < ymd(t)) done++;
     });
     var won = weeks.length && met === weeks.length;
+    /* THE TWO ABOVE IT. Exotic: every week of the month a session over the goal. Mythic: a perfect month that is also the most you have ever moved in one, once there are three months to compare it with. */
+    var a0 = ymd(new Date(y, mo, 1)), b0 = ymd(new Date(y, mo + 1, 0)), mv = 0;
+    ws.forEach(function (w) { if (w.d >= a0 && w.d <= b0) mv += woVol(w); });
+    seen++;
+    var exo = !!won && S.goal < 7 && wkMin >= S.goal + 1, myth = !!won && seen >= 3 && mv > bestVol && mv > 0;
+    bestVol = Math.max(bestVol, mv);
     if (!won && !cur) continue;
-    out.push({ b: { id: 'm' + y + (mo < 9 ? '0' : '') + (mo + 1), n: MON[mo] + ' ' + y, k: 'month', pt: 'month', sh: 'arch', c: MONTH_C[mo], gl: String(mo + 1),
-      d: 'Your workouts-a-week goal, met every week of ' + MON[mo] + '.', bk: ['Perfect month', MON[mo] + ' ' + y] }, d: won ? last : '', p: won ? null : [met, weeks.length] });
+    var tier = myth ? 4 : exo ? 3 : 0, nm = MON[mo];
+    var bd = { id: 'm' + y + (mo < 9 ? '0' : '') + (mo + 1), n: nm + ' ' + y, k: 'month', pt: 'month', sh: 'arch', c: MONTH_C[mo], gl: String(mo + 1),
+      d: myth ? 'Every week of ' + nm + ' on goal, and the most you have ever moved in a month.' : exo ? 'Your goal and one more session, every week of ' + nm + '.' : 'Your workouts-a-week goal, met every week of ' + nm + '.',
+      bk: [myth ? 'Record month' : exo ? 'Above the goal' : 'Perfect month', nm + ' ' + y] };
+    if (tier) { bd.t = tier; bd.fx = MONTH_FX[mo]; }
+    out.push({ b: bd, d: won ? last : '', p: won ? null : [met, weeks.length] });
   }
   return out.reverse();
 }
@@ -9031,7 +9044,7 @@ function lfMedalCard() {
       var it = el('<div class="lf-bdi"><b></b><span></span></div>'), btn = lfCoinBtn(x, 76);
       if (!x.d) { var f = Math.min(1, x.p[0] / Math.max(1, x.p[1])), C = 2 * Math.PI * 45; btn.insertAdjacentHTML('beforeend', '<svg class="lf-bdr" viewBox="0 0 94 94" aria-hidden="true"><circle class="bg" cx="47" cy="47" r="45"/><circle class="fg" cx="47" cy="47" r="45" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - f)) + '"/></svg>'); }
       it.insertBefore(btn, it.firstChild);
-      $('b', it).textContent = x.b.n; $('span', it).textContent = x.d ? 'Perfect month' : x.p[0] + ' / ' + x.p[1] + ' weeks';
+      $('b', it).textContent = x.b.n; $('span', it).textContent = x.d ? x.b.bk[0] : x.p[0] + ' / ' + x.p[1] + ' weeks';
       g.appendChild(it);
     });
   });
