@@ -1847,7 +1847,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [big], bseen: { v2: 1, v3: 1, v4: 1, v5: 1, v6: 1, first: 1, ton10: 1, ton15: 1, ton20: 1, rep300: 1, sets30: 1 } }, '2026-10-30T18:00:00', true);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const cls = await page.$$eval('#lfBadges .lf-coin', (b) => Object.fromEntries(b.filter((x) => /^ton/.test(x.dataset.b)).map((x) => [x.dataset.b, x.className])));
-    ok('the harder the finer: a sheen, then a finish, then a finish with a halo', /is-sn/.test(cls.ton10) && !/is-fx/.test(cls.ton10) && /is-fx/.test(cls.ton15) && !/is-t3/.test(cls.ton15) && /is-fx/.test(cls.ton20) && /is-t3/.test(cls.ton20), cls);
+    ok('the harder the finer: a sheen, then a finish, then a finish a level higher; the halo is for the exotic rung above', /is-sn/.test(cls.ton10) && !/is-fx/.test(cls.ton10) && /is-fx/.test(cls.ton15) && !/is-t3/.test(cls.ton15) && /is-fx/.test(cls.ton20) && !/is-t3/.test(cls.ton20), cls);
     const first = await page.getAttribute('#lfBadges .lf-coin[data-b="first"]', 'class');
     ok('and the first of anything stays plain', !/is-sn|is-fx|is-t/.test(first), first);
     const locked = await page.getAttribute('#lfBadges .lf-coin[data-b="wo100"]', 'class');
