@@ -7812,7 +7812,7 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'scallop', stormc: 'trap', summit: 'hex', sands: 'coin24', vein: 'oct', wayf: 'sun', dontmiss: 'hept', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'scallop', ds2: 'scallop', ds3: 'scallop', dsx: 'scallop', dsm: 'scallop', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'scallop', stormc: 'trap', summit: 'hex', sands: 'coin24', vein: 'oct', wayf: 'sun', dontmiss: 'hept', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'rosette', ds2: 'rosette', ds3: 'rosette', dsx: 'rosette', dsm: 'rosette', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
   abs200: 'oct', abs400: 'burst',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
@@ -7835,7 +7835,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', wo100: '100', goal: 'i:r
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
 /* a new rung is a medal, not an object: a shape that reads as a thing (an hourglass, a gear, a drop) is worn as a seal, a scallop, a sun or a plaque instead */
-var BD_MEDAL = { hourglass: 'coin24', gear: 'scallop', drop: 'rosette', compass: 'sun', cross: 'burst', heart: 'scallop', flag: 'trap', tag: 'trap', flare: 'sun', shard: 'burst', ellt: 'coin24', hextall: 'hex', tall: 'oct', shield: 'rosette', gem: 'oct', crest: 'rosette', capsule: 'oct', trid: 'hex', crownb: 'sun', ramp: 'trap', tri: 'hex', egg: 'coin24', pent: 'hex', dumbbell: 'coin24' };
+var BD_MEDAL = { hourglass: 'coin24', gear: 'scallop', drop: 'rosette', compass: 'sun', cross: 'burst', heart: 'scallop', flag: 'trap', tag: 'trap' };
 /* a new rung wears its family's shape, and says its count */
 BD_LAD.forEach(function (l) {
   var s0 = l[1].filter(function (id) { return BD_SHI[id]; })[0];
@@ -7845,6 +7845,14 @@ BD_LAD.forEach(function (l) {
     if (!BD_GL[id]) { var n = r[5] === 'min' || r[5] === 'cdm' ? r[6] / 60 : r[6]; BD_GL[id] = n >= 1e6 ? n / 1e6 + 'M' : n >= 1000 ? n / 1000 + 'k' : String(n); if (r[5] === 'min' || r[5] === 'cdm') BD_GL[id] += 'h'; }
   });
 });
+/* NO TWO BADGES SHARE A LOOK. Each of these pairs was the same shape and the same mark, so the shelf showed two identical pictures for two different badges; one of each pair is moved, and the technique rungs say their count */
+(function () {
+  var sh = { abs10: 'hept', abs50: 'hept', abs100: 'hept', abs200: 'hept', abs400: 'hept', owl25: 'oct', owl50: 'oct', owl75: 'oct', winter: 'oct', photo: 'hextall', wayf: 'scallop', phoenix: 'burst', fullbody: 'oct', stormc: 'hextall', colossus: 'hex', sands: 'hept', wu1: 'scallop', wu2: 'scallop', wu3: 'scallop', wux: 'scallop', wum: 'scallop', ss1: 'trid', ss2: 'trid', ss3: 'trid', ssx: 'trid', ssm: 'trid' };
+  Object.keys(sh).forEach(function (id) { BD_SHI[id] = sh[id]; });
+  BD_GL.eclipse = 'i:moon';
+  var cnt = { ss1: '5', ss2: '25', ss3: '100', ssx: '250', ssm: '600', ds1: '5', ds2: '25', ds3: '100', dsx: '250', dsm: '600', wu1: '25', wu2: '100', wu3: '300', wux: '750', wum: '1.5k' };
+  Object.keys(cnt).forEach(function (id) { BD_GL[id] = cnt[id]; });
+})();
 function bdPoly(c, pts, rr) {
   var n = pts.length;
   for (var i = 0; i < n; i++) {
@@ -8822,7 +8830,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd20', bdDbP = null;
+var BD_VER = 'd21', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
