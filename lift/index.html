@@ -939,6 +939,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-coin[data-m="lock"], .lf-cv-stage[data-m="lock"] { --ca: #5a5c63; --cb: #2c2d31; }
 .lf-coin img { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transition: transform .2s var(--ease); }
 .lf-coin img:not([src]) { display: none; }
+.lf-coin .lf-bdlive { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; pointer-events: none; }
 @keyframes lf-halo { to { transform: rotate(1turn); } }
 .lf-coin.is-sc::after { content: ''; position: absolute; right: -2%; bottom: 2%; width: 22%; height: 22%; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 2px var(--card);
   -webkit-mask: none; }
@@ -8198,7 +8199,7 @@ function bdFront(b, trim) {
   var C = CI.data, O = OI.data, H = HI.data, Z = ZI.data;
   /* AN EXOTIC OR A MYTHIC keeps its whole baked medal, and three more masks are cut from it: where the bright bands are, where the dark ones are, and where the main colour is. Two of them are given something to do. */
   /* only the live award moves; the shelf's still is a picture, so it bakes none of this */
-  var anim = !lock && (b.t === 3 || b.t === 4) && !!fx && BD_FACE >= 700, RG = null;
+  var anim = !lock && (b.t === 3 || b.t === 4) && !!fx && (BD_FACE >= 700 || b.live), RG = null;
   var PT = null;
   if (anim) { RG = bdCv(); RG.x = RG.getContext('2d'); RG.im = RG.x.createImageData(BD_FACE, BD_FACE); PT = bdCv(); PT.x = PT.getContext('2d'); PT.im = PT.x.createImageData(BD_FACE, BD_FACE); }
   for (var y = 0; y < BD_FACE; y++) for (var xx = 0; xx < BD_FACE; xx++) {
@@ -8491,7 +8492,7 @@ function bdMoveFace(g, flat, zf, mp, b) {
   mat.map.wrapS = mat.map.wrapT = BD3.ClampToEdgeWrapping;
   mat.onBeforeCompile = function (sh) {
     sh.uniforms.uT = uT; sh.uniforms.uP = uP;
-    sh.fragmentShader = 'uniform float uT; uniform float uP;\nvec2 bdWarp(vec2 p) { float t = uT * ' + (dir * 1.0).toFixed(2) + ' + uP; return vec2(sin(p.y * 7.0 + t * 1.4) + .5 * sin(p.y * 19.0 - t * 2.1), cos(p.x * 6.0 + t * 1.2) + .5 * cos(p.x * 17.0 + t * 1.7)) * .02 + vec2(sin(t * .35), cos(t * .28)) * .07; }\n' +
+    sh.fragmentShader = 'uniform float uT; uniform float uP;\nvec2 bdWarp(vec2 p) { float t = uT * ' + (dir * 1.0).toFixed(2) + ' + uP; return vec2(sin(p.y * 7.0 + t * 1.4) + .5 * sin(p.y * 19.0 - t * 2.1), cos(p.x * 6.0 + t * 1.2) + .5 * cos(p.x * 17.0 + t * 1.7)) * .035 + vec2(sin(t * .3), cos(t * .24)) * .12; }\n' +
       sh.fragmentShader.replace('texture2D( map, vUv )', 'texture2D( map, vUv + bdWarp( vUv ) )').replace('diffuseColor *= texelColor;', 'diffuseColor *= texelColor * .9;');
   };
   var m = new BD3.Mesh(flat(), mat); m.position.z = zf + .003; m.renderOrder = 6; g.add(m);
@@ -8788,6 +8789,50 @@ function bdPump() {
     })();
   });
 }
+/* THE SHELF MOVES TOO. An exotic or a mythic that is on screen is built live (a few at a time, small, at the same pose as its still) and drawn over the still; the moment it scrolls away it is given back to the GPU, because a shelf of forty held live is what closed the app before. The still stays under it, so the shelf is never blank. */
+var bdLiveIO = null, bdLiveMap = new Map(), bdLiveSt = null, bdLiveRaf = 0, bdLiveQ = [], bdLiveBusy = false, BD_LIVEMAX = 4;
+function bdLiveWatch(coin, x) {
+  if (!('IntersectionObserver' in window) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  if (!bdLiveIO) bdLiveIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) bdLiveOn(e.target); else bdLiveOff(e.target); }); }, { rootMargin: '0px' });
+  coin._lx = x; bdLiveIO.observe(coin);
+}
+function bdLiveOff(coin) {
+  var it = bdLiveMap.get(coin); bdLiveQ = bdLiveQ.filter(function (c) { return c !== coin; });
+  if (!it) return; bdLiveMap.delete(coin);
+  if (it.cv.parentNode) it.cv.parentNode.removeChild(it.cv); var im = coin.querySelector('img'); if (im) im.style.visibility = '';
+  bdDrop(it.g); setTimeout(bdLiveNext, 100);
+}
+function bdLiveOn(coin) { if (bdLiveMap.has(coin) || bdLiveQ.indexOf(coin) >= 0) return; bdLiveQ.push(coin); bdLiveNext(); }
+function bdLiveNext() {
+  if (bdLiveBusy || !bdLiveQ.length || bdViewOn || bdBusy) { if (bdLiveQ.length && !bdViewOn) setTimeout(bdLiveNext, 400); return; }
+  if (bdLiveMap.size >= BD_LIVEMAX) return;
+  var coin = bdLiveQ.shift(); if (!coin || !coin.isConnected || !coin._lx) return bdLiveNext();
+  bdLiveBusy = true;
+  bdThree().then(function (T) {
+    if (!T) { bdLiveBusy = false; return; }
+    if (!bdLiveSt) { var r = bdRenderer(256, 256, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bdLiveSt = { r: r, sc: sc, cam: cam }; }
+    try {
+      var sp = bdSpec(coin._lx); sp.live = true; var g = bdMake(sp, 'silver', 256), cv = document.createElement('canvas'), cs = parseFloat(coin.style.getPropertyValue('--cs')) || 80, px = Math.round(cs * 1.12 * Math.min(2, window.devicePixelRatio || 1));
+      cv.width = cv.height = px; cv.className = 'lf-bdlive'; coin.appendChild(cv); bdLiveMap.set(coin, { g: g, cv: cv, ctx: cv.getContext('2d'), ph: Math.random() * 6 });
+      if (!coin.isConnected) bdLiveOff(coin);
+    } catch (e) { }
+    bdLiveBusy = false; if (!bdLiveRaf && bdLiveMap.size) bdLiveRaf = requestAnimationFrame(bdLiveFrame); setTimeout(bdLiveNext, 120);
+  });
+}
+function bdLiveFrame(now) {
+  bdLiveRaf = 0; if (!bdLiveMap.size) return;
+  bdLiveRaf = requestAnimationFrame(bdLiveFrame);
+  if (bdViewOn || document.hidden) return;
+  if (now - (bdLiveFrame.l || 0) < 40) return; bdLiveFrame.l = now;
+  var t = now / 1000, St = bdLiveSt;
+  bdLiveMap.forEach(function (it, coin) {
+    if (!coin.isConnected) { bdLiveOff(coin); return; }
+    var g = it.g; g.rotation.set(.32, -.5 + Math.sin(t * .5 + it.ph) * .1, .04); if (g.userData.cr) g.userData.cr(t + it.ph);
+    St.sc.add(g); St.r.render(St.sc, St.cam); St.sc.remove(g);
+    it.ctx.clearRect(0, 0, it.cv.width, it.cv.height); it.ctx.drawImage(St.r.domElement, 0, 0, 256, 256, 0, 0, it.cv.width, it.cv.height);
+    var im = coin.querySelector('img'); if (im && im.style.visibility !== 'hidden') im.style.visibility = 'hidden';
+  });
+}
 /* a badge as a button: the still over a flat drawing that stands in until it is ready */
 function lfCoinBtn(x, size) {
   var b = el('<button type="button" class="lf-coin"><img alt="" /></button>');
@@ -8806,6 +8851,7 @@ function lfCoinBtn(x, size) {
     im.addEventListener('load', setMask); setMask();
     b.appendChild(lv); b.appendChild(emb); b.appendChild(el('<u class="lf-spk" aria-hidden="true"><s></s><s></s><s></s><s></s></u>')); b.insertBefore(el('<u class="lf-rays" aria-hidden="true"></u>'), b.firstChild);
   }
+  if (x.d && (x.b.t === 3 || x.b.t === 4) && x.b.fx && !BD_SCENE[x.b.id]) bdLiveWatch(b, x);
   b.addEventListener('pointerdown', function () { bdBuildLive(x); }, { passive: true });
   b.addEventListener('click', function (e) { e.stopPropagation(); lfCoinView(x); });
   return b;
