@@ -898,10 +898,10 @@ const freeze = (at) => `(() => {
     const ctx2 = await ctx({ unit: 'kg', wo: [1, 2, 3, 4, 5].map((i) => ({ id: 't' + i, d: '2026-09-0' + i, s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8, ds: i === 5 ? [{ w: 40, r: 8 }] : undefined }, { w: 60, r: 8, ds: [{ w: 40, r: 8 }] }, { w: 60, r: 8, ds: [{ w: 40, r: 8 }] }, { w: 60, r: 8, ds: i < 3 ? undefined : [{ w: 40, r: 8 }] }].map((q) => JSON.parse(JSON.stringify(q))), ss: 'm1', wu: Array(5).fill({ w: 20, r: 10 }) }, { id: 'hack', n: 'Hack squat', sets: [{ w: 80, r: 8 }], ss: 'm1' }] })) }, '2026-11-02T09:00:00');
     await ctx2.page.click('.lf-bar [data-v="you"]'); await settle(ctx2.page);
     const sh2 = await ctx2.page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('Back to Back: the fifth workout with a linked pair is the fifth superset', sh2.includes('Back to Back:5 Sep') && !sh2.some((x) => /^Double Time:\d+ [A-Z]/.test(x)), sh2.filter((x) => /Back to|Double/.test(x)));
+    ok('Back to Back: the fifth workout with a linked pair is the fifth superset', sh2.includes('Back to Back:5 Sep') && !sh2.some((x) => /^Double Up:\d+ [A-Z]/.test(x)), sh2.filter((x) => /Back to|Double Up/.test(x)));
     ok('Warmed Up: twenty-five warm-up sets, counted across workouts, is won on the fifth', sh2.includes('Warmed Up:5 Sep'), sh2.filter((x) => /Warmed/.test(x)));
     ok('Drop It: a set with a drop on it is a drop set, five of them', sh2.some((x) => /^Drop It:\d+ Sep$/.test(x)), sh2.filter((x) => /Drop It/.test(x)));
-    ok('the next ones show how far along they are', sh2.some((x) => x === 'Primed:25 / 100') && sh2.some((x) => x === 'Double Time:5 / 25'), sh2.filter((x) => /Primed|Double/.test(x)));
+    ok('the next ones show how far along they are', sh2.some((x) => x === 'Primed:25 / 100') && sh2.some((x) => x === 'Double Up:5 / 25'), sh2.filter((x) => /Primed|Double/.test(x)));
     await ctx2.c.close();
     ok('the long ones show how far along they are, and are not earned', ['Drakefire', 'Leviathan', 'Ouroboros', 'Koi Pond', 'Eclipse', 'Moonrise', 'Zodiac'].every((n) => shelf.some((x) => x.indexOf(n + ':') === 0 && /\d/.test(x) && !/[A-Z][a-z]{2}$/.test(x) || x.indexOf(n + ':') === 0 && /\//.test(x))), shelf.filter((x) => /Drakefire|Leviathan|Ouroboros|Koi|Eclipse|Moonrise|Zodiac/.test(x)));
     await c.close();
@@ -1610,7 +1610,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'k0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 5 }] }] }] });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const cols = await page.$$eval('#lfBadges .lf-bcol h4', (x) => x.map((e) => e.textContent));
-    ok('the badges are in collections', cols.join('|') === 'Sessions|Consistency|Volume|Sets & reps|Strength|Exercises|Body parts|Cardio|Friends', cols.join('|'));
+    ok('the badges are in collections', cols.join('|') === 'Sessions|Consistency|Volume|Sets & reps|Strength|Exercises|Body parts|Cardio|Technique|Friends', cols.join('|'));
     ok('each says how much of it is earned', /^\d+ \/ \d+$/.test(await page.textContent('#lfBadges .lf-bcol[data-col="vol"] .lf-bcol-t span')));
     const src = require('fs').readFileSync(require('path').join(__dirname, '../lift/index.html'), 'utf8');
     const mythS = (src.match(/var BD_MYTH = \{([^}]*)\}/) || [])[1] || '', haloS = (src.match(/var BD_HALO = \{([^}]*)\}/) || [])[1] || '';
@@ -1902,7 +1902,7 @@ const freeze = (at) => `(() => {
     await o.page.waitForFunction(() => window.lfOvers === 1, null, { timeout: 8000 }).catch(() => {});
     ok('a week that goes past its goal gets a moment of its own', await o.page.evaluate(() => window.lfOvers) === 1 && await o.page.locator('.lf-gol').count() === 1 && /Overtime/.test(await o.page.textContent('.lf-gol')) && (await store(o.page)).wkOver === '2026-10-26');
     await o.c.close();
-    ok('Two-a-Day pays a title and a flair as well as its badge', /\['twice', 'Double Time', 'Earn Two-a-Day'/.test(src2) && /\['twice', 'Double', 'Earn Two-a-Day'/.test(src2) && /var BD_HALO = \{ twice: 1/.test(src2) && /function wkDays/.test(src2));
+    ok('Two-a-Day pays a title and a flair as well as its badge', /\['twice', 'Double Time', 'Earn Two-a-Day'/.test(src2) && /\['twice', 'Double', 'Earn Two-a-Day'/.test(src2) && /var BD_HALO = \{[^}]*twice: 1/.test(src2) && /function wkDays/.test(src2));
     /* THE MONTH IN REVIEW, and the card that goes in a story */
     const oct = ['2026-10-02', '2026-10-09', '2026-10-16', '2026-10-23'].map((d, k) => W('mo' + k, d, '07'));
     o = await ctx({ unit: 'kg', goal: 1, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: oct }, '2026-11-01T10:00:00');
