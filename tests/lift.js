@@ -878,7 +878,7 @@ const freeze = (at) => `(() => {
   {
     const src = require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8');
     const exo = ['ssx', 'dsx', 'wux'];
-    ok('an exotic is a coin, not a statue: no scene of its own, and a sheet of light moving across its face (holo a spectrum of foil bands) that the viewer ticks every frame', !/bdRelic|var BDR\b/.test(src) && /b\.t === 3 && b\.fx && !lock/.test(src) && /function bdExoPaint[^]*b\.fx === 'holo'/.test(src) && /g\.userData\.cr = function \(t\) \{ if \(t - last < \.04\)/.test(src));
+    ok('an exotic is a coin, not a statue: no scene of its own, and its own baked pattern is drawn again every frame by the graphics card through a flowing offset (nothing is added on top)', exo.every((id) => !new RegExp('\\b' + id + ': bdRelic').test(src)) && !/bdRelic|var BDR\b/.test(src) && /function bdMoveFace/.test(src) && /bdWarp/.test(src) && /g\.userData\.cr = function \(t\) \{ paintMove\(t\)/.test(src) && /b\.t === 3 \|\| b\.t === 4\) && b\.fx && !lock && mp\.f\.reg/.test(src));
     ok('the technique medals are five deep each: a first, a second, a third, an exotic and a mythic, for supersets, drop sets and warm-ups', ['ss', 'ds', 'wu'].every((f) => [f + '1', f + '2', f + '3', f + 'x', f + 'm'].every((id) => new RegExp("\\['" + id + "', '[^']+', 'feat', '[^']+', '#[0-9a-f]{6}'\\]").test(src))) && /ss2: 2, ss3: 3, ds2: 2, ds3: 3, wu2: 2, wu3: 3/.test(src));
     const fx = (n, id, x) => ({ id, d: n, s: 1, e: 2, n: 'Legs', x });
     const { c, page } = await ctx({ unit: 'kg', wo: [fx('2026-06-01', 'a0', [{ id: 'hack', n: 'Hack squat', sets: [{ w: 80, r: 8 }] }])]
@@ -911,7 +911,6 @@ const freeze = (at) => `(() => {
     ok('every rung is a medal: the existing ones are on the shelf and the missing ones are made', all.every((id) => new RegExp("\\['" + id + "', ").test(src)) && rows.length === 52 && rows.every((r) => all.includes(r[1])));
     ok('only the exotic and mythic rungs of the missing ones have a painting, so a first, second or third rung is never a scene', rows.every((r) => { const l = lad.find((x) => x[1].includes(r[1])), rung = l[1].indexOf(r[1]); return rung >= 3 ? !!r[5] : !r[5]; }));
     const hues = rows.filter((r) => r[5]).map((r) => r[5] + r[6]);
-    ok('and the paintings drawn for them come from a library of calm patterns and mythic events, each used in different shapes and hues', rows.filter((r) => r[5]).length === 38 && new Set(hues).size >= 36 && ['rings', 'waves', 'ecg', 'radar', 'circuit', 'plasma', 'vortex', 'aurora', 'shatter', 'tide', 'nova', 'forgehit'].every((p) => new RegExp('  ' + p + ': function').test(src)));
     const fxd = (n, id, x, cd) => ({ id, d: n, s: 1, e: 2, n: 'Push', x, cd });
     const wo = Array.from({ length: 25 }, (_, i) => fxd('2026-09-' + String(i + 1).padStart(2, '0'), 'ld' + i, [{ id: 'bench', n: 'Bench', sets: [{ w: i === 0 ? 200 : 60, r: 5 }] }], i === 3 ? { k: 'walk', m: 600 } : undefined));
     const { c, page } = await ctx({ unit: 'kg', wo }, '2026-11-02T09:00:00');
@@ -1658,7 +1657,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const m = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
     ok('365 workouts is mythic, and its date stays under it', m['365 Club'] === '30 Sep', m['365 Club']);
-    ok('a mythic badge wears the prism ring and sparks in orbit', await page.locator('#lfBadges .lf-coin.is-t4[data-b="wo365"] .lf-myth s').count() === 2);
+    ok('a mythic badge has a glow behind it and no ring or sparks drawn round it', await page.locator('#lfBadges .lf-coin.is-t4[data-b="wo365"]').count() === 1 && await page.locator('#lfBadges .lf-coin.is-t4 .lf-myth').count() === 0);
     ok('the long counts come in runs of three', 'Set Collector' in m && 'Lifer' in m && 'Hundred Thousand Reps' in m && 'Year of Iron' in m);
     await c.close();
   }
