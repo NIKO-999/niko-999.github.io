@@ -889,7 +889,7 @@ const freeze = (at) => `(() => {
     ok('Phoenix: ten sessions inside the thirty days after a month away', shelf.includes('Phoenix:19 Aug'), shelf.filter((x) => /Phoenix/.test(x)));
     ok('Colossus: forty thousand in one session', shelf.includes('Colossus:2 Sep'), shelf.filter((x) => /Colossus/.test(x)));
     ok('Atlas: a barbell lift of 225', shelf.includes('Atlas:5 Sep'), shelf.filter((x) => /Atlas/.test(x)));
-    ok('the owner phone shows Don\'t Miss and every mythic unlocked, for looking at', /if \(BD_PREVIEW && lfOwner\(\)\) \['dontmiss'\]\.concat\(Object\.keys\(BD_MYTH\)\)\.forEach\(/.test(src));
+    ok('only Don\'t Miss is shown unlocked on the owner phone; every other mythic is locked until earned', /if \(BD_PREVIEW && lfOwner\(\)\) \['dontmiss'\]\.forEach\(/.test(src));
     const ctx2 = await ctx({ unit: 'kg', wo: [1, 2, 3, 4, 5].map((i) => ({ id: 't' + i, d: '2026-09-0' + i, s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8, ds: i === 5 ? [{ w: 40, r: 8 }] : undefined }, { w: 60, r: 8, ds: [{ w: 40, r: 8 }] }, { w: 60, r: 8, ds: [{ w: 40, r: 8 }] }, { w: 60, r: 8, ds: i < 3 ? undefined : [{ w: 40, r: 8 }] }].map((q) => JSON.parse(JSON.stringify(q))), ss: 'm1', wu: Array(5).fill({ w: 20, r: 10 }) }, { id: 'hack', n: 'Hack squat', sets: [{ w: 80, r: 8 }], ss: 'm1' }] })) }, '2026-11-02T09:00:00');
     await ctx2.page.click('.lf-bar [data-v="you"]'); await settle(ctx2.page);
     const sh2 = await ctx2.page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
