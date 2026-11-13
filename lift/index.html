@@ -9128,8 +9128,40 @@ BD_NEW.forEach(function (r) {
   BDR[r[0]] = { mold: BD_MOLDS[(k * 5 + 1) % 6], pal: bdRecipe(r[8] * 360, k % 6), n: sh[0], sides: sh[1], rot: sh[2], rs: sh[3] || 1, sx: sh[4] || 1, sy: sh[5] || 1, hue: r[8], sat: .5, rgh: .09, calm: rung === 3 ? 1 : 0, pat: r[7], paint: function (x, N, t, v, u) { BDP[r[7]](x, N, t, v, u, BDR[r[0]]); } };
 });
 
-var BD_SCENE = { ssx: bdRelic('ssx'), ssm: bdRelic('ssm'), dsx: bdRelic('dsx'), dsm: bdRelic('dsm'), wux: bdRelic('wux'), wum: bdRelic('wum'), drakefire: bdRelic('drakefire'), phoenix: bdRelic('phoenix'), leviathan: bdRelic('leviathan'), ouroboros: bdRelic('ouroboros'), koipond: bdRelic('koipond'), eclipse: bdRelic('eclipse'), moonrise: bdRelic('moonrise'), colossus: bdRelic('colossus'), atlas: bdRelic('atlas'), zodiac: bdRelic('zodiac'), dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
-BD_NEW.forEach(function (r) { if (BDR[r[0]]) BD_SCENE[r[0]] = bdRelic(r[0]); });
+var BD_SCENE = { ssm: bdRelic('ssm'), dsm: bdRelic('dsm'), wum: bdRelic('wum'), drakefire: bdRelic('drakefire'), phoenix: bdRelic('phoenix'), leviathan: bdRelic('leviathan'), ouroboros: bdRelic('ouroboros'), koipond: bdRelic('koipond'), eclipse: bdRelic('eclipse'), moonrise: bdRelic('moonrise'), colossus: bdRelic('colossus'), atlas: bdRelic('atlas'), zodiac: bdRelic('zodiac'), dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
+/* only the mythics are statues; an exotic is a coin like the rest, with light moving through it */
+BD_NEW.forEach(function (r) { if (BDR[r[0]] && !BD_HALO[r[0]]) BD_SCENE[r[0]] = bdRelic(r[0]); });
+/* THE MOVING LIGHT OF AN EXOTIC. A coin keeps its own finish and a sheet of light is laid over its face that never stops moving: HOLO is real foil, a spectrum sliding across in bands; every other finish gets one of six slow patterns in its own colour, which one decided by the badge. Additive and held low, so the number and the picture under it stay as readable as before. */
+function bdExoHue(h, l, a) { return 'hsla(' + ((h % 360) + 360) % 360 + ',100%,' + l + '%,' + a + ')'; }
+var BD_EXO = [
+  /* ripples breathing out from the middle */
+  function (x, u, t, h, h2) { for (var k = 0; k < 5; k++) { var p = ((t * .18 + k / 5) % 1), r = p * u * 1.25; x.strokeStyle = bdExoHue(h + k * 14, 62, .5 * (1 - p)); x.lineWidth = u * (.02 + .03 * (1 - p)); x.beginPath(); x.arc(0, 0, Math.max(.1, r), 0, 6.3); x.stroke(); } },
+  /* a lattice of diamonds drifting corner to corner */
+  function (x, u, t, h, h2) { var s = u * .34, o = (t * .1 % 1) * s; x.lineWidth = u * .014; for (var k = -8; k < 9; k++) { x.strokeStyle = bdExoHue(k % 2 ? h : h2, 62, .42); x.beginPath(); x.moveTo(-u * 1.4 + k * s + o, -u * 1.4); x.lineTo(u * 1.4 + k * s + o, u * 1.4); x.moveTo(u * 1.4 + k * s + o, -u * 1.4); x.lineTo(-u * 1.4 + k * s + o, u * 1.4); x.stroke(); } },
+  /* rays turning slowly, a spoke at a time brighter */
+  function (x, u, t, h, h2) { var n = 14; for (var k = 0; k < n; k++) { var a = k / n * 6.2832 + t * .16, lit = .5 + .5 * Math.sin(t * 1.3 + k * .9); x.fillStyle = bdExoHue(k % 2 ? h : h2, 58, .1 + .34 * lit); x.beginPath(); x.moveTo(0, 0); x.arc(0, 0, u * 1.4, a, a + 6.2832 / n * .55); x.closePath(); x.fill(); } },
+  /* soft waves of light rolling upward */
+  function (x, u, t, h, h2) { for (var k = 0; k < 9; k++) { var y0 = ((k / 9 - t * .07) % 1 + 1) % 1 * 2.6 * u - 1.3 * u; x.strokeStyle = bdExoHue(k % 2 ? h : h2, 62, .5); x.lineWidth = u * .03; x.beginPath(); for (var q = -1.4; q <= 1.4; q += .1) { var yy = y0 + Math.sin(q * 3 + t * 1.4 + k) * u * .07; if (q < -1.35) x.moveTo(q * u, yy); else x.lineTo(q * u, yy); } x.stroke(); } },
+  /* a scan of colour sweeping across in a wide soft band */
+  function (x, u, t, h, h2) { var ph = ((t * .16) % 1) * 3.2 - 1.6, gd = x.createLinearGradient((ph - .5) * u, -u * .5, (ph + .5) * u, u * .5); gd.addColorStop(0, bdExoHue(h, 55, 0)); gd.addColorStop(.5, bdExoHue(h2, 70, .55)); gd.addColorStop(1, bdExoHue(h, 55, 0)); x.fillStyle = gd; x.fillRect(-u * 1.5, -u * 1.5, u * 3, u * 3); x.strokeStyle = bdExoHue(h, 60, .28); x.lineWidth = u * .012; for (var k = -9; k < 10; k++) { x.beginPath(); x.moveTo(k * u * .2, -u * 1.4); x.lineTo(k * u * .2 + u * .5, u * 1.4); x.stroke(); } },
+  /* sparks rising through the metal and fading */
+  function (x, u, t, h, h2) { for (var k = 0; k < 26; k++) { var p = ((t * (.07 + bdR(k) * .08) + bdR(k + 40)) % 1), px = (bdR(k + 9) * 2 - 1) * u * 1.05 + Math.sin(t + k) * u * .04, py = (.9 - p * 1.8) * u, r = u * (.02 + .035 * bdR(k + 3)); x.fillStyle = bdExoHue(k % 2 ? h : h2, 70, Math.sin(p * Math.PI) * .85); x.beginPath(); x.arc(px, py, r, 0, 6.3); x.fill(); } }
+];
+function bdExoPaint(ctx, N, t, b) {
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.clearRect(0, 0, N, N); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, N, N);
+  var u = N / 2; ctx.translate(u, u); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = ctx.lineJoin = 'round';
+  if (b.fx === 'holo') {
+    /* foil: bands of the whole spectrum, each hue sliding on its own, and a fine ruling over them that flickers as it moves */
+    for (var k = 0; k < 14; k++) { var ph = ((k / 14 + t * .06) % 1) * 3 - 1.5; ctx.fillStyle = bdExoHue(((k / 14) * 360 + t * 40) % 360, 58, .55); ctx.beginPath(); ctx.moveTo((ph - .12) * u, -u * 1.5); ctx.lineTo((ph + .12) * u, -u * 1.5); ctx.lineTo((ph + .12) * u - u * .9, u * 1.5); ctx.lineTo((ph - .12) * u - u * .9, u * 1.5); ctx.closePath(); ctx.fill(); }
+    ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = u * .012; for (var j = -20; j < 21; j++) { var o = ((t * .5) % 1) * u * .05; ctx.beginPath(); ctx.moveTo(j * u * .08 + o, -u * 1.4); ctx.lineTo(j * u * .08 + o - u * .7, u * 1.4); ctx.stroke(); }
+    var gp = ((t * .22) % 1) * 3.4 - 1.7, gg = ctx.createLinearGradient((gp - .25) * u, -u * .25, (gp + .25) * u, u * .25); gg.addColorStop(0, 'rgba(255,255,255,0)'); gg.addColorStop(.5, 'rgba(255,255,255,.7)'); gg.addColorStop(1, 'rgba(255,255,255,0)'); ctx.fillStyle = gg; ctx.fillRect(-u * 1.5, -u * 1.5, u * 3, u * 3);
+  } else {
+    var h = BD_EXOHUE[b.fx], i = 0; for (var q = 0; q < b.id.length; q++) i += b.id.charCodeAt(q); if (h == null) h = (i * 47) % 360;
+    BD_EXO[i % BD_EXO.length](ctx, u, t, h, h + 40 + (i % 5) * 25);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+var BD_EXOHUE = { ice: 195, aurora: 150, neon: 320, opal: 270, galaxy: 255, emerald: 145, lava: 18, molten: 28, sunrise: 38, carbon: 200, plasma: 285, crystal: 190, obsidian: 40, nebula: 280, prism: 300, void: 25, inferno: 14, circuit: 150, marble: 45, storm: 200, tempest: 215, magma: 15 };
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
@@ -9153,6 +9185,12 @@ function bdMake(b, m, n, pre) {
   var tro = !!BD_TRO[b.sh];
   var f = new BD3.Mesh(tro ? flat() : bdPolar(shp, 0), face(mp.f)); f.position.z = zf + (tro ? .001 : 0); g.add(f);
   var bk = new BD3.Mesh(tro ? flat() : bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf - (tro ? .001 : 0); g.add(bk);
+  if (b.t === 3 && b.fx && !lock) {
+    var ec = document.createElement('canvas'); ec.width = ec.height = 256; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec); et.encoding = BD3.sRGBEncoding;
+    [[zf + .003, 0], [-zf - .003, Math.PI]].forEach(function (zr) { var mh = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, transparent: true, opacity: b.fx === 'holo' ? .44 : .32, blending: BD3.AdditiveBlending, depthWrite: false, toneMapped: false })); mh.position.z = zr[0]; mh.rotation.y = zr[1]; mh.renderOrder = 6; g.add(mh); });
+    var last = -9; bdExoPaint(ex, 256, 0, b); et.needsUpdate = true;
+    g.userData.cr = function (t) { if (t - last < .04) return; last = t; bdExoPaint(ex, 256, t, b); et.needsUpdate = true; };
+  }
   /* THE OWNER'S IS GLASS, the only badge that is: a clear body that
      catches the light at every edge, with the lava suspended inside it in
      two veins at two depths, each flowing its own way so the molten rock
