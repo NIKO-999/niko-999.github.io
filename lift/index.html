@@ -8822,7 +8822,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd19', bdDbP = null;
+var BD_VER = 'd20', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
@@ -8847,22 +8847,26 @@ function bdPump() {
   if (bdBusy || !bdQ.length || bdViewOn) return; bdBusy = true;
   bdThree().then(function (T) {
     if (!T) { bdBusy = false; bdQ = []; return; }
-    if (!bd3) { var r = bdRenderer(360, 360, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bd3 = { r: r, s: sc, c: cam }; }
+    if (!bd3) { var r = bdRenderer(360, 360, true), sc = new T.Scene(); sc.environment = bdEnv(r); bdLights(sc); var cam = new T.PerspectiveCamera(22, 1, .1, 50); cam.position.set(0, 0, 6.1); bd3 = { r: r, s: sc, c: cam }; r.domElement.addEventListener('webglcontextlost', function (e) { e.preventDefault(); bd3 = null; bdBusy = false; setTimeout(bdPump, 500); }, false); }
     (function next() {
-      if (bdViewOn) { bdBusy = false; return; }
+      if (bdViewOn || !bd3) { bdBusy = false; return; }
       /* the badge nearest the screen goes first, so what you are looking at fills in before what is far down the shelf */
       var vh = window.innerHeight, bi = 0, bd = 1e12; bdQ.forEach(function (q, i) { var r = (q[1].parentNode || q[1]).getBoundingClientRect(), d = !r.height ? 1e9 : r.bottom < 0 ? -r.bottom : r.top > vh ? r.top - vh : 0; if (d < bd) { bd = d; bi = i; } });
       var j = bdQ.splice(bi, 1)[0]; if (!j) { bdBusy = false; return; }
       if (!bdStills[j[2]]) {
-        /* one badge that will not draw must never stop the rest, nor stay in the scene to be drawn over every one after it */
-        var aw = null;
+        /* A STILL IS ONLY KEPT IF IT IS PLAINLY ITS OWN. A phone can hand back the frame before, or a lost context's blank, and a wrong picture written to the store stays wrong for ever, so: the scene is emptied of any badge first, the canvas is cleared, and a picture identical to the last one for a badge that is not alike is tried again and, if it is still the same, not kept (and tried later). */
+        var aw = null, sp0 = bdSpec(j[0]), sig = [sp0.sh, sp0.gl, sp0.lock, sp0.fx, sp0.t, sp0.c, sp0.k, sp0.pt].join('|');
         try {
-          aw = bdMake(bdSpec(j[0]), 'silver', 384); aw.rotation.set(.32, -.5, .04); bd3.s.add(aw); bd3.r.render(bd3.s, bd3.c);
-          var du = bd3.r.domElement.toDataURL('image/webp', .9); if (du.indexOf('data:image/webp') !== 0) du = bd3.r.domElement.toDataURL('image/png');
-          bdStills[j[2]] = du; bdDbPut(j[2], du);
+          bd3.s.children.slice().forEach(function (o) { if (o.userData && o.userData.bdAw) { bd3.s.remove(o); bdDrop(o); } });
+          aw = bdMake(sp0, 'silver', 384); aw.userData.bdAw = 1; aw.rotation.set(.32, -.5, .04); bd3.s.add(aw);
+          var shot = function () { bd3.r.clear(); bd3.r.render(bd3.s, bd3.c); var d = bd3.r.domElement.toDataURL('image/webp', .9); if (d.indexOf('data:image/webp') !== 0) d = bd3.r.domElement.toDataURL('image/png'); return d; };
+          var du = shot();
+          if (bd3.last && bd3.last.du === du && bd3.last.sig !== sig) du = shot();
+          if (bd3.last && bd3.last.du === du && bd3.last.sig !== sig) du = '';
+          if (du) { bd3.last = { du: du, sig: sig }; bdStills[j[2]] = du; bdDbPut(j[2], du); }
         } catch (e) { }
-        if (aw) { bd3.s.remove(aw); bdDrop(aw); } bd3.r.renderLists.dispose();
-        if (!bdStills[j[2]]) { (window.requestIdleCallback || function (f) { return setTimeout(f, 16); })(next, { timeout: 400 }); return; }
+        if (bd3) { if (aw) { bd3.s.remove(aw); bdDrop(aw); } bd3.r.renderLists.dispose(); }
+        if (!bdStills[j[2]]) { if ((j[3] = (j[3] || 0) + 1) < 3) bdQ.push(j); (window.requestIdleCallback || function (f) { return setTimeout(f, 60); })(next, { timeout: 600 }); return; }
       }
       j[1].src = bdStills[j[2]];
       /* the same picture may be waiting in more than one place */
