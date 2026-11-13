@@ -8820,7 +8820,7 @@ function bdRelicPts(sp, r) {
 /* the paintings, drawn from the middle of the sheet where one unit is u pixels; v is how lit the badge is just after a tap */
 var BDR = {
   /* MYTHIC. DRAKEFIRE: heat runs out through the scales in waves, and embers rise out of the metal */
-  drakefire: { n: 'ngon', sides: 6, rot: 0, hue: .04, sat: .62, rgh: .12, lamp: 0xffb070, cool: 0xff4a1a, glow: 0xff5a1a,
+  drakefire: { mold: 'dome', pal: [335, 10, 30, 48], n: 'ngon', sides: 6, rot: 0, hue: .04, sat: .62, rgh: .12, lamp: 0xffb070, cool: 0xff4a1a, glow: 0xff5a1a,
     paint: function (x, N, t, v, u) {
       var sw = u * .17, sh = sw * .62, r, c, k; x.lineWidth = u * .013;
       for (r = -9; r <= 9; r++) for (c = -6; c <= 6; c++) {
@@ -8831,7 +8831,7 @@ var BDR = {
       for (k = 0; k < 34; k++) { var f = (t * (.12 + bdR(k + 2) * .16) + bdR(k + 9)) % 1; x.fillStyle = 'rgba(255,' + (150 + 100 * f | 0) + ',60,' + (1 - f) + ')'; x.beginPath(); x.arc((bdR(k) - .5) * 1.6 * u + Math.sin(t * 2 + k) * u * .03, (1 - f * 2) * u * .95, u * (.012 + .01 * bdR(k + 5)), 0, 6.3); x.fill(); }
     } },
   /* MYTHIC. PHOENIX: flame climbing the whole face, sparks leaving the tips */
-  phoenix: { n: 'kite', hue: .11, sat: .72, rgh: .1, lamp: 0xffe0a0, cool: 0xff5a2a, glow: 0xffa020,
+  phoenix: { mold: 'gem', pal: [48, 18, 340, 282], n: 'kite', hue: .11, sat: .72, rgh: .1, lamp: 0xffe0a0, cool: 0xff5a2a, glow: 0xffa020,
     paint: function (x, N, t, v, u) {
       var k, y, last, f; x.lineCap = 'round';
       for (k = 0; k < 18; k++) {
@@ -8845,7 +8845,7 @@ var BDR = {
       for (k = 0; k < 40; k++) { f = (t * (.2 + bdR(k + 2) * .3) + bdR(k + 9)) % 1; x.fillStyle = 'rgba(255,230,140,' + (1 - f) + ')'; x.beginPath(); x.arc((bdR(k) - .5) * 1.6 * u, u * .9 - f * u * 1.8, u * .014, 0, 6.3); x.fill(); }
     } },
   /* MYTHIC. LEVIATHAN: the deep running through teal steel, a sonar ping going out every few seconds */
-  leviathan: { n: 'shield', rs: .92, hue: .5, sat: .62, rgh: .1, lamp: 0xa0f0ff, cool: 0x1aa8c8, glow: 0x18c8c0,
+  leviathan: { mold: 'frame', pal: [190, 215, 262, 170], n: 'shield', rs: .92, hue: .5, sat: .62, rgh: .1, lamp: 0xa0f0ff, cool: 0x1aa8c8, glow: 0x18c8c0,
     paint: function (x, N, t, v, u) {
       var k, i; x.lineWidth = u * .012;
       for (k = -9; k <= 9; k++) {
@@ -8857,7 +8857,7 @@ var BDR = {
       for (i = 0; i < 40; i++) { var bl = Math.pow(Math.sin(t * (.8 + bdR(i) * 1.5) + i) * .5 + .5, 3); x.fillStyle = 'rgba(150,255,240,' + (.15 + .85 * bl) + ')'; x.beginPath(); x.arc((bdR(i + 1) - .5) * 1.7 * u, (bdR(i + 50) - .5) * 1.7 * u, u * (.01 + .015 * bl), 0, 6.3); x.fill(); }
     } },
   /* MYTHIC. OUROBOROS: runes turning against each other round a serpent that is eating its own tail, all of it inside the metal */
-  ouroboros: { n: 'ngon', sides: 10, rot: Math.PI / 10, hue: .33, sat: .52, rgh: .1, lamp: 0xe8ffb0, cool: 0x3adf6a, glow: 0x4aff7a,
+  ouroboros: { mold: 'float', pal: [142, 96, 52], n: 'ngon', sides: 10, rot: Math.PI / 10, hue: .33, sat: .52, rgh: .1, lamp: 0xe8ffb0, cool: 0x3adf6a, glow: 0x4aff7a,
     paint: function (x, N, t, v, u) {
       var i; x.lineCap = 'butt';
       [.26, .4, .86].forEach(function (rr, k) { x.lineWidth = u * .03; x.setLineDash([u * .04, u * .06]); x.lineDashOffset = t * u * .1 * (k % 2 ? 1 : -1); x.strokeStyle = 'hsla(' + (k % 2 ? 48 : 130) + ',90%,' + (45 + 20 * v) + '%,.6)'; x.beginPath(); x.arc(0, 0, rr * u, 0, 6.3); x.stroke(); });
@@ -8870,7 +8870,7 @@ var BDR = {
       var hx = Math.cos(th + .1) * R, hy = Math.sin(th + .1) * R; x.fillStyle = 'hsla(130,100%,70%,1)'; x.beginPath(); x.arc(hx, hy, u * .075, 0, 6.3); x.fill(); x.fillStyle = '#ff4a2a'; x.beginPath(); x.arc(hx + Math.cos(th) * u * .02, hy + Math.sin(th) * u * .02, u * .018, 0, 6.3); x.fill();
     } },
   /* MYTHIC. KOI POND: two koi swimming through ripples, in the metal */
-  koipond: { n: 'ngon', sides: 7, rot: Math.PI / 2, hue: .93, sat: .4, rgh: .08, lamp: 0xffe0f0, cool: 0xff7ab0, glow: 0xff7ab8,
+  koipond: { mold: 'ridge', pal: [345, 22, 50, 185], n: 'ngon', sides: 7, rot: Math.PI / 2, hue: .93, sat: .4, rgh: .08, lamp: 0xffe0f0, cool: 0xff7ab0, glow: 0xff7ab8,
     paint: function (x, N, t, v, u) {
       var k, i, j; x.lineWidth = u * .014;
       for (k = 0; k < 4; k++) for (i = 0; i < 3; i++) { var f = (t * .2 + i / 3 + bdR(k) * .5) % 1; x.strokeStyle = 'rgba(255,' + (170 + 60 * f | 0) + ',' + (210 + 40 * f | 0) + ',' + ((1 - f) * (.55 + v * .4)) + ')'; x.beginPath(); x.arc((bdR(k + 1) - .5) * u * 1.1, (bdR(k + 6) - .5) * u * 1.1, f * u * .6, 0, 6.3); x.stroke(); }
@@ -8881,7 +8881,7 @@ var BDR = {
       });
     } },
   /* MYTHIC. ECLIPSE: a corona on black gold, and a moon that crosses and lights the diamond ring */
-  eclipse: { n: 'ngon', sides: 40, rot: 0, hue: .12, sat: .62, rgh: .09, lamp: 0xfff0b0, cool: 0xffb020, glow: 0xffc030,
+  eclipse: { mold: 'float', pal: [48, 28, 280, 322], n: 'ngon', sides: 40, rot: 0, hue: .12, sat: .62, rgh: .09, lamp: 0xfff0b0, cool: 0xffb020, glow: 0xffc030,
     paint: function (x, N, t, v, u) {
       var i, a, p = (t * .1) % 1, mx = (p - .5) * 2.8 * u, my = Math.sin(p * 6.28) * u * .08, near = Math.max(0, 1 - Math.abs(mx) / (u * .5));
       for (i = 0; i < 40; i++) { a = i / 40 * 6.2832 + t * .12; var L = u * (i % 2 ? .62 : .86) * (.9 + .15 * Math.sin(t * 2 + i) + v * .2 + near * .3); x.strokeStyle = 'hsla(' + (42 + 6 * (i % 2)) + ',100%,' + (55 + 15 * v) + '%,' + (i % 2 ? .45 : .8) + ')'; x.lineWidth = u * (i % 2 ? .012 : .02); x.beginPath(); x.moveTo(Math.cos(a) * u * .42, Math.sin(a) * u * .42); x.lineTo(Math.cos(a) * L, Math.sin(a) * L); x.stroke(); }
@@ -8891,7 +8891,7 @@ var BDR = {
       x.strokeStyle = 'rgba(255,235,170,.9)'; x.lineWidth = u * .015; x.beginPath(); x.arc(mx, my, u * .4, 0, 6.3); x.stroke();
     } },
   /* MYTHIC. MOONRISE: a moon through its phases, moths turning round it, stars waking */
-  moonrise: { n: 'ngon', sides: 4, rot: 0, rs: .95, hue: .7, sat: .48, rgh: .08, lamp: 0xe0d8ff, cool: 0x7a5aff, glow: 0x8a6aff,
+  moonrise: { mold: 'frame', pal: [252, 205, 282, 160], n: 'ngon', sides: 4, rot: 0, rs: .95, hue: .7, sat: .48, rgh: .08, lamp: 0xe0d8ff, cool: 0x7a5aff, glow: 0x8a6aff,
     paint: function (x, N, t, v, u) {
       var i, ph = Math.sin(t * .45) * .5; x.fillStyle = 'rgba(220,210,255,' + (.8 + v * .2) + ')'; x.beginPath(); x.arc(0, 0, u * .5, 0, 6.3); x.fill();
       x.globalCompositeOperation = 'source-over'; x.fillStyle = '#000'; x.beginPath(); x.arc(ph * u * 1.05, -ph * u * .15, u * .46, 0, 6.3); x.fill(); x.globalCompositeOperation = 'lighter';
@@ -8900,7 +8900,7 @@ var BDR = {
       for (i = 0; i < 5; i++) { var s = t * (.6 + i * .13) + i * 1.9, mx = Math.cos(s) * u * (.62 + .1 * Math.sin(i)), my = Math.sin(s * 1.3) * u * .55, fl = Math.sin(t * 14 + i) * .6 + .7; x.strokeStyle = 'rgba(225,215,255,.95)'; x.lineWidth = u * .016; x.beginPath(); x.moveTo(mx - u * .05, my - u * .03 * fl); x.lineTo(mx, my); x.lineTo(mx + u * .05, my - u * .03 * fl); x.stroke(); }
     } },
   /* MYTHIC. COLOSSUS: black rock with a fire in it: the cracks run, flare and breathe */
-  colossus: { n: 'ngon', sides: 8, rot: Math.PI / 8, hue: .03, sat: .18, rgh: .38, met: .85, lamp: 0xffb070, cool: 0xff3a1a, glow: 0xff5a1a,
+  colossus: { mold: 'ridge', pal: [8, 28, 52, 0], n: 'ngon', sides: 8, rot: Math.PI / 8, hue: .03, sat: .18, rgh: .38, met: .85, lamp: 0xffb070, cool: 0xff3a1a, glow: 0xff5a1a,
     paint: function (x, N, t, v, u) {
       var k, j; x.lineCap = x.lineJoin = 'round';
       var cg = x.createRadialGradient(0, 0, 0, 0, 0, u * .5); cg.addColorStop(0, 'rgba(255,120,20,' + (.35 + .25 * Math.sin(t * 1.6) + v * .3) + ')'); cg.addColorStop(1, 'rgba(255,60,0,0)'); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .5, 0, 6.3); x.fill();
@@ -8913,7 +8913,7 @@ var BDR = {
       }
     } },
   /* MYTHIC. ATLAS: a globe turning in gold and blue, armillary rings tilting round it, painted into the steel */
-  atlas: { n: 'ngon', sides: 5, rot: Math.PI / 2, rs: 1.04, hue: .6, sat: .62, rgh: .08, lamp: 0xd0e8ff, cool: 0x3a8aff, glow: 0x3a90ff,
+  atlas: { mold: 'steps', pal: [215, 45, 190, 255], n: 'ngon', sides: 5, rot: Math.PI / 2, rs: 1.04, hue: .6, sat: .62, rgh: .08, lamp: 0xd0e8ff, cool: 0x3a8aff, glow: 0x3a90ff,
     paint: function (x, N, t, v, u) {
       var k, R = u * .62; x.lineWidth = u * .014;
       x.strokeStyle = 'rgba(255,210,110,' + (.7 + v * .3) + ')'; x.beginPath(); x.arc(0, 0, R, 0, 6.3); x.stroke();
@@ -8925,7 +8925,7 @@ var BDR = {
       });
     } },
   /* MYTHIC. ZODIAC: twelve points with a star drawn through them, the whole sky turning, a falling star every few seconds */
-  zodiac: { n: 'ngon', sides: 12, rot: Math.PI / 12, hue: .8, sat: .5, rgh: .07, lamp: 0xffe0ff, cool: 0xc04aff, glow: 0xd050ff,
+  zodiac: { mold: 'dome', pal: [300, 190, 262, 332], n: 'ngon', sides: 12, rot: Math.PI / 12, hue: .8, sat: .5, rgh: .07, lamp: 0xffe0ff, cool: 0xc04aff, glow: 0xd050ff,
     paint: function (x, N, t, v, u) {
       var k, a, b; x.lineWidth = u * .012;
       for (k = 0; k < 12; k++) { a = k / 12 * 6.2832 + t * .12; b = (k + 5) / 12 * 6.2832 + t * .12; x.strokeStyle = 'hsla(' + (290 + 30 * Math.sin(k + t)) + ',90%,' + (62 + 15 * v) + '%,' + (.55 + .35 * Math.sin(t * 1.5 + k)) + ')'; x.beginPath(); x.moveTo(Math.cos(a) * u * .8, Math.sin(a) * u * .8); x.lineTo(Math.cos(b) * u * .8, Math.sin(b) * u * .8); x.stroke(); }
@@ -8934,7 +8934,7 @@ var BDR = {
       var f = (t * .45) % 1, sy = -u * .9 + f * u * 1.8, sx = -u * .9 + f * u * 1.3; var sg = x.createLinearGradient(sx - u * .5, sy - u * .35, sx, sy); sg.addColorStop(0, 'rgba(255,255,255,0)'); sg.addColorStop(1, 'rgba(255,255,255,' + (1 - Math.abs(f - .5) * 1.6) + ')'); x.strokeStyle = sg; x.lineWidth = u * .02; x.beginPath(); x.moveTo(sx - u * .5, sy - u * .35); x.lineTo(sx, sy); x.stroke();
     } },
   /* MYTHIC. GEMINI (supersets): two strands braiding up the face, flaring where they cross */
-  ssm: { n: 'ngon', sides: 6, rot: Math.PI / 6, hue: .85, sat: .5, rgh: .06, lamp: 0xffd0ff, cool: 0x30d0ff, glow: 0xc060ff,
+  ssm: { mold: 'steps', pal: [322, 186, 256, 330], n: 'ngon', sides: 6, rot: Math.PI / 6, hue: .85, sat: .5, rgh: .06, lamp: 0xffd0ff, cool: 0x30d0ff, glow: 0xc060ff,
     paint: function (x, N, t, v, u) {
       var y, k, cols = ['rgba(60,220,255,', 'rgba(255,90,230,'], lastA = null, lastB = null;
       x.lineCap = 'round';
@@ -8949,7 +8949,7 @@ var BDR = {
       for (k = 0; k < 18; k++) { var f = (t * (.25 + bdR(k) * .3) + bdR(k + 4)) % 1; x.fillStyle = 'rgba(255,255,255,' + (1 - f) * .8 + ')'; x.beginPath(); x.arc((bdR(k + 9) - .5) * u * 1.3, u * .9 - f * u * 1.8, u * .012, 0, 6.3); x.fill(); }
     } },
   /* MYTHIC. AVALANCHE (drop sets): ice falls through the metal, faster as it goes, and bursts where it lands */
-  dsm: { n: 'ngon', sides: 3, rot: -Math.PI / 2, rs: 1.2, hue: .56, sat: .45, rgh: .07, lamp: 0xe0f4ff, cool: 0x60c8ff, glow: 0x70d0ff,
+  dsm: { mold: 'frame', pal: [192, 256, 302, 170], n: 'ngon', sides: 3, rot: -Math.PI / 2, rs: 1.2, hue: .56, sat: .45, rgh: .07, lamp: 0xe0f4ff, cool: 0x60c8ff, glow: 0x70d0ff,
     paint: function (x, N, t, v, u) {
       var k, surge = Math.pow(Math.max(0, Math.sin(t * 1.15)), 10);
       var wash = x.createLinearGradient(0, -u, 0, u); wash.addColorStop(0, 'rgba(180,230,255,' + (.05 + surge * .3) + ')'); wash.addColorStop(1, 'rgba(120,200,255,' + (.2 + surge * .5) + ')'); x.fillStyle = wash; x.fillRect(-u * 1.2, -u * 1.2, u * 2.4, u * 2.4);
@@ -8960,7 +8960,7 @@ var BDR = {
       }
     } },
   /* MYTHIC. IGNITION (warm-up sets): a spark runs the fuse in to the middle and the whole face goes up */
-  wum: { n: 'star', rot: Math.PI / 16, hue: .07, sat: .7, rgh: .09, lamp: 0xffe0a0, cool: 0xff5a1a, glow: 0xff7a20,
+  wum: { mold: 'gem', pal: [48, 8, 332, 22], n: 'star', rot: Math.PI / 16, hue: .07, sat: .7, rgh: .09, lamp: 0xffe0a0, cool: 0xff5a1a, glow: 0xff7a20,
     paint: function (x, N, t, v, u) {
       var P = 4.4, ph = (t % P) / P, run = Math.min(1, ph / .62), boom = ph > .62 ? (ph - .62) / .38 : 0, i, last = null;
       var turns = 3.2; x.lineCap = 'round';
@@ -8974,7 +8974,7 @@ var BDR = {
       x.fillStyle = 'rgba(255,120,30,' + (.12 + .06 * Math.sin(t * 5)) + ')'; x.beginPath(); x.arc(0, 0, u * .07, 0, 6.3); x.fill();
     } },
   /* EXOTIC. TANDEM (supersets): two links of light turning together on blue steel, the rings of a chain. Calm, and nothing alive in it */
-  ssx: { n: 'ngon', sides: 4, rot: Math.PI / 4, rs: .98, hue: .56, sat: .55, rgh: .1, lamp: 0xd0f0ff, cool: 0x3aa8ff, glow: 0x3aa0ff, calm: 1,
+  ssx: { mold: 'gem', pal: [185, 225, 275], n: 'ngon', sides: 4, rot: Math.PI / 4, rs: .98, hue: .56, sat: .55, rgh: .1, lamp: 0xd0f0ff, cool: 0x3aa8ff, glow: 0x3aa0ff, calm: 1,
     paint: function (x, N, t, v, u) {
       var k, a = t * .28; x.lineCap = 'round';
       for (k = 0; k < 3; k++) {
@@ -8986,7 +8986,7 @@ var BDR = {
       x.strokeStyle = 'rgba(120,210,255,' + (.25 + .15 * Math.sin(t * 1.4)) + ')'; x.lineWidth = u * .01; for (k = -4; k <= 4; k++) { x.beginPath(); x.moveTo(-u, k * u * .2 + Math.sin(t + k) * u * .01); x.lineTo(u, k * u * .2 + Math.sin(t + k + 2) * u * .01); x.stroke(); }
     } },
   /* EXOTIC. CASCADE (drop sets): steps of light falling down a staircase of steel, each lower step slower. Calm */
-  dsx: { n: 'drop', rs: .96, hue: .58, sat: .5, rgh: .09, lamp: 0xdff2ff, cool: 0x5ab8ff, glow: 0x5ab4ff, calm: 1,
+  dsx: { mold: 'ridge', pal: [205, 160, 236, 190], n: 'drop', rs: .96, hue: .58, sat: .5, rgh: .09, lamp: 0xdff2ff, cool: 0x5ab8ff, glow: 0x5ab4ff, calm: 1,
     paint: function (x, N, t, v, u) {
       var k, j; x.lineCap = 'butt';
       for (k = 0; k < 9; k++) {
@@ -8997,7 +8997,7 @@ var BDR = {
       for (j = -5; j <= 5; j++) { var f = (t * .22 + j * .17) % 1; x.strokeStyle = 'rgba(230,248,255,' + (.2 + .45 * Math.sin(f * Math.PI)) + ')'; x.beginPath(); x.moveTo(j * u * .17, -u * 1.1 + f * u * 2.2); x.lineTo(j * u * .17, -u * 1.1 + f * u * 2.2 + u * .22); x.stroke(); }
     } },
   /* EXOTIC. EMBER (warm-ups): heat breathing out through triangles of amber, ring after ring. Calm */
-  wux: { n: 'ngon', sides: 3, rot: Math.PI / 2, rs: 1.2, hue: .09, sat: .66, rgh: .1, lamp: 0xffe8b0, cool: 0xff9a2a, glow: 0xffa030, calm: 1,
+  wux: { mold: 'dome', pal: [36, 12, 50, 350], n: 'ngon', sides: 3, rot: Math.PI / 2, rs: 1.2, hue: .09, sat: .66, rgh: .1, lamp: 0xffe8b0, cool: 0xff9a2a, glow: 0xffa030, calm: 1,
     paint: function (x, N, t, v, u) {
       var k, i; x.lineJoin = 'round';
       for (k = 0; k < 7; k++) {
@@ -9008,50 +9008,81 @@ var BDR = {
     } }
 };
 /* the stepped body of a relic and the light across it */
+/* SIX MOLDS, so the relics are not all the same object. Each is a different way of building a badge out of layers, and the painting is lit across whichever one it is: STEPS is the terraced funnel, DOME is a stepped dome that bulges out, FRAME is a thick bezel round a recessed window, GEM is a faceted cut stone, RIDGE is a plate with glowing ribs and a hub, FLOAT is three plates with air between them so they slide over one another as it turns. */
+var BD_MOLDS = ['steps', 'dome', 'frame', 'gem', 'ridge', 'float'];
+function bdMold(mold) {
+  var L = [], i, HOLE = [.38, .32, .26, .2, .14, .08];
+  if (mold === 'dome') { for (i = 0; i < 8; i++) L.push({ sc: .18 + .82 * Math.cos(i / 7 * 1.3), hole: 0, depth: .07, z: i * .065, bev: .02, seg: 3 }); }
+  else if (mold === 'frame') L = [{ sc: 1, hole: .64, depth: .16, z: .02, bev: .05, seg: 4 }, { sc: .66, hole: 0, depth: .05, z: 0, bev: .012, seg: 2 }, { sc: .5, hole: .42, depth: .05, z: .06, bev: .014, seg: 2 }, { sc: .22, hole: 0, depth: .1, z: .04, bev: .04, seg: 3 }];
+  else if (mold === 'gem') L = [{ sc: 1, hole: 0, depth: .04, z: 0, bev: .03, seg: 1, flat: 1 }, { sc: .82, hole: 0, depth: .09, z: .04, bev: .1, seg: 1, flat: 1 }, { sc: .56, hole: 0, depth: .09, z: .12, bev: .09, seg: 1, flat: 1 }, { sc: .3, hole: 0, depth: .05, z: .2, bev: .06, seg: 1, flat: 1 }];
+  else if (mold === 'ridge') L = [{ sc: 1, hole: 0, depth: .06, z: 0, bev: .02, seg: 2 }, { sc: 1, hole: .9, depth: .14, z: .02, bev: .03, seg: 3 }, { sc: .2, hole: 0, depth: .16, z: .04, bev: .04, seg: 3 }];
+  else if (mold === 'float') L = [{ sc: 1, hole: 0, depth: .04, z: 0, bev: .02, seg: 2, dim: 1 }, { sc: .84, hole: .44, depth: .07, z: .24, bev: .03, seg: 3, turn: 1 }, { sc: .28, hole: 0, depth: .08, z: .14, bev: .04, seg: 3 }];
+  else for (i = 0; i < 7; i++) { var R = .707 + i * .073; L.push({ sc: R / 1.145, hole: i < 6 ? HOLE[i] * 1.414 / R : 0, depth: .085, z: (6 - i) * .085, bev: .016, seg: 3 }); }
+  return L;
+}
+/* a hue a fraction of the way along a palette, the short way round */
+function bdPalHue(pal, f) {
+  if (pal.length < 2) return pal[0]; var q = Math.min(.9999, Math.max(0, f)) * (pal.length - 1), i = Math.floor(q), a = pal[i], b = pal[i + 1], d = ((b - a + 540) % 360) - 180; return (a + d * (q - i) + 360) % 360;
+}
 function bdRelic(id) {
   var sp = BDR[id];
   return function (A) {
-    var T = A.T, g = A.g, hi = A.hi, i, K = 7, TT = .085, HOLE = [.38, .32, .26, .2, .14, .08], pend = false, tapAt = -99, st = { v: 0 };
+    var T = A.T, g = A.g, hi = A.hi, i, pend = false, tapAt = -99, st = { v: 0 }, mold = sp.mold || 'steps', LY = bdMold(mold), pal = sp.pal || [sp.hue * 360];
     var EN = hi ? 512 : 384, ec = document.createElement('canvas'); ec.width = ec.height = EN; var ex = ec.getContext('2d'), etx = new T.CanvasTexture(ec), U = EN / 1.8, lastDraw = -1;
     etx.encoding = T.sRGBEncoding; etx.wrapS = etx.wrapT = T.ClampToEdgeWrapping; etx.repeat.set(1 / 1.8, 1 / 1.8); etx.offset.set(.5, .5);
     function paint(t, v) {
       ex.setTransform(1, 0, 0, 1, 0, 0); ex.globalCompositeOperation = 'source-over'; ex.fillStyle = '#000'; ex.fillRect(0, 0, EN, EN);
-      ex.translate(EN / 2, EN / 2); ex.globalCompositeOperation = 'lighter'; ex.lineCap = ex.lineJoin = 'round'; sp.paint(ex, EN, t, v, U); etx.needsUpdate = true;
+      ex.translate(EN / 2, EN / 2); ex.globalCompositeOperation = 'lighter'; ex.lineCap = ex.lineJoin = 'round'; sp.paint(ex, EN, t, v, U);
+      /* THE COLOURWAY: the painting is recoloured by a gradient of the badge's own palette that slowly turns across it, so a badge is a sweep of colour and not one hue. The 'color' blend keeps the painting's light and takes the gradient's colour, and black stays black. */
+      var an = t * (sp.sway || (sp.calm ? .12 : .22)) + (sp.ph || 0), cx = Math.cos(an) * U * .95, cy = Math.sin(an) * U * .95, gr = ex.createLinearGradient(-cx, -cy, cx, cy);
+      pal.forEach(function (h, k) { gr.addColorStop(pal.length > 1 ? k / (pal.length - 1) : 0, 'hsl(' + h + ',100%,50%)'); });
+      ex.globalCompositeOperation = 'color'; ex.fillStyle = gr; ex.fillRect(-EN, -EN, EN * 2, EN * 2); ex.globalCompositeOperation = 'source-over';
+      etx.needsUpdate = true;
     }
-    var mats = [], sm = [], FM = [], BM = [], front = new T.Group(), back = new T.Group(), cr = new T.Group(), pivot = new T.Group(), rs = sp.rs || 1;
+    var mats = [], sm = [], FM = [], BM = [], front = new T.Group(), back = new T.Group(), cr = new T.Group(), pivot = new T.Group(), rs = sp.rs || 1, RM = 1.145 * rs, nL = LY.length;
     g.add(pivot); pivot.add(cr); cr.scale.setScalar(.8); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
-    for (i = 0; i < K; i++) {
-      var R = (.707 + i * .073) * rs, baseC = new T.Color().setHSL(sp.hue, sp.sat, .13 - i * .014), sh = new T.Shape(), pts = bdRelicPts(sp, R);
+    LY.forEach(function (ly, i) {
+      var fr = nL > 1 ? i / (nL - 1) : 0, R = ly.sc * RM, spl = ly.turn ? { n: sp.n, sides: sp.sides, rot: (sp.rot || 0) + Math.PI / (sp.sides || 6), sx: sp.sx, sy: sp.sy } : sp, sh = new T.Shape(), pts = bdRelicPts(spl, R);
       pts.forEach(function (q, j) { if (j) sh.lineTo(q[0], q[1]); else sh.moveTo(q[0], q[1]); }); sh.closePath();
-      if (i < K - 1) { var hp = bdRelicPts(sp, HOLE[i] * 1.414 * rs), ho = new T.Path(); hp.slice().reverse().forEach(function (q, j) { if (j) ho.lineTo(q[0], q[1]); else ho.moveTo(q[0], q[1]); }); ho.closePath(); sh.holes.push(ho); }
-      var geo = new T.ExtrudeGeometry(sh, { depth: TT, bevelEnabled: true, bevelThickness: .016, bevelSize: .016, bevelSegments: hi ? 4 : 3 });
-      var mk = function (map) { return new T.MeshPhysicalMaterial({ color: baseC, metalness: sp.met || 1, roughness: sp.rgh, envMapIntensity: 1.5, clearcoat: 1, clearcoatRoughness: .05, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
+      if (ly.hole) { var hp = bdRelicPts(spl, R * ly.hole), ho = new T.Path(); hp.slice().reverse().forEach(function (q, j) { if (j) ho.lineTo(q[0], q[1]); else ho.moveTo(q[0], q[1]); }); ho.closePath(); sh.holes.push(ho); }
+      var geo = new T.ExtrudeGeometry(sh, { depth: ly.depth, bevelEnabled: true, bevelThickness: ly.bev, bevelSize: ly.bev, bevelSegments: ly.seg });
+      var baseC = new T.Color().setHSL(bdPalHue(pal, fr) / 360, sp.sat || .6, (ly.dim ? .08 : .14) - .06 * fr);
+      var mk = function (map) { return new T.MeshPhysicalMaterial({ color: baseC, metalness: sp.met || 1, roughness: sp.rgh, envMapIntensity: 1.5, clearcoat: 1, clearcoatRoughness: .05, flatShading: !!ly.flat, emissive: map ? 0xffffff : 0x000000, emissiveMap: map || null, emissiveIntensity: 1 }); };
       mats[i] = mk(etx); sm[i] = mk(null);
-      FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); FM[i].position.z = (K - 1 - i) * TT; front.add(FM[i]);
-      BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); BM[i].position.z = (K - 1 - i) * TT; back.add(BM[i]);
+      FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); FM[i].position.z = ly.z; front.add(FM[i]);
+      BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); BM[i].position.z = ly.z; back.add(BM[i]);
+    });
+    /* the ridge mold's ribs, each lit in its own place along the palette */
+    if (mold === 'ridge') {
+      var NR = Math.max(6, Math.min(sp.sides || 8, 16)), rg = new T.BoxGeometry(.06, RM * .8, .07);
+      for (i = 0; i < NR; i++) {
+        var a = i / NR * Math.PI * 2, rc = new T.Color().setHSL(bdPalHue(pal, i / NR) / 360, 1, .55);
+        [front, back].forEach(function (grp) { var rib = new T.Mesh(rg, new T.MeshBasicMaterial({ color: rc, toneMapped: false })); rib.position.set(Math.cos(a) * RM * .47, Math.sin(a) * RM * .47, .2); rib.rotation.z = a - Math.PI / 2; grp.add(rib); });
+      }
     }
-    var hc = function (l) { return new T.Color().setHSL(sp.hue, .85, l); }; if (sp.lamp == null) sp.lamp = hc(.82); if (sp.cool == null) sp.cool = hc(.5); if (sp.glow == null) sp.glow = hc(.55);
-    var lamp = new T.PointLight(sp.lamp, 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
-    var cool = new T.PointLight(sp.cool, 1, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
-    var rim = new T.PointLight(sp.cool, .6, 3); rim.position.set(1.2, .9, -.5); g.add(rim);
-    /* the only thing outside the metal: a soft glow behind it */
-    var glow = new T.Sprite(new T.SpriteMaterial({ map: bdDotTex(), color: sp.glow, transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false })); glow.scale.set(3.6, 3.6, 1); glow.position.z = -.7; g.add(glow);
+    var hc = function (hh, l) { return new T.Color().setHSL(hh / 360, .9, l); };
+    var lamp = new T.PointLight(hc(pal[0], .82), 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
+    var cool = new T.PointLight(hc(pal[pal.length - 1], .5), 1, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
+    var rim = new T.PointLight(hc(bdPalHue(pal, .5), .55), .6, 3); rim.position.set(1.2, .9, -.5); g.add(rim);
+    /* the only thing outside the metal: a soft glow behind it, one end of the palette on each side */
+    var mkGlow = function (hh) { var sprite = new T.Sprite(new T.SpriteMaterial({ map: bdDotTex(), color: hc(hh, .55), transparent: true, opacity: .5, blending: T.AdditiveBlending, depthWrite: false })); sprite.scale.set(3.4, 3.4, 1); sprite.position.z = -.7; g.add(sprite); return sprite; };
+    var gA = mkGlow(pal[0]), gB = mkGlow(pal[pal.length - 1]);
     g.userData.tap = function () { pend = true; };
     A.add(function (t) {
       if (pend) { tapAt = t; pend = false; }
       var u = t - tapAt, spin = u >= 0 && u < 1.7 ? (1 - Math.pow(1 - u / 1.7, 3)) * Math.PI * 2 : 0, v = u >= 0 && u < 1.6 ? Math.exp(-u * 2.2) : 0, pu = .5 + .5 * Math.sin(t * .9);
       if (t - lastDraw > (v > .03 ? .034 : .05) || t < lastDraw) { lastDraw = t; paint(t, v); }
-      pivot.rotation.y = Math.sin(t * .5) * (sp.calm ? .34 : .44) + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .18; pivot.position.y = Math.sin(t * .8) * .045;
-      for (var i = 0; i < K; i++) {
-        var lift = u >= 0 && u < 1.2 && u > i * .09 && u < i * .09 + .5 ? Math.sin((u - i * .09) * Math.PI / .5) * .1 : 0;
-        mats[i].emissiveIntensity = (2.5 - i * .16) * (.85 + .3 * pu) + 1.4 * v; FM[i].position.z = (K - 1 - i) * TT + lift; BM[i].position.z = (K - 1 - i) * TT + lift;
+      pivot.rotation.y = Math.sin(t * .5) * (sp.calm ? .36 : .46) + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .2; pivot.position.y = Math.sin(t * .8) * .045;
+      for (var i = 0; i < nL; i++) {
+        var ly = LY[i], lift = u >= 0 && u < 1.2 && u > i * .09 && u < i * .09 + .5 ? Math.sin((u - i * .09) * Math.PI / .5) * .1 : 0, fr = nL > 1 ? i / (nL - 1) : 0;
+        mats[i].emissiveIntensity = (2.5 - fr * .8) * (.85 + .3 * pu) * (ly.dim ? .6 : 1) * (mold === 'dome' ? .42 : 1) + 1.4 * v; FM[i].position.z = ly.z + lift; BM[i].position.z = ly.z + lift;
       }
       lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .6 + Math.sin(t * 1.3) * .2 + v;
-      glow.material.opacity = .42 + .1 * Math.sin(t * 1.1) + .3 * v;
+      var ga = t * .3; gA.position.set(Math.cos(ga) * .35, Math.sin(ga) * .35, -.7); gB.position.set(-Math.cos(ga) * .35, -Math.sin(ga) * .35, -.7);
+      gA.material.opacity = gB.material.opacity = .36 + .1 * Math.sin(t * 1.1) + .28 * v;
     });
   };
 }
-
 /* shapes for the ladder relics, none of them the same as another or as one of the hand-made sixteen */
 var BD_SHAPES = [['star', 8, 0], ['ngon', 9, Math.PI / 2], ['cross', 4, 0], ['ngon', 6, 0, 1, 1, 1.25], ['gem', 5, 0], ['ngon', 5, -Math.PI / 2], ['star', 10, Math.PI / 10], ['ngon', 7, 0], ['ngon', 14, 0], ['ngon', 8, 0], ['star', 6, Math.PI / 6], ['ngon', 12, 0], ['ngon', 13, Math.PI / 2], ['ngon', 8, Math.PI / 8, 1, 1, 1.2],
   ['ngon', 6, Math.PI / 6, 1, 1.25, 1], ['ngon', 4, Math.PI / 4, 1, 1, 1.25], ['ngon', 9, 0], ['ngon', 5, 0], ['star', 12, 0], ['ngon', 10, 0], ['ngon', 11, Math.PI / 2], ['ngon', 4, 0, 1, 1.2, 1], ['ngon', 16, Math.PI / 16], ['ngon', 5, Math.PI / 2, 1, 1.15, 1], ['ngon', 7, Math.PI / 2, 1, 1, 1.2], ['ngon', 3, Math.PI / 2, 1.1, 1.3, 1], ['ngon', 10, Math.PI / 10, 1, 1.2, 1], ['ngon', 12, 0, 1, 1, 1.15], ['star', 14, 0], ['ngon', 18, 0], ['ngon', 3, 0, 1.1, 1, 1], ['ngon', 3, Math.PI, 1.1, 1, 1.2], ['ngon', 6, 0, 1, 1.3, 1], ['ngon', 8, 0, 1, 1, 1.3], ['star', 9, 0], ['ngon', 11, 0], ['ngon', 5, Math.PI, 1, 1, 1.2], ['ngon', 7, Math.PI / 7, 1, 1.2, 1], ['ngon', 9, Math.PI / 9, 1, 1, 1.15], ['star', 7, 0], ['ngon', 15, 0], ['ngon', 13, 0], ['star', 5, Math.PI / 2], ['ngon', 12, Math.PI / 12, 1, 1.2, 1]];
@@ -9081,18 +9112,20 @@ var BDP = {
     pts.forEach(function (p) { var g = x.createRadialGradient(p[0], p[1], 0, p[0], p[1], u * .12); g.addColorStop(0, 'rgba(255,255,255,.9)'); g.addColorStop(1, bdH(sp, 60, 0)); x.fillStyle = g; x.beginPath(); x.arc(p[0], p[1], u * .12, 0, 6.3); x.fill(); }); },
   vortex: function (x, N, t, v, u, sp) { var arm, i; for (arm = 0; arm < 3; arm++) for (i = 0; i < 60; i++) { var f = i / 60, a = arm * 2.0944 + f * 5.2 - t * (.9 + (1 - f) * 1.4), r = (1 - f) * u * .95 + u * .04; x.fillStyle = bdH(sp, 52 + 30 * f, .5 + .5 * f, arm * 18); x.beginPath(); x.arc(Math.cos(a) * r, Math.sin(a) * r, u * (.02 + .04 * f), 0, 6.3); x.fill(); } var cg = x.createRadialGradient(0, 0, 0, 0, 0, u * (.28 + .06 * Math.sin(t * 3) + v * .1)); cg.addColorStop(0, 'rgba(255,255,255,1)'); cg.addColorStop(.4, bdH(sp, 62, .8)); cg.addColorStop(1, bdH(sp, 50, 0)); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .4, 0, 6.3); x.fill(); },
   aurora: function (x, N, t, v, u, sp) { var L, i; for (L = 0; L < 4; L++) { var dh = L * 28 - 30; x.beginPath(); for (i = -20; i <= 20; i++) { var px = i * u * .05, top = -u * (.8 - L * .1) + Math.sin(px / u * 3 + t * (.6 + L * .2) + L) * u * .22 + Math.sin(px / u * 7 - t * .9) * u * .06; if (i === -20) x.moveTo(px, top); else x.lineTo(px, top); } x.lineTo(u * 1.1, u * .9); x.lineTo(-u * 1.1, u * .9); x.closePath(); var g = x.createLinearGradient(0, -u, 0, u * .9); g.addColorStop(0, bdH(sp, 70, .75, dh)); g.addColorStop(.5, bdH(sp, 55, .2, dh)); g.addColorStop(1, bdH(sp, 50, 0, dh)); x.fillStyle = g; x.fill(); } },
-  shatter: function (x, N, t, v, u, sp) { var k, P = 4.2, ph = (t % P) / P, n = 14; for (k = 0; k < n; k++) { var a0 = k / n * 6.2832 + bdR(k) * .15, a1 = (k + 1) / n * 6.2832, r = u * (.55 + .45 * bdR(k + 7)), lit = Math.max(0, 1 - Math.abs(ph * 1.6 - k / n * 1.4 - .1) * 3.2) + v * .5 + .1; x.fillStyle = bdH(sp, 40 + 40 * Math.min(1, lit), Math.min(.95, .1 + .7 * lit), k * 4); x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(a0) * r, Math.sin(a0) * r); x.lineTo(Math.cos(a1) * r * .96, Math.sin(a1) * r * .96); x.closePath(); x.fill(); x.strokeStyle = 'rgba(255,255,255,' + (.3 + .5 * lit) + ')'; x.lineWidth = u * .01; x.stroke(); } var fl = Math.pow(Math.max(0, 1 - Math.abs(ph - .55) * 7), 2); if (fl > 0) { x.fillStyle = 'rgba(255,255,255,' + fl * .5 + ')'; x.beginPath(); x.arc(0, 0, u * 1.2, 0, 6.3); x.fill(); x.strokeStyle = 'rgba(255,255,255,' + fl + ')'; x.lineWidth = u * .03; x.beginPath(); x.arc(0, 0, (ph - .5) * u * 8, 0, 6.3); x.stroke(); } },
+  shatter: function (x, N, t, v, u, sp) { var k, P = 4.2, ph = (t % P) / P, n = 14; for (k = 0; k < n; k++) { var a0 = k / n * 6.2832 + bdR(k) * .15, a1 = (k + 1) / n * 6.2832, r = u * (.55 + .45 * bdR(k + 7)), lit = Math.max(0, 1 - Math.abs(ph * 1.6 - k / n * 1.4 - .1) * 3.2) + v * .5 + .1; x.fillStyle = bdH(sp, 40 + 40 * Math.min(1, lit), Math.min(.95, .1 + .7 * lit), k * 4); x.beginPath(); x.moveTo(0, 0); x.lineTo(Math.cos(a0) * r, Math.sin(a0) * r); x.lineTo(Math.cos(a1) * r * .96, Math.sin(a1) * r * .96); x.closePath(); x.fill(); x.strokeStyle = 'rgba(255,255,255,' + (.3 + .5 * lit) + ')'; x.lineWidth = u * .01; x.stroke(); } var fl = Math.pow(Math.max(0, 1 - Math.abs(ph - .55) * 7), 2); if (fl > 0) { x.fillStyle = 'rgba(255,255,255,' + fl * .5 + ')'; x.beginPath(); x.arc(0, 0, u * 1.2, 0, 6.3); x.fill(); x.strokeStyle = 'rgba(255,255,255,' + fl + ')'; x.lineWidth = u * .03; x.beginPath(); x.arc(0, 0, Math.abs(ph - .5) * u * 8, 0, 6.3); x.stroke(); } },
   tide: function (x, N, t, v, u, sp) { var L, i, surge = (t * .22) % 1; for (L = 0; L < 5; L++) { x.beginPath(); for (i = -20; i <= 20; i++) { var px = i * u * .05, y = u * (.9 - L * .32 - surge * .9) + Math.sin(px / u * 4 + t * (1 + L * .25) + L) * u * .07; if (i === -20) x.moveTo(px, y); else x.lineTo(px, y); } x.lineTo(u * 1.1, u * 1.2); x.lineTo(-u * 1.1, u * 1.2); x.closePath(); x.fillStyle = bdH(sp, 40 + L * 8, .12 + .05 * L, L * 6); x.fill(); x.strokeStyle = bdH(sp, 75, .8); x.lineWidth = u * .012; x.stroke(); } for (i = 0; i < 26; i++) { var f = (t * .3 + bdR(i)) % 1; x.fillStyle = 'rgba(255,255,255,' + (1 - f) * .8 + ')'; x.beginPath(); x.arc((bdR(i + 4) - .5) * 1.7 * u, u * .9 - f * u * 1.8 - surge * u * .5, u * .012, 0, 6.3); x.fill(); } },
   nova: function (x, N, t, v, u, sp) { var P = 4.8, ph = (t % P) / P, grow = Math.min(1, ph / .7), boom = ph > .7 ? (ph - .7) / .3 : 0, i; var cg = x.createRadialGradient(0, 0, 0, 0, 0, u * (.1 + grow * .35)); cg.addColorStop(0, 'rgba(255,255,255,' + (.5 + grow * .5) + ')'); cg.addColorStop(1, bdH(sp, 60, 0)); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .6, 0, 6.3); x.fill(); for (i = 0; i < 18; i++) { var a = i / 18 * 6.2832 + t * .2, len = u * (.12 + grow * .22) * (1 + .3 * Math.sin(t * 5 + i)); x.strokeStyle = bdH(sp, 70, .6 * grow + .1); x.lineWidth = u * .015; x.beginPath(); x.moveTo(Math.cos(a) * u * .1, Math.sin(a) * u * .1); x.lineTo(Math.cos(a) * len, Math.sin(a) * len); x.stroke(); } if (boom > 0) { for (i = 0; i < 3; i++) { var br = Math.max(0, boom - i * .12); x.strokeStyle = 'rgba(255,255,255,' + (1 - br) * (1 - i * .25) + ')'; x.lineWidth = u * (.05 * (1 - br) + .01); x.beginPath(); x.arc(0, 0, br * u * 1.3, 0, 6.3); x.stroke(); } x.fillStyle = bdH(sp, 62, (1 - boom) * .5); x.beginPath(); x.arc(0, 0, u * 1.3, 0, 6.3); x.fill(); } },
   forgehit: function (x, N, t, v, u, sp) { var P = 2.4, ph = (t % P) / P, k, hit = ph < .5 ? ph / .5 : 1, cg = x.createRadialGradient(0, 0, 0, 0, 0, u * .7); var glow = ph < .5 ? Math.exp(-ph * 6) * .8 + .35 : .4 + .15 * Math.sin(t * 3); cg.addColorStop(0, 'rgba(255,255,255,' + glow + ')'); cg.addColorStop(.35, bdH(sp, 60, glow * .9)); cg.addColorStop(1, bdH(sp, 50, 0)); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .8, 0, 6.3); x.fill();
     if (ph < .5) { var a = ph; for (k = 0; k < 30; k++) { var ang = bdR(k) * 6.2832, sp2 = (.3 + bdR(k + 9) * .9) * u * 1.6, d = sp2 * a, gy = a * a * u * 1.4; x.strokeStyle = 'rgba(255,' + (210 - 100 * a * 2 | 0) + ',90,' + (1 - a * 2) + ')'; x.lineWidth = u * .018; x.beginPath(); x.moveTo(Math.cos(ang) * d, Math.sin(ang) * d + gy); x.lineTo(Math.cos(ang) * (d - u * .06), Math.sin(ang) * (d - u * .06) + gy - u * .02); x.stroke(); } x.strokeStyle = 'rgba(255,255,255,' + (1 - a * 2) + ')'; x.lineWidth = u * .04 * (1 - a * 2) + u * .006; x.beginPath(); x.arc(0, 0, a * u * 2.2, 0, 6.3); x.stroke(); }
     for (k = 0; k < 24; k++) { var f = (t * .2 + bdR(k)) % 1; x.fillStyle = bdH(sp, 65, (1 - f) * .6); x.beginPath(); x.arc((bdR(k + 3) - .5) * u * 1.3, u * .8 - f * u * 1.6, u * .012, 0, 6.3); x.fill(); } }
 };
+/* colourways made from a hue: a run of neighbours, a pair of opposites, a triad, a spectrum, a split, a long sweep */
+function bdRecipe(h, kind) { return [[h, h + 35, h + 70], [h, h + 180], [h, h + 120, h + 240], [h, h + 60, h + 120, h + 200, h + 280], [h, h + 150, h + 210], [h - 40, h, h + 40, h + 90]][kind].map(function (x) { return (x % 360 + 360) % 360; }); }
 /* the ladder's own relics: a spec from each row that has a painting */
 BD_NEW.forEach(function (r) {
   if (!r[7]) return;
   var rung = BD_LAD.filter(function (l) { return l[1].indexOf(r[0]) >= 0; })[0][1].indexOf(r[0]), k = Object.keys(BDR).length, sh = BD_SHAPES[k % BD_SHAPES.length];
-  BDR[r[0]] = { n: sh[0], sides: sh[1], rot: sh[2], rs: sh[3] || 1, sx: sh[4] || 1, sy: sh[5] || 1, hue: r[8], sat: .5, rgh: .09, calm: rung === 3 ? 1 : 0, pat: r[7], paint: function (x, N, t, v, u) { BDP[r[7]](x, N, t, v, u, BDR[r[0]]); } };
+  BDR[r[0]] = { mold: BD_MOLDS[(k * 5 + 1) % 6], pal: bdRecipe(r[8] * 360, k % 6), n: sh[0], sides: sh[1], rot: sh[2], rs: sh[3] || 1, sx: sh[4] || 1, sy: sh[5] || 1, hue: r[8], sat: .5, rgh: .09, calm: rung === 3 ? 1 : 0, pat: r[7], paint: function (x, N, t, v, u) { BDP[r[7]](x, N, t, v, u, BDR[r[0]]); } };
 });
 
 var BD_SCENE = { ssx: bdRelic('ssx'), ssm: bdRelic('ssm'), dsx: bdRelic('dsx'), dsm: bdRelic('dsm'), wux: bdRelic('wux'), wum: bdRelic('wum'), drakefire: bdRelic('drakefire'), phoenix: bdRelic('phoenix'), leviathan: bdRelic('leviathan'), ouroboros: bdRelic('ouroboros'), koipond: bdRelic('koipond'), eclipse: bdRelic('eclipse'), moonrise: bdRelic('moonrise'), colossus: bdRelic('colossus'), atlas: bdRelic('atlas'), zodiac: bdRelic('zodiac'), dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
