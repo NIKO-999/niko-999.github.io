@@ -191,7 +191,7 @@ const freeze = (at) => `(() => {
   ok('today is the routine', (await page.textContent('#lfPick')).trim() === 'Push' && /Push, Pull, Legs/.test(await page.textContent('.lf-sub')));
   ok('and says two exercises', /2 exercises/.test(await page.textContent('.lf-chips')));
   /* sampled every frame from inside the page, so a loaded machine cannot make the first look come late */
-  await page.evaluate(() => { window.__rise = []; const f = () => { const s = document.querySelector('.lf-session'); if (s) window.__rise.push(s.getBoundingClientRect().top); if (window.__rise.length < 90) requestAnimationFrame(f); }; requestAnimationFrame(f); });
+  await page.evaluate(() => { window.__rise = []; const f = () => { const s = document.querySelector('.lf-session'); if (s) window.__rise.push(s.getBoundingClientRect().top); if (window.__rise.length < 400 && !(window.__rise.length > 12 && window.__rise.slice(-12).every((v) => Math.abs(v - window.__rise[window.__rise.length - 1]) < .5) && window.__rise[window.__rise.length - 1] < 60)) requestAnimationFrame(f); }; requestAnimationFrame(f); });
   await page.click('#lfGo');
   await settle(page); await page.waitForTimeout(400);
   const rise = await page.evaluate(() => window.__rise), mid = rise[0], end = rise[rise.length - 1];
