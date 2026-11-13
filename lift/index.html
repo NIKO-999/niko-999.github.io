@@ -7630,7 +7630,7 @@ function lfBadges() {
     ['allmus4', amBest, 4], ['zodiac', amBest, 8], ['koipond', Math.floor(cdTot / 60), 100], ['post50', postN, 50], ['cdwk', bestOf(cdWk), 5], ['cardio100', cdW, 100], ['cdh50', Math.floor(cdTot / 60), 50]]
     .forEach(function (q) { prog[q[0]] = [Math.min(q[1], q[2]), q[2]]; });
   /* A LOOK AT THE SIX SCENES: on the owner's phone only, and put away by setting this to false */
-  if (BD_PREVIEW && lfOwner()) ['dontmiss'].forEach(function (id) { won(id, ymd(today())); });
+  if (BD_PREVIEW && lfOwner()) ['dontmiss'].concat(Object.keys(BD_MYTH)).forEach(function (id) { won(id, ymd(today())); });
   /* the owner badge is not a thing anyone else can see they lack */
   return BADGES.filter(function (b) { return (b.id !== 'owner' && b.id !== 'creator' && b.id !== 'slayer') || out[b.id]; }).map(function (b) { return { b: b, d: out[b.id] ? out[b.id].d : '', p: prog[b.id] }; });
 }
