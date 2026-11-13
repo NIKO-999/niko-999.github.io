@@ -939,7 +939,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-coin[data-m="lock"], .lf-cv-stage[data-m="lock"] { --ca: #5a5c63; --cb: #2c2d31; }
 .lf-coin img { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transition: transform .2s var(--ease); }
 .lf-coin img:not([src]) { display: none; }
-.lf-dbg { position: absolute; left: 8px; right: 8px; bottom: 8px; margin: 0; padding: 6px 8px; border-radius: 8px; background: rgba(0,0,0,.72); color: #9fe8a8; font: 10px/1.35 ui-monospace, Menlo, monospace; white-space: pre-wrap; pointer-events: none; z-index: 5; }
 .lf-coin .lf-bdlive { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; pointer-events: none; }
 @keyframes lf-halo { to { transform: rotate(1turn); } }
 .lf-coin.is-sc::after { content: ''; position: absolute; right: -2%; bottom: 2%; width: 22%; height: 22%; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 2px var(--card);
@@ -8500,7 +8499,6 @@ function bdMoveFace(g, flat, zf, mp, b) {
       sh.fragmentShader.replace('texture2D( map, vUv )', 'texture2D( map, vUv + bdWarp( vUv ) )').replace('diffuseColor *= texelColor;', 'diffuseColor *= texelColor * .9;');
   };
   var m = new BD3.Mesh(flat(), mat); m.position.z = zf + .003; m.renderOrder = 6; g.add(m);
-  g.userData.mvU = uT; g.userData.mvMat = mat;
   return function (t) { uT.value = t; };
 }
 function bdMake(b, m, n, pre) {
@@ -8902,7 +8900,7 @@ function lfCoinView(x, earnedNow) {
   }
   function close() {
     if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up'); vb.classList.remove('is-up');
-    setTimeout(function () { if (aw && aw.userData.dbgRestore) { aw.userData.dbgRestore(); aw.userData.dbgRestore = null; } if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); vb.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); }, 240);
+    setTimeout(function () { if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); vb.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); }, 240);
   }
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
   document.addEventListener('keydown', esc);
@@ -8933,13 +8931,6 @@ function lfCoinView(x, earnedNow) {
     (kept ? Promise.resolve(kept) : built.then(function (g) { return g || bdViewTake(bdKey(x)) || bdMake(bdSpec(x), 'silver', BD_LIVE); })).then(function (g) {
     if (done) { if (g) bdViewKeep(g); return; }
     aw = g; aw.userData.k = bdKey(x); sc.add(aw); bdUpload(K, aw);
-    /* OWNER'S READOUT: what the animation is doing on this phone, since it cannot be seen from here */
-    var dbg = null, dbgN = 0, dbgErr = [];
-    if (lfOwner()) {
-      dbg = el('<pre class="lf-dbg" aria-hidden="true"></pre>'); stage.appendChild(dbg);
-      var ce = console.error; console.error = function () { try { var m = [].join.call(arguments, ' '); if (/THREE|shader|WebGL/i.test(m)) dbgErr.push(m.slice(0, 90)); } catch (e) { } return ce.apply(console, arguments); };
-      aw.userData.dbgRestore = function () { console.error = ce; };
-    }
     /* it arrives turning and settles face up */
     var ry = -Math.PI * 2 - .8, rx = .3, vy = 0, vx = 0, drag = null, t0 = performance.now();
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -8951,7 +8942,6 @@ function lfCoinView(x, earnedNow) {
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
       aw.rotation.set(rx + sw * .4, ry + sw, 0);
       if (aw.userData.cr) aw.userData.cr(performance.now() / 1000);
-      if (dbg && ++dbgN % 15 === 0) { var U = aw.userData, mat = U.mvMat, gl = r.getContext(), pr = r.info.programs ? r.info.programs.length : -1; dbg.textContent = 'moving: ' + (U.mvU ? 'yes' : 'NO (no layer)') + '\nclock: ' + (U.mvU ? U.mvU.value.toFixed(1) : '-') + '  frames: ' + dbgN + '\ncr: ' + (U.cr ? 'set' : 'missing') + '  shader: ' + (mat ? (r.properties.get(mat).currentProgram ? 'ok' : 'NOT BUILT') : '-') + '\nprograms: ' + pr + '  errors: ' + dbgErr.length + (dbgErr.length ? '\n' + dbgErr[0] : '') + '\ngl: ' + (typeof WebGL2RenderingContext !== 'undefined' && gl instanceof WebGL2RenderingContext ? '2' : '1') + '  maxtex: ' + gl.getParameter(gl.MAX_TEXTURE_SIZE) + '\nreduce: ' + (calm ? 'on' : 'off') + '  face: ' + BD_FACE; }
       if (aw.userData.flow) { var tt = performance.now() / 1000; aw.userData.flow.offset.set(Math.sin(tt * .21) * .12, -tt * .045); aw.userData.flow2.offset.set(tt * .03, Math.cos(tt * .17) * .1); aw.userData.haze.opacity = .17 + Math.sin(tt * 1.9) * .05; var phs = tt % 3.6, gp = phs / 1.1, g2 = (phs - .45) / 1.1; aw.userData.glint.forEach(function (t, i) { var q = i ? g2 : gp; t.offset.x = q > 0 && q < 1 ? (i ? -.8 + q * 1.6 : .8 - q * 1.6) : 2; });
         /* the lava surges as the light crosses it, then settles */ var sg = 1 + 1.6 * Math.exp(-Math.pow((phs - .5) / .35, 2)) + Math.sin(tt * 3.3) * .15; aw.userData.lavaM.forEach(function (m) { m.color.setScalar(sg); }); }
       r.render(sc, cam);
