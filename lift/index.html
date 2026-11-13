@@ -3802,19 +3802,23 @@ function lfCardDraw(sp) {
   var wk = !!sp.wk, cp = wk || (sp.lines || []).length > 4, y = cp ? 270 : 290;
   T(sp.kicker.toUpperCase(), 34, 700, A(.95), y); y += cp ? 82 : 96;
   var tpx = cp ? 76 : 104, tl = wrap(sp.title, tpx, 800, W - 180).slice(0, 2); tl.forEach(function (l) { T(l, tpx, 800, '#ffffff', y); y += tpx + 8; }); y -= tpx + 8;
-  y += cp ? 54 : 64; T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += cp ? 150 : 200;
+  y += cp ? 54 : 64; if (!wk) T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += wk ? 52 : cp ? 150 : 200;
   if (wk) {
     /* THE WEEK'S GOAL AS ITS RING, in the review's own look: the ring filled to how much of the goal the week closed, the count inside it */
-    var rc = y - 14, rR = 92; x.lineWidth = 24; x.lineCap = 'round'; x.strokeStyle = 'rgba(255,255,255,.1)'; x.beginPath(); x.arc(W / 2, rc, rR, 0, Math.PI * 2); x.stroke();
-    x.strokeStyle = A(1); x.beginPath(); x.arc(W / 2, rc, rR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.001, Math.min(1, sp.ring[0] / Math.max(1, sp.ring[1])))); x.stroke();
-    T(sp.ring[0] + '/' + sp.ring[1], 62, 800, '#ffffff', rc + 20); T(sp.ring[2] ? 'GOAL HIT' : 'WORKOUTS', 20, 700, A(.95), rc + 54);
-    y = rc + rR + 150;
+    /* THE REVIEW'S OWN RING, drawn to the same proportions as the one on the screen: a 120 box, a 52 radius, a 12 stroke, a rounded arc with its glow, and when the goal is hit a wide soft light round it */
+    var D = 250, K = D / 168, rc = y - 6 + D / 2 - 40, rR = 52 / 120 * D, lw = 12 / 120 * D;
+    if (sp.ring[2]) { x.save(); x.shadowColor = A(.45); x.shadowBlur = 40 * K; x.strokeStyle = 'rgba(0,0,0,0)'; x.lineWidth = 2; x.beginPath(); x.arc(W / 2, rc, D / 2 + 10 * K, 0, Math.PI * 2); x.stroke(); x.fillStyle = 'rgba(0,0,0,0)'; x.restore(); x.save(); x.shadowColor = A(.45); x.shadowBlur = 40 * K; x.fillStyle = '#000'; x.globalCompositeOperation = 'destination-over'; x.beginPath(); x.arc(W / 2, rc, D / 2 + 10 * K, 0, Math.PI * 2); x.fill(); x.restore(); }
+    x.lineWidth = lw; x.lineCap = 'round'; x.strokeStyle = '#1e1e22'; x.beginPath(); x.arc(W / 2, rc, rR, 0, Math.PI * 2); x.stroke();
+    x.save(); x.shadowColor = A(.6); x.shadowBlur = 8 * K; x.strokeStyle = A(1); x.beginPath(); x.arc(W / 2, rc, rR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.001, Math.min(1, sp.ring[0] / Math.max(1, sp.ring[1])))); x.stroke(); x.restore();
+    x.textAlign = 'center'; x.font = '800 ' + 40 * K + 'px ' + FF; x.fillStyle = '#ffffff'; if ('letterSpacing' in x) x.letterSpacing = (-.03 * 40 * K) + 'px'; x.fillText(sp.ring[0] + '/' + sp.ring[1], W / 2, rc + 40 * K * .36 - 6);
+    x.font = '700 ' + 11 * K + 'px ' + FF; x.fillStyle = sp.ring[2] ? A(1) : 'rgba(255,255,255,.62)'; if ('letterSpacing' in x) x.letterSpacing = (.12 * 11 * K) + 'px'; x.fillText(sp.ring[2] ? 'GOAL HIT' : 'WORKOUTS', W / 2 + 4, rc + 40 * K * .36 + 11 * K + 10); if ('letterSpacing' in x) x.letterSpacing = '0px';
+    y = rc + D / 2 + 20 + 72;
   }
-  T(sp.hero, wk ? 120 : cp ? 150 : 200, 800, A(1), y, 'center', W - 140);
-  y += wk ? 62 : cp ? 74 : 86; T(sp.heroL, cp ? 40 : 44, 600, 'rgba(255,255,255,.7)', y);
+  T(sp.hero, wk ? 100 : cp ? 150 : 200, 800, A(1), y, 'center', W - 140);
+  y += wk ? 50 : cp ? 74 : 86; T(sp.heroL, cp ? 40 : 44, 600, 'rgba(255,255,255,.7)', y);
   if (wk) {
     /* the seven days, lit as they were */
-    y += 40; var dw = 96, dg = (W - 180 - dw * 7) / 6;
+    y += 32; var dw = 96, dg = (W - 180 - dw * 7) / 6;
     for (var di = 0; di < 7; di++) {
       var dx = 90 + di * (dw + dg), st = sp.days[di];
       if (st === 1) { x.shadowColor = A(.55); x.shadowBlur = 26; x.fillStyle = A(1); rr(dx, y, dw, 84, 26); x.fill(); x.shadowBlur = 0; }
@@ -3822,7 +3826,7 @@ function lfCardDraw(sp) {
       else { x.fillStyle = 'rgba(255,255,255,.08)'; rr(dx, y, dw, 84, 26); x.fill(); }
       x.textAlign = 'center'; x.font = '700 26px ' + FF; x.fillStyle = st === 1 ? '#fff' : 'rgba(255,255,255,.45)'; x.fillText('MTWTFSS'[di], dx + dw / 2, y + 84 + 38);
     }
-    y += 84 + 38 + 14;
+    y += 84 + 38 + 6;
   }
   if (cp) { y += 62; T(sp.stats.map(function (st) { return st[1] === 'time' ? st[0] : st[0] + ' ' + st[1]; }).join('   ·   '), 36, 700, '#ffffff', y); y += 70; }
   else {
@@ -4111,7 +4115,7 @@ function lfWeekSheet(m) {
       cl.push([w.n || 'Workout', [fmtDay(w.d), at, du, fmtBig(toDisp(woVol(w))) + ' ' + S.unit].filter(Boolean).join('  ·  ')]);
     });
     for (var di = 0; di < 7; di++) { var dk = ymd(addDays(m, di)); dy.push(ws.some(function (w) { return w.d === dk; }) ? 1 : S.rd[dk] ? 2 : 0); }
-    var tl = []; if (top) tl.push('Most trained: ' + top + '  ·  ' + lfSetsN(mu[top]) + ' sets'); if (streak > 0) tl.push(streak + (streak === 1 ? ' week' : ' weeks') + ' in a row on goal');
+    var tl = []; if (top) tl.push('Most trained: ' + top + '  ·  ' + lfSetsN(mu[top]) + ' sets' + (streak > 0 ? '  ·  ' + streak + (streak === 1 ? ' week' : ' wks') + ' on goal' : '')); else if (streak > 0) tl.push(streak + (streak === 1 ? ' week' : ' weeks') + ' in a row on goal');
     lfShareCardSheet({ wk: true, ring: [S.goal > 0 ? gd : st.wo, S.goal > 0 ? S.goal : st.wo, hit && met], days: dy, top: tl, kicker: 'Workout  ·  Week in review', title: range, sub: met ? 'Every target hit' : 'Targets weren\'t met',
       hero: Math.round(toDisp(st.vol)).toLocaleString(), heroL: S.unit + ' this week', stats: [[String(st.sets), 'sets'], [fmtBig(st.reps), 'reps'], [mins ? fmtDur(mins * 60000) : '—', 'time']], prs: [], lines: cl }, 'lift-week-' + a);
   });
