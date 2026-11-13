@@ -906,6 +906,29 @@ const freeze = (at) => `(() => {
     ok('the long ones show how far along they are, and are not earned', ['Drakefire', 'Leviathan', 'Ouroboros', 'Koi Pond', 'Eclipse', 'Moonrise', 'Zodiac'].every((n) => shelf.some((x) => x.indexOf(n + ':') === 0 && /\d/.test(x) && !/[A-Z][a-z]{2}$/.test(x) || x.indexOf(n + ':') === 0 && /\//.test(x))), shelf.filter((x) => /Drakefire|Leviathan|Ouroboros|Koi|Eclipse|Moonrise|Zodiac/.test(x)));
     await c.close();
   }
+  /* ── THE LADDERS: every counting medal is five rungs, and the missing ones were made ── */
+  {
+    const src = require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8');
+    const lad = [...src.slice(src.indexOf('var BD_LAD = ['), src.indexOf('var BD_NEW = [')).matchAll(/\['(\w\w)', \[([^\]]+)\]\]/g)].map((m) => [m[1], m[2].split(',').map((x) => x.trim().replace(/'/g, ''))]);
+    const rows = [...src.slice(src.indexOf('var BD_NEW = ['), src.indexOf('var BD_NEWBY')).matchAll(/^  \['(\w+)', '[^']+', '(\w+)', '[^']+', '#[0-9a-f]{6}', '(\w+)', (\d+)(?:, '(\w+)', ([0-9.]+))?\]/gm)];
+    const all = lad.flatMap((l) => l[1]);
+    ok('thirty-one ladders of five rungs, none sharing a medal with another', lad.length === 31 && lad.every((l) => l[1].length === 5) && new Set(all).size === all.length, lad.length);
+    ok('every rung is a medal: the existing ones are on the shelf and the missing ones are made', all.every((id) => new RegExp("\\['" + id + "', ").test(src)) && rows.length === 52 && rows.every((r) => all.includes(r[1])));
+    ok('only the exotic and mythic rungs of the missing ones have a painting, so a first, second or third rung is never a scene', rows.every((r) => { const l = lad.find((x) => x[1].includes(r[1])), rung = l[1].indexOf(r[1]); return rung >= 3 ? !!r[5] : !r[5]; }));
+    const hues = rows.filter((r) => r[5]).map((r) => r[5] + r[6]);
+    ok('and the paintings drawn for them come from a library of calm patterns and mythic events, each used in different shapes and hues', rows.filter((r) => r[5]).length === 38 && new Set(hues).size >= 36 && ['rings', 'waves', 'ecg', 'radar', 'circuit', 'plasma', 'vortex', 'aurora', 'shatter', 'tide', 'nova', 'forgehit'].every((p) => new RegExp('  ' + p + ': function').test(src)));
+    const fxd = (n, id, x, cd) => ({ id, d: n, s: 1, e: 2, n: 'Push', x, cd });
+    const wo = Array.from({ length: 25 }, (_, i) => fxd('2026-09-' + String(i + 1).padStart(2, '0'), 'ld' + i, [{ id: 'bench', n: 'Bench', sets: [{ w: i === 0 ? 200 : 60, r: 5 }] }], i === 3 ? { k: 'walk', m: 600 } : undefined));
+    const { c, page } = await ctx({ unit: 'kg', wo }, '2026-11-02T09:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const sh = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
+    ok('Favourite: one exercise in twenty-five workouts', sh.includes('Favourite:25 Sep'), sh.filter((x) => /Favourite/.test(x)));
+    ok('200 Club: a barbell lift of 200', sh.includes('200 Club:1 Sep'), sh.filter((x) => /200 Club/.test(x)));
+    ok('Three Weeks Straight: twenty-one days in a row', sh.includes('Three Weeks Straight:21 Sep'), sh.filter((x) => /Three Weeks/.test(x)));
+    ok('Ten Hours Deep: ten hours of cardio', sh.includes('Ten Hours Deep:4 Sep'), sh.filter((x) => /Ten Hours/.test(x)));
+    ok('the rungs above show how far along they are', sh.some((x) => /^Obsession:25 \/ 200$/.test(x)) && sh.some((x) => /^Thirty Straight:25 \/ 30$/.test(x)), sh.filter((x) => /Obsession|Thirty/.test(x)));
+    await c.close();
+  }
   /* ── SETS AND WORKOUTS OPEN THE SAME WAY, and a sheet is frosted glass ── */
   {
     const wo = (id, d, n) => ({ id, d, s: 1, e: 2, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: Array(n).fill({ w: 100, r: 8 }) }] });
@@ -1004,8 +1027,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 155 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 155/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 207 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 207/.test(await page.textContent('#lfBadges .lf-hd')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -1042,9 +1065,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
     ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 155/.test(await page.textContent('#lfBadges h3')));
+    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 207/.test(await page.textContent('#lfBadges h3')));
     await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 155);
+    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 207);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
     ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
@@ -1669,7 +1692,7 @@ const freeze = (at) => `(() => {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 155);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 207);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
     ok('the link is spent: the hash leaves the address bar', await page.waitForFunction(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || ''), null, { timeout: 10000 }).then(() => true, () => false));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
