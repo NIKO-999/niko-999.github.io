@@ -7288,7 +7288,7 @@ var BADGES = [
   ['sands', 'Time Keeper', 'mile', 'A hundred and fifty hours trained, all time.', '#f5b84a'],
   ['vein', 'Deep Vein', 'pr', 'A hundred and fifty new bests, all time.', '#62e6ff'],
   ['wayf', 'Wayfinder', 'mile', 'A hundred and twenty different exercises logged.', '#7fb4ff'],
-  ['dontmiss', "Don't Miss", 'streak', 'Every planned day, four weeks running.', '#ff9ad5'],
+  ['dontmiss', "Don't Miss", 'streak', 'Every planned day, four weeks running.', '#9aa3c0'],
   /* THE TECHNIQUE MEDALS: supersets, drop sets and warm-ups, each five deep: a first, a second, a third, an exotic and a mythic */
   ['ss1', 'Back to Back', 'feat', 'Five supersets logged.', '#4ac8ff'],
   ['ss2', 'Double Up', 'feat', 'Twenty-five supersets.', '#4ac8ff'],
@@ -7723,7 +7723,7 @@ var BD_TRIM = { silver: '#eceef2' };
 function bdTrimOf(b) {
   if (b.lock) return BD_TRIM.silver;
   if (b.fx === 'jet') return '#17181d';
-  if (b.fx === 'tempest') return '#23262f';
+  if (b.fx === 'tempest') return '#17181d';
   var base = b.fx ? BD_FXGL[b.fx] : (b.c || (BD_KIND[b.k] || {}).c);
   if (!base || base.charAt(0) !== '#' || base.length !== 7) return b.fx ? BD_FXTRIM[b.fx] : BD_TRIM.silver;
   var c = lfRgb(base); return lfHex(c.map(function (v) { return Math.round(v * .62 + 255 * .38); }));
@@ -7739,7 +7739,7 @@ var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', sta
   night: 'scallop', dawn: 'dome', onfire: 'flare', winter: 'shard', lungs: 'ellt', fullbody: 'trid',
   pr3: 'burst', sets30: 'gear', wkend: 'flag', mon20: 'tag', year: 'coin24', cardio25: 'heart', leg50: 'hextall',
   chest50: 'shield', chest100: 'shield', chest200: 'shield', bk50: 'gem', bk100: 'gem', bk200: 'gem', sh50: 'dome', sh100: 'dome', sh200: 'dome', arm50: 'tall', arm100: 'tall', arm200: 'tall',
-  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'scallop', stormc: 'trap', summit: 'hex', sands: 'coin24', vein: 'oct', wayf: 'sun', dontmiss: 'flare', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'drop', ds2: 'drop', ds3: 'drop', dsx: 'drop', dsm: 'drop', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
+  wave: 'capsule', trio: 'trid', landslide: 'flare', photo: 'crest', pack: 'crownb', slayer: 'coin24', forge: 'scallop', stormc: 'trap', summit: 'hex', sands: 'coin24', vein: 'oct', wayf: 'sun', dontmiss: 'hept', ss1: 'twin', ss2: 'twin', ss3: 'twin', ssx: 'twin', ssm: 'twin', ds1: 'drop', ds2: 'drop', ds3: 'drop', dsx: 'drop', dsm: 'drop', wu1: 'dome', wu2: 'dome', wu3: 'dome', wux: 'dome', wum: 'dome', drakefire: 'hextall', phoenix: 'flare', leviathan: 'oct', ouroboros: 'coin24', koipond: 'egg', eclipse: 'sun', moonrise: 'dome', colossus: 'trap', atlas: 'pent', zodiac: 'rosette', zero: 'hept', newyear: 'star5', century: 'coin24', twice: 'twin',
   sets500: 'gear', sets2k: 'gear', sets5k: 'gear', hr25: 'hourglass', hr100: 'hourglass', hr250: 'hourglass', rp10k: 'cross', rp50k: 'cross', rp100k: 'cross', mo3: 'tag', mo6: 'tag', mo12: 'tag', allmus: 'trid', dec31: 'scallop', friday13: 'shard', leap: 'egg', ironwk: 'flare', plate4: 'oct', wo365: 'sun', st52: 'star5', v10m: 'coin24', owner: 'dumbbell',
   wo250: 'coin24', wo500: 'sun', ton25: 'trap', wkvol: 'trap', setwk100: 'gear', sets40: 'gear', ex15: 'compass', ex80: 'compass', sig50: 'burst', sig100: 'burst',
   tgt12: 'rosette', allmus4: 'trid', post50: 'hextall', cdwk: 'heart', cardio100: 'heart', cdh50: 'ellt' };
@@ -7756,7 +7756,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4'
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50',
   chest50: '50', chest100: '100', chest200: '200', bk50: '50', bk100: '100', bk200: '200', sh50: '50', sh100: '100', sh200: '200', arm50: '50', arm100: '100', arm200: '200',
-  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: 'i:cal', ss1: 'i:pair', ss2: 'i:pair', ss3: 'i:pair', ssx: 'i:pair', ssm: 'i:pair', ds1: 'i:ramp', ds2: 'i:ramp', ds3: 'i:ramp', dsx: 'i:ramp', dsm: 'i:ramp', wu1: 'i:flame', wu2: 'i:flame', wu3: 'i:flame', wux: 'i:flame', wum: 'i:flame', drakefire: 'i:flame', phoenix: 'i:flame', leviathan: 'i:weight', ouroboros: 'i:ring', koipond: 'i:ramp', eclipse: 'i:sun', moonrise: 'i:moon', colossus: 'i:weight', atlas: 'i:dumb', zodiac: 'i:star', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
+  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: 'i:bolt', ss1: 'i:pair', ss2: 'i:pair', ss3: 'i:pair', ssx: 'i:pair', ssm: 'i:pair', ds1: 'i:ramp', ds2: 'i:ramp', ds3: 'i:ramp', dsx: 'i:ramp', dsm: 'i:ramp', wu1: 'i:flame', wu2: 'i:flame', wu3: 'i:flame', wux: 'i:flame', wum: 'i:flame', drakefire: 'i:flame', phoenix: 'i:flame', leviathan: 'i:weight', ouroboros: 'i:ring', koipond: 'i:ramp', eclipse: 'i:sun', moonrise: 'i:moon', colossus: 'i:weight', atlas: 'i:dumb', zodiac: 'i:star', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
   sets500: '500', sets2k: '2k', sets5k: '5k', hr25: '25h', hr100: '100h', hr250: '250h', rp10k: '10k', rp50k: '50k', rp100k: '100k', mo3: '3', mo6: '6', mo12: '12', allmus: 'i:dumb', dec31: 'i:star', friday13: '13', leap: '29', ironwk: '10h', plate4: '4', wo365: '365', st52: '52', v10m: '10M', owner: 'i:flame',
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
@@ -8084,13 +8084,13 @@ function bdFx(fx, k, x, y, q) {
      lightning crackling through the lot */
   /* TEMPEST: jet black, a gradient of colour running through it (blue to violet to teal), and lightning in thin forked veins, white at the heart */
   if (fx === 'tempest') {
-    var tg = .5 + .5 * Math.sin(x * 1.5 + y * 1.1 + Math.sin(y * 2.3) * .8), tg2 = .5 + .5 * Math.sin(x * 1.1 - y * 1.6 + 1.7), tcol = mix(mix([30, 70, 255], [140, 60, 255], tg), [30, 220, 210], tg2 * .6);
+    var tg = .5 + .5 * Math.sin(x * 1.5 + y * 1.1 + Math.sin(y * 2.3) * .8), tg2 = .5 + .5 * Math.sin(x * 1.1 - y * 1.6 + 1.7), tcol = mix(mix([60, 110, 255], [150, 80, 255], tg), [60, 230, 220], tg2 * .5);
     var tv1 = Math.abs(Math.sin(x * 6.2 + Math.sin(y * 4.7 + Math.sin(x * 11) * .7) * 2.2)), tv2 = Math.abs(Math.sin(y * 5.3 - x * 2.1 + Math.sin(x * 9 + y * 3) * 1.4));
-    var tbolt = Math.max(tv1 < .075 ? 1 - tv1 / .075 : 0, tv2 < .055 ? 1 - tv2 / .055 : 0), tglow = Math.max(tv1 < .16 ? (.16 - tv1) / .16 : 0, 0) * .35;
-    var tjet = mix([3, 3, 5], [16, 17, 24], Math.pow(Math.max(0, Math.sin(x * 2.4 - y * 1.8 + .3)), 8));
-    if (k === 'b') return mix([14, 15, 21], [44, 48, 62], (y + 1) / 2);
-    if (k === 'd') return mix(mix([2, 2, 4], tcol, .1 + tglow * .5), mix(tcol, [225, 235, 255], .7), tbolt);
-    return mix(mix(tjet, tcol, .42 + tglow), mix(tcol, [235, 242, 255], .75), tbolt);
+    var tbolt = Math.max(tv1 < .06 ? 1 - tv1 / .06 : 0, tv2 < .045 ? 1 - tv2 / .045 : 0), tglow = Math.max(tv1 < .2 ? (.2 - tv1) / .2 : 0, tv2 < .12 ? (.12 - tv2) / .12 : 0);
+    var tsh = Math.pow(Math.max(0, Math.sin(x * 2.4 - y * 1.8 + .3)), 8), tjet = mix([3, 3, 5], [20, 21, 28], tsh);
+    if (k === 'b') return mix([5, 5, 8], [26, 27, 35], tsh);
+    if (k === 'd') return mix(mix([2, 2, 4], tcol, .06 + tglow * .22), mix(tcol, [235, 240, 255], .8), tbolt);
+    return mix(mix(tjet, tcol, tglow * .3 + .05), mix(tcol, [240, 244, 255], .8), tbolt);
   }
   if (fx === 'prism') {
     var pr = c3((x - y) * .9 + Math.sin(x * 3 + y * 2) * .08 + n * .03, 0, .33, .67);
@@ -8283,7 +8283,8 @@ function bdIcon(c, k) {
     c.lineWidth = 36; c.beginPath(); if (c.roundRect) c.roundRect(-180, -150, 360, 330, 36); else c.rect(-180, -150, 360, 330); c.stroke();
     r(-180, -150, 360, 90, 30); r(-110, -215, 40, 110, 14); r(70, -215, 40, 110, 14);
     for (var i = 0; i < 3; i++) for (var j = 0; j < 2; j++) r(-120 + i * 95, -5 + j * 90, 50, 50, 10);
-  } else if (k === 'star') { c.beginPath(); for (var s = 0; s < 10; s++) { var a = -Math.PI / 2 + s * Math.PI / 5, rr = s % 2 ? 95 : 220; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
+  } else if (k === 'bolt') { c.beginPath(); c.moveTo(70, -240); c.lineTo(-150, 20); c.lineTo(-25, 20); c.lineTo(-75, 240); c.lineTo(150, -50); c.lineTo(25, -50); c.closePath(); c.fill(); }
+  else if (k === 'star') { c.beginPath(); for (var s = 0; s < 10; s++) { var a = -Math.PI / 2 + s * Math.PI / 5, rr = s % 2 ? 95 : 220; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
   else if (k === 'stairs') { c.beginPath(); c.moveTo(-230, 200); c.lineTo(-230, 100); c.lineTo(-115, 100); c.lineTo(-115, 0); c.lineTo(0, 0); c.lineTo(0, -100); c.lineTo(115, -100); c.lineTo(115, -200); c.lineTo(230, -200); c.lineTo(230, 200); c.closePath(); c.fill(); }
   else if (k === 'ramp') { c.beginPath(); c.moveTo(-240, 190); c.lineTo(240, 190); c.lineTo(240, -150); c.closePath(); c.fill(); c.beginPath(); c.arc(-40, -120, 52, 0, Math.PI * 2); c.fill(); }
   else if (k === 'scale') {
@@ -8739,7 +8740,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd10', bdDbP = null;
+var BD_VER = 'd11', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
