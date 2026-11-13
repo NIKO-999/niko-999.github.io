@@ -1633,6 +1633,16 @@ var PROGRAM_QC = [
   { id: 'k-fri', dow: 5, n: 'Upper power', sp: 'Pull-ups, bench, arms', ex: [['pullup', 3, 6, 8], ['bench', 3, 6, 8], ['latraise', 4, 12, 15], ['hammer', 3, 10, 12], ['tripush', 3, 10, 12]] },
   { id: 'k-sat', dow: 6, n: 'Calf burnout', sp: 'Calves, sissy squats, Romanian deadlifts', ex: [['calf', 4, 15, 20], ['legext', 3, 12, 15, 'each side'], ['sissy', 3, 10, 12], ['rdl', 3, 8, 10], ['hackcalf', 3, 20, 20]] }
 ];
+/* NIKO (CURRENT ROUTINE): the advanced hypertrophy week as written, seven days, three lower and four upper. The sets are the plan's own and are the optimal volume for it, so nothing here is padded: 16 quad, 13 calf, 10 hamstring, 6 direct adductor, and the rest as listed. */
+var PROGRAM_NK = [
+  { id: 'n-mon', dow: 1, n: 'Chest & shoulders', sp: 'Incline press, flyes, lateral raises, triceps', ex: [['smithinc', 3, 6, 10], ['mchest', 3, 8, 12], ['cfly', 2, 12, 15], ['mlat', 4, 12, 20], ['rdfly', 2, 15, 20], ['tripush', 3, 10, 15]] },
+  { id: 'n-tue', dow: 2, n: 'Quad strength', sp: 'Hack squat, extensions, split squats, adductors', ex: [['hack', 4, 6, 10], ['legext', 3, 10, 15], ['bss', 2, 10, 12, 'each side'], ['adduct', 3, 10, 15], ['hackcalf', 4, 8, 12]] },
+  { id: 'n-wed', dow: 3, n: 'Back & V-taper', sp: 'Pull-ups, rows, pulldowns, pullovers, curls', ex: [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['ngpd', 3, 10, 12], ['cpullover', 2, 12, 15], ['seatrow', 2, 10, 12], ['preacher', 3, 8, 12]] },
+  { id: 'n-thu', dow: 4, n: 'Hamstrings & glutes', sp: 'Hinge, curls, hip thrust, seated calves', ex: [['rdl', 3, 6, 10], ['seatcurl', 4, 10, 15], ['hipthrust', 3, 8, 12], ['lyingcurl', 3, 12, 15], ['calfseat', 4, 12, 20]] },
+  { id: 'n-fri', dow: 5, n: 'Chest & back', sp: 'Incline press, rows, pec deck, delts, arms', ex: [['incdb', 3, 8, 12], ['csrow', 3, 8, 12], ['pecdeck', 2, 12, 15], ['sapd', 2, 10, 12], ['cablat', 3, 12, 20], ['hammer', 2, 10, 15], ['triover', 2, 10, 15]] },
+  { id: 'n-sat', dow: 6, n: 'Delts, arms & abs', sp: 'Lateral raises, curls, triceps, core', ex: [['mlat', 3, 12, 20], ['revpec', 3, 12, 20], ['preacher', 3, 10, 15], ['incurl', 2, 10, 15], ['ropeext', 3, 10, 15], ['cablecrunch', 3, 12, 15], ['hlr', 3, 12, 15]] },
+  { id: 'n-sun', dow: 0, n: 'Quad volume', sp: 'Pendulum squat, extensions, adductors, calves', ex: [['pendulum', 4, 8, 12], ['legext', 3, 12, 15], ['adduct', 3, 12, 20], ['calfstand', 5, 10, 15]] }
+];
 function lfMkProg(list) { return list.map(function (d) {
   return { id: d.id, dow: d.dow, n: d.n, sp: d.sp, fixed: 1, choice: d.choice ? 1 : 0, ss: d.ss || [], ex: d.ex.map(function (e) { return e[0]; }),
     tg: d.ex.reduce(function (o, e) { o[e[0]] = e[4] ? [e[1], e[2], e[3], e[4]] : [e[1], e[2], e[3]]; return o; }, {}) };
@@ -1647,10 +1657,11 @@ var PROGRAMS = {
   gl: { n: 'Conditioning', s: 'Conditioning', days: lfMkProg(PROGRAM_GL) },
   qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) },
   gf: { n: 'Glute focus', s: 'Glute focus', days: lfMkProg(PROGRAM_GF) },
-  sx: { n: 'Superset split', s: 'Superset split', days: lfMkProg(PROGRAM_SX) }
+  sx: { n: 'Superset split', s: 'Superset split', days: lfMkProg(PROGRAM_SX) },
+  nk: { n: 'NIKO (current routine)', s: 'NIKO (current routine)', days: lfMkProg(PROGRAM_NK) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
-var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx'];
+var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx', 'nk'];
 var CHOICES = lfMkProg(CHOICE_RT);
 /* A set × rep target as written: '3 × 8–12', '3 × 30–40 m each side',
    or '4 rounds'. */
@@ -1661,6 +1672,21 @@ function lfProg() { return PROGRAMS[S.prog] || PROGRAMS.ul; }
    then what to keep in mind while you look it over. */
 var GL_WEEKS = 'The 8 weeks: weeks 1–2 set a baseline and record every set, rep and RIR; 3–4 add reps at the same weight; 5–6 add 2.5–5% once every set tops its range; 7 push performance with compounds shy of failure; 8 deload 30–50% if fatigue has built up.';
 var DAY_TIPS = {
+  'n-mon': ['Upper chest, shoulder width and pressing strength', ['Moderate volume. Heavy compounds and machine compounds stop 1–2 reps short; isolations 0–1; the last isolation set to technical failure.']],
+  'n-tue': ['Heavy knee-dominant work, quad thickness and adductors', [
+    'Hack squats: controlled eccentric, deep comfortable range.',
+    'Leg extensions: full knee extension and a controlled lowering.',
+    'Bulgarian split squats: stable positioning and the same depth every set.',
+    'Adductors: work through a comfortable, substantial stretch.']],
+  'n-wed': ['Lat width, back thickness and biceps', ['Moderate volume. Do not sacrifice range of motion to add weight.']],
+  'n-thu': ['Posterior chain, glutes and calves', [
+    'RDL: controlled eccentric and a loaded hamstring stretch.',
+    'Seated curls: emphasise the lengthened position.',
+    'Hip thrusts: a controlled lockout without leaning into the lower back.',
+    'Lying curls: finish with strong contractions.']],
+  'n-fri': ['More chest and back, with extra lateral delt work', ['Hypertrophy day. Keep the same range and the same stops as the first chest day.']],
+  'n-sat': ['Shoulder detail, arms and core', ['Keep it controlled. This is not another high-fatigue day.']],
+  'n-sun': ['Quad hypertrophy, inner-thigh thickness and calves', ['Your second quad session, with a different squat to give a slightly different stimulus. Three days after the posterior-chain day.']],
   'k-mon': ['Heavy quads and standing calves', [
     'Calves: a full 2-second pause in the stretch on every rep, all three leg days — the tendon bounces the weight otherwise. Last set a 3-step drop set.',
     'Pendulum or deep hack squat, low stance, 3 seconds down. 3 minutes between sets.',
@@ -1818,6 +1844,8 @@ var FOCUS_GL = lfFocusFrom(PROGRAM_GL, { Glutes: 1, Hamstrings: 1, Abs: 1 });
 var FOCUS_QC = lfFocusFrom(PROGRAM_QC, { Quads: 1, Calves: 1 });
 var FOCUS_GF = lfFocusFrom(PROGRAM_GF, { Glutes: 1, Hamstrings: 1, Quads: 1 });
 var FOCUS_SX = lfFocusFrom(PROGRAM_SX, {});
+/* the volume priorities of the NIKO routine: quads and calves (adductors sit under Legs, which the app does not count) */
+var FOCUS_NK = lfFocusFrom(PROGRAM_NK, { Quads: 1, Calves: 1 });
 function lfFocusOf(list) { return list.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
 var FOCUS_V1 = 'Quads:13:16:1,Calves:12:12:1,Lower back:6:6:1,Hamstrings:10:10:0,Glutes:5:8:0,Abs:9:9:0';
 function lfFocusDefault() { return FOCUS_DEFAULT.map(function (f) { return { m: f[0], lo: f[1], hi: f[2], p: f[3] }; }); }
@@ -4460,7 +4488,7 @@ function lfRenderLib() {
       if (S.prog === k) return;
       var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
       var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
-      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF, sx: FOCUS_SX }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
+      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF, sx: FOCUS_SX, nk: FOCUS_NK }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
       if (JSON.stringify(S.focus) === sig(oldDef)) S.focus = lfFocusOf(newDef);
       S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
       lfSave(); lfRender();
