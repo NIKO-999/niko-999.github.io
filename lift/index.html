@@ -3940,6 +3940,7 @@ function lfMonthSheet(m) {
   b.appendChild(ln);
   if (d.prs.length) { var pl = el('<div class="lf-fin-l" id="lfMoPr"><div class="lf-cap">Records this month</div><div class="lf-tags"></div></div>'); d.prs.slice(0, 12).forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
   var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= d.a && x.d <= d.z; });
+  if (got.length) { var bl = el('<div class="lf-fin-l" id="lfMoBg"><div class="lf-cap">Badges this month</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfMoDone">On to ' + MON[(m.getMonth() + 1) % 12] + '</button>');
   var shr = el('<button type="button" class="lf-btn is-full" id="lfMoShare">Share to story</button>');
   var s = lfSheet({ title: '', body: b, foot: [shr, done], full: true, cls: 'lf-wsh' }); if (met) s.el.classList.add('is-met');
@@ -4077,6 +4078,8 @@ function lfWeekSheet(m) {
     if (before >= 0 && inW > 0 && inW > before + 1e-9 && lfPrOk(z, inW, before)) prs.push(exName(id, exIds[id]));
   });
   if (met && prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
+  var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= a && x.d <= z; });
+  if (met && got.length) { var bl = el('<div class="lf-fin-l" id="lfWsBg"><div class="lf-cap">Badges this week</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
   var done = el('<button type="button" class="lf-btn is-log is-full" id="lfWsDone">' + (met ? 'On to next week' : 'Done') + '</button>');
   var shr = el('<button type="button" class="lf-btn is-full" id="lfWsShare">Share to story</button>');
   var s = lfSheet({ title: '', body: b, foot: [shr, done], full: true, cls: 'lf-wsh' }); s.el.classList.add(met ? 'is-met' : 'is-miss');
