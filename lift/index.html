@@ -8493,8 +8493,8 @@ function bdExoPaint(ctx, N, t, b) {
   var M = 72, ix = bdExoIx(b.id), dir = ix % 2 ? 1 : -1;
   if (!bdExoSm) { bdExoSm = document.createElement('canvas'); bdExoSm.width = bdExoSm.height = M; }
   var sx = bdExoSm.getContext('2d'), img = sx.createImageData(M, M), sc = .85 + (ix % 5) * .12;
-  bdExoPass(img, M, b.fx, t, sc, dir * (t * .12 + ix), Math.sin(t * .21 + ix) * .5, t * .09 * dir, b.t === 4 ? .3 : .38);
-  if (b.t === 4) bdExoPass(img, M, b.fx, t, sc * 1.35, -dir * (t * .09 + ix * 2), Math.cos(t * .17 + ix) * .5, -t * .11 * dir, .24);
+  bdExoPass(img, M, b.fx, t, sc, dir * (t * .12 + ix), Math.sin(t * .21 + ix) * .5, t * .09 * dir, b.t === 4 ? .75 : 1);
+  if (b.t === 4) bdExoPass(img, M, b.fx, t, sc * 1.35, -dir * (t * .09 + ix * 2), Math.cos(t * .17 + ix) * .5, -t * .11 * dir, .4);
   sx.putImageData(img, 0, 0);
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = '#000'; ctx.fillRect(0, 0, N, N); ctx.imageSmoothingEnabled = true; ctx.drawImage(bdExoSm, 0, 0, N, N);
 }
@@ -8521,9 +8521,10 @@ function bdMake(b, m, n, pre) {
   var tro = !!BD_TRO[b.sh];
   var f = new BD3.Mesh(tro ? flat() : bdPolar(shp, 0), face(mp.f)); f.position.z = zf + (tro ? .001 : 0); g.add(f);
   var bk = new BD3.Mesh(tro ? flat() : bdPolar(shp, .07, true), face(mp.b)); bk.rotation.y = Math.PI; bk.position.z = -zf - (tro ? .001 : 0); g.add(bk);
-  if ((b.t === 3 || b.t === 4) && b.fx && !lock) {
+  if ((b.t === 3 || b.t === 4) && b.fx && !lock && mp.f.glaze) {
+    /* THE ENAMEL ITSELF MOVES: the moving pattern is laid over the face through the enamel's own mask, opaque, so it stands where the baked pattern stood; the walls, the number and the picture are not in the mask and stay metal. Nothing is drawn on top of the pattern. */
     var ec = document.createElement('canvas'); ec.width = ec.height = 256; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec); et.encoding = BD3.sRGBEncoding;
-    [[zf + .003, 0], [-zf - .003, Math.PI]].forEach(function (zr) { var mh = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, transparent: true, opacity: 1, blending: BD3.AdditiveBlending, depthWrite: false, toneMapped: false })); mh.position.z = zr[0]; mh.rotation.y = zr[1]; mh.renderOrder = 6; g.add(mh); });
+    var em = new BD3.Mesh(flat(), new BD3.MeshBasicMaterial({ map: et, alphaMap: mp.f.glaze, transparent: true, depthWrite: false, toneMapped: false })); em.position.z = zf + .003; em.renderOrder = 6; g.add(em);
     var last = -9; bdExoPaint(ex, 256, 0, b); et.needsUpdate = true;
     g.userData.cr = function (t) { if (t - last < .04) return; last = t; bdExoPaint(ex, 256, t, b); et.needsUpdate = true; };
   }
@@ -8740,7 +8741,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd6', bdDbP = null;
+var BD_VER = 'd7', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
