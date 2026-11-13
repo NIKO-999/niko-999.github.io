@@ -8870,7 +8870,7 @@ var BDR = {
       var hx = Math.cos(th + .1) * R, hy = Math.sin(th + .1) * R; x.fillStyle = 'hsla(130,100%,70%,1)'; x.beginPath(); x.arc(hx, hy, u * .075, 0, 6.3); x.fill(); x.fillStyle = '#ff4a2a'; x.beginPath(); x.arc(hx + Math.cos(th) * u * .02, hy + Math.sin(th) * u * .02, u * .018, 0, 6.3); x.fill();
     } },
   /* MYTHIC. KOI POND: two koi swimming through ripples, in the metal */
-  koipond: { mold: 'ridge', pal: [345, 22, 50, 185], n: 'ngon', sides: 7, rot: Math.PI / 2, hue: .93, sat: .4, rgh: .08, lamp: 0xffe0f0, cool: 0xff7ab0, glow: 0xff7ab8,
+  koipond: { mold: 'rosette', pal: [345, 22, 50, 185], n: 'ngon', sides: 7, rot: Math.PI / 2, hue: .93, sat: .4, rgh: .08, lamp: 0xffe0f0, cool: 0xff7ab0, glow: 0xff7ab8,
     paint: function (x, N, t, v, u) {
       var k, i, j; x.lineWidth = u * .014;
       for (k = 0; k < 4; k++) for (i = 0; i < 3; i++) { var f = (t * .2 + i / 3 + bdR(k) * .5) % 1; x.strokeStyle = 'rgba(255,' + (170 + 60 * f | 0) + ',' + (210 + 40 * f | 0) + ',' + ((1 - f) * (.55 + v * .4)) + ')'; x.beginPath(); x.arc((bdR(k + 1) - .5) * u * 1.1, (bdR(k + 6) - .5) * u * 1.1, f * u * .6, 0, 6.3); x.stroke(); }
@@ -8900,7 +8900,7 @@ var BDR = {
       for (i = 0; i < 5; i++) { var s = t * (.6 + i * .13) + i * 1.9, mx = Math.cos(s) * u * (.62 + .1 * Math.sin(i)), my = Math.sin(s * 1.3) * u * .55, fl = Math.sin(t * 14 + i) * .6 + .7; x.strokeStyle = 'rgba(225,215,255,.95)'; x.lineWidth = u * .016; x.beginPath(); x.moveTo(mx - u * .05, my - u * .03 * fl); x.lineTo(mx, my); x.lineTo(mx + u * .05, my - u * .03 * fl); x.stroke(); }
     } },
   /* MYTHIC. COLOSSUS: black rock with a fire in it: the cracks run, flare and breathe */
-  colossus: { mold: 'ridge', pal: [8, 28, 52, 0], n: 'ngon', sides: 8, rot: Math.PI / 8, hue: .03, sat: .18, rgh: .38, met: .85, lamp: 0xffb070, cool: 0xff3a1a, glow: 0xff5a1a,
+  colossus: { mold: 'rosette', pal: [8, 28, 52, 0], n: 'ngon', sides: 8, rot: Math.PI / 8, hue: .03, sat: .18, rgh: .38, met: .85, lamp: 0xffb070, cool: 0xff3a1a, glow: 0xff5a1a,
     paint: function (x, N, t, v, u) {
       var k, j; x.lineCap = x.lineJoin = 'round';
       var cg = x.createRadialGradient(0, 0, 0, 0, 0, u * .5); cg.addColorStop(0, 'rgba(255,120,20,' + (.35 + .25 * Math.sin(t * 1.6) + v * .3) + ')'); cg.addColorStop(1, 'rgba(255,60,0,0)'); x.fillStyle = cg; x.beginPath(); x.arc(0, 0, u * .5, 0, 6.3); x.fill();
@@ -8986,7 +8986,7 @@ var BDR = {
       x.strokeStyle = 'rgba(120,210,255,' + (.25 + .15 * Math.sin(t * 1.4)) + ')'; x.lineWidth = u * .01; for (k = -4; k <= 4; k++) { x.beginPath(); x.moveTo(-u, k * u * .2 + Math.sin(t + k) * u * .01); x.lineTo(u, k * u * .2 + Math.sin(t + k + 2) * u * .01); x.stroke(); }
     } },
   /* EXOTIC. CASCADE (drop sets): steps of light falling down a staircase of steel, each lower step slower. Calm */
-  dsx: { mold: 'ridge', pal: [205, 160, 236, 190], n: 'drop', rs: .96, hue: .58, sat: .5, rgh: .09, lamp: 0xdff2ff, cool: 0x5ab8ff, glow: 0x5ab4ff, calm: 1,
+  dsx: { mold: 'rosette', pal: [205, 160, 236, 190], n: 'drop', rs: .96, hue: .58, sat: .5, rgh: .09, lamp: 0xdff2ff, cool: 0x5ab8ff, glow: 0x5ab4ff, calm: 1,
     paint: function (x, N, t, v, u) {
       var k, j; x.lineCap = 'butt';
       for (k = 0; k < 9; k++) {
@@ -9008,14 +9008,14 @@ var BDR = {
     } }
 };
 /* the stepped body of a relic and the light across it */
-/* SIX MOLDS, so the relics are not all the same object. Each is a different way of building a badge out of layers, and the painting is lit across whichever one it is: STEPS is the terraced funnel, DOME is a stepped dome that bulges out, FRAME is a thick bezel round a recessed window, GEM is a faceted cut stone, RIDGE is a plate with glowing ribs and a hub, FLOAT is three plates with air between them so they slide over one another as it turns. */
-var BD_MOLDS = ['steps', 'dome', 'frame', 'gem', 'ridge', 'float'];
+/* SIX MOLDS, so the relics are not all the same object. Each is a different way of building a badge out of layers, and the painting is lit across whichever one it is: STEPS is the terraced funnel, DOME is a stepped dome that bulges out, FRAME is a thick bezel round a recessed window, GEM is a faceted cut stone, ROSETTE is five layers of the shape each turned a little from the last, like petals, FLOAT is three plates with air between them so they slide over one another as it turns. */
+var BD_MOLDS = ['steps', 'dome', 'frame', 'gem', 'rosette', 'float'];
 function bdMold(mold) {
   var L = [], i, HOLE = [.38, .32, .26, .2, .14, .08];
   if (mold === 'dome') { for (i = 0; i < 8; i++) L.push({ sc: .18 + .82 * Math.cos(i / 7 * 1.3), hole: 0, depth: .07, z: i * .065, bev: .02, seg: 3 }); }
   else if (mold === 'frame') L = [{ sc: 1, hole: .64, depth: .16, z: .02, bev: .05, seg: 4 }, { sc: .66, hole: 0, depth: .05, z: 0, bev: .012, seg: 2 }, { sc: .5, hole: .42, depth: .05, z: .06, bev: .014, seg: 2 }, { sc: .22, hole: 0, depth: .1, z: .04, bev: .04, seg: 3 }];
   else if (mold === 'gem') L = [{ sc: 1, hole: 0, depth: .04, z: 0, bev: .03, seg: 1, flat: 1 }, { sc: .82, hole: 0, depth: .09, z: .04, bev: .1, seg: 1, flat: 1 }, { sc: .56, hole: 0, depth: .09, z: .12, bev: .09, seg: 1, flat: 1 }, { sc: .3, hole: 0, depth: .05, z: .2, bev: .06, seg: 1, flat: 1 }];
-  else if (mold === 'ridge') L = [{ sc: 1, hole: 0, depth: .06, z: 0, bev: .02, seg: 2, dim: 1 }, { sc: 1, hole: .9, depth: .14, z: .02, bev: .03, seg: 3 }, { sc: .2, hole: 0, depth: .16, z: .04, bev: .04, seg: 3 }];
+  else if (mold === 'rosette') for (i = 0; i < 5; i++) L.push({ sc: 1 - i * .19, hole: 0, depth: .05, z: i * .075, bev: .02, seg: 2, rotk: i, dim: i === 0 });
   else if (mold === 'float') L = [{ sc: 1, hole: 0, depth: .04, z: 0, bev: .02, seg: 2, dim: 1 }, { sc: .84, hole: .44, depth: .07, z: .24, bev: .03, seg: 3, turn: 1 }, { sc: .28, hole: 0, depth: .08, z: .14, bev: .04, seg: 3 }];
   else for (i = 0; i < 7; i++) { var R = .707 + i * .073; L.push({ sc: R / 1.145, hole: i < 6 ? HOLE[i] * 1.414 / R : 0, depth: .085, z: (6 - i) * .085, bev: .016, seg: 3 }); }
   return L;
@@ -9042,7 +9042,7 @@ function bdRelic(id) {
     var mats = [], sm = [], FM = [], BM = [], front = new T.Group(), back = new T.Group(), cr = new T.Group(), pivot = new T.Group(), rs = sp.rs || 1, RM = 1.145 * rs, nL = LY.length;
     g.add(pivot); pivot.add(cr); cr.scale.setScalar(.8); back.rotation.x = Math.PI; cr.add(front); cr.add(back);
     LY.forEach(function (ly, i) {
-      var fr = nL > 1 ? i / (nL - 1) : 0, R = ly.sc * RM, spl = ly.turn ? { n: sp.n, sides: sp.sides, rot: (sp.rot || 0) + Math.PI / (sp.sides || 6), sx: sp.sx, sy: sp.sy } : sp, sh = new T.Shape(), pts = bdRelicPts(spl, R);
+      var fr = nL > 1 ? i / (nL - 1) : 0, R = ly.sc * RM, spl = ly.turn ? { n: sp.n, sides: sp.sides, rot: (sp.rot || 0) + Math.PI / (sp.sides || 6), sx: sp.sx, sy: sp.sy } : ly.rotk ? { n: sp.n, sides: sp.sides, rot: (sp.rot || 0) + ly.rotk * Math.PI / (sp.sides || 8) * .55, sx: sp.sx, sy: sp.sy } : sp, sh = new T.Shape(), pts = bdRelicPts(spl, R);
       pts.forEach(function (q, j) { if (j) sh.lineTo(q[0], q[1]); else sh.moveTo(q[0], q[1]); }); sh.closePath();
       if (ly.hole) { var hp = bdRelicPts(spl, R * ly.hole), ho = new T.Path(); hp.slice().reverse().forEach(function (q, j) { if (j) ho.lineTo(q[0], q[1]); else ho.moveTo(q[0], q[1]); }); ho.closePath(); sh.holes.push(ho); }
       var geo = new T.ExtrudeGeometry(sh, { depth: ly.depth, bevelEnabled: true, bevelThickness: ly.bev, bevelSize: ly.bev, bevelSegments: ly.seg });
@@ -9052,18 +9052,6 @@ function bdRelic(id) {
       FM[i] = new T.Mesh(geo, [mats[i], sm[i]]); FM[i].position.z = ly.z; front.add(FM[i]);
       BM[i] = new T.Mesh(geo, [mats[i], sm[i]]); BM[i].position.z = ly.z; back.add(BM[i]);
     });
-    /* the ridge mold's ribs, each lit in its own place along the palette */
-    if (mold === 'ridge') {
-      /* ribs of dark metal with a thin seam of light down each, so the plate reads as machined rather than as coloured sticks */
-      var NR = Math.max(6, Math.min(sp.sides || 8, 14)), rg = new T.BoxGeometry(.075, RM * .78, .08), sg = new T.BoxGeometry(.016, RM * .74, .09);
-      for (i = 0; i < NR; i++) {
-        var a = i / NR * Math.PI * 2, rc = new T.Color().setHSL(bdPalHue(pal, i / NR) / 360, .8, .6);
-        [front, back].forEach(function (grp) {
-          var rib = new T.Mesh(rg, new T.MeshPhysicalMaterial({ color: new T.Color().setHSL(bdPalHue(pal, i / NR) / 360, .35, .1), metalness: 1, roughness: .18, clearcoat: 1, envMapIntensity: 1.4 })), sm2 = new T.Mesh(sg, new T.MeshBasicMaterial({ color: rc, toneMapped: false }));
-          rib.position.set(Math.cos(a) * RM * .47, Math.sin(a) * RM * .47, .2); rib.rotation.z = a - Math.PI / 2; sm2.position.copy(rib.position); sm2.position.z = .245; sm2.rotation.z = rib.rotation.z; grp.add(rib); grp.add(sm2);
-        });
-      }
-    }
     var hc = function (hh, l) { return new T.Color().setHSL(hh / 360, .9, l); };
     var lamp = new T.PointLight(hc(pal[0], .82), 1, 5); lamp.position.set(0, 0, 1.6); g.add(lamp);
     var cool = new T.PointLight(hc(pal[pal.length - 1], .5), 1, 4); cool.position.set(-1.1, -1, 1.2); g.add(cool);
@@ -9079,7 +9067,7 @@ function bdRelic(id) {
       pivot.rotation.y = Math.sin(t * .5) * (sp.calm ? .36 : .46) + spin; pivot.rotation.x = -.1 + Math.sin(t * .4) * .2; pivot.position.y = Math.sin(t * .8) * .045;
       for (var i = 0; i < nL; i++) {
         var ly = LY[i], lift = u >= 0 && u < 1.2 && u > i * .09 && u < i * .09 + .5 ? Math.sin((u - i * .09) * Math.PI / .5) * .1 : 0, fr = nL > 1 ? i / (nL - 1) : 0;
-        mats[i].emissiveIntensity = (2.5 - fr * .8) * (.85 + .3 * pu) * (ly.dim ? (mold === 'ridge' ? .3 : .6) : 1) * (mold === 'dome' ? .42 : 1) + 1.4 * v; FM[i].position.z = ly.z + lift; BM[i].position.z = ly.z + lift;
+        mats[i].emissiveIntensity = (2.5 - fr * .8) * (.85 + .3 * pu) * (ly.dim ? .6 : 1) * (mold === 'dome' ? .42 : 1) + 1.4 * v; FM[i].position.z = ly.z + lift; BM[i].position.z = ly.z + lift;
       }
       lamp.position.set(Math.sin(t * .9) * 1.5, Math.cos(t * .7) * 1.1, 1.5); lamp.intensity = .6 + Math.sin(t * 1.3) * .2 + v;
       var ga = t * .3; gA.position.set(Math.cos(ga) * .35, Math.sin(ga) * .35, -.7); gB.position.set(-Math.cos(ga) * .35, -Math.sin(ga) * .35, -.7);
@@ -9129,7 +9117,7 @@ function bdRecipe(h, kind) { return [[h, h + 35, h + 70], [h, h + 180], [h, h + 
 BD_NEW.forEach(function (r) {
   if (!r[7]) return;
   var rung = BD_LAD.filter(function (l) { return l[1].indexOf(r[0]) >= 0; })[0][1].indexOf(r[0]), k = Object.keys(BDR).length, sh = BD_SHAPES[k % BD_SHAPES.length];
-  BDR[r[0]] = { mold: BD_MOLDS[(k * 5 + 1) % 6], pal: bdRecipe(r[8] * 360, BD_MOLDS[(k * 5 + 1) % 6] === 'ridge' ? (k % 2 ? 0 : 4) : k % 6), n: sh[0], sides: sh[1], rot: sh[2], rs: sh[3] || 1, sx: sh[4] || 1, sy: sh[5] || 1, hue: r[8], sat: .5, rgh: .09, calm: rung === 3 ? 1 : 0, pat: r[7], paint: function (x, N, t, v, u) { BDP[r[7]](x, N, t, v, u, BDR[r[0]]); } };
+  BDR[r[0]] = { mold: BD_MOLDS[(k * 5 + 1) % 6], pal: bdRecipe(r[8] * 360, k % 6), n: sh[0], sides: sh[1], rot: sh[2], rs: sh[3] || 1, sx: sh[4] || 1, sy: sh[5] || 1, hue: r[8], sat: .5, rgh: .09, calm: rung === 3 ? 1 : 0, pat: r[7], paint: function (x, N, t, v, u) { BDP[r[7]](x, N, t, v, u, BDR[r[0]]); } };
 });
 
 var BD_SCENE = { ssm: bdRelic('ssm'), dsm: bdRelic('dsm'), wum: bdRelic('wum'), drakefire: bdRelic('drakefire'), phoenix: bdRelic('phoenix'), leviathan: bdRelic('leviathan'), ouroboros: bdRelic('ouroboros'), koipond: bdRelic('koipond'), eclipse: bdRelic('eclipse'), moonrise: bdRelic('moonrise'), colossus: bdRelic('colossus'), atlas: bdRelic('atlas'), zodiac: bdRelic('zodiac'), dontmiss: bdTempest, forge: bdForge, stormc: bdStorm, summit: bdSummit, sands: bdSands, vein: bdVein, wayf: bdWayf };
