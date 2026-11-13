@@ -1658,7 +1658,7 @@ var PROGRAMS = {
   qc: { n: 'Leg focused split', s: 'Leg focused', days: lfMkProg(PROGRAM_QC) },
   gf: { n: 'Glute focus', s: 'Glute focus', days: lfMkProg(PROGRAM_GF) },
   sx: { n: 'Superset split', s: 'Superset split', days: lfMkProg(PROGRAM_SX) },
-  nk: { n: 'Your routine', s: 'Your routine', days: lfMkProg(PROGRAM_NK) }
+  nk: { n: 'NIKO', s: 'NIKO', days: lfMkProg(PROGRAM_NK) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
 var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx', 'nk'];
@@ -4483,8 +4483,8 @@ function lfRenderLib() {
   var pg = el('<div class="lf-seg" id="lfProg" style="--n:3;margin-bottom:10px"></div>');
   PROG_IDS.forEach(function (k) {
     var bt = el('<button type="button"></button>'); bt.dataset.p = k;
-    /* the routine that is yours is an icon, not a name: a star, named for a screen reader */
-    if (k === 'nk') { bt.style.cssText = 'display:flex;align-items:center;justify-content:center'; bt.innerHTML = '<svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true" style="width:22px;height:22px"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'; bt.setAttribute('aria-label', PROGRAMS[k].n); } else bt.textContent = PROGRAMS[k].s;
+    /* the routine that is yours is its name and a star */
+    if (k === 'nk') { bt.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:6px'; bt.innerHTML = '<span>NIKO</span><svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'; bt.setAttribute('aria-label', PROGRAMS[k].n); } else bt.textContent = PROGRAMS[k].s;
     bt.setAttribute('aria-pressed', S.prog === k ? 'true' : 'false');
     bt.addEventListener('click', function () {
       if (S.prog === k) return;
