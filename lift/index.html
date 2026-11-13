@@ -7756,7 +7756,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', goal: 'i:ring', st4: '4'
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
   pr3: '3', sets30: '30', wkend: 'i:cal', mon20: '20', year: 'i:star', weigh: 'i:scale', cardio25: '25', leg50: '50',
   chest50: '50', chest100: '100', chest200: '200', bk50: '50', bk100: '100', bk200: '200', sh50: '50', sh100: '100', sh200: '200', arm50: '50', arm100: '100', arm200: '200',
-  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: 'i:bolt', ss1: 'i:pair', ss2: 'i:pair', ss3: 'i:pair', ssx: 'i:pair', ssm: 'i:pair', ds1: 'i:ramp', ds2: 'i:ramp', ds3: 'i:ramp', dsx: 'i:ramp', dsm: 'i:ramp', wu1: 'i:flame', wu2: 'i:flame', wu3: 'i:flame', wux: 'i:flame', wum: 'i:flame', drakefire: 'i:flame', phoenix: 'i:flame', leviathan: 'i:weight', ouroboros: 'i:ring', koipond: 'i:ramp', eclipse: 'i:sun', moonrise: 'i:moon', colossus: 'i:weight', atlas: 'i:dumb', zodiac: 'i:star', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
+  wave: '3', trio: 'i:pair', landslide: '2×', photo: 'i:ring', pack: 'i:trophy', slayer: 'i:star', unbeat: 'i:star', forge: 'i:flame', stormc: 'i:weight', summit: 'i:ramp', sands: 'i:ring', vein: 'i:trophy', dontmiss: 'i:inf', ss1: 'i:pair', ss2: 'i:pair', ss3: 'i:pair', ssx: 'i:pair', ssm: 'i:pair', ds1: 'i:ramp', ds2: 'i:ramp', ds3: 'i:ramp', dsx: 'i:ramp', dsm: 'i:ramp', wu1: 'i:flame', wu2: 'i:flame', wu3: 'i:flame', wux: 'i:flame', wum: 'i:flame', drakefire: 'i:flame', phoenix: 'i:flame', leviathan: 'i:weight', ouroboros: 'i:ring', koipond: 'i:ramp', eclipse: 'i:sun', moonrise: 'i:moon', colossus: 'i:weight', atlas: 'i:dumb', zodiac: 'i:star', wayf: 'i:sun', zero: '14', newyear: 'i:star', century: '100', heavy2: '2×', twice: '2',
   sets500: '500', sets2k: '2k', sets5k: '5k', hr25: '25h', hr100: '100h', hr250: '250h', rp10k: '10k', rp50k: '50k', rp100k: '100k', mo3: '3', mo6: '6', mo12: '12', allmus: 'i:dumb', dec31: 'i:star', friday13: '13', leap: '29', ironwk: '10h', plate4: '4', wo365: '365', st52: '52', v10m: '10M', owner: 'i:flame',
   wo250: '250', wo500: '500', v500k: '500k', ton25: '25k', wkvol: 'i:weight', setwk100: '100', sets40: '40', pr25: '25', pr50: '50', ex15: '15', ex80: '80',
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
@@ -7983,7 +7983,7 @@ function bdTroPat(t) {
 }
 /* THE RARE FINISHES, a pixel at a time: field k ('a' the kind's own, 'd' the
    deep one, 'b' the light one) at (x, y), with q to seed the specks */
-function bdFx(fx, k, x, y, q) {
+function bdFx(fx, k, x, y, q, ox, oy) {
   var n = bdNoise(q * 5.31), mix = bdMix, c3 = function (t, a, b, c) { return [128 + 127 * Math.cos(6.283 * (t + a)), 128 + 127 * Math.cos(6.283 * (t + b)), 128 + 127 * Math.cos(6.283 * (t + c))]; };
   if (fx === 'galaxy') {
     var neb = .5 + .5 * Math.sin(x * 3.1 + Math.sin(y * 4.3) * 1.6) * Math.cos(y * 2.2 - x * 1.4);
@@ -8084,13 +8084,17 @@ function bdFx(fx, k, x, y, q) {
      lightning crackling through the lot */
   /* TEMPEST: jet black, a gradient of colour running through it (blue to violet to teal), and lightning in thin forked veins, white at the heart */
   if (fx === 'tempest') {
+    /* everything is jet black but the lightning; inside the infinity sign the lightning is thick and everywhere, which is what shows the sign */
     var tg = .5 + .5 * Math.sin(x * 1.5 + y * 1.1 + Math.sin(y * 2.3) * .8), tg2 = .5 + .5 * Math.sin(x * 1.1 - y * 1.6 + 1.7), tcol = mix(mix([60, 110, 255], [150, 80, 255], tg), [60, 230, 220], tg2 * .5);
     var tv1 = Math.abs(Math.sin(x * 6.2 + Math.sin(y * 4.7 + Math.sin(x * 11) * .7) * 2.2)), tv2 = Math.abs(Math.sin(y * 5.3 - x * 2.1 + Math.sin(x * 9 + y * 3) * 1.4));
-    var tbolt = Math.max(tv1 < .06 ? 1 - tv1 / .06 : 0, tv2 < .045 ? 1 - tv2 / .045 : 0), tglow = Math.max(tv1 < .2 ? (.2 - tv1) / .2 : 0, tv2 < .12 ? (.12 - tv2) / .12 : 0);
-    var tsh = Math.pow(Math.max(0, Math.sin(x * 2.4 - y * 1.8 + .3)), 8), tjet = mix([3, 3, 5], [20, 21, 28], tsh);
-    if (k === 'b') return mix([5, 5, 8], [26, 27, 35], tsh);
-    if (k === 'd') return mix(mix([2, 2, 4], tcol, .06 + tglow * .22), mix(tcol, [235, 240, 255], .8), tbolt);
-    return mix(mix(tjet, tcol, tglow * .3 + .05), mix(tcol, [240, 244, 255], .8), tbolt);
+    var tsh = Math.pow(Math.max(0, Math.sin(x * 2.4 - y * 1.8 + .3)), 8), tjet = mix([2, 2, 3], [15, 16, 21], tsh);
+    if (k === 'g') {
+      var gb = Math.max(tv1 < .3 ? 1 - tv1 / .3 : 0, tv2 < .22 ? 1 - tv2 / .22 : 0), gw = Math.max(tv1 < .4 ? (.4 - tv1) / .4 : 0, 0) * .35;
+      return mix(mix([2, 2, 3], tcol, gw * .5), mix(tcol, [240, 245, 255], .85), gb);
+    }
+    var tbolt = Math.max(tv1 < .045 ? 1 - tv1 / .045 : 0, tv2 < .03 ? 1 - tv2 / .03 : 0), tglow = Math.max(tv1 < .14 ? (.14 - tv1) / .14 : 0, tv2 < .08 ? (.08 - tv2) / .08 : 0);
+    if (k === 'b') return mix([2, 2, 3], [14, 15, 20], tsh);
+    return mix(mix(tjet, tcol, tglow * .25), mix(tcol, [240, 244, 255], .8), tbolt);
   }
   if (fx === 'prism') {
     var pr = c3((x - y) * .9 + Math.sin(x * 3 + y * 2) * .08 + n * .03, 0, .33, .67);
@@ -8210,8 +8214,8 @@ function bdFront(b, trim) {
     var q = y * BD_FACE + xx, i = q * 4, ux = (xx - u) / u, uy = (u - y) / u;
     if (S[i + 3] < 128) { C[i + 3] = 0; O[i + 1] = 30; O[i + 2] = 255; O[i + 3] = 255; H[i] = H[i + 1] = H[i + 2] = 255; H[i + 3] = 255; Z[i + 3] = 255; continue; }
     var mf = MF[q], gv = GV[q], en;
-    if (anim && gv < .82 && pf(ux, uy) !== 'b') { var rr = RG.im.data, rw = (1 - mf) * 255; rr[i] = rr[i + 1] = rr[i + 2] = rw; rr[i + 3] = 255; }
-    if (gv >= .82) en = Ai;
+    if (anim && (gv < .82 ? pf(ux, uy) !== 'b' : fx === 'tempest')) { var rr = RG.im.data, rw = (1 - mf) * 255; rr[i] = rr[i + 1] = rr[i + 2] = rw; rr[i + 3] = 255; }
+    if (gv >= .82) en = fx === 'tempest' ? bdFx(fx, 'g', ux, uy, 0) : Ai;
     else if (fx) en = bdFx(fx, pf(ux, uy), ux, uy, q);
     else if (sn) {
       /* SHEEN: the kind's colour as candy metal, a band of light across it
@@ -8229,12 +8233,13 @@ function bdFront(b, trim) {
     C[i] = rgb[0]; C[i + 1] = rgb[1]; C[i + 2] = rgb[2]; C[i + 3] = 255;
     O[i] = 255; O[i + 1] = ro; O[i + 2] = mf * 255; O[i + 3] = 255;
     H[i] = H[i + 1] = H[i + 2] = hh * 255; H[i + 3] = 255;
-    Z[i] = Z[i + 1] = Z[i + 2] = (1 - mf) * 255; Z[i + 3] = 255;
+    Z[i] = Z[i + 1] = Z[i + 2] = (1 - mf) * 255 * (fx === 'tempest' ? .12 : 1); Z[i + 3] = 255;
   }
   if (anim) RG.x.putImageData(RG.im, 0, 0);
+  var gmap = null; if (anim && fx === 'tempest') { gmap = new Uint8Array(192 * 192); for (var gj = 0; gj < 192; gj++) for (var gi = 0; gi < 192; gi++) gmap[gj * 192 + gi] = GV[Math.floor(gj * BD_FACE / 192) * BD_FACE + Math.floor(gi * BD_FACE / 192)] >= .82 ? 1 : 0; }
   cc.putImageData(CI, 0, 0); oc.putImageData(OI, 0, 0); hc.putImageData(HI, 0, 0); gz.putImageData(ZI, 0, 0);
   var sm = bdCv(), smc = sm.getContext('2d'); bdBlur(sm, hgt, 1.2, true);
-  return { col: bdTex(col, true), orm: bdTex(orm), n: bdNorm(smc.getImageData(0, 0, BD_FACE, BD_FACE).data, 22), glaze: bdTex(glz), reg: anim ? bdTex(RG) : null, pf: pf };
+  return { col: bdTex(col, true), orm: bdTex(orm), n: bdNorm(smc.getImageData(0, 0, BD_FACE, BD_FACE).data, 22), glaze: bdTex(glz), reg: anim ? bdTex(RG) : null, pf: pf, gm: gmap };
 }
 /* the back: plain polished metal, the date engraved into it */
 function bdBack(b, trim) {
@@ -8283,7 +8288,7 @@ function bdIcon(c, k) {
     c.lineWidth = 36; c.beginPath(); if (c.roundRect) c.roundRect(-180, -150, 360, 330, 36); else c.rect(-180, -150, 360, 330); c.stroke();
     r(-180, -150, 360, 90, 30); r(-110, -215, 40, 110, 14); r(70, -215, 40, 110, 14);
     for (var i = 0; i < 3; i++) for (var j = 0; j < 2; j++) r(-120 + i * 95, -5 + j * 90, 50, 50, 10);
-  } else if (k === 'bolt') { c.beginPath(); c.moveTo(70, -240); c.lineTo(-150, 20); c.lineTo(-25, 20); c.lineTo(-75, 240); c.lineTo(150, -50); c.lineTo(25, -50); c.closePath(); c.fill(); }
+  } else if (k === 'inf') { c.lineWidth = 78; c.beginPath(); for (var iq = 0; iq <= 64; iq++) { var ia = iq / 64 * Math.PI * 2, id = 1 + Math.sin(ia) * Math.sin(ia); c[iq ? 'lineTo' : 'moveTo'](250 * Math.cos(ia) / id, 250 * Math.sin(ia) * Math.cos(ia) / id); } c.closePath(); c.stroke(); } else if (k === 'bolt') { c.beginPath(); c.moveTo(70, -240); c.lineTo(-150, 20); c.lineTo(-25, 20); c.lineTo(-75, 240); c.lineTo(150, -50); c.lineTo(25, -50); c.closePath(); c.fill(); }
   else if (k === 'star') { c.beginPath(); for (var s = 0; s < 10; s++) { var a = -Math.PI / 2 + s * Math.PI / 5, rr = s % 2 ? 95 : 220; c.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } c.closePath(); c.fill(); }
   else if (k === 'stairs') { c.beginPath(); c.moveTo(-230, 200); c.lineTo(-230, 100); c.lineTo(-115, 100); c.lineTo(-115, 0); c.lineTo(0, 0); c.lineTo(0, -100); c.lineTo(115, -100); c.lineTo(115, -200); c.lineTo(230, -200); c.lineTo(230, 200); c.closePath(); c.fill(); }
   else if (k === 'ramp') { c.beginPath(); c.moveTo(-240, 190); c.lineTo(240, 190); c.lineTo(240, -150); c.closePath(); c.fill(); c.beginPath(); c.arc(-40, -120, 52, 0, Math.PI * 2); c.fill(); }
@@ -8491,7 +8496,7 @@ function bdExoIx(id) { if (!bdExoOrder) { var m = {}; Object.keys(BD_HALO).conca
 function bdMoveFace(g, flat, zf, mp, b) {
   var M = 192, ec = document.createElement('canvas'); ec.width = ec.height = M; var ex = ec.getContext('2d'), et = new BD3.CanvasTexture(ec), im = ex.createImageData(M, M), d = im.data, ks = [], ix = bdExoIx(b.id), dir = ix % 2 ? 1 : -1, fx = b.fx;
   et.encoding = BD3.sRGBEncoding;
-  for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) ks.push(mp.f.pf(i / (M - 1) * 2 - 1, 1 - j / (M - 1) * 2));
+  for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) ks.push(mp.f.gm && mp.f.gm[j * M + i] ? 'g' : mp.f.pf(i / (M - 1) * 2 - 1, 1 - j / (M - 1) * 2));
   function paint(t) {
     var sx = Math.sin(t * .15 + ix) * .32, sy = Math.cos(t * .11 + ix * 2) * .32 + t * .018 * dir;
     for (var j = 0; j < M; j++) for (var i = 0; i < M; i++) { var q = j * M + i, k = q * 4; if (ks[q] === 'b') { d[k + 3] = 0; continue; } var c = bdFx(fx, ks[q], i / (M - 1) * 2 - 1 + sx, 1 - j / (M - 1) * 2 + sy, 0); d[k] = c[0] * .86; d[k + 1] = c[1] * .86; d[k + 2] = c[2] * .86; d[k + 3] = 255; }
@@ -8740,7 +8745,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd11', bdDbP = null;
+var BD_VER = 'd14', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
