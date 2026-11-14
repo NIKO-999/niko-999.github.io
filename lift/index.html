@@ -2169,7 +2169,6 @@ function lfWatchMsg(m) {
     var k = $('.lf-chk', row); if (k && row.className.indexOf('is-done') < 0) k.click();
   }, 80);
 }
-if (LF_WGT && LF_WGT.addListener) { try { LF_WGT.addListener('watchMsg', function (m) { lfWatchMsg(m); }); } catch (e) {} }
 function lfWatchSoon() { clearTimeout(lfWatchT); lfWatchT = setTimeout(lfWatchAct, 400); }
 function lfSaveAct() {
   lfAwakeSync(); lfWatchSoon();
@@ -5316,6 +5315,8 @@ var LF_APP_LIVE = false, LF_APP_URL = 'https://apps.apple.com/app/id6833453418';
 var LF_NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
 /* ── THE WIDGETS: today, the week ring, the streak and the latest badge on the Home Screen and Lock Screen, and the rest as a Live Activity. Only the iPhone app has a way to hand them anything, so on the website all of this is a no-op. What goes is one small snapshot of counts and names: how many sessions this week, which day's routine is up, the streak and the name of the last badge. Never a set, a weight or a note. ── */
 var LF_WGT = LF_NATIVE && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LiftWidgets || null, lfWgLast = '', lfWgT = 0, lfWRest = 0;
+/* what the Watch sends back is heard from here, once the plugin is known */
+if (LF_WGT && LF_WGT.addListener) { try { LF_WGT.addListener('watchMsg', function (m) { lfWatchMsg(m); }); } catch (e) {} }
 /* ── APPLE HEALTH, in the iPhone app only: a finished workout is saved to Health as a strength session (its start, its end and its name, never a set or a weight), and your latest body weight can be read back. Both are switched on by you, here, and the first press is when iPhone asks. */
 function lfHealthSave(w) {
   if (!LF_WGT || !S.hk || !w || (S.hkd && S.hkd[w.id])) return;
