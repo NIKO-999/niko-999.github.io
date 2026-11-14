@@ -524,8 +524,13 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-rs-l { font-size: 17px; font-weight: 700; color: var(--ink); }
 .lf-ss-rest.is-idle .lf-rs-c, .lf-ss-rest.is-idle .lf-rs-l { color: var(--quiet); }
 .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l { color: var(--good); }
+.lf-ss-rest.is-over .lf-rs-c, .lf-ss-rest.is-over .lf-rs-l { color: var(--bad); }
+.lf-ss-rest.is-over .lf-rs-fg { stroke: var(--bad); filter: drop-shadow(0 0 7px color-mix(in srgb, var(--bad) 70%, transparent)); }
+.lf-ss-rest.is-over .lf-rs-c { animation: lf-over 1s ease-in-out infinite; }
+@keyframes lf-over { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.09); opacity: .55; } }
+[data-acc-g][data-acc-g] .lf-ss-rest.is-over :is(.lf-rs-c, .lf-rs-l) { color: var(--bad); background: none; -webkit-text-fill-color: var(--bad); }
 .lf-ss-rest.is-ready .lf-rs-fg { stroke: var(--log-s, var(--log)); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--log) 60%, transparent)); }
-@media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } .lf-ss-rest.is-over .lf-rs-c { animation: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-curb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; flex: none; }
@@ -2418,7 +2423,18 @@ function lfToast(msg, undo) {
    whatever else is playing, so even an older copy's 'playback' claim
    left in a phone's memory is put back the moment this one runs. */
 try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
-function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); }
+var lfAc = null;
+/* the audio context is made and woken inside a tap, which is the only time a phone lets a page make a sound */
+function lfAudioWake() { try { var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return; if (!lfAc) lfAc = new AC(); if (lfAc.state === 'suspended') lfAc.resume(); } catch (e) { lfAc = null; } }
+function lfBeep(f, t0, d, type, vol) {
+  if (!lfAc || lfAc.state !== 'running') return;
+  var o = lfAc.createOscillator(), g = lfAc.createGain(), t = lfAc.currentTime + t0;
+  o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .01); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+  o.connect(g); g.connect(lfAc.destination); o.start(t); o.stop(t + d + .02);
+}
+/* the start of the range: two soft rising chimes. The end of it: three low, hard buzzes. */
+function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); try { lfBeep(660, 0, .16, 'sine', .35); lfBeep(880, .2, .22, 'sine', .35); } catch (e) {} }
+function lfRing2() { window.lfRests2 = (window.lfRests2 || 0) + 1; buzz([220, 90, 220, 90, 220]); try { [0, .3, .6].forEach(function (t0) { lfBeep(170, t0, .22, 'square', .22); }); } catch (e) {} }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 
 /* ═══════════ HOME ═══════════ */
@@ -3205,14 +3221,20 @@ function lfTick() {
     var gone = Date.now() - act.rest, rt = act.restEx ? lfRestOf(act.restEx) : null;
     var ready = !!(act.rest && rt && gone >= rt.lo * 1000), left = rt ? rt.lo * 1000 - gone : 0;
     $('.lf-rs-c', r).textContent = act.rest ? fmtClock(gone) : '0:00';
-    $('.lf-rs-l', r).textContent = !act.rest ? 'Rest' : ready ? 'Ready' : 'Resting';
+    var split = !!(rt && rt.hi > rt.lo), hiMs = rt ? rt.hi * 1000 : 0;
+    /* PAST THE TOP OF THE TARGET it goes red and pulses: with a range that is its far end, with a single figure it is half a minute after it */
+    var over = !!(act.rest && rt && gone > (split ? hiMs : rt.lo * 1000 + 30000));
+    $('.lf-rs-l', r).textContent = !act.rest ? 'Rest' : over ? 'Over' : ready ? 'Ready' : 'Resting';
     $('.lf-rs-t', r).textContent = !act.rest ? 'Starts when you tick a set' : rt ? (ready ? '' : fmtClock(Math.max(0, left) + 999) + ' to go · ') + 'target ' + lfRestTxt(rt) : '';
     /* the ring's circumference is 2π·44 ≈ 276.5; full when the rest reaches the start of its target */
     $('.lf-rs-fg', r).style.strokeDashoffset = (276.5 * (1 - (act.rest && rt ? Math.min(1, gone / (rt.lo * 1000)) : 0))).toFixed(1);
     r.classList.toggle('is-idle', !act.rest);
     r.classList.toggle('is-ready', ready);
-    /* Once per rest, the moment it is up. */
-    if (ready && !act.rang) { act.rang = 1; lfSaveAct(); if (S.ra) lfRing(); }
+    r.classList.toggle('is-over', over);
+    /* TWO TONES, so a rest can be judged by ear: the start of the range, and the end of it. Heard late, only the one that is current. */
+    var rg = act.rang || 0;
+    if (ready && rg < 1 && !(split && gone >= hiMs)) { act.rang = 1; lfSaveAct(); if (S.ra) lfRing(); }
+    if (split && act.rest && gone >= hiMs && rg < 2) { act.rang = 2; lfSaveAct(); if (S.ra) lfRing2(); }
     if (lfLockLive && (ready || !act.rest)) { if (act.rest) lfLockDone(); else lfLockStop(); }
     if (lfWRest && (ready || !act.rest)) lfWidgetRestEnd();
   }
@@ -7194,6 +7216,7 @@ function lfLockWav() {
   return u;
 }
 function lfLockStart() {
+  lfAudioWake();
   /* in the iPhone app the rest is a Live Activity, which draws its own countdown on the Lock Screen; the silent-sound trick below is only for the website */
   if (LF_WGT && act && act.rest && act.restEx) { var wrs = lfRestOf(act.restEx), wnx = act.x.filter(function (e) { return e.sets.some(function (q) { return !q.ok; }); })[0]; lfWidgetRestStart(act.rest + wrs.lo * 1000, wnx ? wnx.n : ''); return; }
   if (!S.rl || !act || !act.rest || !('mediaSession' in navigator)) return;

@@ -537,6 +537,16 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 125000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
     await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
     ok('the rest alert fires once when the rest is up', await page.evaluate(() => window.lfRests) === 1);
+    ok('inside the range it is ready, not over', !(await page.locator('#lfRest.is-over').count()) && /Ready/.test(await page.textContent('#lfRest .lf-rs-l')) && !(await page.evaluate(() => window.lfRests2 || 0)));
+    /* PAST THE TOP OF THE RANGE: a second tone, red, pulsing */
+    await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = Date.now() - 400000; localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
+    await page.reload(); await page.waitForTimeout(400); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(2300);
+    ok('past the top of the range it says Over', /Over/.test(await page.textContent('#lfRest .lf-rs-l')) && await page.locator('#lfRest.is-over').count() === 1);
+    const red = await page.evaluate(() => { const r = document.querySelector('#lfRest'), c = getComputedStyle(r.querySelector('.lf-rs-c')), bad = (() => { const d = document.createElement('i'); d.style.color = 'var(--bad)'; document.body.appendChild(d); const v = getComputedStyle(d).color; d.remove(); return v; })(); return { col: c.color, bad, anim: c.animationName, st: getComputedStyle(r.querySelector('.lf-rs-fg')).stroke }; });
+    ok('in red, and the number pulses', red.col === red.bad && /lf-over/.test(red.anim), red);
+    ok('the second tone is heard once, and the first is not played late', await page.evaluate(() => window.lfRests2) === 1 && !(await page.evaluate(() => window.lfRests || 0)));
+    const aSrc = await page.evaluate(() => 0), srcT = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+    ok('the two tones are different sounds, a rising chime and a low buzz', /function lfRing\(\)[^}]*660[^}]*880/.test(srcT) && /function lfRing2\(\)[^}]*'square'/.test(srcT));
     await page.click('#lfFinish'); await page.waitForTimeout(800); await page.keyboard.press('Escape'); await settle(page);
     await c.close();
   }
