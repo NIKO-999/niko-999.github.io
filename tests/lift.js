@@ -2323,7 +2323,7 @@ const freeze = (at) => `(() => {
   {
     const c3 = await browser.newContext(Object.assign({}, PHONE, { serviceWorkers: 'block' }));
     await c3.addInitScript(`localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg', goal: 3, wkSum: '9999-12-31', wkDone: '9999-12-31', tour: true }));`);
-    await c3.route('**/lift/index.html', async (r) => {
+    await c3.route(/\/lift\/(index\.html)?(\?.*)?$/, async (r) => {
       let h = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
       const i = h.lastIndexOf('})();');
       h = h.slice(0, i) + 'window.__t = {}; ["lfBadges", "bdSpec", "ymd", "today", "BD_DST"].forEach(function (k) { try { window.__t[k] = eval(k); } catch (e) {} });' + h.slice(i);
