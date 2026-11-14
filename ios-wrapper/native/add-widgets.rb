@@ -36,7 +36,7 @@ File.write(File.join(ios, 'App', 'App.entitlements'), app_entitlements)
 proj = Xcodeproj::Project.open(File.join(ios, 'App.xcodeproj'))
 app = proj.targets.find { |t| t.name == 'App' } or abort 'no App target'
 
-ext = proj.new_target(:app_extension, name, :ios, '16.1', nil, :swift)
+ext = proj.new_target(:app_extension, name, :ios, '16.2', nil, :swift)
 grp = proj.main_group.new_group(name, name)
 Dir[File.join(dest, '*.swift')].sort.each { |f| ext.add_file_references([grp.new_reference(File.basename(f))]) }
 grp.new_reference('Info.plist')
@@ -49,7 +49,7 @@ ext.build_configurations.each do |c|
   s['INFOPLIST_FILE'] = "#{name}/Info.plist"
   s['CODE_SIGN_ENTITLEMENTS'] = "#{name}/#{name}.entitlements"
   s['SWIFT_VERSION'] = '5.0'
-  s['IPHONEOS_DEPLOYMENT_TARGET'] = '16.1'
+  s['IPHONEOS_DEPLOYMENT_TARGET'] = '16.2'
   s['TARGETED_DEVICE_FAMILY'] = '1'
   s['DEVELOPMENT_TEAM'] = team
   s['CODE_SIGN_STYLE'] = 'Automatic'
