@@ -2363,6 +2363,44 @@ const freeze = (at) => `(() => {
     await d.c.close();
   }
 
+  /* ── THE COACH: a lift that has stalled is said to be, with a lighter week to get through it; and a finished workout says what to do next time ── */
+  {
+    const sess = (id, d, reps) => ({ id, d, s: new Date(d + 'T07:00:00').getTime(), e: new Date(d + 'T07:50:00').getTime(), n: 'Press', rt: 'r1', x: [{ id: 'bench', n: 'Bench press', sets: reps.map((r) => ({ w: 60, r })) }] });
+    const seed = (wo) => ({ unit: 'kg', goal: 3, rt: [{ id: 'r1', n: 'Press', sp: '', ex: ['bench'], tg: { bench: [3, 5, 8] } }], pick: { d: '2026-11-02', id: 'r1' }, wo });
+    {
+      const o = await ctx(seed([sess('a', '2026-10-19', [7, 6, 6]), sess('b', '2026-10-26', [7, 6, 6]), sess('c', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
+      await o.page.click('#lfGo'); await settle(o.page);
+      const aim = await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent();
+      ok('three sessions at 60 with no rep gained is a stall, and the aim is a lighter weight', aim === 'Stalled for 3 sessions. Try 55 × 5', aim);
+      await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').click(); await settle(o.page);
+      ok('one tap takes the lighter week', (await o.page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '55,5,55,5,55,5');
+      for (let i = 0; i < 3; i++) await o.page.locator('.lf-session .lf-ex').first().locator('.lf-chk').nth(i).click();
+      await o.page.click('#lfFinish'); await o.page.waitForTimeout(900);
+      ok('finishing says what to do next time', await top(o.page).locator('#lfFinNext').count() === 1 && /Bench press/.test(await top(o.page).locator('#lfFinNext').textContent()));
+      await o.c.close();
+    }
+    {
+      const o = await ctx(seed([sess('a', '2026-10-19', [5, 5, 5]), sess('b', '2026-10-26', [6, 5, 5]), sess('c', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
+      await o.page.click('#lfGo'); await settle(o.page);
+      const aim = await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent();
+      ok('reps going up is not a stall', /^Try /.test(aim) && !/Stalled/.test(aim), aim);
+      await o.c.close();
+    }
+    {
+      const o = await ctx(seed([sess('a', '2026-10-19', [8, 8, 8]), sess('b', '2026-10-26', [7, 6, 6]), sess('c', '2026-10-30', [8, 8, 8])]), '2026-11-02T07:00:00');
+      await o.page.click('#lfGo'); await settle(o.page);
+      const aim = await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent();
+      ok('the top of the range is progress, so the weight goes up and nothing is flagged', aim === 'Try 62.5 × 5', aim);
+      await o.c.close();
+    }
+    {
+      const o = await ctx(seed([sess('a', '2026-10-26', [7, 6, 6]), sess('b', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
+      await o.page.click('#lfGo'); await settle(o.page);
+      ok('two sessions are too few to call a stall', !/Stalled/.test(await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent()));
+      await o.c.close();
+    }
+  }
+
   /* ── THE IPHONE APP'S HOOKS: haptics, a screen that stays on, the set sent to the Watch and a set logged from it. The plugin is stood in for by a recorder. ── */
   {
     const c2 = await browser.newContext(PHONE);

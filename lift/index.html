@@ -3241,6 +3241,17 @@ function lfCarry(id) {
   for (var rid in sw) for (var a in sw[rid]) if (sw[rid][a] === id) { var p = lastFor(a); if (p && p.length) return { from: a, sets: p }; }
   return null;
 }
+/* A STALLED LIFT: the heaviest weight has been the same for three sessions in a row and the best set at it has not gained a rep. A lighter week (a tenth off, to the plate you have) is the usual way through, so that is what it offers. Never for body weight, which has no weight to take off, and never when the last session already hit the top of the range, which is progress. */
+function lfStalled(id, hi) {
+  var h = historyFor(id); if (h.length < 3) return null;
+  var l3 = h.slice(-3), topw = function (ss) { return ss.reduce(function (a, q) { return Math.max(a, q.w); }, 0); }, w0 = topw(l3[0].sets);
+  if (!(w0 > 0) || !l3.every(function (x) { return Math.abs(topw(x.sets) - w0) < 1e-9; })) return null;
+  var best = l3.map(function (x) { return x.sets.filter(function (q) { return Math.abs(q.w - w0) < 1e-9; }).reduce(function (a, q) { return Math.max(a, q.r); }, 0); });
+  if (best[2] > best[0] || l3[2].sets.every(function (q) { return q.r >= hi; })) return null;
+  var step = S.unit === 'lb' ? 5 * LB : 2.5, w = Math.round(w0 * 0.9 / step) * step;
+  if (w >= w0) w = w0 - step;
+  return w > 0 ? { w: w, from: w0, n: 3 } : null;
+}
 function lfAim(e) {
   var own = lastFor(e.id), car = own ? null : lfCarry(e.id);
   var r = lfAim0(e, own || (car && car.sets));
@@ -3260,6 +3271,8 @@ function lfAim0(e, last) {
     var upS = last.map(function () { return { w: w, r: lo }; });
     return { up: 1, sets: tg ? upS : last, fill: upS, note: 'Try ' + fmtW(w) + ' × ' + lo };
   }
+  var st = bw ? null : lfStalled(e.id, hi);
+  if (st) { var dl = last.map(function () { return { w: st.w, r: lo }; }); return { stall: st, sets: tg ? dl : last, fill: dl, note: 'Stalled for 3 sessions. Try ' + fmtW(st.w) + ' × ' + lo }; }
   var sets = last.map(function (s) { return { w: s.w, r: bw ? s.r + 1 : Math.min(hi, Math.max(lo, s.r + 1)) }; });
   /* an exercise with no plan still ticks as last time; the suggestion is there, and one tap takes it */
   return { sets: tg ? sets : last, fill: sets, note: 'Try ' + (bw ? 'BW' : fmtWS(sets[0].w)) + ' × ' + sets[0].r };
@@ -3859,6 +3872,18 @@ function lfWoPrs(w) {
 /* THE FINISH SCREEN. Straight after Finish it says what is new; opened
    again from today's card on Home (review) it is the same screen for that
    workout, with its sets under it and the badges that day earned. */
+/* NEXT TIME, worked out the moment you finish: for each lift, what to do the next time it comes up and why. The notable ones (a weight to add, a stall) come first. The same arithmetic as the aim under each exercise in a workout, so the two always agree. */
+function lfNextTime(w) {
+  var rt = w.rt ? rtById(w.rt) : null, rows = [];
+  w.x.forEach(function (e) {
+    if (!e.sets || !e.sets.length) return;
+    var a = lfAim0({ id: e.id, tg: rt && rt.tg && rt.tg[e.id] || null }, e.sets), sets = a.fill || a.sets;
+    if (!a.note || !sets || !sets.length) return;
+    var f = sets[0], kind = a.up ? 'Add weight' : a.stall ? 'Stalled, go lighter' : 'Same weight, more reps';
+    rows.push({ id: e.id, n: exName(e.id, e.n), kind: kind, txt: fmtWS(f.w) + ' × ' + f.r, rank: a.up ? 0 : a.stall ? 1 : 2 });
+  });
+  return rows.sort(function (a, c) { return a.rank - c.rank; }).slice(0, 6);
+}
 function lfSummary(w, prs, review) {
   var vol = toDisp(woVol(w));
   var b = el('<div class="lf-fin" id="lfFin"><div class="lf-fin-ok">' + IC.check + '</div><div class="lf-cap">Workout logged</div><h3></h3><p class="lf-fin-d"></p>'
@@ -3886,6 +3911,17 @@ function lfSummary(w, prs, review) {
     var bl = el('<div class="lf-fin-l" id="lfFinBg"><div class="lf-cap">Badges earned</div><div class="lf-tags"></div></div>');
     fresh.forEach(function (x) { var g = el('<span class="lf-tag"><span></span></span>'); $('span', g).textContent = x.b.n; $('.lf-tags', bl).appendChild(g); });
     b.appendChild(bl);
+  }
+  var nx = review ? [] : lfNextTime(w);
+  if (nx.length) {
+    var nl = el('<div class="lf-fin-l lf-fin-sets" id="lfFinNext"><div class="lf-cap">Next time</div></div>');
+    nx.forEach(function (r) {
+      var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
+      $('b', x).textContent = r.n; $('div', x).textContent = r.kind + ' · ' + r.txt;
+      x.addEventListener('click', function () { lfExSheet(r.id); });
+      nl.appendChild(x);
+    });
+    b.appendChild(nl);
   }
   if (review) {
     var sl = el('<div class="lf-fin-l lf-fin-sets" id="lfFinSets"><div class="lf-cap">Sets</div></div>');
