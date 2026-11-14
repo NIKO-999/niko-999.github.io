@@ -38,7 +38,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         CAPPluginMethod(name: "duck", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "haptic", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "keepAwake", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "watchAct", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "watchAct", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "shareStory", returnType: CAPPluginReturnPromise)
     ]
 
     // The Watch gets the same snapshot and the rest end time, over WatchConnectivity.
@@ -117,6 +118,36 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         }
     }
     private func cancelRestNote() { UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["lift.rest.over"]) }
+
+
+    // ── A story: the card's video goes straight into Instagram's or Facebook's story editor as the background, or into the share sheet.
+    @objc func shareStory(_ call: CAPPluginCall) {
+        guard let b64 = call.getString("data"), let data = Data(base64Encoded: b64) else { call.reject("no video"); return }
+        let kind = call.getString("kind") ?? "sheet"
+        let ext = call.getString("ext") ?? "mp4"
+        let appId = (call.getString("appId") ?? "").isEmpty ? (Bundle.main.bundleIdentifier ?? "") : (call.getString("appId") ?? "")
+        DispatchQueue.main.async {
+            if kind == "instagram" || kind == "facebook" {
+                let scheme = kind == "instagram" ? "instagram-stories" : "facebook-stories"
+                let key = kind == "instagram" ? "com.instagram.sharedSticker.backgroundVideo" : "com.facebook.sharedSticker.backgroundVideo"
+                if let url = URL(string: scheme + "://share?source_application=" + appId), UIApplication.shared.canOpenURL(url) {
+                    var item: [String: Any] = [key: data]
+                    if kind == "facebook" { item["com.facebook.sharedSticker.appID"] = appId }
+                    UIPasteboard.general.setItems([item], options: [.expirationDate: Date().addingTimeInterval(300)])
+                    UIApplication.shared.open(url, options: [:]) { _ in call.resolve(["ok": true, "via": kind]) }
+                    return
+                }
+            }
+            // the other app is not there (or this is the share sheet): the phone's own sheet, with the video as a file
+            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("lift-story." + ext)
+            try? data.write(to: tmp)
+            guard let vc = self.bridge?.viewController else { call.resolve(["ok": false]); return }
+            let sheet = UIActivityViewController(activityItems: [tmp], applicationActivities: nil)
+            if let pop = sheet.popoverPresentationController { pop.sourceView = vc.view; pop.sourceRect = CGRect(x: vc.view.bounds.midX, y: vc.view.bounds.maxY - 40, width: 1, height: 1) }
+            sheet.completionWithItemsHandler = { _, done, _, _ in call.resolve(["ok": done, "via": "sheet"]) }
+            vc.present(sheet, animated: true)
+        }
+    }
 
     /// The music dips while a rest tone plays and comes back on its own: it is lowered, never stopped.
     @objc func duck(_ call: CAPPluginCall) {

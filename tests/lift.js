@@ -1952,7 +1952,10 @@ const freeze = (at) => `(() => {
     ok('on the first the month just gone comes up by itself, named, with what you moved', await o.page.locator('#lfMonthSum').count() === 1 && /October/.test(await o.page.textContent('#lfMonthSum')) && /4 sessions/.test(await o.page.textContent('#lfMonthSum')) && (await store(o.page)).moSum === '2026-10');
     ok('and it never says red: a month is not graded', await o.page.evaluate(() => !document.querySelector('.lf-wsh.is-miss')));
     await o.page.click('#lfMoShare'); await settle(o.page);
-    ok('the card is a 1080 by 1920 picture, shown as it will go out, with Share and Save', await o.page.locator('.lf-card-pv img').count() === 1 && JSON.stringify(await o.page.evaluate(() => window.lfCardLast)) === '{"w":1080,"h":1920}' && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 1);
+    ok('the card is a 1080 by 1920 story that plays, with Share and Save, and no still picture', await o.page.locator('.lf-card-pv img').count() === 0 && await o.page.locator('.lf-card-st').count() === 1 && await o.page.evaluate(() => window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920) && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 1);
+    await o.page.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 25000 }).catch(() => {});
+    ok('it records itself as it plays, and what it recorded is a video that loops in place of the canvas', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
+    ok('the video is not a picture file: no png, no image button', !/image\/png/.test(src2.slice(src2.indexOf('function lfShareCardSheet'), src2.indexOf('THE MONTH IN REVIEW'))) && !/Save image/.test(src2));
     await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfMoDone'); await settle(o.page);
     await o.page.reload(); await o.page.waitForTimeout(4500);
     ok('once: a reload does not bring it back', await o.page.locator('#lfMonthSum').count() === 0);
@@ -1968,7 +1971,7 @@ const freeze = (at) => `(() => {
     await o.page.click('#lfPick'); await settle(o.page);
     ok('a finished workout offers its card, weights and all', await top(o.page).locator('#lfFinShare').count() === 1);
     await top(o.page).locator('#lfFinShare').click(); await settle(o.page);
-    ok('and the card is made at story size', JSON.stringify(await o.page.evaluate(() => window.lfCardLast)) === '{"w":1080,"h":1920}');
+    ok('and the card is made at story size', await o.page.evaluate(() => window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920));
     await o.c.close();
     ok('the card carries no footer line', !/Logged in Lift/.test(src2));
     ok('the card keeps to the middle of a story and shows every set: the weights are on it', /bottom = 1670/.test(src2) && /function lfCardWorkout/.test(src2) && /navigator\.canShare\(\{ files: \[f\] \}\)/.test(src2) && /fmtWS\(q\.w\)/.test(src2));
@@ -2342,6 +2345,31 @@ const freeze = (at) => `(() => {
     ok('no two badges on the shelf share a silhouette, finish, pattern and colour', r3.n >= 247 && r3.dup.length === 0, r3.dup);
     ok('the forty day streaks are eight ladders of five, each its own shape and colour', r3.ds === 40 && r3.ladders.length === 8 && r3.ladders.every((x) => x === 1), r3.ladders);
     await c3.close();
+  }
+
+  /* ── A STORY IN THE iPHONE APP goes straight to Instagram or Facebook as the video, or to the phone's share sheet. The plugin is a recorder. ── */
+  {
+    const W = (id, d, h) => ({ id, d, s: new Date(d + 'T' + h + ':00:00').getTime(), e: new Date(d + 'T' + h + ':50:00').getTime(), n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }] }] });
+    const c5 = await browser.newContext(PHONE);
+    await c5.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c5.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
+    await c5.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 1, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, tour: true, wo: [W('t1', '2026-10-30', '07')] }))}); })();`);
+    await c5.addInitScript(`window.__calls = []; window.Capacitor = { isNativePlatform: () => true, Plugins: { LiftWidgets: new Proxy({ addListener: () => Promise.resolve({ remove() {} }) }, { get: (t, k) => t[k] || ((a) => { window.__calls.push([k, a]); return Promise.resolve({}); }) }) } };`);
+    const pg5 = await c5.newPage();
+    pg5.on('pageerror', (e) => errors.push(String(e)));
+    await pg5.goto(URL); await pg5.waitForTimeout(500);
+    await pg5.click('#lfPick'); await settle(pg5);
+    await top(pg5).locator('#lfFinShare').click(); await settle(pg5);
+    ok('in the app the story has Instagram and Facebook buttons beside the share sheet', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardShare').count() === 1);
+    ok('and none of them can be pressed until there is a video to send', await pg5.locator('#lfCardIg').isDisabled());
+    await pg5.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 25000 }).catch(() => {});
+    await pg5.click('#lfCardIg'); await pg5.waitForTimeout(600);
+    const ig = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1]));
+    ok('Instagram is sent the recorded video, by name of the app', ig.length === 1 && ig[0].kind === 'instagram' && typeof ig[0].data === 'string' && ig[0].data.length > 1000 && /^(mp4|webm)$/.test(ig[0].ext), ig.map((x) => [x.kind, x.ext, (x.data || '').length]));
+    await pg5.click('#lfCardFb'); await pg5.click('#lfCardShare'); await pg5.waitForTimeout(600);
+    const kinds = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
+    ok('Facebook and the share sheet each send it too', kinds.join() === 'instagram,facebook,sheet', kinds);
+    await c5.close();
   }
 
   await browser.close();

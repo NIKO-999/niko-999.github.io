@@ -61,6 +61,9 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :NSSupportsLiveActivities bool true" ios/App/App/Info.plist || /usr/libexec/PlistBuddy -c "Set :NSSupportsLiveActivities true" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string Lift reads your body weight from Health so you do not type it twice." ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :NSHealthUpdateUsageDescription string Lift saves your finished workouts to Health." ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string instagram-stories" ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:1 string facebook-stories" ios/App/App/Info.plist || true
 
       - name: Portrait only, no encryption questions
         working-directory: ios-wrapper/ios/App/App

@@ -340,7 +340,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-btn.is-full { width: 100%; }
 .lf-again { margin-top: 12px; width: 100%; }
 .lf-card-pv { display: flex; justify-content: center; padding: 4px 0 8px; }
-.lf-card-pv img { width: min(100%, 320px); aspect-ratio: 9 / 16; border-radius: 18px; background: #0b0b0e; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 18px 40px rgba(0,0,0,.5); }
+.lf-card-st { width: min(100%, 320px); aspect-ratio: 9 / 16; border-radius: 18px; background: #0b0b0e; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 18px 40px rgba(0,0,0,.5); overflow: hidden; }
+.lf-card-st canvas, .lf-card-st video { display: block; width: 100%; height: 100%; object-fit: cover; }
 .lf-ex { --ss: color-mix(in srgb, var(--log) 55%, #000); }
 .lf-ssb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; }
 .lf-ssb::before { content: ''; position: absolute; inset: -6px -3px; }
@@ -499,6 +500,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sh-bd { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 4px 20px 20px; overscroll-behavior: contain; }
 .lf-sh-ft { flex: none; padding: 12px 20px calc(var(--safe-b) + 14px); border-top: 1px solid var(--line); display: flex; gap: 10px; }
 .lf-sh-ft > * { flex: 1; }
+.lf-sh-ft.is-wrap { flex-wrap: wrap; }
+.lf-sh-ft.is-wrap > * { flex: 1 1 calc(50% - 5px); }
 /* A SHEET WITH NO TITLE has nothing for the head row to say: the close
    button floats in the corner and the content starts under the grab. */
 .lf-sheet.no-title .lf-sh-hd { position: absolute; top: 12px; right: 8px; padding: 0; z-index: 2; }
@@ -3890,9 +3893,13 @@ function lfSummary(w, prs, review) {
    file; nothing is uploaded and nobody on the app is involved. The weights
    are on it, because a record is the point. Everything lives between 250
    and 1670 of 1920: the top and the foot of a story belong to the app. */
-function lfCardDraw(sp) {
-  var W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+/* THE CARD MOVES. Drawn with a second argument, 0 to 1, it is that moment of its animation: the title comes in, the ring fills, the figure counts up, the days light one after another, the rest follows. With none it is the finished card. A story is the animation, recorded. */
+function lfCardDraw(sp, prog, into) {
+  var W = 1080, H = 1920, cv = into || document.createElement('canvas'); cv.width = W; cv.height = H;
+  var anim = typeof prog === 'number', P = anim ? prog : 1;
+  var cl = function (v) { return Math.max(0, Math.min(1, v)); }, eo = function (v) { v = cl(v); return 1 - Math.pow(1 - v, 3); };
   var x = cv.getContext('2d'), FF = 'Inter, -apple-system, system-ui, sans-serif';
+  var fade = function (st, du) { x.globalAlpha = anim ? eo((P - st) / du) : 1; };
   x.fillStyle = (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2'; var acc = String(x.fillStyle);
   var rgb = /^#/.test(acc) ? [parseInt(acc.slice(1, 3), 16), parseInt(acc.slice(3, 5), 16), parseInt(acc.slice(5, 7), 16)] : [163, 230, 53];
   var A = function (a) { return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')'; };
@@ -3909,27 +3916,32 @@ function lfCardDraw(sp) {
   /* A LONG WORKOUT GETS THE ROOM: with more than four exercises the stat boxes
      and the big title give way to one line each, so the sets can be read. */
   var wk = !!sp.wk, cp = wk || (sp.lines || []).length > 4, y = cp ? 270 : 290;
+  fade(0, .15);
   T(sp.kicker.toUpperCase(), 34, 700, A(.95), y); y += cp ? 82 : 96;
   var tpx = cp ? 76 : 104, tl = wrap(sp.title, tpx, 800, W - 180).slice(0, 2); tl.forEach(function (l) { T(l, tpx, 800, '#ffffff', y); y += tpx + 8; }); y -= tpx + 8;
   y += cp ? 54 : 64; if (!wk) T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += wk ? 52 : cp ? 150 : 200;
   if (wk) {
     /* THE WEEK'S GOAL AS ITS RING, in the review's own look: the ring filled to how much of the goal the week closed, the count inside it */
     /* THE REVIEW'S OWN RING, drawn to the same proportions as the one on the screen: a 120 box, a 52 radius, a 12 stroke, a rounded arc with its glow, and when the goal is hit a wide soft light round it */
+    fade(.04, .14);
     var D = 250, K = D / 168, rc = y - 6 + D / 2 - 40, rR = 52 / 120 * D, lw = 12 / 120 * D;
     if (sp.ring[2]) { x.save(); x.shadowColor = A(.45); x.shadowBlur = 40 * K; x.strokeStyle = 'rgba(0,0,0,0)'; x.lineWidth = 2; x.beginPath(); x.arc(W / 2, rc, D / 2 + 10 * K, 0, Math.PI * 2); x.stroke(); x.fillStyle = 'rgba(0,0,0,0)'; x.restore(); x.save(); x.shadowColor = A(.45); x.shadowBlur = 40 * K; x.fillStyle = '#000'; x.globalCompositeOperation = 'destination-over'; x.beginPath(); x.arc(W / 2, rc, D / 2 + 10 * K, 0, Math.PI * 2); x.fill(); x.restore(); }
     x.lineWidth = lw; x.lineCap = 'round'; x.strokeStyle = '#1e1e22'; x.beginPath(); x.arc(W / 2, rc, rR, 0, Math.PI * 2); x.stroke();
-    x.save(); x.shadowColor = A(.6); x.shadowBlur = 8 * K; x.strokeStyle = A(1); x.beginPath(); x.arc(W / 2, rc, rR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.001, Math.min(1, sp.ring[0] / Math.max(1, sp.ring[1])))); x.stroke(); x.restore();
-    x.textAlign = 'center'; x.font = '800 ' + 40 * K + 'px ' + FF; x.fillStyle = '#ffffff'; if ('letterSpacing' in x) x.letterSpacing = (-.03 * 40 * K) + 'px'; x.fillText(sp.ring[0] + '/' + sp.ring[1], W / 2, rc + 40 * K * .36 - 6);
+    x.save(); x.shadowColor = A(.6); x.shadowBlur = 8 * K; x.strokeStyle = A(1); x.beginPath(); x.arc(W / 2, rc, rR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.001, Math.min(1, sp.ring[0] / Math.max(1, sp.ring[1])) * eo((P - .1) / .5))); x.stroke(); x.restore();
+    x.textAlign = 'center'; x.font = '800 ' + 40 * K + 'px ' + FF; x.fillStyle = '#ffffff'; if ('letterSpacing' in x) x.letterSpacing = (-.03 * 40 * K) + 'px'; x.fillText(Math.round(sp.ring[0] * eo((P - .1) / .5)) + '/' + sp.ring[1], W / 2, rc + 40 * K * .36 - 6);
     x.font = '700 ' + 11 * K + 'px ' + FF; x.fillStyle = sp.ring[2] ? A(1) : 'rgba(255,255,255,.62)'; if ('letterSpacing' in x) x.letterSpacing = (.12 * 11 * K) + 'px'; x.fillText(sp.ring[2] ? 'GOAL HIT' : 'WORKOUTS', W / 2 + 4, rc + 40 * K * .36 + 11 * K + 10); if ('letterSpacing' in x) x.letterSpacing = '0px';
     y = rc + D / 2 + 20 + 72;
   }
-  T(sp.hero, wk ? 100 : cp ? 150 : 200, 800, A(1), y, 'center', W - 140);
+  var heroTxt = sp.hero; if (anim) { var hn = parseFloat(String(sp.hero).replace(/,/g, '')); if (isFinite(hn)) heroTxt = Math.round(hn * eo((P - .12) / .5)).toLocaleString(); }
+  fade(.1, .15);
+  T(heroTxt, wk ? 100 : cp ? 150 : 200, 800, A(1), y, 'center', W - 140);
   y += wk ? 50 : cp ? 74 : 86; T(sp.heroL, cp ? 40 : 44, 600, 'rgba(255,255,255,.7)', y);
   if (wk) {
     /* the seven days, lit as they were */
     y += 32; var dw = 96, dg = (W - 180 - dw * 7) / 6;
     for (var di = 0; di < 7; di++) {
       var dx = 90 + di * (dw + dg), st = sp.days[di];
+      x.globalAlpha = anim ? eo((P - (.34 + di * .05)) / .1) : 1;
       if (st === 1) { x.shadowColor = A(.55); x.shadowBlur = 26; x.fillStyle = A(1); rr(dx, y, dw, 84, 26); x.fill(); x.shadowBlur = 0; }
       else if (st === 2) { x.strokeStyle = 'rgba(255,255,255,.22)'; x.lineWidth = 3; rr(dx + 1.5, y + 1.5, dw - 3, 81, 25); x.stroke(); }
       else { x.fillStyle = 'rgba(255,255,255,.08)'; rr(dx, y, dw, 84, 26); x.fill(); }
@@ -3937,13 +3949,16 @@ function lfCardDraw(sp) {
     }
     y += 84 + 38 + 6;
   }
+  fade(.45, .12);
   if (cp) { y += 62; T(sp.stats.map(function (st) { return st[1] === 'time' ? st[0] : st[0] + ' ' + st[1]; }).join('   ·   '), 36, 700, '#ffffff', y); y += 70; }
   else {
     y += 90; var bw = (W - 180 - 40) / 3;
-    sp.stats.forEach(function (st, i) { var bx = 90 + i * (bw + 20); x.fillStyle = 'rgba(255,255,255,.07)'; rr(bx, y, bw, 150, 30); x.fill(); x.textAlign = 'center'; x.font = '800 60px ' + FF; x.fillStyle = '#fff'; x.fillText(st[0], bx + bw / 2, y + 72, bw - 20); x.font = '600 28px ' + FF; x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(st[1], bx + bw / 2, y + 118); });
+    sp.stats.forEach(function (st, i) { x.globalAlpha = anim ? eo((P - (.45 + i * .06)) / .12) : 1; var bx = 90 + i * (bw + 20); x.fillStyle = 'rgba(255,255,255,.07)'; rr(bx, y, bw, 150, 30); x.fill(); x.textAlign = 'center'; x.font = '800 60px ' + FF; x.fillStyle = '#fff'; x.fillText(st[0], bx + bw / 2, y + 72, bw - 20); x.font = '600 28px ' + FF; x.fillStyle = 'rgba(255,255,255,.55)'; x.fillText(st[1], bx + bw / 2, y + 118); });
     y += 150 + 60;
   }
+  fade(.55, .12);
   if (wk && sp.top && sp.top.length) { sp.top.forEach(function (tl) { T(tl, 32, 700, 'rgba(255,255,255,.82)', y + 4, 'center', W - 180); y += 52; }); y += 6; }
+  fade(.6, .12);
   if (sp.prs && sp.prs.length) {
     var ptxt = (sp.prs.length === 1 ? '1 new record' : sp.prs.length + ' new records'); x.font = '800 32px ' + FF; var pw = x.measureText(ptxt).width + 80, ph = cp ? 62 : 70;
     x.fillStyle = A(1); rr(W / 2 - pw / 2, y - 44, pw, ph, ph / 2); x.fill(); x.fillStyle = '#0b0b0e'; x.textAlign = 'center'; x.fillText(ptxt, W / 2, y + 2);
@@ -3962,16 +3977,19 @@ function lfCardDraw(sp) {
   var L = layout(1); while (L.tot > avail && scale > .5) { scale -= .04; L = layout(scale); }
   var rows = L.rows, more = 0;
   while (L.tot > avail && rows.length > 1) { rows.pop(); more++; L.tot = layout(scale).rows.slice(0, rows.length).reduce(function (a, r) { return a + 50 * scale + r.tx.length * 40 * scale + 24 * scale; }, 0); }
+  fade(.64, .12);
   if (rows.length) {
     var cardH = Math.min(avail + 40, L.tot + 70 + (more ? 44 : 0)); x.fillStyle = 'rgba(255,255,255,.06)'; rr(90, top, W - 180, cardH, 36); x.fill();
     var yy = top + 40 + 38 * scale;
-    rows.forEach(function (r) {
+    rows.forEach(function (r, ri) {
+      x.globalAlpha = anim ? eo((P - (.66 + ri * .035)) / .1) : 1;
       x.textAlign = 'left'; x.font = '800 ' + (38 * scale) + 'px ' + FF; x.fillStyle = '#fff'; x.fillText(r.nm, 120, yy); yy += 12 * scale;
       r.tx.forEach(function (t) { yy += 40 * scale; x.font = '500 ' + (31 * scale) + 'px ' + FF; x.fillStyle = 'rgba(255,255,255,.66)'; x.fillText(t, 120, yy); });
       yy += 24 * scale + 38 * scale;
     });
     if (more) { x.font = '700 30px ' + FF; x.fillStyle = A(.95); x.textAlign = 'left'; x.fillText('+ ' + more + ' more', 120, top + cardH - 28); }
   }
+  x.globalAlpha = 1;
   return cv;
 }
 /* what a finished workout says on the card: every set, one by one */
@@ -3992,24 +4010,62 @@ function lfCardWorkout(w, prs) {
   return { kicker: 'Workout  ·  ' + fmtDay(w.d), title: w.n, sub: w.s > 1e11 ? fmtAt(new Date(w.s)) + '  ·  ' + mins : mins,
     hero: Math.round(toDisp(woVol(w))).toLocaleString(), heroL: S.unit + ' moved', stats: [[mins, 'time'], [String(woSets(w)), 'sets'], [fmtBig(woReps(w)), 'reps']], prs: prs || [], lines: lines };
 }
-/* THE PREVIEW IS THE CARD, so what you see is what goes out: Share opens the
-   phone's own share sheet with the picture as a file, which is how it lands in
-   a story already cropped; where a phone cannot share a file, it is saved. */
+/* A STORY IS THE CARD, MOVING. The preview plays the card's animation and records itself as it plays (MediaRecorder on the very canvas you are watching), so what goes out is what you saw, as a short video. In the iPhone app it goes straight into the Instagram or Facebook story editor, the video already in place as the background; the phone's own share sheet is there for everything else. On the web it is shared as a file, or saved. No still picture is made or offered. */
+var LF_FB_APP_ID = '';
+function lfCardMime() {
+  var c = ['video/mp4;codecs=avc1.42E01E', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'];
+  for (var i = 0; i < c.length; i++) { try { if (window.MediaRecorder && MediaRecorder.isTypeSupported(c[i])) return c[i]; } catch (e) {} }
+  return '';
+}
 function lfShareCardSheet(sp, name) {
-  var cv = lfCardDraw(sp), b = el('<div class="lf-card-pv"><img alt="The card, as it will be shared" /></div>');
-  var share = el('<button type="button" class="lf-btn is-log is-full" id="lfCardShare">Share to story</button>');
-  var save = el('<button type="button" class="lf-btn is-full" id="lfCardSave">Save image</button>');
-  var blob = null, url = '';
-  cv.toBlob(function (bl) { blob = bl; if (!bl) return; url = URL.createObjectURL(bl); $('img', b).src = url; }, 'image/png');
-  var file = function () { try { return new File([blob], name + '.png', { type: 'image/png' }); } catch (e) { return null; } };
-  var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.png'; document.body.appendChild(a); a.click(); a.remove(); };
-  share.addEventListener('click', function () {
-    if (!blob) return; var f = file();
+  var cv = document.createElement('canvas'), b = el('<div class="lf-card-pv"><div class="lf-card-st" aria-label="The story, as it will be shared"></div></div>');
+  var holder = $('.lf-card-st', b); holder.appendChild(cv);
+  lfCardDraw(sp, 0, cv);
+  var foot = [], blob = null, mime = lfCardMime(), ext = /mp4/.test(mime) ? 'mp4' : 'webm', url = '', rec = null, raf = 0, dead = false;
+  var mk = function (id, txt, cls) { var q = el('<button type="button" class="lf-btn ' + (cls || '') + '" id="' + id + '" disabled></button>'); q.textContent = txt; return q; };
+  var ig = LF_WGT && LF_WGT.shareStory ? mk('lfCardIg', 'Instagram story', 'is-log') : null;
+  var fb = LF_WGT && LF_WGT.shareStory ? mk('lfCardFb', 'Facebook story') : null;
+  var gen = mk('lfCardShare', LF_WGT ? 'More ways to share' : 'Share', ig ? '' : 'is-log');
+  var save = mk('lfCardSave', 'Save video');
+  [ig, fb, gen, save].forEach(function (q) { if (q) foot.push(q); });
+  var enable = function () { foot.forEach(function (q) { q.disabled = false; }); };
+  var file = function () { try { return new File([blob], name + '.' + ext, { type: mime.split(';')[0] }); } catch (e) { return null; } };
+  var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.' + ext; document.body.appendChild(a); a.click(); a.remove(); };
+  var toB64 = function (bl) { return new Promise(function (res) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.readAsDataURL(bl); }); };
+  var native = function (kind) { if (!blob) return; toB64(blob).then(function (d) { return LF_WGT.shareStory({ kind: kind, data: d, ext: ext, appId: LF_FB_APP_ID }); }).catch(function () {}); };
+  if (ig) ig.addEventListener('click', function () { native('instagram'); });
+  if (fb) fb.addEventListener('click', function () { native('facebook'); });
+  gen.addEventListener('click', function () {
+    if (!blob) return;
+    if (LF_WGT && LF_WGT.shareStory) { native('sheet'); return; }
+    var f = file();
     if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function () {}); else saveIt();
   });
-  save.addEventListener('click', saveIt);
-  var sh = lfSheet({ title: 'Share', body: b, foot: [save, share], onClose: function () { if (url) setTimeout(function () { URL.revokeObjectURL(url); }, 4000); } });
-  window.lfCards = (window.lfCards || 0) + 1; window.lfCardLast = { w: cv.width, h: cv.height };
+  save.addEventListener('click', function () { if (LF_WGT && LF_WGT.shareStory) native('sheet'); else saveIt(); });
+  var DUR = 3600, HOLD = 1800, t0 = 0, chunks = [];
+  var finish = function () {
+    blob = new Blob(chunks, { type: mime.split(';')[0] || 'video/webm' }); if (dead) return;
+    url = URL.createObjectURL(blob);
+    /* the finished video plays on a loop in place of the canvas */
+    var v = document.createElement('video'); v.src = url; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('aria-label', 'The story, as it will be shared');
+    holder.textContent = ''; holder.appendChild(v); var pl = v.play(); if (pl && pl.catch) pl.catch(function () {});
+    window.lfStoryBytes = blob.size; enable();
+  };
+  var frame = function (now) {
+    if (dead) return; if (!t0) t0 = now;
+    var el0 = now - t0; lfCardDraw(sp, Math.min(1, el0 / DUR), cv);
+    if (el0 < DUR + HOLD) raf = requestAnimationFrame(frame); else if (rec && rec.state !== 'inactive') rec.stop();
+  };
+  /* no recorder (an old browser): the finished card plays out once and the buttons stay off, because there is nothing to send */
+  try {
+    if (!mime || !cv.captureStream) throw new Error('no recorder');
+    rec = new MediaRecorder(cv.captureStream(30), { mimeType: mime, videoBitsPerSecond: 4500000 });
+    rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+    rec.onstop = finish; rec.start(250); raf = requestAnimationFrame(frame);
+  } catch (e) { lfCardDraw(sp, 1, cv); foot.forEach(function (q) { q.disabled = true; }); }
+  var sh = lfSheet({ title: 'Share', body: b, foot: foot, onClose: function () { dead = true; cancelAnimationFrame(raf); try { if (rec && rec.state !== 'inactive') rec.stop(); } catch (e) {} if (url) setTimeout(function () { URL.revokeObjectURL(url); }, 4000); } });
+  if (sh.foot) sh.foot.classList.add('is-wrap');
+  window.lfCards = (window.lfCards || 0) + 1; window.lfCardLast = { w: cv.width, h: cv.height, mime: mime };
   return sh;
 }
 
