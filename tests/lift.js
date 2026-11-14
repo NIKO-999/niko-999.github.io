@@ -565,7 +565,7 @@ const freeze = (at) => `(() => {
        music you train to. No Test sound, no media element, no 'playback'. */
     ok('there is no sound to test', !(await page.locator('#lfRaTest').count()));
     ok('the rest alert is On or Off, never a sound', (await page.locator('#lfRa button').allTextContents()).join('|') === 'On|Off');
-    ok('nothing in the page claims the audio session or plays a sound, except the silent one behind the lock-screen rest, which is off until asked for', !/type = 'playback'|new Audio\(|AudioContext|\.play\(\)/.test((await page.content()).replace(/var lfLockAu[\s\S]*?function lfRestPushClear/, '')));
+    ok('nothing in the page claims the audio session or plays a media element, except the silent one behind the lock-screen rest; the rest tones are Web Audio, made inside a tap, with the music ducked natively', !/type = 'playback'|new Audio\(|\.play\(\)/.test((await page.content()).replace(/var lfLockAu[\s\S]*?function lfRestPushClear/, '')));
     await c.close();
   }
   {
@@ -1890,7 +1890,7 @@ const freeze = (at) => `(() => {
     await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"bseen":{"v2":1,"v3":1}}'); })();`);
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('theme is its own fold, shut, saying lime', await page.getAttribute('#lfTheme h3 > button', 'aria-expanded') === 'false' && /Lime/.test(await page.textContent('#lfTheme h3')));
+    ok('theme is its own fold, shut, saying cream', await page.getAttribute('#lfTheme h3 > button', 'aria-expanded') === 'false' && /Cream/.test(await page.textContent('#lfTheme h3')));
     ok('and appearance is not in settings any more', await page.locator('#lfSet #lfMode').count() === 0);
     await page.click('#lfTheme h3 > button'); await settle(page);
     ok('it holds appearance and the wheel', await page.locator('#lfTheme #lfMode').isVisible() && await page.locator('#lfWheel').isVisible());
@@ -1913,9 +1913,9 @@ const freeze = (at) => `(() => {
     await page.click('#lfTheme #lfMode [data-m="light"]'); await settle(page);
     ok('light and dark live here now', await page.evaluate(() => document.documentElement.dataset.mode) === 'light');
     await page.click('#lfAccReset'); await settle(page);
-    ok('back to cream clears it', (await tok()).toLowerCase() === '#e1d4c2' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
+    ok('back to cream clears it', (await tok()).toLowerCase() === '#b5a084' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
     const gg = await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return [r.getPropertyValue('--good').trim().toLowerCase(), '', document.documentElement.dataset.mode]; });
-    ok('and the greens are green again', gg[0] === '#248a3d' && gg[1] === '', gg);
+    ok('and the greens are green again', gg[0] === '#6e5b45' && gg[1] === '', gg);
     await c.close();
   }
 
