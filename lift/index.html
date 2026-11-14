@@ -9130,7 +9130,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd22', bdDbP = null;
+var BD_VER = 'd23', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
@@ -9143,9 +9143,20 @@ function bdDbGet(k) { return bdDb().then(function (db) { return db ? new Promise
 function bdDbPut(k, v) { bdDb().then(function (db) { if (db) try { db.transaction('s', 'readwrite').objectStore('s').put(v, BD_VER + ':' + k); } catch (e) {} }); }
 /* Don't Miss changed its look after phones had saved a picture of it: the suffix is its look's version, so only it is drawn again */
 function bdKey(x) { return x.b.id + (x.b.id === 'dontmiss' ? ':tm4' : '') + (x.d ? ':' + x.d : ':lock') + (x.b.gl ? ':' + x.b.gl : '') + (x.p && x.b.k === 'month' ? ':' + x.p.join('/') : ''); }
+/* THE SHELF'S PICTURES ARE FILES, made ahead of time with the same code that draws the badge when it is opened (tools/make-badge-stills.py). Drawing 247 of them on each phone, one at a time, left most of the shelf as blank discs for a while, and the blank ones all looked alike until you opened one. A badge with a file shows it at once; one without (a month's medal, which carries its progress) is still drawn live, as it was. */
+var BD_STATIC = /*BD_STATIC*/[]/*END*/, bdStaticSet = null;
+function bdStaticUrl(x) {
+  if (!bdStaticSet) { bdStaticSet = {}; BD_STATIC.forEach(function (k) { bdStaticSet[k] = 1; }); }
+  if (!bdStaticSet[x.b.id] || x.b.k === 'month' || x.b.gl) return '';
+  return 'bd/' + x.b.id + (x.d ? '' : '-l') + '.webp?v=' + BD_VER;
+}
 function bdStill(x, img) {
-  var key = bdKey(x);
+  var key = bdKey(x), su = bdStaticUrl(x);
   if (bdStills[key]) { img.src = bdStills[key]; return; }
+  if (su) { img.onerror = function () { img.onerror = null; bdStillLive(x, img, key); }; img.src = su; return; }
+  bdStillLive(x, img, key);
+}
+function bdStillLive(x, img, key) {
   bdDbGet(key).then(function (v) {
     if (v) { bdStills[key] = v; img.src = v; return; }
     bdQ.push([x, img, key]); bdPump();
