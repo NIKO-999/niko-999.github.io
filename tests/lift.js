@@ -2282,6 +2282,41 @@ const freeze = (at) => `(() => {
     await o.c.close();
   }
 
+  /* ── THE IPHONE APP'S HOOKS: haptics, a screen that stays on, the set sent to the Watch and a set logged from it. The plugin is stood in for by a recorder. ── */
+  {
+    const c2 = await browser.newContext(PHONE);
+    await c2.addInitScript(freeze('2026-11-02T07:00:00'));
+    await c2.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
+    await c2.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, tour: true }))}); })();`);
+    await c2.addInitScript(`window.__calls = []; window.__fire = {};
+      window.Capacitor = { isNativePlatform: () => true, Plugins: { LiftWidgets: new Proxy({ addListener: (n, f) => { window.__fire[n] = f; return Promise.resolve({ remove() {} }); } }, { get: (t, k) => t[k] || ((a) => { window.__calls.push([k, a]); return Promise.resolve({}); }) }) } };`);
+    const pg = await c2.newPage();
+    pg.on('pageerror', (e) => errors.push(String(e)));
+    await pg.goto(URL); await pg.waitForTimeout(500);
+    await pg.click('#lfGo'); await settle(pg);
+    const calls = () => pg.evaluate(() => window.__calls.map((x) => x[0] + ':' + JSON.stringify(x[1])));
+    ok('a workout keeps the screen awake', (await calls()).some((x) => /^keepAwake:\{"on":true\}/.test(x)));
+    const set0 = pg.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
+    await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
+    await set0.locator('.lf-chk').click(); await pg.waitForTimeout(900);
+    const cs = await calls();
+    ok('a ticked set is a light haptic tap', cs.some((x) => /^haptic:\{"kind":"tick"\}/.test(x)), cs.slice(0, 8));
+    const wa = cs.filter((x) => /^watchAct:/.test(x)).pop() || '';
+    const wj = wa ? JSON.parse(JSON.parse(wa.replace(/^watchAct:/, '')).json || 'null') : null;
+    ok('the watch is sent the set it is on: the exercise, the set and the weight and reps', !!wj && wj.of > 1 && wj.i === 1 && wj.w === 100 && wj.r === 8 && !!wj.ex, wj);
+    /* the watch logs the next set at 105 x 6 */
+    await pg.evaluate((m) => window.__fire.watchMsg(m), { t: 'set', id: wj.id, i: 1, w: 105, r: 6 }); await pg.waitForTimeout(700);
+    const act = await pg.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')));
+    const ex0 = act.x.find((x) => x.id === wj.id);
+    ok('a set logged from the watch is ticked with the weight and reps it sent', ex0.sets[1].ok === 1 && ex0.sets[1].w === 105 && ex0.sets[1].r === 6, ex0.sets[1]);
+    ok('and it starts the rest like any other tick', !!act.rest);
+    await pg.evaluate((m) => window.__fire.watchMsg(m), { t: 'set', id: wj.id, i: 1, w: 999, r: 99 }); await pg.waitForTimeout(300);
+    ok('the same set sent twice is not logged twice', (await pg.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')))).x.find((x) => x.id === wj.id).sets[1].w === 105);
+    await pg.click('#lfFinish'); await pg.waitForTimeout(900);
+    ok('and finishing lets the screen sleep again and tells the watch there is no workout', (await calls()).some((x) => /^keepAwake:\{"on":false\}/.test(x)) && (await calls()).filter((x) => /^watchAct:/.test(x)).pop() === 'watchAct:{"json":""}', (await calls()).slice(-4));
+    await c2.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

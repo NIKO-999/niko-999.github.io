@@ -149,18 +149,26 @@ struct RestLiveActivity: Widget {
                     if !context.state.next.isEmpty { Text("Next: \(context.state.next)").font(.system(size: 13)).foregroundColor(.white.opacity(0.7)).lineLimit(1) }
                 }
                 Spacer()
-                Text(timerInterval: Date()...max(Date(), context.state.end), countsDown: true)
-                    .font(.system(size: 34, weight: .heavy, design: .rounded)).monospacedDigit().foregroundColor(.white)
-                    .multilineTextAlignment(.trailing).frame(maxWidth: 110, alignment: .trailing)
+                if context.isStale {
+                    VStack(alignment: .trailing, spacing: 0) {
+                        Text("READY").font(.system(size: 12, weight: .heavy)).foregroundColor(accent)
+                        Text(context.state.end, style: .timer).font(.system(size: 22, weight: .heavy, design: .rounded)).monospacedDigit().foregroundColor(.white).multilineTextAlignment(.trailing)
+                    }.frame(maxWidth: 110, alignment: .trailing)
+                } else {
+                    Text(timerInterval: Date()...max(Date(), context.state.end), countsDown: true)
+                        .font(.system(size: 34, weight: .heavy, design: .rounded)).monospacedDigit().foregroundColor(.white)
+                        .multilineTextAlignment(.trailing).frame(maxWidth: 110, alignment: .trailing)
+                }
             }
             .padding(16)
             .activityBackgroundTint(Color(red: 0.05, green: 0.05, blue: 0.06))
         } dynamicIsland: { context in
             let accent = Color(hex: context.attributes.accent)
             return DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) { Text("REST").font(.system(size: 12, weight: .bold)).foregroundColor(accent) }
+                DynamicIslandExpandedRegion(.leading) { Text(context.isStale ? "READY" : "REST").font(.system(size: 12, weight: .bold)).foregroundColor(accent) }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(timerInterval: Date()...max(Date(), context.state.end), countsDown: true).monospacedDigit().frame(maxWidth: 80)
+                    if context.isStale { Text(context.state.end, style: .timer).monospacedDigit().foregroundColor(accent).frame(maxWidth: 80) }
+                    else { Text(timerInterval: Date()...max(Date(), context.state.end), countsDown: true).monospacedDigit().frame(maxWidth: 80) }
                 }
                 DynamicIslandExpandedRegion(.bottom) {
                     if !context.state.next.isEmpty { Text("Next: \(context.state.next)").font(.system(size: 13)).lineLimit(1) }
@@ -168,7 +176,8 @@ struct RestLiveActivity: Widget {
             } compactLeading: {
                 Text("REST").font(.system(size: 10, weight: .bold)).foregroundColor(accent)
             } compactTrailing: {
-                Text(timerInterval: Date()...max(Date(), context.state.end), countsDown: true).monospacedDigit().frame(maxWidth: 44)
+                if context.isStale { Text(context.state.end, style: .timer).monospacedDigit().foregroundColor(accent).frame(maxWidth: 44) }
+                else { Text(timerInterval: Date()...max(Date(), context.state.end), countsDown: true).monospacedDigit().frame(maxWidth: 44) }
             } minimal: {
                 Image(systemName: "timer").foregroundColor(accent)
             }

@@ -1,6 +1,7 @@
 import Foundation
 import Capacitor
 import UIKit
+import UserNotifications
 import AVFoundation
 import Vision
 import PDFKit
@@ -23,7 +24,7 @@ import WatchConnectivity
 /// redraw. startRest / endRest run the rest between sets as a Live Activity on the Lock Screen.
 /// Nothing here reads a set, a weight or a note: the page decides what goes, and it sends counts and names.
 @objc(LiftWidgetsPlugin)
-public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControllerDelegate, UIDocumentPickerDelegate {
+public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControllerDelegate, UIDocumentPickerDelegate, WCSessionDelegate {
     public let identifier = "LiftWidgetsPlugin"
     public let jsName = "LiftWidgets"
     public let pluginMethods: [CAPPluginMethod] = [
@@ -34,7 +35,10 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         CAPPluginMethod(name: "healthSave", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "healthWeight", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "readPlan", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "duck", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "duck", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "haptic", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "keepAwake", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "watchAct", returnType: CAPPluginReturnPromise)
     ]
 
     // The Watch gets the same snapshot and the rest end time, over WatchConnectivity.
@@ -44,13 +48,75 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         mixAudio()
         NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in self?.mixAudio() }
         #if canImport(WatchConnectivity)
-        if WCSession.isSupported() { WCSession.default.activate() }
+        if WCSession.isSupported() { WCSession.default.delegate = self; WCSession.default.activate() }
         #endif
     }
     private func mixAudio() {
         // set, but not switched on: the page's own sounds never take the music over
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
     }
+
+
+    // ── The watch: the set you are on goes over, a set done or a workout started comes back.
+    @objc func watchAct(_ call: CAPPluginCall) {
+        let j = call.getString("json") ?? ""
+        toWatch("act", j)
+        call.resolve()
+    }
+
+    #if canImport(WatchConnectivity)
+    public func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {}
+    public func sessionDidBecomeInactive(_ session: WCSession) {}
+    public func sessionDidDeactivate(_ session: WCSession) { session.activate() }
+    public func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        DispatchQueue.main.async { self.notifyListeners("watchMsg", data: message, retainUntilConsumed: true) }
+    }
+    public func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any]) {
+        DispatchQueue.main.async { self.notifyListeners("watchMsg", data: userInfo, retainUntilConsumed: true) }
+    }
+    #endif
+
+    // ── Haptics: a real tap for a tick, a success for a finish, two for a rest that is ready, three hard ones for a rest gone over.
+    @objc func haptic(_ call: CAPPluginCall) {
+        let kind = call.getString("kind") ?? "tick"
+        DispatchQueue.main.async {
+            switch kind {
+            case "success": UINotificationFeedbackGenerator().notificationOccurred(.success)
+            case "ready":
+                let g = UIImpactFeedbackGenerator(style: .medium); g.impactOccurred()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.14) { g.impactOccurred() }
+            case "over":
+                let g = UIImpactFeedbackGenerator(style: .heavy)
+                for i in 0..<3 { DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.16) { g.impactOccurred() } }
+            case "medium": UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            default: UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
+        }
+        call.resolve()
+    }
+
+    // ── The screen stays on while a workout is going.
+    @objc func keepAwake(_ call: CAPPluginCall) {
+        let on = call.getBool("on") ?? false
+        DispatchQueue.main.async { UIApplication.shared.isIdleTimerDisabled = on }
+        call.resolve()
+    }
+
+    // ── "Rest is over", with the app closed: a notification at the end of the target. Asked for the first time a rest starts.
+    private func scheduleRestNote(end: Date, next: String) {
+        let c = UNUserNotificationCenter.current()
+        c.removePendingNotificationRequests(withIdentifiers: ["lift.rest.over"])
+        c.requestAuthorization(options: [.alert, .sound]) { ok, _ in
+            guard ok, end.timeIntervalSinceNow > 1 else { return }
+            let n = UNMutableNotificationContent()
+            n.title = "Rest is over"
+            n.body = next.isEmpty ? "Next set" : "Next: " + next
+            n.sound = .default
+            if #available(iOS 15.0, *) { n.interruptionLevel = .timeSensitive }
+            c.add(UNNotificationRequest(identifier: "lift.rest.over", content: n, trigger: UNTimeIntervalNotificationTrigger(timeInterval: end.timeIntervalSinceNow, repeats: false)))
+        }
+    }
+    private func cancelRestNote() { UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["lift.rest.over"]) }
 
     /// The music dips while a rest tone plays and comes back on its own: it is lowered, never stopped.
     @objc func duck(_ call: CAPPluginCall) {
@@ -94,13 +160,14 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
             let next = call.getString("next") ?? ""
             let accent = call.getString("accent") ?? "#a3e635"
             toWatch("next", next); toWatch("restEnd", ms)
+            scheduleRestNote(end: end, next: next)
             Task {
                 for a in Activity<LiftRestAttributes>.activities { await a.end(nil, dismissalPolicy: .immediate) }
                 guard ActivityAuthorizationInfo().areActivitiesEnabled, end > Date() else { call.resolve(); return }
                 let state = LiftRestAttributes.ContentState(end: end, next: next)
                 do {
                     _ = try Activity.request(attributes: LiftRestAttributes(title: "Rest", accent: accent),
-                                             content: .init(state: state, staleDate: end.addingTimeInterval(30)), pushType: nil)
+                                             content: .init(state: state, staleDate: end), pushType: nil)
                 } catch { }
                 call.resolve()
             }
@@ -112,6 +179,7 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
 
     @objc func endRest(_ call: CAPPluginCall) {
         toWatch("restEnd", 0.0)
+        cancelRestNote()
         #if canImport(ActivityKit)
         if #available(iOS 16.2, *) {
             Task {

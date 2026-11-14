@@ -2126,7 +2126,53 @@ function lfLoadAct() {
   } catch (e) { return null; }
 }
 var lfLvSent = -1;
+var lfAwakeOn = false, lfWakeSent = null, lfWatchT = 0, lfWatchLast = '';
+function lfAwakeSync() {
+  var on = !!act; if (on === lfAwakeOn) return; lfAwakeOn = on;
+  try { if (LF_WGT && LF_WGT.keepAwake) LF_WGT.keepAwake({ on: on }); } catch (e) {}
+  try {
+    if (!LF_WGT && navigator.wakeLock) {
+      if (on) navigator.wakeLock.request('screen').then(function (l) { lfWakeSent = l; }, function () {});
+      else if (lfWakeSent) { lfWakeSent.release().catch(function () {}); lfWakeSent = null; }
+    }
+  } catch (e) {}
+}
+/* THE WATCH sees the set you are on: which exercise, which set, and the weight and reps it would log. It is sent a moment after the last change, and only when it is different. */
+function lfWatchAct() {
+  if (!LF_WGT || !LF_WGT.watchAct) return;
+  var o = null;
+  if (act) {
+    var cur = null;
+    (lfOrd || act.x).forEach(function (e) { if (cur) return; for (var i = 0; i < e.sets.length; i++) if (!e.sets[i].ok) { cur = { e: e, i: i }; return; } });
+    if (cur) {
+      var ag = lfAim(cur.e), g = ag.sets[cur.i] || ag.sets[ag.sets.length - 1], s0 = cur.e.sets[cur.i], prevS = cur.i ? cur.e.sets[cur.i - 1] : null;
+      var w = s0.w !== '' && s0.w != null ? +s0.w : prevS && prevS.ok ? +prevS.w : g ? +g.w : 0, r = s0.r !== '' && s0.r != null ? +s0.r : g ? +g.r : (cur.e.tg ? cur.e.tg[1] : 8);
+      o = { n: act.n, ex: cur.e.n, id: cur.e.id, i: cur.i, of: cur.e.sets.length, w: toDisp(w), r: r, u: S.unit, st: S.unit === 'lb' ? 5 : 2.5, bw: !!(exById(cur.e.id) && exById(cur.e.id).t === 'bw') };
+    } else o = { n: act.n, done: 1 };
+  }
+  var j = JSON.stringify(o); if (j === lfWatchLast) return; lfWatchLast = j;
+  LF_WGT.watchAct({ json: o ? j : '' }).catch(function () {});
+}
+/* WHAT THE WATCH SENDS BACK: a set done (with the weight and reps it was set to), or a workout started. A set is logged by pressing the very check the screen has, so every rule of the app applies to it: records, the rest timer, the Live Activity. */
+function lfWatchMsg(m) {
+  if (!m) return;
+  if (m.t === 'start') { if (!act && !woOn(ymd(today())).length) { var rt = lfToday(); if (rt && !lfIsRest()) lfStart(rt); } return; }
+  if (m.t !== 'set' || !act) return;
+  var e = act.x.filter(function (x) { return x.id === m.id; })[0];
+  if (!e || !e.sets[m.i] || e.sets[m.i].ok) return;
+  lfOpenSession();
+  setTimeout(function () {
+    var card = $$('#lfExList .lf-ex').filter(function (c) { return c.dataset.ex === m.id; })[0]; if (!card) return;
+    var row = $$('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop)', card)[m.i]; if (!row) return;
+    var ins = $$('input', row);
+    [[ins[0], String(m.w)], [ins[1], String(m.r)]].forEach(function (q) { if (q[0]) { q[0].value = q[1]; q[0].dispatchEvent(new Event('input', { bubbles: true })); } });
+    var k = $('.lf-chk', row); if (k && row.className.indexOf('is-done') < 0) k.click();
+  }, 80);
+}
+if (LF_WGT && LF_WGT.addListener) { try { LF_WGT.addListener('watchMsg', function (m) { lfWatchMsg(m); }); } catch (e) {} }
+function lfWatchSoon() { clearTimeout(lfWatchT); lfWatchT = setTimeout(lfWatchAct, 400); }
 function lfSaveAct() {
+  lfAwakeSync(); lfWatchSoon();
   try { if (act) localStorage.setItem(ACTK, JSON.stringify(act)); else localStorage.removeItem(ACTK); } catch (e) {}
   /* starting and ending a workout tell friends; a set ticked does not */
   var lv = act ? act.s : 0;
@@ -2436,7 +2482,13 @@ function lfBeep(f, t0, d, type, vol) {
 function lfDuck(ms) { if (LF_WGT && LF_WGT.duck) { try { LF_WGT.duck({ ms: ms }); } catch (e) {} return .12; } return 0; }
 function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); try { var d = lfDuck(1300); lfBeep(660, d, .16, 'sine', .35); lfBeep(880, d + .2, .22, 'sine', .35); } catch (e) {} }
 function lfRing2() { window.lfRests2 = (window.lfRests2 || 0) + 1; buzz([220, 90, 220, 90, 220]); try { var d = lfDuck(1700); [0, .3, .6].forEach(function (t0) { lfBeep(170, d + t0, .22, 'square', .22); }); } catch (e) {} }
-function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
+/* IN THE IPHONE APP a buzz is a real haptic: a light tap for a tick, a success for a finished workout, a double for a rest being ready, a hard triple for one gone over. On the web it is the phone's vibration where there is one. */
+function buzz(ms) {
+  try {
+    if (LF_WGT && LF_WGT.haptic) { var k = typeof ms === 'number' ? (ms <= 16 ? 'tick' : 'medium') : ms && ms[0] >= 200 ? 'over' : ms && ms[0] >= 70 ? 'ready' : 'success'; LF_WGT.haptic({ kind: k }); return; }
+    if (navigator.vibrate) navigator.vibrate(ms || 12);
+  } catch (e) {}
+}
 
 /* ═══════════ HOME ═══════════ */
 function lfToday() {
