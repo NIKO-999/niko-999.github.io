@@ -2248,6 +2248,30 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── READ A ROUTINE: text, a photo or a PDF becomes routines; here it is the pasted text, which is the same path the phone's reading ends in ── */
+  {
+    const o = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page);
+    await o.page.click('#lfReadRt'); await settle(o.page);
+    ok('Read a routine opens with a place to paste', await top(o.page).locator('#lfPlnT').count() === 1);
+    ok('and offers no photo or PDF button on the web, where nothing can read one', await top(o.page).locator('.lf-pln-src button').count() === 0);
+    await top(o.page).locator('#lfPlnT').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
+    await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
+    const inputs = await top(o.page).locator('input[aria-label="Routine name"]').evaluateAll((x) => x.map((e) => e.value));
+    ok('it finds the two days', inputs.join() === 'PUSH DAY,PULL DAY', inputs);
+    const rows = await top(o.page).locator('.lf-li b').allTextContents();
+    ok('each line is matched to the library', rows.length === 6 && /bench/i.test(rows[0]) && /overhead|press/i.test(rows[1]) && /pull/i.test(rows[3]), rows);
+    ok('and a line it cannot place says so and waits for a choice', rows[5] === 'Made up lift' && /Not matched/.test(await top(o.page).locator('.lf-li').nth(5).textContent()));
+    ok('the sets and reps are kept', /4 × 8–10/.test(await top(o.page).locator('.lf-li').first().textContent()));
+    await top(o.page).locator('#lfPlnSave').click(); await settle(o.page);
+    const st = await store(o.page);
+    ok('saving makes a routine a day, and leaves out what was not matched', st.rt.length === 2 && st.rt[0].n === 'PUSH DAY' && st.rt[1].ex.length === 2, st.rt);
+    ok('with its targets', st.rt[0].tg && st.rt[0].tg[st.rt[0].ex[0]].join() === '4,8,10', st.rt[0]);
+    await o.page.reload(); await settle(o.page);
+    ok('and they survive a reload, targets and all', (await store(o.page)).rt[0].tg[st.rt[0].ex[0]].join() === '4,8,10');
+    await o.c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

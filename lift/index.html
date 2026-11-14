@@ -2055,7 +2055,9 @@ function lfClean(o) {
   if (Array.isArray(o.ex)) d.ex = o.ex.filter(function (e) { return e && typeof e.id === 'string' && typeof e.n === 'string' && e.n.trim(); })
     .map(function (e) { return { id: e.id, n: e.n.slice(0, 60), m: MUSCLES.indexOf(e.m) >= 0 ? e.m : 'Other', t: e.t === 'bw' ? 'bw' : 'w', c: e.c ? 1 : 0 }; });
   if (Array.isArray(o.rt)) d.rt = o.rt.filter(function (r) { return r && typeof r.id === 'string' && typeof r.n === 'string'; })
-    .map(function (r) { return { id: r.id, n: r.n.slice(0, 40) || 'Routine', sp: typeof r.sp === 'string' ? r.sp.slice(0, 60) : '', ex: Array.isArray(r.ex) ? r.ex.filter(function (x) { return typeof x === 'string'; }) : [] }; });
+    .map(function (r) { var o2 = { id: r.id, n: r.n.slice(0, 40) || 'Routine', sp: typeof r.sp === 'string' ? r.sp.slice(0, 60) : '', ex: Array.isArray(r.ex) ? r.ex.filter(function (x) { return typeof x === 'string'; }) : [] };
+      if (r.tg && typeof r.tg === 'object') { o2.tg = {}; o2.ex.forEach(function (id) { var t = r.tg[id]; if (Array.isArray(t) && t[0] > 0 && t[1] > 0 && t[2] >= t[1]) o2.tg[id] = [Math.min(12, +t[0]), Math.min(100, +t[1]), Math.min(100, +t[2])]; }); }
+      return o2; });
   if (Array.isArray(o.wo)) d.wo = o.wo.map(lfCleanWo).filter(Boolean);
   /* The split's days were renamed for what they train; a session logged
      under the old name takes the new one, so the calendar reads one way. */
@@ -2612,7 +2614,7 @@ function lfTodayCard() {
 function lfEstMin(rt, n) {
   if (rt && rt.tg) {
     var own = S.wo.filter(function (x) { return x.rt === rt.id && x.e - x.s >= 5 * 60000; });
-    if (!own.length) return Math.round(rt.ex.reduce(function (a, id) { var r = lfRestOf(id); return a + rt.tg[id][0] * ((r.lo + r.hi) / 2 + 40); }, 0) / 60);
+    if (!own.length) return Math.round(rt.ex.reduce(function (a, id) { var r = lfRestOf(id); return a + ((rt.tg[id] || [3])[0]) * ((r.lo + r.hi) / 2 + 40); }, 0) / 60);
   }
   if (rt) {
     var w = S.wo.filter(function (x) { return x.rt === rt.id && x.e - x.s >= 5 * 60000; });
@@ -4391,6 +4393,7 @@ function lfRoutinePicker() {
   });
   item('Empty workout', 'Add exercises as you go', false, function () { s.close(true); lfStart(null); });
   item('New routine', 'A named list of exercises you repeat', false, function () { s.close(true); lfRoutineForm(null); });
+  item('Read a routine', 'From a photo, a PDF or pasted text', false, function () { s.close(true); lfPlanSheet(); });
 }
 
 /* THE SECOND SESSION OF A DAY comes with a routine, picked from the ones you have: the day's programme first, then your own, then an empty one. It still does not count as another day toward the weekly goal. */
@@ -4406,6 +4409,112 @@ function lfSecondPicker(last) {
     item(r.n, (r.fixed ? DOW_LONG[r.dow] + ' · ' : '') + (r.sp || (r.ex.length + ' exercises')), !!last && last.rt === r.id, function () { s.close(true); lfAgainOk = 1; lfStart(r); });
   });
   item('Empty workout', 'Add exercises as you go', false, function () { s.close(true); lfAgainOk = 1; lfStart(null); });
+}
+
+/* ═══════════ READ A ROUTINE ═══════════
+   A photo, a screenshot, a PDF or some pasted text of a plan becomes routines you can save. On the iPhone the reading is done on the phone itself (Apple's text recognition and PDFKit): the picture and the text never leave it. Here only the lines are worked out. A line with a count in it (4x8, 3 sets of 10-12) is an exercise; a short line without one is a day. Every exercise is matched to the library and the preview says what it understood, so a wrong guess is one press to fix and nothing is saved until you say so. */
+var PLAN_SYN = { db: 'dumbbell', dbs: 'dumbbell', bb: 'barbell', ez: 'ez', kb: 'kettlebell', rdl: 'romanian deadlift', ohp: 'overhead press', bp: 'bench press', lat: 'lat', pulldown: 'pulldown', 'pull-up': 'pullup', 'chin-up': 'chinup', tri: 'triceps', bi: 'biceps', ext: 'extension', extensions: 'extension', curls: 'curl', raises: 'raise', rows: 'row', presses: 'press', flyes: 'fly', flies: 'fly', squats: 'squat', lunges: 'lunge', dips: 'dip', crunches: 'crunch', shrugs: 'shrug' };
+function planToks(s) {
+  return String(s).toLowerCase().replace(/[^a-z0-9 \-]/g, ' ').replace(/-/g, ' ').split(/\s+/).filter(Boolean).map(function (w) { return PLAN_SYN[w] || w; }).join(' ').split(/\s+/).map(function (w) { return w.length > 3 && /s$/.test(w) && !/ss$/.test(w) ? w.slice(0, -1) : w; }).filter(function (w) { return w && w !== 'the' && w !== 'a' && w !== 'with' && w !== 'and'; });
+}
+function planMatch(name) {
+  var q = planToks(name); if (!q.length) return null;
+  var best = null, bs = 0;
+  allEx().forEach(function (e) {
+    var t = planToks(e.n), hit = 0;
+    q.forEach(function (w) { if (t.indexOf(w) >= 0) hit++; });
+    if (!hit) return;
+    var sc = hit / Math.max(q.length, t.length) + (hit === q.length && hit === t.length ? .5 : 0) + (hit === t.length ? .1 : 0);
+    if (sc > bs) { bs = sc; best = e; }
+  });
+  return bs >= .6 ? { id: best.id, score: bs } : null;
+}
+var PLAN_DAY = /^(?:day\s*\d+|week\s*\d+|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?|push|pull|legs?|upper|lower|full\s*body|chest|back|shoulders?|arms?|abs|core|glutes?|quads?|hamstrings?)\b/i;
+function planParse(text) {
+  var lines = String(text || '').split(/\r?\n/).map(function (l) { return l.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+  var days = [], cur = null;
+  function day(n) { cur = { n: n.slice(0, 40), ex: [] }; days.push(cur); }
+  lines.forEach(function (raw) {
+    var m, sets = 0, lo = 0, hi = 0, name = raw;
+    if ((m = raw.match(/(\d{1,2})\s*(?:sets?)?\s*[x×*]\s*(\d{1,3})(?:\s*(?:[-–]|to)\s*(\d{1,3}))?/i))) { sets = +m[1]; lo = +m[2]; hi = +(m[3] || m[2]); name = raw.replace(m[0], ' '); }
+    else if ((m = raw.match(/(\d{1,2})\s*sets?\s*(?:of|[:@])?\s*(\d{1,3})(?:\s*(?:[-–]|to)\s*(\d{1,3}))?(?:\s*reps?)?/i))) { sets = +m[1]; lo = +m[2]; hi = +(m[3] || m[2]); name = raw.replace(m[0], ' '); }
+    else if ((m = raw.match(/^(.*?[a-z])\s+(\d{1,2})\s+(\d{1,3})(?:\s*[-–]\s*(\d{1,3}))?\s*$/i))) { sets = +m[2]; lo = +m[3]; hi = +(m[4] || m[3]); name = m[1]; }
+    name = name.replace(/@\s*rpe\s*[\d.]+/ig, ' ').replace(/\b\d+(?:\.\d+)?\s*(?:kg|lbs?|%)\b/ig, ' ').replace(/^\s*(?:[A-Da-d]?\d{1,2}[.):]|[-•·*])\s*/, '').replace(/[|:;,–—-]+\s*$/, '').replace(/^[|:;,–—-]+\s*/, '').replace(/\s+/g, ' ').trim();
+    if (sets > 0 && sets <= 12 && lo > 0 && lo <= 100 && name.length > 1) {
+      if (hi < lo) hi = lo;
+      if (!cur) day('Imported routine');
+      var mt = planMatch(name);
+      cur.ex.push({ raw: name.slice(0, 60), id: mt ? mt.id : null, sets: sets, lo: lo, hi: hi });
+      return;
+    }
+    var mt2 = name.length > 2 && !/\d{2,}/.test(name) ? planMatch(name) : null;
+    if (mt2 && mt2.score >= .75 && !PLAN_DAY.test(name)) { if (!cur) day('Imported routine'); cur.ex.push({ raw: name.slice(0, 60), id: mt2.id, sets: 3, lo: 8, hi: 12 }); return; }
+    var words = name.split(' ').length;
+    if (name.length > 1 && name.length <= 40 && words <= 5 && (PLAN_DAY.test(name) || /^[A-Z0-9][^a-z]*$/.test(raw) || /^[A-Z][A-Za-z &/]*[:]?$/.test(raw))) day(name.replace(/:$/, '').replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); }));
+  });
+  return days.filter(function (d) { return d.ex.length; });
+}
+function lfPlanSheet() {
+  var b = el('<div><div class="lf-pln-src"></div><label class="lf-flab" for="lfPlnT">Or paste the text</label><textarea class="lf-field" id="lfPlnT" rows="5" placeholder="Push&#10;Bench press 4x8&#10;Overhead press 3x10" style="resize:none"></textarea></div>');
+  var go = el('<button type="button" class="lf-btn is-ink is-full" id="lfPlnGo">Read it</button>');
+  var s = lfSheet({ title: 'Read a routine', body: b, foot: [go] });
+  var src = $('.lf-pln-src', b);
+  if (LF_WGT && LF_WGT.readPlan) {
+    [['photo', 'Photo or screenshot'], ['file', 'PDF or file']].forEach(function (k) {
+      var bt = el('<button type="button" class="lf-btn is-full" style="margin-bottom:10px"></button>'); bt.textContent = k[1];
+      bt.addEventListener('click', function () {
+        LF_WGT.readPlan({ kind: k[0] }).then(function (r) {
+          var t = r && Array.isArray(r.lines) ? r.lines.join('\n') : '';
+          if (!t.trim()) { lfToast('Nothing readable in that'); return; }
+          $('#lfPlnT', b).value = t; lfPlanGo(s, t);
+        }, function () {});
+      });
+      src.appendChild(bt);
+    });
+  }
+  go.addEventListener('click', function () { lfPlanGo(s, $('#lfPlnT', b).value); });
+}
+function lfPlanGo(from, text) {
+  var days = planParse(text);
+  if (!days.length) { lfToast('No exercises found. Lines like "Bench press 4x8" work best'); return; }
+  from.close(true); lfPlanPreview(days);
+}
+function lfPlanPreview(days) {
+  var b = el('<div></div>');
+  function paint() {
+    b.textContent = '';
+    days.forEach(function (d, di) {
+      var h = el('<input class="lf-field" maxlength="40" aria-label="Routine name" style="margin-top:10px" />'); h.value = d.n;
+      h.addEventListener('input', function () { d.n = h.value; });
+      b.appendChild(h);
+      var l = el('<div class="lf-list"></div>');
+      d.ex.forEach(function (x, xi) {
+        var li = el('<div class="lf-li"><button type="button" class="lf-li-t" style="text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit"><b></b><span></span></button><span class="lf-li-r lf-num"></span><button type="button" class="lf-x" aria-label="Remove">' + IC.x + '</button></div>');
+        $('b', li).textContent = x.id ? exName(x.id) : x.raw;
+        $('span', li).textContent = x.id ? (exName(x.id).toLowerCase() === x.raw.toLowerCase() ? '' : 'Read as "' + x.raw + '"') : 'Not matched · press to choose';
+        if (!x.id) $('b', li).style.color = 'var(--bad)';
+        $('.lf-li-r', li).textContent = x.sets + ' × ' + lfRange(x.lo, x.hi);
+        $('.lf-li-t', li).addEventListener('click', function () { lfPicker(function (id) { x.id = id; paint(); }); });
+        $('.lf-x', li).addEventListener('click', function () { d.ex.splice(xi, 1); if (!d.ex.length) days.splice(di, 1); paint(); });
+        l.appendChild(li);
+      });
+      b.appendChild(l);
+    });
+  }
+  paint();
+  var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfPlnSave">Save routines</button>');
+  var s = lfSheet({ title: 'Check it', body: b, foot: [save] });
+  save.addEventListener('click', function () {
+    var n = 0;
+    days.forEach(function (d) {
+      var ex = d.ex.filter(function (x) { return x.id; }); if (!ex.length) return;
+      var rt = { id: lfId(), n: (d.n || 'Routine').trim().slice(0, 40) || 'Routine', sp: '', ex: [], tg: {} };
+      ex.forEach(function (x) { if (rt.ex.indexOf(x.id) < 0) { rt.ex.push(x.id); rt.tg[x.id] = [x.sets, x.lo, x.hi]; } });
+      S.rt.push(rt); n++;
+    });
+    if (!n) { lfToast('Choose at least one exercise'); return; }
+    lfSave(); s.close(true); lfRender(); lfToast('Saved ' + n + (n === 1 ? ' routine' : ' routines'));
+  });
 }
 
 function lfRoutineForm(rt) {
@@ -4542,6 +4651,9 @@ function lfRenderLib() {
   var nr = el('<button type="button" class="lf-li" id="lfNewRt"><div class="lf-li-t"><b>New routine</b></div>' + IC.plus + '</button>');
   nr.addEventListener('click', function () { lfRoutineForm(null); });
   $('.lf-list', rc).appendChild(nr);
+  var rr = el('<button type="button" class="lf-li" id="lfReadRt"><div class="lf-li-t"><b>Read a routine</b></div>' + IC.plus + '</button>');
+  rr.addEventListener('click', lfPlanSheet);
+  $('.lf-list', rc).appendChild(rr);
   root.appendChild(rc);
   /* the library */
   var hd = el('<div class="lf-hd lf-gh"><span class="lf-cap">All exercises</span></div>');
