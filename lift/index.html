@@ -2146,7 +2146,7 @@ function lfWatchAct() {
     (lfOrd || act.x).forEach(function (e) { if (cur) return; for (var i = 0; i < e.sets.length; i++) if (!e.sets[i].ok) { cur = { e: e, i: i }; return; } });
     if (cur) {
       var ag = lfAim(cur.e), g = ag.sets[cur.i] || ag.sets[ag.sets.length - 1], s0 = cur.e.sets[cur.i], prevS = cur.i ? cur.e.sets[cur.i - 1] : null;
-      var w = s0.w !== '' && s0.w != null ? +s0.w : prevS && prevS.ok ? +prevS.w : g ? +g.w : 0, r = s0.r !== '' && s0.r != null ? +s0.r : g ? +g.r : (cur.e.tg ? cur.e.tg[1] : 8);
+      var w = s0.w !== '' && s0.w != null ? +s0.w : prevS && prevS.ok ? +prevS.w : g ? +g.w : 0, r = s0.r !== '' && s0.r != null ? +s0.r : prevS && prevS.ok ? +prevS.r : g ? +g.r : (cur.e.tg ? cur.e.tg[1] : 8);
       o = { n: act.n, ex: cur.e.n, id: cur.e.id, i: cur.i, of: cur.e.sets.length, w: toDisp(w), r: r, u: S.unit, st: S.unit === 'lb' ? 5 : 2.5, bw: !!(exById(cur.e.id) && exById(cur.e.id).t === 'bw') };
     } else o = { n: act.n, done: 1 };
   }
