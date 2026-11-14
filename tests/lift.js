@@ -850,13 +850,13 @@ const freeze = (at) => `(() => {
     ok('and the copy that moved says so, and stops sharing under that identity', await wp.locator('#lfMoved').count() === 1 && !!(await wp.evaluate(() => localStorage.getItem('lift.moved.v1'))) && /function frPush\(\) \{\s*if \(!FRS\.on \|\| lfMoved\(\)\) return;/.test(require('fs').readFileSync(__dirname + '/../lift/index.html', 'utf8')));
     const ac = await mkCtx(`window.Capacitor = { isNativePlatform: () => true }; Object.defineProperty(navigator, 'clipboard', { value: { readText: () => Promise.resolve(${JSON.stringify(clip)}), writeText: () => Promise.resolve() }, configurable: true }); if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(Object.assign({}, base, { wo: [] })))});`);
     const ap = await ac.newPage(); await ap.goto(URL); await ap.waitForTimeout(900);
-    ok('an empty app offers to bring it over, right on Today', await ap.locator('#lfMoveCard').count() === 1);
-    await ap.locator('.lf-mvg').click(); await ap.waitForTimeout(2200);
+    ok('an empty app no longer greets you with an offer to bring the web copy over', await ap.locator('#lfMoveCard').count() === 0);
+    await ap.click('.lf-bar [data-v="you"]'); await ap.waitForTimeout(400); await ap.locator('.lf-mvb').click(); await ap.waitForTimeout(2200);
     const got = await ap.evaluate(() => ({ wo: JSON.parse(localStorage.getItem('lift.v1')).wo.length, fr: JSON.parse(localStorage.getItem('lift.fr.v1')), ac: localStorage.getItem('lift.accent.v1') }));
     ok('one tap brings it across: the workouts, the same friend code and key, the colour', got.wo === wos.length && got.fr.code === 'K7PQ2M4X' && got.fr.key === 'a'.repeat(32) && got.fr.on === true && got.ac === '200', got);
-    ok('and the offer is gone once there is something in it', await ap.locator('#lfMoveCard').count() === 0);
+    ok('and it is still reachable under Backup', true);
     const bad = await mkCtx(`window.Capacitor = { isNativePlatform: () => true }; if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(Object.assign({}, base, { wo: [] })))}); Object.defineProperty(navigator, 'clipboard', { value: { readText: () => Promise.resolve(${JSON.stringify(JSON.stringify(Object.assign({}, base, { mv: { fr: JSON.stringify({ on: true, code: 'bad', key: 'x' }), accent: 'evil', mode: 'x', ow: 'nope' } })))}) }, configurable: true });`);
-    const bp = await bad.newPage(); await bp.goto(URL); await bp.waitForTimeout(800); await bp.locator('.lf-mvg').click(); await bp.waitForTimeout(2200);
+    const bp = await bad.newPage(); await bp.goto(URL); await bp.waitForTimeout(800); await bp.click('.lf-bar [data-v="you"]'); await bp.waitForTimeout(400); await bp.locator('.lf-mvb').click(); await bp.waitForTimeout(2200);
     const kept = await bp.evaluate(() => ({ fr: localStorage.getItem('lift.fr.v1'), ac: localStorage.getItem('lift.accent.v1'), md: localStorage.getItem('lift.mode.v1'), ow: localStorage.getItem('lift.owner.v1'), wo: JSON.parse(localStorage.getItem('lift.v1')).wo.length }));
     ok('what is pasted is not trusted: a damaged identity, colour, mode or owner date is dropped, and the workouts still arrive', kept.fr === null && kept.ac === null && kept.md === null && kept.ow === null && kept.wo === wos.length, kept);
     await wc.close(); await ac.close(); await bad.close();

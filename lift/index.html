@@ -5210,10 +5210,9 @@ function lfMoveCard() {
   var seen = false; try { seen = localStorage.getItem(LF_MVC) === '1'; } catch (e) {}
   if (seen) return null;
   var c, go, no;
-  if (LF_NATIVE && !S.wo.length) {
-    c = el('<div class="lf-card" id="lfMoveCard"><b style="display:block;font-size:19px;margin-bottom:4px">Coming from Lift on the web?</b><p class="lf-lab" style="margin:0 0 12px;text-transform:none;letter-spacing:0;font-size:13px">Open it there, go to You, tap Move to the iPhone app, then come back and paste. Your workouts, streak and friends come with you.</p><div style="display:flex;gap:10px"><button type="button" class="lf-btn is-log lf-mvg" style="flex:1">Paste and move</button><button type="button" class="lf-btn lf-mvn">Not now</button></div></div>');
-    $('.lf-mvg', c).addEventListener('click', lfMoveIn);
-  } else if (!LF_NATIVE && LF_APP_LIVE && S.wo.length && !lfMoved()) {
+  /* the app no longer greets a new phone with an offer to bring the web copy over: the few who have one are told how, and the button stays under Backup */
+  if (LF_NATIVE) return null;
+  if (!LF_NATIVE && LF_APP_LIVE && S.wo.length && !lfMoved()) {
     c = el('<div class="lf-card" id="lfMoveCardW"><b style="display:block;font-size:19px;margin-bottom:4px">Lift is on the App Store</b><p class="lf-lab" style="margin:0 0 12px;text-transform:none;letter-spacing:0;font-size:13px">Move your workouts, streak and friends over in one tap. Nothing starts again.</p><div style="display:flex;gap:10px"><button type="button" class="lf-btn is-log lf-mvg" style="flex:1">Move to the app</button><button type="button" class="lf-btn lf-mvn">Later</button></div></div>');
     $('.lf-mvg', c).addEventListener('click', function () { lfMoveOut(); setTimeout(function () { window.open(LF_APP_URL, '_blank'); }, 400); });
   } else return null;
