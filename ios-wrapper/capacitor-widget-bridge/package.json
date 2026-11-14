@@ -1,0 +1,10 @@
+{
+  "name": "capacitor-lift-widgets",
+  "version": "1.0.0",
+  "description": "Hands Lift's widgets their snapshot through an App Group and runs the rest as a Live Activity.",
+  "private": true,
+  "main": "index.js",
+  "files": ["ios/Sources", "CapacitorLiftWidgets.podspec", "Package.swift"],
+  "capacitor": { "ios": { "src": "ios" } },
+  "peerDependencies": { "@capacitor/core": ">=7.0.0" }
+}

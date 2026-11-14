@@ -2103,6 +2103,7 @@ function lfSave() {
   try { localStorage.setItem(KEY, JSON.stringify(S)); }
   catch (e) { lfToast('Could not save — this phone is out of room'); }
   if (typeof frQueue === 'function') frQueue();
+  if (typeof lfWidgetSoon === 'function') lfWidgetSoon();
 }
 function lfLoadAct() {
   try {
@@ -3208,6 +3209,7 @@ function lfTick() {
     /* Once per rest, the moment it is up. */
     if (ready && !act.rang) { act.rang = 1; lfSaveAct(); if (S.ra) lfRing(); }
     if (lfLockLive && (ready || !act.rest)) { if (act.rest) lfLockDone(); else lfLockStop(); }
+    if (lfWRest && (ready || !act.rest)) lfWidgetRestEnd();
   }
   var l = $('#lfLive em'); if (l) l.textContent = fmtClock(Date.now() - act.s);
   /* the bar for getting back into the workout has no business under the
@@ -5107,6 +5109,30 @@ function lfMoveCard() {
 /* MOVING FROM THE WEB TO THE APP. The app keeps its own storage, apart from Safari's and the Home Screen's, so what you have built up does not follow you by itself. One tap here copies it, and one tap there pastes it: the workouts (the streak is worked out from them and your goal, so it carries on), the settings, your friends, your colour. The friend identity goes too, so nobody has to add you again; the copy you moved FROM then stops posting under it, or two copies would take turns overwriting each other. The web banner is off until the day the App Store page is live. */
 var LF_APP_LIVE = false, LF_APP_URL = 'https://apps.apple.com/app/id6833453418';
 var LF_NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+/* ── THE WIDGETS: today, the week ring, the streak and the latest badge on the Home Screen and Lock Screen, and the rest as a Live Activity. Only the iPhone app has a way to hand them anything, so on the website all of this is a no-op. What goes is one small snapshot of counts and names: how many sessions this week, which day's routine is up, the streak and the name of the last badge. Never a set, a weight or a note. ── */
+var LF_WGT = LF_NATIVE && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LiftWidgets || null, lfWgLast = '', lfWgT = 0, lfWRest = 0;
+function lfWidgetSnap() {
+  var t = today(), m = monday(t), days = [], i, done = false, rt = lfToday();
+  for (i = 0; i < 7; i++) { var dk = ymd(addDays(m, i)); days.push(S.wo.some(function (w) { return w.d === dk; }) ? 1 : S.rd && S.rd[dk] ? 2 : 0); }
+  done = days[(t.getDay() + 6) % 7] === 1;
+  var streak = 0, q = S.goal > 0 && wkDays(m) >= S.goal ? m : addDays(m, -7);
+  for (var g = 0; g < 104 && S.goal > 0 && wkDays(q) >= S.goal; q = addDays(q, -7), g++) streak++;
+  var got = lfBadgesCache().filter(function (x) { return x.d; }).sort(function (x, y) { return x.d < y.d ? 1 : x.d > y.d ? -1 : 0; })[0];
+  return { v: 1, d: ymd(t), accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#a3e635', unit: S.unit,
+    today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: days.filter(function (x) { return x === 1; }).length, goal: S.goal || 0, days: days }, streak: streak,
+    badge: got ? { name: got.b.n, d: got.d } : null };
+}
+function lfWidgetPush() {
+  if (!LF_WGT) return;
+  try { var j = JSON.stringify(lfWidgetSnap()); if (j === lfWgLast) return; lfWgLast = j; LF_WGT.setSnapshot({ json: j }); } catch (e) {}
+}
+function lfWidgetSoon() { if (!LF_WGT) return; clearTimeout(lfWgT); lfWgT = setTimeout(lfWidgetPush, 900); }
+function lfWidgetRestStart(end, nx) {
+  if (!LF_WGT || !act) return; lfWRest = 1;
+  try { LF_WGT.startRest({ end: end, title: 'Rest', next: nx || '', accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#a3e635' }); } catch (e) {}
+}
+function lfWidgetRestEnd() { if (!LF_WGT || !lfWRest) return; lfWRest = 0; try { LF_WGT.endRest({}); } catch (e) {} }
+if (LF_WGT) { document.addEventListener('visibilitychange', function () { if (document.hidden) lfWidgetPush(); }); setTimeout(lfWidgetPush, 1500); }
 var LF_MV = 'lift.moved.v1', LF_MVC = 'lift.movecard.v1';
 function lfMoved() { try { return /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem(LF_MV) || ''); } catch (e) { return false; } }
 var FR_URL = 'https://sched.nikorapullin.workers.dev';
@@ -7003,6 +7029,8 @@ function lfLockWav() {
   return u;
 }
 function lfLockStart() {
+  /* in the iPhone app the rest is a Live Activity, which draws its own countdown on the Lock Screen; the silent-sound trick below is only for the website */
+  if (LF_WGT && act && act.rest && act.restEx) { var wrs = lfRestOf(act.restEx), wnx = act.x.filter(function (e) { return e.sets.some(function (q) { return !q.ok; }); })[0]; lfWidgetRestStart(act.rest + wrs.lo * 1000, wnx ? wnx.n : ''); return; }
   if (!S.rl || !act || !act.rest || !('mediaSession' in navigator)) return;
   try {
     var rs = lfRestOf(act.restEx), nx = act.x.filter(function (e) { return e.sets.some(function (q) { return !q.ok; }); })[0];
@@ -7026,6 +7054,7 @@ function lfLockDone() {
   } catch (e) {}
 }
 function lfLockStop() {
+  lfWidgetRestEnd();
   if (!lfLockLive && !lfLockAu) return; lfLockLive = false;
   try { if (lfLockAu) lfLockAu.pause(); navigator.mediaSession.playbackState = 'none'; navigator.mediaSession.metadata = null; } catch (e) {}
 }
