@@ -2376,7 +2376,7 @@ const freeze = (at) => `(() => {
       ok('one tap takes the lighter week', (await o.page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '55,5,55,5,55,5');
       for (let i = 0; i < 3; i++) await o.page.locator('.lf-session .lf-ex').first().locator('.lf-chk').nth(i).click();
       await o.page.click('#lfFinish'); await o.page.waitForTimeout(900);
-      ok('finishing says what to do next time', await top(o.page).locator('#lfFinNext').count() === 1 && /Bench press/.test(await top(o.page).locator('#lfFinNext').textContent()));
+      ok('finishing says what to do next time', await top(o.page).locator('#lfFinNext').count() === 1 && /bench press.*55 × 6/i.test(await top(o.page).locator('#lfFinNext').textContent()));
       await o.c.close();
     }
     {
