@@ -2298,11 +2298,12 @@ const freeze = (at) => `(() => {
     ok('a workout keeps the screen awake', (await calls()).some((x) => /^keepAwake:\{"on":true\}/.test(x)));
     const set0 = pg.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
     await set0.locator('input').nth(0).fill('100'); await set0.locator('input').nth(1).fill('8');
-    await set0.locator('.lf-chk').click(); await pg.waitForTimeout(900);
+    await set0.locator('.lf-chk').click(); await pg.waitForFunction(() => window.__calls.some((x) => x[0] === 'watchAct' && /"i\\":1|"i":1/.test(x[1].json)), null, { timeout: 8000 }).catch(() => {}); await pg.waitForTimeout(300);
     const cs = await calls();
     ok('a ticked set is a light haptic tap', cs.some((x) => /^haptic:\{"kind":"tick"\}/.test(x)), cs.slice(0, 8));
     const wa = cs.filter((x) => /^watchAct:/.test(x)).pop() || '';
     const wj = wa ? JSON.parse(JSON.parse(wa.replace(/^watchAct:/, '')).json || 'null') : null;
+    if (!wj) { ok('the watch is sent the set it is on', false, wa); await c2.close(); } else {
     ok('the watch is sent the set it is on: the exercise, the set and the weight and reps', !!wj && wj.of > 1 && wj.i === 1 && wj.w === 100 && wj.r === 8 && !!wj.ex, wj);
     /* the watch logs the next set at 105 x 6 */
     await pg.evaluate((m) => window.__fire.watchMsg(m), { t: 'set', id: wj.id, i: 1, w: 105, r: 6 }); await pg.waitForTimeout(700);
@@ -2315,6 +2316,7 @@ const freeze = (at) => `(() => {
     await pg.click('#lfFinish'); await pg.waitForTimeout(900);
     ok('and finishing lets the screen sleep again and tells the watch there is no workout', (await calls()).some((x) => /^keepAwake:\{"on":false\}/.test(x)) && (await calls()).filter((x) => /^watchAct:/.test(x)).pop() === 'watchAct:{"json":""}', (await calls()).slice(-4));
     await c2.close();
+    }
   }
 
   await browser.close();
