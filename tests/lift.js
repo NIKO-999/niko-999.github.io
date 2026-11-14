@@ -198,14 +198,14 @@ const freeze = (at) => `(() => {
   ok('the session rises from the foot of the screen', mid > end + 150 && end < 60, { mid, end });
   ok('carrying the routine\'s two exercises', (await page.$$eval('.lf-session .lf-ex-n', (x) => x.map((e) => e.textContent))).join() === 'Bench press,Overhead press');
   ok('with three sets each when they are new', (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length))).join() === '3,3');
-  ok('its finish button is the lime one', await page.$eval('#lfFinish', (b) => getComputedStyle(b).backgroundColor) === 'rgb(163, 230, 53)');
+  ok('its finish button is the cream one', await page.$eval('#lfFinish', (b) => getComputedStyle(b).backgroundColor) === 'rgb(225, 212, 194)');
 
   const set = (ex, i) => page.locator('.lf-session .lf-ex').nth(ex).locator('.lf-set:not(.is-hd)').nth(i);
   await set(0, 0).locator('.lf-chk').click();
   ok('a set with nothing in it cannot be logged', !(await set(0, 0).getAttribute('class')).includes('is-done') && /weight and reps/.test(await page.textContent('.lf-toast')));
   await set(0, 0).locator('input').nth(0).fill('60'); await set(0, 0).locator('input').nth(1).fill('8');
   await set(0, 0).locator('.lf-chk').click();
-  ok('logging a set turns its check lime', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(163, 230, 53)');
+  ok('logging a set turns its check cream', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(225, 212, 194)');
   ok('and starts the rest clock: a ring, the time in it, how long is left beside it', /^0:0\d$/.test((await page.textContent('#lfRest .lf-rs-c')).trim()) && /Resting/.test(await page.textContent('#lfRest')) && /to go · target 2–3 min/.test(await page.textContent('#lfRest')) && await page.locator('#lfRest .lf-rs-ring svg').count() === 1);
   ok('the rest clock is always on screen, even scrolled to the end of the workout', await page.evaluate(() => {
     const bd = document.querySelector('.lf-session .lf-sh-bd'); bd.scrollTop = bd.scrollHeight;
@@ -376,7 +376,7 @@ const freeze = (at) => `(() => {
     const now = document.querySelector('.lf-cell.is-now'), day = document.querySelector('.lf-cell:not(.is-now):not(.is-pad)');
     const had = day.classList.contains('is-on'); day.classList.add('is-on');
     const lit = getComputedStyle(day).backgroundColor; if (!had) day.classList.remove('is-on');
-    return lit === 'rgb(163, 230, 53)' && now.classList.contains('is-on') && getComputedStyle(now).backgroundColor !== 'rgb(163, 230, 53)';
+    return lit === 'rgb(225, 212, 194)' && now.classList.contains('is-on') && getComputedStyle(now).backgroundColor !== 'rgb(225, 212, 194)';
   }));
   ok('a day still ahead cannot be pressed', await page.$eval('.lf-cell[data-d="2026-10-31"]', (e) => e.disabled));
   ok('later is refused on the month you are in', await page.$eval('.lf-calnav .lf-round:last-child', (e) => e.disabled));
@@ -1385,7 +1385,7 @@ const freeze = (at) => `(() => {
     const sh = await top(A.page).textContent('.lf-sh-bd');
     const T = top(A.page);
     const acc = await T.evaluate((e) => [e.style.getPropertyValue('--log'), getComputedStyle(document.documentElement).getPropertyValue('--log').trim()]);
-    ok('a friend\'s page wears the colour they chose, and yours stays yours', acc[0] && acc[0] !== '#a3e635' && acc[1].toLowerCase() === '#a3e635', acc);
+    ok('a friend\'s page wears the colour they chose, and yours stays yours', acc[0] && acc[0] !== '#e1d4c2' && acc[1].toLowerCase() === '#e1d4c2', acc);
     ok('a friend opens on a whole dashboard: when, and the three tiles', /18 days ago/.test(sh) && await T.locator('.lf-stat').count() === 3, sh.slice(0, 120));
     ok('their thirty days', await T.locator('#frGrid .lf-day').count() === 30);
     ok('their week, reps by day against goal', await T.locator('#frWeek .lf-bars > div').count() === 7 && /0\/3/.test(await T.locator('#frWeek').textContent()));
@@ -1895,25 +1895,25 @@ const freeze = (at) => `(() => {
     await page.click('#lfTheme h3 > button'); await settle(page);
     ok('it holds appearance and the wheel', await page.locator('#lfTheme #lfMode').isVisible() && await page.locator('#lfWheel').isVisible());
     const tok = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
-    ok('lime to begin with', (await tok()).toLowerCase() === '#a3e635', await tok());
+    ok('cream to begin with', (await tok()).toLowerCase() === '#e1d4c2', await tok());
     const b = await page.locator('#lfWheel').boundingBox();
     /* the bottom of the ring is 180 degrees: a cyan */
     await page.mouse.move(b.x + b.width / 2, b.y + b.height - 12); await page.mouse.down(); await page.mouse.up(); await settle(page);
     const cy = await tok();
-    ok('a press on the ring sets the accent from that hue', cy !== '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '180', [cy, await page.evaluate(() => localStorage.getItem('lift.accent.v1'))]);
+    ok('a press on the ring sets the accent from that hue', cy !== '#e1d4c2' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '180', [cy, await page.evaluate(() => localStorage.getItem('lift.accent.v1'))]);
     ok('and the fold names it', /Cyan/.test(await page.textContent('#lfTheme h3')));
     ok('the greens that say done follow it, a filling bar stays white', await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return r.getPropertyValue('--good').trim() === r.getPropertyValue('--today-ink').trim(); }));
     ok('the ink on a fill is worked out to read on it', await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--on-log').trim()) !== '');
     await page.focus('#lfWheel'); await page.keyboard.press('ArrowRight');
     ok('arrows turn it too', await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '185');
     await page.reload(); await page.waitForTimeout(300);
-    ok('it is kept across a reload', (await tok()) === (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--today').trim())) && (await tok()) !== '#a3e635');
+    ok('it is kept across a reload', (await tok()) === (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--today').trim())) && (await tok()) !== '#e1d4c2');
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     await page.click('#lfTheme h3 > button'); await settle(page);
     await page.click('#lfTheme #lfMode [data-m="light"]'); await settle(page);
     ok('light and dark live here now', await page.evaluate(() => document.documentElement.dataset.mode) === 'light');
     await page.click('#lfAccReset'); await settle(page);
-    ok('back to lime clears it', (await tok()).toLowerCase() === '#a3e635' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
+    ok('back to cream clears it', (await tok()).toLowerCase() === '#e1d4c2' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === null);
     const gg = await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return [r.getPropertyValue('--good').trim().toLowerCase(), '', document.documentElement.dataset.mode]; });
     ok('and the greens are green again', gg[0] === '#248a3d' && gg[1] === '', gg);
     await c.close();

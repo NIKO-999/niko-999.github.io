@@ -37,7 +37,7 @@ struct LiftSnap: Codable {
 
 extension Color {
     init(hex: String?) {
-        var s = (hex ?? "#a3e635").trimmingCharacters(in: .whitespaces)
+        var s = (hex ?? "#e1d4c2").trimmingCharacters(in: .whitespaces)
         if s.hasPrefix("#") { s.removeFirst() }
         var v: UInt64 = 0
         Scanner(string: s).scanHexInt64(&v)

@@ -83,7 +83,7 @@ final class Link: NSObject, ObservableObject, WCSessionDelegate {
 
 extension Color {
     init(hex: String?) {
-        var s = (hex ?? "#a3e635").trimmingCharacters(in: .whitespaces)
+        var s = (hex ?? "#e1d4c2").trimmingCharacters(in: .whitespaces)
         if s.hasPrefix("#") { s.removeFirst() }
         if s.count == 3 { s = s.map { "\($0)\($0)" }.joined() }
         var v: UInt64 = 0; Scanner(string: s).scanHexInt64(&v)

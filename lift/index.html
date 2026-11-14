@@ -37,15 +37,16 @@
   --dim: #a1a1a8;
   --quiet: #8a8a92;
   --mark-off: #3a3a40;
-  --good: #34c759;
   /* The accent: today on the calendar and a PR on a set. */
-  --today: #a3e635;
+  --today: #e1d4c2;
   /* THE ONE COLOUR. Everything you press to put something on the record
-     — log a set, finish a workout — is lime, and nothing else is. */
-  --log: #a3e635;
-  --on-log: #0b1400;
-  /* the accent as WORDS: the same lime, until a white page needs it a shade deeper */
-  --today-ink: #a3e635;
+     — log a set, finish a workout — is cream, and nothing else is. It was lime; the
+     default is a neutral now, and the picker still has every colour. */
+  --log: #e1d4c2;
+  --on-log: #111114;
+  /* the accent as WORDS: the same cream, until a white page needs it a shade deeper */
+  --today-ink: #e1d4c2;
+  --good: #e1d4c2;
   /* Red is kept for one thing: something going away or going wrong. */
   --bad: #ff453a;
   --on-ink: #000000;
@@ -60,11 +61,11 @@
   --dash: rgba(255,255,255,.2);
   --plot: #0e0e10;
   --shade: rgba(0,0,0,.6);
-  --live-bg: #16210a;
+  --live-bg: color-mix(in srgb, #e1d4c2 14%, #000);
   --live-ink: color-mix(in srgb, var(--log) 72%, #fff);
   --toast: #2c2c30;
   --card-shadow: none;
-  --done-bg: rgba(52, 199, 89, .16);
+  --done-bg: color-mix(in srgb, #e1d4c2 18%, transparent);
   --r: 22px;
   --r-s: 14px;
   --bar-h: 64px;
@@ -98,19 +99,18 @@
   --dash: rgba(0,0,0,.2);
   --plot: #f5f5f7;
   --shade: rgba(0,0,0,.12);
-  --live-bg: #eef7dc;
+  --live-bg: color-mix(in srgb, #b5a084 12%, #fff);
   --live-ink: color-mix(in srgb, var(--log) 55%, #000);
-  /* the same lime on both faces; only accent WORDS go a shade deeper,
-     because bright lime type on white cannot be read */
-  --today: #a3e635;
-  --log: #a3e635;
-  --on-log: #0b1400;
-  --today-ink: #65a30d;
+  /* the cream goes a shade deeper on a white page, where pale type cannot be read */
+  --today: #b5a084;
+  --log: #b5a084;
+  --on-log: #111114;
+  --today-ink: #6e5b45;
   --bad: #d70015;
   --toast: #1c1c1e;
   --card-shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.05);
-  --done-bg: rgba(52, 199, 89, .14);
-  --good: #248a3d;
+  --done-bg: color-mix(in srgb, #b5a084 22%, transparent);
+  --good: #6e5b45;
   color-scheme: light;}
 
 /* An app puts a view away with the hidden attribute, and any author
@@ -1096,7 +1096,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 /* HEAD TO HEAD */
 .fr-vs-h { display: flex; align-items: center; gap: 6px; }
 .fr-vs-h i { width: 9px; height: 9px; border-radius: 50%; background: var(--rc); }
-.fr-vs-h i.is-me { background: var(--me-c, #a3e635); }
+.fr-vs-h i.is-me { background: var(--me-c, #e1d4c2); }
 .fr-vs-h em { font-style: normal; color: var(--quiet); margin: 0 2px; }
 .fr-vs-b { display: grid; gap: 12px; margin: 12px 0 4px; }
 .fr-vs-r { display: grid; grid-template-columns: 52px minmax(0, 1fr) 52px; align-items: center; gap: 8px; }
@@ -1108,7 +1108,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .fr-vs-t i { display: flex; height: 6px; border-radius: 6px; background: var(--card2); overflow: hidden; }
 .fr-vs-t i.is-me { justify-content: flex-end; }
 .fr-vs-t u { display: block; height: 100%; width: 0; border-radius: inherit; background: var(--rc); transition: width .9s cubic-bezier(.2, .9, .3, 1.1); }
-.fr-vs-t i.is-me u { background: var(--me-c, #a3e635); }
+.fr-vs-t i.is-me u { background: var(--me-c, #e1d4c2); }
 .fr-vs-duo { display: flex; align-items: center; gap: 8px; margin: 14px 0 4px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--dim); }
 .fr-vs-duo .lf-ic { width: 16px; height: 16px; color: var(--rc); flex: none; }
 @media (prefers-reduced-motion: reduce) { .fr-ban-c > .lf-coin, .fr-ban.is-live .fr-ban-av, .fr-sync-d i { animation: none; } .fr-vs-t u { transition: none; } }
@@ -3727,7 +3727,7 @@ function lfCelebrate(big) {
   var wr = el('<div class="lf-cel-w" aria-hidden="true"><i class="lf-cel-flash"></i><i class="lf-cel-ring"></i><i class="lf-cel-ring is-2"></i>' + (big ? '<i class="lf-cel-ring is-3"></i>' : '') + '<canvas></canvas></div>');
   var cv = $('canvas', wr); cv.width = W * dpr; cv.height = H * dpr;
   var cx = cv.getContext('2d'); cx.scale(dpr, dpr);
-  var acc = (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#a3e635';
+  var acc = (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2';
   var cols = [acc, '#ffffff', '#ffd75e', '#ff8ac0', '#7fd4ff', acc], gold = ['#ffd75e', '#fff1b0', '#ffb020', '#ffffff'];
   var ps = [], t0 = performance.now(), last = t0, todo = [], R = Math.random;
   function cannon(side) {
@@ -3894,7 +3894,7 @@ function lfSummary(w, prs, review) {
 function lfCardDraw(sp) {
   var W = 1080, H = 1920, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   var x = cv.getContext('2d'), FF = 'Inter, -apple-system, system-ui, sans-serif';
-  x.fillStyle = (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#a3e635'; var acc = String(x.fillStyle);
+  x.fillStyle = (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2'; var acc = String(x.fillStyle);
   var rgb = /^#/.test(acc) ? [parseInt(acc.slice(1, 3), 16), parseInt(acc.slice(3, 5), 16), parseInt(acc.slice(5, 7), 16)] : [163, 230, 53];
   var A = function (a) { return 'rgba(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ',' + a + ')'; };
   var bg = x.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#0d0d11'); bg.addColorStop(1, '#050507'); x.fillStyle = bg; x.fillRect(0, 0, W, H);
@@ -4088,7 +4088,7 @@ function lfMonthSheet(m) {
   });
   var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, n = $('.lf-fin-vol span', b), vol = toDisp(st.vol);
   buzz(met ? [20, 60, 20, 60, 40] : 12);
-  if (!calm && met) setTimeout(function () { var r0 = $('.lf-fin-vol', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#a3e635'); }, 500);
+  if (!calm && met) setTimeout(function () { var r0 = $('.lf-fin-vol', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#e1d4c2'); }, 500);
   if (calm) { n.textContent = Math.round(vol).toLocaleString(); return; }
   var t0 = 0; (function step(ts) { if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / 1100), e = 1 - Math.pow(1 - k, 3); n.textContent = Math.round(vol * e).toLocaleString(); if (k < 1 && document.body.contains(n)) requestAnimationFrame(step); })(0);
   window.lfMonths = (window.lfMonths || 0) + 1;
@@ -4235,7 +4235,7 @@ function lfWeekSheet(m) {
   var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, n = $('.lf-fin-vol span', b), vol = toDisp(st.vol);
   buzz(met ? [20, 60, 20, 60, 40] : 12);
   setTimeout(function () { arc.style.strokeDasharray = arc.dataset.to; }, 120);
-  if (!calm && met) setTimeout(function () { var r0 = $('.lf-ws-ring', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top + r0.height / 2, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#a3e635'); }, 650);
+  if (!calm && met) setTimeout(function () { var r0 = $('.lf-ws-ring', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top + r0.height / 2, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#e1d4c2'); }, 650);
   if (calm) { n.textContent = Math.round(vol).toLocaleString(); return; }
   var t0 = 0;
   (function step(ts) {
@@ -5083,7 +5083,7 @@ function lfThemeCard() {
       + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span><i class="lf-wh-nk"></i></div>'
       + '<p class="lf-wh-cap" id="lfWhCap"></p>'
       + '<span class="lf-flab">Earned colours</span><div class="lf-thg" id="lfThemes"></div>'
-      + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to lime</button></div>');
+      + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to cream</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
       b.addEventListener('click', function () { try { localStorage.setItem('lift.mode.v1', b.dataset.m); } catch (e) {} lfApplyMode(); lfRender(); });
@@ -5351,7 +5351,7 @@ function lfWidgetSnap() {
   var streak = 0, q = S.goal > 0 && wkDays(m) >= S.goal ? m : addDays(m, -7);
   for (var g = 0; g < 104 && S.goal > 0 && wkDays(q) >= S.goal; q = addDays(q, -7), g++) streak++;
   var got = lfBadgesCache().filter(function (x) { return x.d; }).sort(function (x, y) { return x.d < y.d ? 1 : x.d > y.d ? -1 : 0; })[0];
-  return { v: 1, d: ymd(t), accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#a3e635', unit: S.unit,
+  return { v: 1, d: ymd(t), accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2', unit: S.unit,
     today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: days.filter(function (x) { return x === 1; }).length, goal: S.goal || 0, days: days }, streak: streak,
     badge: got ? { name: got.b.n, d: got.d } : null };
 }
@@ -5362,7 +5362,7 @@ function lfWidgetPush() {
 function lfWidgetSoon() { if (!LF_WGT) return; clearTimeout(lfWgT); lfWgT = setTimeout(lfWidgetPush, 900); }
 function lfWidgetRestStart(end, nx) {
   if (!LF_WGT || !act) return; lfWRest = 1;
-  try { LF_WGT.startRest({ end: end, title: 'Rest', next: nx || '', accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#a3e635' }); } catch (e) {}
+  try { LF_WGT.startRest({ end: end, title: 'Rest', next: nx || '', accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2' }); } catch (e) {}
 }
 function lfWidgetRestEnd() { if (!LF_WGT || !lfWRest) return; lfWRest = 0; try { LF_WGT.endRest({}); } catch (e) {} }
 if (LF_WGT) { document.addEventListener('visibilitychange', function () { if (document.hidden) lfWidgetPush(); }); setTimeout(lfWidgetPush, 1500); }
@@ -6328,7 +6328,7 @@ function frBadges(st) {
 function lfGlitch(col, name) {
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1), light = document.documentElement.getAttribute('data-mode') === 'light';
-  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#a3e635', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
+  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#e1d4c2', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
     mx = Math.max(r, g, bl), mn = Math.min(r, g, bl), d = mx - mn, H0 = d < .08 ? 205 : (mx === r ? ((g - bl) / d + 6) % 6 : mx === g ? (bl - r) / d + 2 : (r - g) / d + 4) * 60, SAT = d < .08 ? 40 : 100;
   var cv = document.createElement('canvas'); cv.width = W * dpr; cv.height = H * dpr; cv.setAttribute('aria-hidden', 'true');
   cv.style.cssText = 'position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:90;pointer-events:none';
@@ -6378,7 +6378,7 @@ function lfGlitch(col, name) {
 function lfProfileBurst(col, name, anchor) {
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1), light = document.documentElement.getAttribute('data-mode') === 'light';
-  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#a3e635', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
+  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#e1d4c2', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
     mx = Math.max(r, g, bl), mn = Math.min(r, g, bl), d = mx - mn, H0 = d < .08 ? 205 : (mx === r ? ((g - bl) / d + 6) % 6 : mx === g ? (bl - r) / d + 2 : (r - g) / d + 4) * 60, SAT = d < .08 ? 40 : 100;
   var rc = anchor && anchor.getBoundingClientRect ? anchor.getBoundingClientRect() : null, cx = rc && rc.width ? rc.left + rc.width / 2 : W * .2, cy = rc && rc.height ? rc.top + rc.height / 2 : H * .1;
   var cv = document.createElement('canvas'); cv.width = W * dpr; cv.height = H * dpr; cv.setAttribute('aria-hidden', 'true');
@@ -6435,7 +6435,7 @@ function lfProfileBurst(col, name, anchor) {
 function lfSlash(col) {
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1), light = document.documentElement.getAttribute('data-mode') === 'light';
-  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#a3e635', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
+  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#e1d4c2', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
     mx = Math.max(r, g, bl), mn = Math.min(r, g, bl), d = mx - mn, H0 = d < .08 ? 205 : (mx === r ? ((g - bl) / d + 6) % 6 : mx === g ? (bl - r) / d + 2 : (r - g) / d + 4) * 60, SAT = d < .08 ? 40 : 100;
   var cv = document.createElement('canvas'); cv.width = W * dpr; cv.height = H * dpr; cv.setAttribute('aria-hidden', 'true');
   cv.style.cssText = 'position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:90;pointer-events:none';
@@ -6518,7 +6518,7 @@ function lfDragon(col) {
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   var W = window.innerWidth, H = window.innerHeight, dpr = Math.min(2, window.devicePixelRatio || 1), light = document.documentElement.getAttribute('data-mode') === 'light';
   /* the accent, as a hue; a grey one is drawn white-blue so it still glows */
-  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#a3e635', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
+  var hx = /^#[0-9a-f]{6}$/i.test(col || '') ? col : '#e1d4c2', r = parseInt(hx.slice(1, 3), 16) / 255, g = parseInt(hx.slice(3, 5), 16) / 255, bl = parseInt(hx.slice(5, 7), 16) / 255,
     mx = Math.max(r, g, bl), mn = Math.min(r, g, bl), d = mx - mn, H0 = d < .08 ? 205 : (mx === r ? ((g - bl) / d + 6) % 6 : mx === g ? (bl - r) / d + 2 : (r - g) / d + 4) * 60, SAT = d < .08 ? 40 : 100;
   var cv = document.createElement('canvas'); cv.width = W * dpr; cv.height = H * dpr; cv.setAttribute('aria-hidden', 'true');
   cv.style.cssText = 'position:fixed;left:0;top:0;width:' + W + 'px;height:' + H + 'px;z-index:90;pointer-events:none';
@@ -9581,7 +9581,7 @@ function lfNeu(h) {
   if (h >= 1000 && h < 1000 + NEUTRALS.length) return NEUTRALS[h - 1000];
   return null;
 }
-function lfAccName(h) { var n = lfNeu(h) || lfTheme(h); return h === null || h === undefined ? 'Lime' : n ? n.n : lfHueName(h); }
+function lfAccName(h) { var n = lfNeu(h) || lfTheme(h); return h === null || h === undefined ? 'Cream' : n ? n.n : lfHueName(h); }
 function lfRgb(hex) { return [1, 3, 5].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }); }
 function lfAccentSet(h, keep) {
   lfAccTmp = h;
@@ -9601,10 +9601,10 @@ var ACC_KEYS = ['--today', '--log', '--on-log', '--today-ink', '--live-bg', '--g
 function lfAccOn(node, h) {
   var dark = document.documentElement.getAttribute('data-mode') !== 'light', st = node.style;
   if (h === null || h === undefined) {
-    var lime = { '--today': '#a3e635', '--log': '#a3e635', '--on-log': '#0b1400', '--today-ink': dark ? '#a3e635' : '#65a30d', '--live-bg': dark ? '#16210a' : '#eef7dc',
-      '--good': dark ? '#34c759' : '#248a3d', '--done-bg': dark ? 'rgba(52, 199, 89, .16)' : 'rgba(52, 199, 89, .14)' };
+    var lime = { '--today': dark ? '#e1d4c2' : '#b5a084', '--log': dark ? '#e1d4c2' : '#b5a084', '--on-log': '#111114', '--today-ink': dark ? '#e1d4c2' : '#6e5b45', '--live-bg': dark ? 'color-mix(in srgb, #e1d4c2 14%, #000)' : 'color-mix(in srgb, #b5a084 12%, #fff)',
+      '--good': dark ? '#e1d4c2' : '#6e5b45', '--done-bg': dark ? 'color-mix(in srgb, #e1d4c2 18%, transparent)' : 'color-mix(in srgb, #b5a084 22%, transparent)' };
     ACC_KEYS.forEach(function (k) { if (lime[k]) st.setProperty(k, lime[k]); });
-    st.setProperty('--log-g', '#a3e635'); st.setProperty('--log-s', '#a3e635'); st.setProperty('--log-t', '#a3e635');
+    var cf = dark ? '#e1d4c2' : '#b5a084'; st.setProperty('--log-g', cf); st.setProperty('--log-s', cf); st.setProperty('--log-t', cf);
     node.removeAttribute('data-acc-g');
     return;
   }
