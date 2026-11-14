@@ -1,6 +1,7 @@
 import Foundation
 import Capacitor
 import UIKit
+import AVFoundation
 import Vision
 import PDFKit
 import PhotosUI
@@ -38,9 +39,17 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
     // The Watch gets the same snapshot and the rest end time, over WatchConnectivity.
     private var watchCtx: [String: Any] = [:]
     override public func load() {
+        // THE REST TONES MUST NOT STOP THE MUSIC: the page's sounds play on top of whatever is playing.
+        mixAudio()
+        NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in self?.mixAudio() }
         #if canImport(WatchConnectivity)
         if WCSession.isSupported() { WCSession.default.activate() }
         #endif
+    }
+    private func mixAudio() {
+        let s = AVAudioSession.sharedInstance()
+        try? s.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+        try? s.setActive(true, options: [])
     }
     private func toWatch(_ k: String, _ v: Any?) {
         #if canImport(WatchConnectivity)
