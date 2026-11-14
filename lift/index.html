@@ -2433,8 +2433,9 @@ function lfBeep(f, t0, d, type, vol) {
   o.connect(g); g.connect(lfAc.destination); o.start(t); o.stop(t + d + .02);
 }
 /* the start of the range: two soft rising chimes. The end of it: three low, hard buzzes. */
-function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); try { lfBeep(660, 0, .16, 'sine', .35); lfBeep(880, .2, .22, 'sine', .35); } catch (e) {} }
-function lfRing2() { window.lfRests2 = (window.lfRests2 || 0) + 1; buzz([220, 90, 220, 90, 220]); try { [0, .3, .6].forEach(function (t0) { lfBeep(170, t0, .22, 'square', .22); }); } catch (e) {} }
+function lfDuck(ms) { if (LF_WGT && LF_WGT.duck) { try { LF_WGT.duck({ ms: ms }); } catch (e) {} return .12; } return 0; }
+function lfRing() { window.lfRests = (window.lfRests || 0) + 1; buzz([80, 60, 80]); try { var d = lfDuck(1300); lfBeep(660, d, .16, 'sine', .35); lfBeep(880, d + .2, .22, 'sine', .35); } catch (e) {} }
+function lfRing2() { window.lfRests2 = (window.lfRests2 || 0) + 1; buzz([220, 90, 220, 90, 220]); try { var d = lfDuck(1700); [0, .3, .6].forEach(function (t0) { lfBeep(170, d + t0, .22, 'square', .22); }); } catch (e) {} }
 function buzz(ms) { try { if (navigator.vibrate) navigator.vibrate(ms || 12); } catch (e) {} }
 
 /* ═══════════ HOME ═══════════ */

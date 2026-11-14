@@ -33,7 +33,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         CAPPluginMethod(name: "healthAuth", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "healthSave", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "healthWeight", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "readPlan", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "readPlan", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "duck", returnType: CAPPluginReturnPromise)
     ]
 
     // The Watch gets the same snapshot and the rest end time, over WatchConnectivity.
@@ -47,10 +48,23 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         #endif
     }
     private func mixAudio() {
-        let s = AVAudioSession.sharedInstance()
-        try? s.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-        try? s.setActive(true, options: [])
+        // set, but not switched on: the page's own sounds never take the music over
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
     }
+
+    /// The music dips while a rest tone plays and comes back on its own: it is lowered, never stopped.
+    @objc func duck(_ call: CAPPluginCall) {
+        let ms = min(max(call.getDouble("ms") ?? 1200, 200), 4000)
+        let s = AVAudioSession.sharedInstance()
+        try? s.setCategory(.playback, mode: .default, options: [.mixWithOthers, .duckOthers])
+        try? s.setActive(true, options: [])
+        DispatchQueue.main.asyncAfter(deadline: .now() + ms / 1000) {
+            try? s.setActive(false, options: .notifyOthersOnDeactivation)
+            try? s.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+        }
+        call.resolve()
+    }
+
     private func toWatch(_ k: String, _ v: Any?) {
         #if canImport(WatchConnectivity)
         guard WCSession.isSupported() else { return }
