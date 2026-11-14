@@ -1993,6 +1993,8 @@ function lfClean(o) {
     if (o.fx.wk && typeof o.fx.wk === 'object') Object.keys(o.fx.wk).sort().slice(-200).forEach(function (k) { var v = o.fx.wk[k]; if (isD(k) && Array.isArray(v)) d.fx.wk[k] = [Math.max(0, Math.min(1000, Math.round(+v[0]) || 0)), Math.max(0, Math.min(1000, Math.round(+v[1]) || 0)), Math.max(0, Math.min(50, Math.round(+v[2]) || 0)), v[3] ? 1 : 0, isD(v[4]) ? v[4] : ''].concat(v.length > 5 ? [v[5] ? 1 : 0] : []); });
   }
   if (typeof o.wkDone === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkDone)) d.wkDone = o.wkDone;
+  if (o.hk === true) d.hk = true;
+  if (o.hkd && typeof o.hkd === 'object') { d.hkd = {}; Object.keys(o.hkd).slice(-400).forEach(function (k) { if (o.hkd[k] === 1) d.hkd[k] = 1; }); }
   if (typeof o.wkSum === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkSum)) d.wkSum = o.wkSum;
   if (typeof o.wkOver === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.wkOver)) d.wkOver = o.wkOver;
   if (typeof o.moSum === 'string' && /^\d{4}-\d\d$/.test(o.moSum)) d.moSum = o.moSum;
@@ -2552,7 +2554,7 @@ function lfTodayCard() {
     c.insertBefore(el('<span class="lf-done" id="lfDone">' + IC.check + 'Completed</span>'), c.firstChild);
     if (doneWs.length === 1) {
       var ag = el('<button type="button" class="lf-btn lf-again" id="lfAgain">Second session</button>');
-      ag.addEventListener('click', function (ev) { ev.stopPropagation(); lfAsk('Train again today?', 'A second session is logged in full. It does not count as another day toward your weekly goal.', 'Start', function () { lfAgainOk = 1; lfStart(null); }); });
+      ag.addEventListener('click', function (ev) { ev.stopPropagation(); lfSecondPicker(last); });
       c.appendChild(ag);
     }
   }
@@ -3719,7 +3721,7 @@ function lfFinish() {
   var prs = [];
   act.x.forEach(function (e) { if (e.sets.some(function (s) { return s.ok && s.pr; })) prs.push(e.n); });
   var w = { id: act.id, d: ymd(new Date(act.s)), s: act.s, e: Date.now(), n: act.n || 'Workout', rt: act.rt, x: x, cd: cd };
-  S.wo.push(w); lfSave();
+  S.wo.push(w); lfSave(); lfHealthSave(w);
   act = null; lfLockStop(); lfSaveAct();
   clearInterval(tick);
   if (sessSheet) sessSheet.close(true); sessSheet = null;
@@ -4391,6 +4393,21 @@ function lfRoutinePicker() {
   item('New routine', 'A named list of exercises you repeat', false, function () { s.close(true); lfRoutineForm(null); });
 }
 
+/* THE SECOND SESSION OF A DAY comes with a routine, picked from the ones you have: the day's programme first, then your own, then an empty one. It still does not count as another day toward the weekly goal. */
+function lfSecondPicker(last) {
+  var b = el('<div class="lf-list"></div>'), s = lfSheet({ title: 'Second session', body: b });
+  function item(t, sub, cur, fn) {
+    var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div></button>');
+    $('b', li).textContent = t; $('span', li).textContent = sub;
+    if (cur) li.insertAdjacentHTML('beforeend', IC.check);
+    li.addEventListener('click', fn); b.appendChild(li);
+  }
+  allRt().forEach(function (r) {
+    item(r.n, (r.fixed ? DOW_LONG[r.dow] + ' · ' : '') + (r.sp || (r.ex.length + ' exercises')), !!last && last.rt === r.id, function () { s.close(true); lfAgainOk = 1; lfStart(r); });
+  });
+  item('Empty workout', 'Add exercises as you go', false, function () { s.close(true); lfAgainOk = 1; lfStart(null); });
+}
+
 function lfRoutineForm(rt) {
   var draft = rt ? rt.ex.slice() : [];
   var b = el('<div><label class="lf-flab" for="lfRtN">Name</label><input class="lf-field" id="lfRtN" maxlength="40" placeholder="Push" autocomplete="off" /><label class="lf-flab" for="lfRtS">Split (optional)</label><input class="lf-field" id="lfRtS" maxlength="60" placeholder="Push, Pull, Legs" autocomplete="off" /><span class="lf-flab">Exercises</span><div class="lf-list" id="lfRtX"></div><button type="button" class="lf-add">' + IC.plus + 'Add exercise</button></div>');
@@ -4854,6 +4871,7 @@ function lfRenderYou() {
   else if (lfMoved()) $('#lfMoveBack', bk).addEventListener('click', function () { try { localStorage.removeItem(LF_MV); } catch (e) {} lfRender(); if (typeof frPushNow === 'function') frPushNow(); });
   else mvb.addEventListener('click', lfMoveOut);
   root.appendChild(bk);
+  var hk = lfHealthCard(); if (hk) root.appendChild(hk);
 }
 /* A CARD THAT FOLDS: its title is a button inside the heading, it says
    whether it is open, and it remembers per card. Shut until opened — a
@@ -5112,6 +5130,34 @@ var LF_APP_LIVE = false, LF_APP_URL = 'https://apps.apple.com/app/id6833453418';
 var LF_NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
 /* ── THE WIDGETS: today, the week ring, the streak and the latest badge on the Home Screen and Lock Screen, and the rest as a Live Activity. Only the iPhone app has a way to hand them anything, so on the website all of this is a no-op. What goes is one small snapshot of counts and names: how many sessions this week, which day's routine is up, the streak and the name of the last badge. Never a set, a weight or a note. ── */
 var LF_WGT = LF_NATIVE && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LiftWidgets || null, lfWgLast = '', lfWgT = 0, lfWRest = 0;
+/* ── APPLE HEALTH, in the iPhone app only: a finished workout is saved to Health as a strength session (its start, its end and its name, never a set or a weight), and your latest body weight can be read back. Both are switched on by you, here, and the first press is when iPhone asks. */
+function lfHealthSave(w) {
+  if (!LF_WGT || !S.hk || !w || (S.hkd && S.hkd[w.id])) return;
+  LF_WGT.healthSave({ start: w.s, end: w.e, title: w.n }).then(function (r) { if (r && r.ok) { S.hkd = S.hkd || {}; S.hkd[w.id] = 1; lfSave(); } }, function () {});
+}
+function lfHealthCard() {
+  if (!LF_WGT || !LF_WGT.healthAuth) return null;
+  var c = el('<div class="lf-card" id="lfHealth"><div class="lf-lab" style="margin-bottom:10px">Apple Health</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfHkSave"></button><button type="button" class="lf-btn" style="flex:1" id="lfHkWt">Read weight</button></div></div>');
+  var sv = $('#lfHkSave', c);
+  function paint() { sv.textContent = S.hk ? 'Saving workouts · on' : 'Save workouts'; sv.classList.toggle('is-ink', !!S.hk); sv.setAttribute('aria-pressed', S.hk ? 'true' : 'false'); }
+  paint();
+  sv.addEventListener('click', function () {
+    if (S.hk) { S.hk = false; lfSave(); paint(); return; }
+    LF_WGT.healthAuth({}).then(function (r) {
+      if (!r || !r.ok) { lfToast('Allow Health in Settings to turn this on'); return; }
+      S.hk = true; lfSave(); paint(); lfToast('Workouts will be saved to Health');
+    }, function () { lfToast('Health is not available here'); });
+  });
+  $('#lfHkWt', c).addEventListener('click', function () {
+    LF_WGT.healthAuth({}).then(function () { return LF_WGT.healthWeight({}); }).then(function (r) {
+      if (!r || !(r.kg > 0)) { lfToast('No weight in Health yet'); return; }
+      var d = ymd(new Date(r.t || Date.now()));
+      S.bw = S.bw.filter(function (p) { return p.d !== d; }); S.bw.push({ d: d, kg: Math.round(r.kg * 10) / 10 }); S.bw.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
+      lfSave(); lfRender(); lfToast('Weight read from Health');
+    }, function () { lfToast('Could not read Health'); });
+  });
+  return c;
+}
 function lfWidgetSnap() {
   var t = today(), m = monday(t), days = [], i, done = false, rt = lfToday();
   for (i = 0; i < 7; i++) { var dk = ymd(addDays(m, i)); days.push(S.wo.some(function (w) { return w.d === dk; }) ? 1 : S.rd && S.rd[dk] ? 2 : 0); }

@@ -59,6 +59,8 @@ jobs:
           gem list xcodeproj -i >/dev/null 2>&1 || sudo gem install xcodeproj --no-document
           ruby native/add-widgets.rb
           /usr/libexec/PlistBuddy -c "Add :NSSupportsLiveActivities bool true" ios/App/App/Info.plist || /usr/libexec/PlistBuddy -c "Set :NSSupportsLiveActivities true" ios/App/App/Info.plist
+          /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string Lift reads your body weight from Health so you do not type it twice." ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :NSHealthUpdateUsageDescription string Lift saves your finished workouts to Health." ios/App/App/Info.plist || true
 
       - name: Portrait only, no encryption questions
         working-directory: ios-wrapper/ios/App/App

@@ -29,7 +29,9 @@ entitlements = <<~PLIST
   </dict></plist>
 PLIST
 File.write(File.join(dest, "#{name}.entitlements"), entitlements)
-File.write(File.join(ios, 'App', 'App.entitlements'), entitlements)
+# the app also saves workouts to Apple Health
+app_entitlements = entitlements.sub('</dict></plist>', "  <key>com.apple.developer.healthkit</key>\n  <true/>\n  <key>com.apple.developer.healthkit.access</key>\n  <array/>\n</dict></plist>")
+File.write(File.join(ios, 'App', 'App.entitlements'), app_entitlements)
 
 proj = Xcodeproj::Project.open(File.join(ios, 'App.xcodeproj'))
 app = proj.targets.find { |t| t.name == 'App' } or abort 'no App target'
@@ -72,6 +74,50 @@ embed.symbol_dst_subfolder_spec = :plug_ins
 bf = embed.add_file_reference(ext.product_reference, true)
 bf.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
 app.add_dependency(ext)
+
+# ── the Apple Watch app: a single-target watchOS app, embedded in the iPhone app
+wname = 'LiftWatch'
+wdest = File.join(ios, wname)
+FileUtils.rm_rf(wdest)
+FileUtils.cp_r(File.join(root, 'native', wname), wdest)
+icons = File.join(wdest, 'Assets.xcassets', 'AppIcon.appiconset')
+FileUtils.mkdir_p(icons)
+FileUtils.cp(File.join(root, 'assets', 'icon-only.png'), File.join(icons, 'icon.png'))
+File.write(File.join(icons, 'Contents.json'), '{"images":[{"filename":"icon.png","idiom":"universal","platform":"watchos","size":"1024x1024"}],"info":{"author":"xcode","version":1}}')
+File.write(File.join(wdest, 'Assets.xcassets', 'Contents.json'), '{"info":{"author":"xcode","version":1}}')
+
+watch = proj.new_target(:application, wname, :watchos, '9.0', nil, :swift)
+wgrp = proj.main_group.new_group(wname, wname)
+Dir[File.join(wdest, '*.swift')].sort.each { |f| watch.add_file_references([wgrp.new_reference(File.basename(f))]) }
+assets = wgrp.new_reference('Assets.xcassets')
+watch.resources_build_phase.add_file_reference(assets)
+watch.build_configurations.each do |c|
+  s = c.build_settings
+  s['PRODUCT_BUNDLE_IDENTIFIER'] = "#{bundle}.watchkitapp"
+  s['PRODUCT_NAME'] = '$(TARGET_NAME)'
+  s['SDKROOT'] = 'watchos'
+  s['SUPPORTED_PLATFORMS'] = 'watchos watchsimulator'
+  s['TARGETED_DEVICE_FAMILY'] = '4'
+  s['WATCHOS_DEPLOYMENT_TARGET'] = '9.0'
+  s['SWIFT_VERSION'] = '5.0'
+  s['DEVELOPMENT_TEAM'] = team
+  s['CODE_SIGN_STYLE'] = 'Automatic'
+  s['MARKETING_VERSION'] = version
+  s['CURRENT_PROJECT_VERSION'] = build
+  s['GENERATE_INFOPLIST_FILE'] = 'YES'
+  s['INFOPLIST_KEY_CFBundleDisplayName'] = 'Lift'
+  s['INFOPLIST_KEY_WKApplication'] = 'YES'
+  s['INFOPLIST_KEY_WKCompanionAppBundleIdentifier'] = bundle
+  s['ASSETCATALOG_COMPILER_APPICON_NAME'] = 'AppIcon'
+  s['SKIP_INSTALL'] = 'YES'
+  s['LD_RUNPATH_SEARCH_PATHS'] = '$(inherited) @executable_path/Frameworks'
+end
+wembed = app.new_copy_files_build_phase('Embed Watch Content')
+wembed.symbol_dst_subfolder_spec = :products_directory
+wembed.dst_path = '$(CONTENTS_FOLDER_PATH)/Watch'
+wbf = wembed.add_file_reference(watch.product_reference, true)
+wbf.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
+app.add_dependency(watch)
 
 proj.save
 puts "widgets added: #{bundle}.widgets, group #{group}"

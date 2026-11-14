@@ -1924,9 +1924,10 @@ const freeze = (at) => `(() => {
     o = await ctx({ unit: 'kg', goal: 5, wo: [W('b1', '2026-10-30', '07')] }, '2026-10-30T18:00:00');
     ok('a trained day offers a second session, by name', await o.page.locator('#lfAgain').count() === 1 && await o.page.locator('#lfGo').count() === 0);
     await o.page.click('#lfAgain'); await settle(o.page);
-    ok('it asks first, and says it is not another day toward the goal', /does not count as another day/.test(await top(o.page).textContent()));
-    await top(o.page).locator('button', { hasText: 'Start' }).click(); await settle(o.page);
-    ok('and then the second workout is open', await o.page.locator('.lf-session').count() === 1);
+    ok('it offers the routines to pick from, with an empty one last', await top(o.page).locator('.lf-li').count() >= 2 && /Empty workout/.test(await top(o.page).locator('.lf-li').last().textContent()));
+    const pickN = await top(o.page).locator('.lf-li').first().locator('b').textContent();
+    await top(o.page).locator('.lf-li').first().click(); await settle(o.page);
+    ok('and the second session comes with that routine\'s exercises', await o.page.locator('.lf-session').count() === 1 && await o.page.locator('.lf-session .lf-ex').count() > 0 && pickN.length > 0);
     await o.c.close();
     /* a day more than the goal asked for has its own moment, once */
     o = await ctx({ unit: 'kg', goal: 2, wkDone: '2026-10-26', wo: [W('c1', '2026-10-27', '07'), W('c2', '2026-10-28', '07'), W('c3', '2026-10-30', '07')] }, '2026-10-30T18:00:00');
