@@ -2319,6 +2319,31 @@ const freeze = (at) => `(() => {
     }
   }
 
+  /* ── THE SHELF: no two badges are the same picture. Each is told apart by its silhouette, its finish, its pattern and its colour, and the number in the middle does not count. ── */
+  {
+    const c3 = await browser.newContext(Object.assign({}, PHONE, { serviceWorkers: 'block' }));
+    await c3.addInitScript(`localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg', goal: 3, wkSum: '9999-12-31', wkDone: '9999-12-31', tour: true }));`);
+    await c3.route('**/lift/index.html', async (r) => {
+      let h = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
+      const i = h.lastIndexOf('})();');
+      h = h.slice(0, i) + 'window.__t = {}; ["lfBadges", "bdSpec", "ymd", "today", "BD_DST"].forEach(function (k) { try { window.__t[k] = eval(k); } catch (e) {} });' + h.slice(i);
+      r.fulfill({ body: h, contentType: 'text/html' });
+    });
+    const pg3 = await c3.newPage();
+    await pg3.goto(URL); await pg3.waitForTimeout(600);
+    const r3 = await pg3.evaluate(() => {
+      const specs = __t.lfBadges().map((x) => { x.d = __t.ymd(__t.today()); const s = __t.bdSpec(x); return { id: x.b.id, look: [s.sh, s.fx || '', s.pt || '', s.c || ''].join('|') }; });
+      const by = {}; specs.forEach((s) => { (by[s.look] = by[s.look] || []).push(s.id); });
+      const dup = Object.keys(by).filter((k) => by[k].length > 1).map((k) => by[k]);
+      const ds = __t.BD_DST.map((r) => 'd' + r[0]), shapes = {};
+      ds.forEach((id, i) => { const s = specs.find((q) => q.id === id).look.split('|'); (shapes[Math.floor(i / 5)] = shapes[Math.floor(i / 5)] || new Set()).add(s[0] + s[3]); });
+      return { n: specs.length, dup, ladders: Object.keys(shapes).map((k) => shapes[k].size), ds: ds.length };
+    });
+    ok('no two badges on the shelf share a silhouette, finish, pattern and colour', r3.n >= 247 && r3.dup.length === 0, r3.dup);
+    ok('the forty day streaks are eight ladders of five, each its own shape and colour', r3.ds === 40 && r3.ladders.length === 8 && r3.ladders.every((x) => x === 1), r3.ladders);
+    await c3.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
