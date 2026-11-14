@@ -2285,6 +2285,83 @@ const freeze = (at) => `(() => {
     await o.c.close();
   }
 
+  /* ── PROGRAMS: put away to clean up, shared as a link, added from a link or pasted text ── */
+  {
+    const o = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
+    await o.page.evaluate(() => { window.__sh = []; navigator.share = (x) => { window.__sh.push(x); return Promise.resolve(); }; });
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page);
+    const strip = () => o.page.evaluate(() => [...document.querySelectorAll('#lfProg button')].map((x) => x.textContent || x.getAttribute('aria-label')));
+    ok('the strip starts with all seven programs', (await strip()).length === 7);
+    await o.page.click('#lfProgMg'); await settle(o.page);
+    ok('Manage lists each program with Share and Remove', await o.page.locator('.lf-sheet [data-p]').count() === 7 && await o.page.locator('.lf-sheet [data-a="rm"]').count() === 7);
+    await o.page.locator('.lf-sheet [data-p="ppl"] [data-a="rm"]').click(); await settle(o.page);
+    ok('removing one takes it off the strip and keeps it to restore', (await strip()).length === 6 && !(await strip()).includes('PPL') && await o.page.locator('.lf-sheet [data-a="restore"]').count() === 1 && (await store(o.page)).hp.join() === 'ppl');
+    ok('and the program that is on can be removed too, which turns another one on', await (async () => { await o.page.locator('.lf-sheet [data-p="ul"] [data-a="rm"]').click(); await settle(o.page); const st = await store(o.page); return st.prog !== 'ul' && st.hp.indexOf('ul') >= 0 && (await strip()).indexOf('Upper / lower') < 0; })());
+    await o.page.reload(); await settle(o.page);
+    ok('it is still put away after a reload', (await store(o.page)).hp.join() === 'ppl,ul' || (await store(o.page)).hp.length === 2);
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfProgMg'); await settle(o.page);
+    await o.page.locator('.lf-sheet [data-a="restore"]').first().click(); await settle(o.page);
+    await o.page.locator('.lf-sheet [data-a="restore"]').first().click(); await settle(o.page);
+    ok('Restore brings both back and the record forgets it was ever put away', (await strip()).length === 7 && (await store(o.page)).hp === undefined);
+    /* the last one on the strip cannot be removed */
+    await o.page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.hp = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx']; s.prog = 'nk'; localStorage.setItem('lift.v1', JSON.stringify(s)); });
+    await o.page.reload(); await settle(o.page);
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfProgMg'); await settle(o.page);
+    ok('with one left, Remove is off, so the strip is never empty', await o.page.locator('.lf-sheet [data-p="nk"] [data-a="rm"]').isDisabled());
+    await o.page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); delete s.hp; s.prog = 'ul'; localStorage.setItem('lift.v1', JSON.stringify(s)); });
+    await o.page.reload(); await settle(o.page);
+    /* sharing */
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfProgMg'); await settle(o.page);
+    await o.page.locator('.lf-sheet [data-p="sx"] [data-a="share"]').click(); await settle(o.page);
+    const sent = await o.page.evaluate(() => ({ sh: window.__sh, last: window.lfProgLast }));
+    ok('Share hands the phone a message with a link to the program', sent.sh.length === 1 && /Superset split/.test(sent.sh[0].text) && /\/lift\/#p=[A-Za-z0-9_-]+/.test(sent.sh[0].text), sent.sh);
+    const dec = await o.page.evaluate((c) => { try { c = c.replace(/-/g, '+').replace(/_/g, '/'); while (c.length % 4) c += '='; return JSON.parse(decodeURIComponent(escape(atob(c)))); } catch (e) { return null; } }, sent.last.code);
+    const blob = JSON.stringify(dec || {});
+    ok('what is in it is the program only: days, exercises, sets and reps', dec && dec.n === 'Superset split' && dec.d.length === 6 && dec.d[0][3].length > 3 && dec.d[0][4].length === 1, blob.slice(0, 160));
+    ok('and none of your weights, history or swaps', !/"w":|"wo"|"sw"|lift\.v1/.test(blob));
+    await o.page.evaluate(() => { window.__txt = window.lfProgLast.text; window.__code = window.lfProgLast.code; });
+    const text = sent.last.text, code = sent.last.code;
+    await o.c.close();
+
+    /* a second phone adds it from the pasted message */
+    const t = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
+    await t.page.click('.lf-bar [data-v="lib"]'); await settle(t.page);
+    await t.page.click('#lfProgMg'); await settle(t.page); await t.page.click('#lfPgAddBtn'); await settle(t.page);
+    await top(t.page).locator('#lfPgT').fill('nonsense'); await top(t.page).locator('#lfPgGo').click(); await settle(t.page);
+    ok('text that is not a program is refused and nothing is added', await top(t.page).locator('#lfPgT').count() === 1 && !(await store(t.page)).pg);
+    await top(t.page).locator('#lfPgT').fill(text); await top(t.page).locator('#lfPgGo').click(); await settle(t.page);
+    ok('the pasted message shows the program to check, a day to a row', await top(t.page).locator('#lfPgAdd').count() === 1 && await top(t.page).locator('.lf-li').count() === 6 && await top(t.page).locator('#lfPgN').inputValue() === 'Superset split');
+    await top(t.page).locator('#lfPgN').fill('My supersets'); await top(t.page).locator('#lfPgAdd').click(); await settle(t.page);
+    const st = await store(t.page);
+    ok('adding it keeps it as a program of its own and turns it on', st.pg && st.pg.length === 1 && st.pg[0].n === 'My supersets' && st.prog === st.pg[0].id && /^u[a-z0-9]+$/.test(st.pg[0].id), st.pg && st.pg[0].id);
+    ok('its supersets came with it', st.pg[0].d[0].ss.length === 1 && st.pg[0].d[0].ss[0].length === 5);
+    ok('it is on the strip, with its days under it', (await t.page.evaluate(() => [...document.querySelectorAll('#lfProg button')].map((x) => x.textContent))).includes('My supersets') && await t.page.locator('#lfSplit .lf-li').count() === 6);
+    await t.page.reload(); await settle(t.page);
+    ok('it survives a reload and is still the program on', (await store(t.page)).prog === st.prog && (await store(t.page)).pg.length === 1);
+    await t.page.click('.lf-bar [data-v="lib"]'); await settle(t.page); await t.page.click('#lfProgMg'); await settle(t.page);
+    await t.page.locator('.lf-sheet [data-p="' + st.prog + '"] [data-a="rm"]').click(); await settle(t.page);
+    ok('a program you added is removed for good, with Undo, and another is turned on', !(await store(t.page)).pg && (await store(t.page)).prog === 'ul');
+    await t.page.locator('.lf-toast button').last().click().catch(() => {}); await settle(t.page);
+    ok('Undo brings it back and turns it on again', (await store(t.page)).pg && (await store(t.page)).pg.length === 1 && (await store(t.page)).prog === st.prog);
+    await t.c.close();
+
+    /* the link itself, opened on the web copy */
+    const l = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
+    await l.page.goto(URL + '#p=' + code); await settle(l.page); await l.page.waitForTimeout(500);
+    ok('a link opened on the web shows the program and leaves the bar clean', await top(l.page).locator('#lfPgAdd').count() === 1 && (await l.page.evaluate(() => location.hash)) === '');
+    await top(l.page).locator('#lfPgAdd').click(); await settle(l.page);
+    ok('and adding it works the same', (await store(l.page)).pg.length === 1);
+    await l.page.evaluate(() => { location.hash = '#p=zzzzzzzzzzzzzzzz'; }); await settle(l.page);
+    ok('a broken link adds nothing and says so', (await store(l.page)).pg.length === 1 && await top(l.page).locator('#lfPgAdd').count() === 0);
+    await l.c.close();
+
+    /* a damaged stored program costs itself, never the record */
+    const d = await ctx({ unit: 'kg', goal: 3, wo: [W('t1', '2026-10-30', '07')], pg: [{ id: 'ubad', n: 'x', d: 'nope' }, { id: 'ugood1', n: 'Fine', d: [{ id: 'ugood1-1', w: 1, n: 'Mon', sp: '', x: [['bench', 3, 8, 10]], ss: [] }] }], hp: ['ppl', 'zzz'] }, '2026-10-30T18:00:00');
+    const ds = await store(d.page);
+    ok('a damaged program is dropped, the good one and the workouts stay', ds.pg.length === 1 && ds.pg[0].id === 'ugood1' && ds.wo.length === 1 && ds.hp.join() === 'ppl', ds.pg);
+    await d.c.close();
+  }
+
   /* ── THE IPHONE APP'S HOOKS: haptics, a screen that stays on, the set sent to the Watch and a set logged from it. The plugin is stood in for by a recorder. ── */
   {
     const c2 = await browser.newContext(PHONE);

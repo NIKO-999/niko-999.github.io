@@ -1670,7 +1670,9 @@ var PROGRAMS = {
   nk: { n: 'NIKO', s: 'NIKO', days: lfMkProg(PROGRAM_NK) }
 };
 PROGRAMS.ul.s = 'Upper / lower';
-var PROG_IDS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx', 'nk'];
+var BUILTIN_PROGS = ['ul', 'ppl', 'gl', 'qc', 'gf', 'sx', 'nk'];
+/* every program there is, built in or added: a day of any of them still opens by id, even one taken off the strip */
+var PROG_IDS = BUILTIN_PROGS.slice();
 var CHOICES = lfMkProg(CHOICE_RT);
 /* A set × rep target as written: '3 × 8–12', '3 × 30–40 m each side',
    or '4 rounds'. */
@@ -1990,7 +1992,13 @@ function lfClean(o) {
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
   d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true;
-  if (PROG_IDS.indexOf(o.prog) >= 0) d.prog = o.prog;
+  /* PROGRAMS ADDED by link or code (pg) and built-in ones put away (hp). A damaged program costs itself, never the record. */
+  if (Array.isArray(o.pg)) { var pgl = lfCleanPgs(o.pg); if (pgl.length) d.pg = pgl; }
+  if (Array.isArray(o.hp)) { var hpl = o.hp.filter(function (k, i, a) { return BUILTIN_PROGS.indexOf(k) >= 0 && a.indexOf(k) === i; }); if (hpl.length) d.hp = hpl; }
+  var pgIds = BUILTIN_PROGS.concat((d.pg || []).map(function (q) { return q.id; }));
+  if (d.hp && pgIds.every(function (k) { return d.hp.indexOf(k) >= 0; })) delete d.hp;
+  if (pgIds.indexOf(o.prog) >= 0) d.prog = o.prog;
+  if (d.hp && d.hp.indexOf(d.prog) >= 0) d.prog = pgIds.filter(function (k) { return d.hp.indexOf(k) < 0; })[0];
   /* which badges have been announced; absent means badges are new to this phone */
   /* VERSUS FRIENDS, kept: sessions you trained in step with a friend, by
      your workout and their code, and each week's standing on the rings as
@@ -2078,6 +2086,28 @@ function lfClean(o) {
      not keep yesterday's day open tomorrow. */
   d.pick = o.pick && typeof o.pick.id === 'string' && /^\d{4}-\d\d-\d\d$/.test(o.pick.d) ? { d: o.pick.d, id: o.pick.id } : null;
   return d;
+}
+function lfCleanPgs(list) {
+  var ok = function (v) { return typeof v === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(v); }, seen = {};
+  return list.slice(0, 20).map(function (p) {
+    if (!p || typeof p.id !== 'string' || !/^u[a-z0-9]{3,16}$/.test(p.id) || seen[p.id] || typeof p.n !== 'string' || !Array.isArray(p.d)) return null;
+    seen[p.id] = 1; var dows = {};
+    var days = p.d.slice(0, 7).map(function (d) {
+      if (!d || !ok(d.id) || !(d.w >= 0 && d.w <= 6) || d.w !== Math.round(d.w) || dows[d.w]) return null;
+      var x = (Array.isArray(d.x) ? d.x : []).slice(0, 30).map(function (e) {
+        if (!Array.isArray(e) || !ok(e[0])) return null;
+        var n = Math.round(+e[1]), lo = Math.round(+e[2]), hi = Math.round(+e[3]);
+        if (!(n > 0 && n <= 12 && lo > 0 && lo <= 100 && hi >= lo && hi <= 100)) return null;
+        var r = [e[0], n, lo, hi]; if (typeof e[4] === 'string' && e[4]) r.push(e[4].slice(0, 20)); return r;
+      }).filter(Boolean);
+      if (!x.length) return null;
+      dows[d.w] = 1;
+      var ids = x.map(function (e) { return e[0]; });
+      var ss = (Array.isArray(d.ss) ? d.ss : []).slice(0, 6).map(function (g) { return Array.isArray(g) ? g.filter(function (id) { return ids.indexOf(id) >= 0; }).slice(0, 6) : []; }).filter(function (g) { return g.length > 1; });
+      return { id: d.id, w: d.w, n: (typeof d.n === 'string' ? d.n.slice(0, 40) : '') || 'Day', sp: typeof d.sp === 'string' ? d.sp.slice(0, 60) : '', x: x, ss: ss };
+    }).filter(Boolean);
+    return days.length ? { id: p.id, n: p.n.slice(0, 30).trim() || 'Program', d: days } : null;
+  }).filter(Boolean);
 }
 function lfCleanWo(w) {
   if (!w || typeof w !== 'object' || !/^\d{4}-\d\d-\d\d$/.test(w.d)) return null;
@@ -2185,6 +2215,7 @@ function lfSaveAct() {
 }
 
 var S = lfLoad();
+lfProgSync();
 var act = lfLoadAct();
 
 /* ═══════════ READING THE RECORD ═══════════ */
@@ -4730,6 +4761,179 @@ function lfDaySpec(rt) {
   go.addEventListener('click', function () { s.close(true); lfStart(rt); });
 }
 
+/* ═══════════ PROGRAMS: put away, share, add ═══════════
+   A program is a week of days. The seven that come with the app can be put
+   away to clean the strip up (they stay whole and come back with Restore),
+   and any program can be sent to somebody as a link. What goes in the link
+   is the program itself: the days, the exercises and their sets and reps,
+   and the name of any exercise you made, because they will not have it.
+   Never your weights, your history or your swaps. The link carries it in
+   the fragment, which never leaves the phone it is opened on. Opened in
+   the app, the link cannot open the app, so Add a program takes the
+   pasted link (or the bare code) as well. */
+function lfProgVisible() { return PROG_IDS.filter(function (k) { return !(S.hp || []).some(function (h) { return h === k; }); }); }
+function lfProgDef(k) {
+  var D = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF, sx: FOCUS_SX, nk: FOCUS_NK };
+  return D[k] || (PROGRAMS[k] && PROGRAMS[k].focus && PROGRAMS[k].focus.length ? PROGRAMS[k].focus : FOCUS_DEFAULT);
+}
+/* the programs you added join the built-in ones; run again whenever S.pg changes */
+function lfProgSync() {
+  PROG_IDS = BUILTIN_PROGS.slice();
+  Object.keys(PROGRAMS).forEach(function (k) { if (BUILTIN_PROGS.indexOf(k) < 0) delete PROGRAMS[k]; });
+  (S.pg || []).forEach(function (p) {
+    var raw = p.d.map(function (d) { return { id: d.id, dow: d.w, n: d.n, sp: d.sp, ss: d.ss, ex: d.x }; });
+    PROGRAMS[p.id] = { n: p.n, s: p.n.slice(0, 14), days: lfMkProg(raw), focus: lfFocusFrom(raw, {}), mine: 1 };
+    PROG_IDS.push(p.id);
+  });
+}
+/* turn a program on: the weekly targets follow only when they are still the old program's own */
+function lfProgSwitch(k) {
+  var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
+  var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
+  if (JSON.stringify(S.focus) === sig(lfProgDef(S.prog))) S.focus = lfFocusOf(lfProgDef(k));
+  S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
+  return was;
+}
+function lfB64(str) { return btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+function lfUnB64(c) { c = c.replace(/-/g, '+').replace(/_/g, '/'); while (c.length % 4) c += '='; return decodeURIComponent(escape(atob(c))); }
+function lfProgPack(k) {
+  var p = PROGRAMS[k], cust = {};
+  var d = p.days.filter(function (r) { return !r.choice; }).map(function (r) {
+    var x = r.ex.map(function (id) {
+      var t = r.tg[id] || [3, 8, 12];
+      if (!EXERCISES.some(function (q) { return q.id === id; })) { var e = exById(id); if (e) cust[id] = [id, e.n, e.m, e.t]; }
+      var row = [id, t[0], t[1], t[2]]; if (t[3]) row.push(t[3]); return row;
+    });
+    return [r.dow, r.n, r.sp, x, r.ss || []];
+  });
+  return { n: p.n, d: d, c: Object.keys(cust).map(function (q) { return cust[q]; }) };
+}
+function lfProgShare(k) {
+  var code = lfB64(JSON.stringify(lfProgPack(k)));
+  var url = 'https://niko-999.github.io/lift/#p=' + code;
+  var text = PROGRAMS[k].n + ', a Lift program\nIn Lift: Exercises, Manage and share programs, Add a program, then paste this:\n' + url;
+  window.lfProgLast = { code: code, url: url, text: text };
+  if (navigator.share) navigator.share({ text: text }).catch(function () {});
+  else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { lfToast('Copied, ready to send'); }, function () { lfToast('Could not copy'); });
+}
+/* read a shared program back: only what is valid survives, and what this version of Lift has no exercise for is counted, not guessed at */
+function lfProgUnpack(text) {
+  var t = String(text || ''), m = /(?:#p=|LIFT1:)([A-Za-z0-9_-]{8,60000})/.exec(t), code = m ? m[1] : (/^\s*[A-Za-z0-9_-]{20,60000}\s*$/.test(t) ? t.trim() : '');
+  if (!code) return null;
+  var o; try { o = JSON.parse(lfUnB64(code)); } catch (e) { return null; }
+  if (!o || typeof o.n !== 'string' || !Array.isArray(o.d)) return null;
+  var mine = {}, okId = function (v) { return typeof v === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(v); };
+  (Array.isArray(o.c) ? o.c : []).slice(0, 60).forEach(function (e) { if (Array.isArray(e) && okId(e[0]) && typeof e[1] === 'string' && e[1].trim()) mine[e[0]] = { id: e[0], n: e[1].slice(0, 60), m: MUSCLES.indexOf(e[2]) >= 0 ? e[2] : 'Other', t: e[3] === 'bw' ? 'bw' : 'w', c: 0 }; });
+  var dropped = 0, dows = {}, cu = {};
+  var days = o.d.slice(0, 7).map(function (r) {
+    if (!Array.isArray(r) || !(r[0] >= 0 && r[0] <= 6) || r[0] !== Math.round(r[0]) || dows[r[0]] || !Array.isArray(r[3])) return null;
+    var x = r[3].slice(0, 30).filter(function (e) {
+      if (!Array.isArray(e) || !okId(e[0])) return false;
+      if (EXERCISES.some(function (q) { return q.id === e[0]; }) || mine[e[0]] || exById(e[0])) { if (mine[e[0]] && !EXERCISES.some(function (q) { return q.id === e[0]; })) cu[e[0]] = mine[e[0]]; return true; }
+      dropped++; return false;
+    });
+    if (!x.length) return null;
+    dows[r[0]] = 1;
+    return { w: r[0], n: String(r[1] || 'Day').slice(0, 40) || 'Day', sp: typeof r[2] === 'string' ? r[2].slice(0, 60) : '', x: x, ss: Array.isArray(r[4]) ? r[4] : [] };
+  }).filter(Boolean);
+  if (!days.length) return null;
+  /* the same pass as the record's own, so anything it would not keep is gone before it is shown */
+  var chk = lfCleanPgs([{ id: 'utmp0', n: o.n, d: days.map(function (d, i) { return { id: 'utmp0-' + d.w, w: d.w, n: d.n, sp: d.sp, x: d.x, ss: d.ss }; }) }]);
+  if (!chk.length) return null;
+  return { n: chk[0].n, d: chk[0].d, c: Object.keys(cu).map(function (q) { return cu[q]; }), dropped: dropped };
+}
+function lfProgAdd(pk, name) {
+  var id; do { id = 'u' + Math.random().toString(36).slice(2, 8); } while (PROGRAMS[id]);
+  var p = { id: id, n: (name || pk.n).trim().slice(0, 30) || 'Program', d: pk.d.map(function (d) { return { id: id + '-' + d.w, w: d.w, n: d.n, sp: d.sp, x: d.x, ss: d.ss }; }) };
+  pk.c.forEach(function (e) { if (!exById(e.id)) S.ex.push(e); });
+  S.pg = (S.pg || []).concat([p]); lfProgSync();
+  var was = lfProgSwitch(id);
+  lfSave(); lfRender();
+  lfToast(p.n + ' added and on', function () {
+    S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick;
+    S.pg = (S.pg || []).filter(function (q) { return q.id !== id; }); if (!S.pg.length) delete S.pg; lfProgSync(); lfSave(); lfRender();
+  });
+}
+function lfProgPreview(pk) {
+  var b = el('<div><label class="lf-flab" for="lfPgN">Name</label><input class="lf-field" id="lfPgN" maxlength="30" autocomplete="off" /><span class="lf-flab">Days</span><div class="lf-list"></div></div>');
+  $('#lfPgN', b).value = pk.n;
+  pk.d.slice().sort(function (a, c) { return ((a.w + 6) % 7) - ((c.w + 6) % 7); }).forEach(function (d) {
+    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b><span></span></div></div>');
+    $('b', li).textContent = DOW_LONG[d.w].slice(0, 3) + ' · ' + d.n;
+    $('span', li).textContent = d.x.length + ' exercise' + (d.x.length === 1 ? '' : 's') + (d.sp ? ' · ' + d.sp : '');
+    $('.lf-list', b).appendChild(li);
+  });
+  if (pk.dropped) { var np = el('<p class="lf-lab" style="margin:10px 0 0"></p>'); np.textContent = pk.dropped + ' exercise' + (pk.dropped === 1 ? '' : 's') + ' this version of Lift does not have ' + (pk.dropped === 1 ? 'was' : 'were') + ' left out.'; b.appendChild(np); }
+  var go = el('<button type="button" class="lf-btn is-ink is-full" id="lfPgAdd">Add program</button>');
+  var s = lfSheet({ title: 'Add a program', body: b, foot: [go] });
+  go.addEventListener('click', function () { var nm = $('#lfPgN', b).value; s.close(true); lfProgAdd(pk, nm); });
+}
+function lfProgAddSheet() {
+  var b = el('<div><label class="lf-flab" for="lfPgT">Paste the link or code</label><textarea class="lf-field" id="lfPgT" rows="4" style="resize:none" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></div>');
+  var kids = [];
+  if (navigator.clipboard && navigator.clipboard.readText) {
+    var pb = el('<button type="button" class="lf-btn is-full" id="lfPgPaste" style="margin-bottom:10px">Paste from clipboard</button>');
+    pb.addEventListener('click', function () { navigator.clipboard.readText().then(function (t) { $('#lfPgT', b).value = t || ''; }, function () {}); });
+    b.insertBefore(pb, b.firstChild);
+  }
+  var go = el('<button type="button" class="lf-btn is-ink is-full" id="lfPgGo">Read it</button>');
+  var s = lfSheet({ title: 'Add a program', body: b, foot: [go] });
+  go.addEventListener('click', function () {
+    var pk = lfProgUnpack($('#lfPgT', b).value);
+    if (!pk) { lfToast('That is not a Lift program'); return; }
+    s.close(true); lfProgPreview(pk);
+  });
+}
+/* a link opened on the web copy: read once, then stripped from the bar */
+function lfProgLink() {
+  var m = /^#p=([A-Za-z0-9_-]{8,60000})$/.exec(location.hash || ''); if (!m) return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  var pk = lfProgUnpack(m[1]); if (!pk) { lfToast('That program link could not be read'); return; }
+  lfProgPreview(pk);
+}
+function lfProgRemove(k) {
+  var vis = lfProgVisible(); if (vis.indexOf(k) < 0 || vis.length < 2) return;
+  var snap = JSON.stringify({ prog: S.prog, focus: S.focus, pick: S.pick, hp: S.hp || null, pg: S.pg || null });
+  var nm = PROGRAMS[k].n;
+  if (S.prog === k) lfProgSwitch(vis.filter(function (x) { return x !== k; })[0]);
+  if (PROGRAMS[k].mine) { S.pg = (S.pg || []).filter(function (q) { return q.id !== k; }); if (!S.pg.length) delete S.pg; }
+  else S.hp = (S.hp || []).concat([k]);
+  lfProgSync(); lfSave(); lfRender();
+  lfToast(nm + ' removed', function () {
+    var o = JSON.parse(snap); S.prog = o.prog; S.focus = o.focus; S.pick = o.pick;
+    if (o.hp) S.hp = o.hp; else delete S.hp; if (o.pg) S.pg = o.pg; else delete S.pg;
+    lfProgSync(); lfSave(); lfRender();
+  });
+}
+function lfProgManage() {
+  var b = el('<div></div>'), s = null;
+  function again() { if (s) s.close(true); lfProgManage(); }
+  var vis = lfProgVisible();
+  vis.forEach(function (k) {
+    var p = PROGRAMS[k], days = p.days.filter(function (r) { return !r.choice; });
+    var c = el('<div class="lf-card" style="padding:12px 16px;margin-bottom:10px" data-p="' + esc(k) + '"><div class="lf-li-t"><b style="display:block"></b><span style="display:block"></span></div><div style="display:flex;gap:10px;margin-top:10px"><button type="button" class="lf-btn" data-a="share" style="flex:1">Share</button><button type="button" class="lf-btn is-bad" data-a="rm" style="flex:1">Remove</button></div></div>');
+    $('b', c).textContent = p.n + (S.prog === k ? ' · on' : '');
+    $('span', c).textContent = days.length + ' day' + (days.length === 1 ? '' : 's') + (p.mine ? ' · added' : '');
+    $('[data-a="share"]', c).addEventListener('click', function () { lfProgShare(k); });
+    var rm = $('[data-a="rm"]', c); rm.disabled = vis.length < 2;
+    rm.addEventListener('click', function () { lfProgRemove(k); again(); });
+    b.appendChild(c);
+  });
+  var gone = BUILTIN_PROGS.filter(function (k) { return (S.hp || []).indexOf(k) >= 0; });
+  if (gone.length) {
+    b.appendChild(el('<div class="lf-cap lf-gh">Removed</div>'));
+    gone.forEach(function (k) {
+      var c = el('<div class="lf-card" style="padding:12px 16px;margin-bottom:10px" data-p="' + esc(k) + '"><div class="lf-li-t"><b></b></div><div style="display:flex;gap:10px;margin-top:10px"><button type="button" class="lf-btn" data-a="restore" style="flex:1">Restore</button></div></div>');
+      $('b', c).textContent = PROGRAMS[k].n;
+      $('[data-a="restore"]', c).addEventListener('click', function () { S.hp = (S.hp || []).filter(function (x) { return x !== k; }); if (!S.hp.length) delete S.hp; lfProgSync(); lfSave(); lfRender(); again(); });
+      b.appendChild(c);
+    });
+  }
+  var add = el('<button type="button" class="lf-btn is-ink is-full" id="lfPgAddBtn">Add a program</button>');
+  add.addEventListener('click', function () { s.close(true); lfProgAddSheet(); });
+  s = lfSheet({ title: 'Programs', body: b, foot: [add] });
+}
+
 var libQ = '', libG = 'all';
 function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
@@ -4740,18 +4944,14 @@ function lfRenderLib() {
      to the new plan's — but only when they are still the old plan's own,
      so targets you set yourself are never overwritten. */
   var pg = el('<div class="lf-seg" id="lfProg" style="--n:3;margin-bottom:10px"></div>');
-  PROG_IDS.forEach(function (k) {
+  lfProgVisible().forEach(function (k) {
     var bt = el('<button type="button"></button>'); bt.dataset.p = k;
     /* the routine that is yours is its name and a star */
     if (k === 'nk') { bt.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:6px'; bt.setAttribute('aria-label', 'NIKO'); bt.innerHTML = '<svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'; bt.setAttribute('aria-label', PROGRAMS[k].n); } else bt.textContent = PROGRAMS[k].s;
     bt.setAttribute('aria-pressed', S.prog === k ? 'true' : 'false');
     bt.addEventListener('click', function () {
       if (S.prog === k) return;
-      var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
-      var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
-      var DEF = { ul: FOCUS_DEFAULT, ppl: FOCUS_PPL, gl: FOCUS_GL, qc: FOCUS_QC, gf: FOCUS_GF, sx: FOCUS_SX, nk: FOCUS_NK }, oldDef = DEF[S.prog] || FOCUS_DEFAULT, newDef = DEF[k];
-      if (JSON.stringify(S.focus) === sig(oldDef)) S.focus = lfFocusOf(newDef);
-      S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
+      var was = lfProgSwitch(k);
       lfSave(); lfRender();
       lfToast(PROGRAMS[k].n + ' is on', function () { S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; lfSave(); lfRender(); });
     });
@@ -4769,6 +4969,7 @@ function lfRenderLib() {
     $('.lf-list', pc).appendChild(li);
   });
   root.appendChild(pc);
+  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); root.appendChild(pmg);
   /* routines */
   root.appendChild(el('<div class="lf-cap lf-gh">Your routines</div>'));
   var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
@@ -9832,6 +10033,8 @@ if (S.bseen && !S.bseen.v5) { var BS5 = { pr3: 1, sets30: 1, wkend: 1, mon20: 1,
 if (S.bseen && !S.bseen.v4) { var BS4 = { early: 1, owl: 1, long: 1, ton10: 1, rep300: 1, back: 1, seven: 1, explore: 1 }; lfBadges().forEach(function (x) { if (x.d && BS4[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v4 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v3) { lfMedals().forEach(function (x) { if (x.d) S.bseen[x.b.id] = 1; }); S.bseen.v3 = 1; lfSave(); }
 lfRender();
+lfProgLink();
+addEventListener('hashchange', lfProgLink);
 /* An open counts for the board, a beat after the first paint. */
 if (FRS.on) setTimeout(frPush, 1500);
 /* A workout left open when the app was closed comes back up where it was. */
