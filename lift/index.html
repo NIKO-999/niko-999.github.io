@@ -4613,7 +4613,7 @@ function lfRenderLib() {
   PROG_IDS.forEach(function (k) {
     var bt = el('<button type="button"></button>'); bt.dataset.p = k;
     /* the routine that is yours is its name and a star */
-    if (k === 'nk') { bt.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:6px'; bt.innerHTML = '<span>NIKO</span><svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'; bt.setAttribute('aria-label', PROGRAMS[k].n); } else bt.textContent = PROGRAMS[k].s;
+    if (k === 'nk') { bt.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:6px'; bt.setAttribute('aria-label', 'NIKO'); bt.innerHTML = '<svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true" style="width:18px;height:18px"><path d="M12 3.2l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-3-5.4 3 1.1-6L3.2 9.6l6.1-.8z" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>'; bt.setAttribute('aria-label', PROGRAMS[k].n); } else bt.textContent = PROGRAMS[k].s;
     bt.setAttribute('aria-pressed', S.prog === k ? 'true' : 'false');
     bt.addEventListener('click', function () {
       if (S.prog === k) return;
