@@ -6882,7 +6882,7 @@ function frWeekOf(st) {
   var wk = tr && tr.m ? (tr.m === mon && Array.isArray(tr.w8) && Array.isArray(tr.w8[7]) ? +tr.w8[7][0] || 0 : 0) : (+(st && st.wk) || 0);
   return { n: wk, g: Math.max(1, +(st && st.goal) || 0) };
 }
-function frColOf(st) { var h = frHue(st), nu = lfNeu(h), th = lfTheme(h); if (th) return th.c; if (nu) return document.documentElement.getAttribute('data-mode') === 'light' ? nu.l : nu.d; return h === null ? '#a3e635' : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
+function frColOf(st) { var h = frHue(st), nu = lfNeu(h), th = lfTheme(h); if (th) return th.c; if (nu) return document.documentElement.getAttribute('data-mode') === 'light' ? nu.l : nu.d; return h === null ? (document.documentElement.getAttribute('data-mode') === 'light' ? '#b5a084' : '#e1d4c2') : lfHex(lfHsl(h, 80, h > 200 && h < 300 ? 64 : 56)); }
 /* WHAT THE FRIENDS TAB SEES, kept for the badges. In sync is a workout of
    yours with a friend's started inside it (from 45 minutes before yours
    began to when it ended), or them live while you were. The week's standing
