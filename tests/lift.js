@@ -2357,7 +2357,7 @@ const freeze = (at) => `(() => {
     await l.c.close();
 
     /* a damaged stored program costs itself, never the record */
-    const d = await ctx({ unit: 'kg', goal: 3, wo: [W('t1', '2026-10-30', '07')], pg: [{ id: 'ubad', n: 'x', d: 'nope' }, { id: 'ugood1', n: 'Fine', d: [{ id: 'ugood1-1', w: 1, n: 'Mon', sp: '', x: [['bench', 3, 8, 10]], ss: [] }] }], hp: ['ppl', 'zzz'] }, '2026-10-30T18:00:00');
+    const d = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'w1', d: '2026-10-29', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8 }] }] }], pg: [{ id: 'ubad', n: 'x', d: 'nope' }, { id: 'ugood1', n: 'Fine', d: [{ id: 'ugood1-1', w: 1, n: 'Mon', sp: '', x: [['bench', 3, 8, 10]], ss: [] }] }], hp: ['ppl', 'zzz'] }, '2026-10-30T18:00:00');
     const ds = await store(d.page);
     ok('a damaged program is dropped, the good one and the workouts stay', ds.pg.length === 1 && ds.pg[0].id === 'ugood1' && ds.wo.length === 1 && ds.hp.join() === 'ppl', ds.pg);
     await d.c.close();
