@@ -4048,7 +4048,7 @@ function lfShareCardSheet(sp, name) {
     url = URL.createObjectURL(blob);
     /* the finished video plays on a loop in place of the canvas */
     var v = document.createElement('video'); v.src = url; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('aria-label', 'The story, as it will be shared');
-    holder.textContent = ''; holder.appendChild(v); var pl = v.play(); if (pl && pl.catch) pl.catch(function () {});
+    holder.textContent = ''; holder.appendChild(v);
     window.lfStoryBytes = blob.size; enable();
   };
   var frame = function (now) {
