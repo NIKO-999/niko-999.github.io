@@ -5184,7 +5184,10 @@ var LF_MV = 'lift.moved.v1', LF_MVC = 'lift.movecard.v1';
 function lfMoved() { try { return /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem(LF_MV) || ''); } catch (e) { return false; } }
 var FR_URL = 'https://sched.nikorapullin.workers.dev';
 var FRK = 'lift.fr.v1';
+var FR_MAX = 500;
 var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+/* THE HOST: whoever turns friends on has the app's maker on their list from the first minute, and shows up on the maker's list too. It is only a friend like any other: it can be removed from the list, and a removal is kept. */
+var LF_HOST = '';
 function frLoad() {
   var d = { on: false, code: '', key: '', name: '', list: [], pend: '', rx: [], no: [] };
   try {
@@ -5194,7 +5197,7 @@ function frLoad() {
       if (d.on) { d.code = o.code; d.key = o.key; }
       d.name = typeof o.name === 'string' ? o.name.slice(0, 24) : '';
       d.pend = typeof o.pend === 'string' && /^[A-HJ-NP-Z2-9]{8}$/.test(o.pend) ? o.pend : '';
-      if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, 50)
+      if (Array.isArray(o.list)) d.list = o.list.filter(function (f) { return f && /^[A-HJ-NP-Z2-9]{8}$/.test(f.c); }).slice(0, FR_MAX)
         .map(function (f) { return { c: f.c, n: typeof f.n === 'string' ? f.n.slice(0, 24) : '', s: f.s && typeof f.s === 'object' ? f.s : null, at: +f.at || 0, gone: !!f.gone, rx: Array.isArray(f.rx) ? f.rx : [] }; });
       d.rx = Array.isArray(o.rx) ? o.rx : [];
       d.sv = +o.sv || 0;
@@ -5467,9 +5470,13 @@ function frTurnOn(name, btn) {
       if (r.st === 403 && ++tries < 4) return claim();
       if (r.st !== 200) throw new Error(r.st);
       FRS.on = true; FRS.name = name; frSave(); frSig = '';
-      lfToast('Friends is on'); lfRender();
+      lfToast('Friends is on'); lfRender(); frAddHost();
     }).catch(function () { FRS.code = ''; FRS.key = ''; btn.disabled = false; lfToast('Could not reach the server — try again'); });
   })();
+}
+function frAddHost() {
+  if (!LF_HOST || LF_HOST === FRS.code || FRS.no.indexOf(LF_HOST) >= 0 || FRS.list.some(function (f) { return f.c === LF_HOST; })) return;
+  frAdd(LF_HOST, function (err) { if (!err) lfRender(); });
 }
 function frTurnOff() {
   lfAsk('Turn off friends?', 'Your counts are deleted from the server and your code stops working. Your friend list on this phone goes too.', 'Turn off', function () {

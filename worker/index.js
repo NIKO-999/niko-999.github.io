@@ -759,7 +759,7 @@ export default {
       const fk = 'liftf:' + lfo[1];
       let fo = JSON.parse((await env.SCHED.get(fk)) || '[]');
       const had = fo.some((x) => x.f === body.f);
-      fo = [{ f: body.f, n: me.n, at: Date.now() }].concat(fo.filter((x) => x.f !== body.f)).slice(0, 200);
+      fo = [{ f: body.f, n: me.n, at: Date.now() }].concat(fo.filter((x) => x.f !== body.f)).slice(0, 500);
       await env.SCHED.put(fk, JSON.stringify(fo), { expirationTtl: LIFT_TTL });
       /* and their phone is told, once, if it asked to be */
       if (!had && them.pu) {
