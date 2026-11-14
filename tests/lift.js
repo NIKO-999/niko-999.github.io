@@ -2312,6 +2312,7 @@ const freeze = (at) => `(() => {
     await o.page.reload(); await settle(o.page);
     /* sharing */
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfProgMg'); await settle(o.page);
+    await o.page.evaluate(() => { window.__sh = []; navigator.share = (x) => { window.__sh.push(x); return Promise.resolve(); }; });
     await o.page.locator('.lf-sheet [data-p="sx"] [data-a="share"]').click(); await settle(o.page);
     const sent = await o.page.evaluate(() => ({ sh: window.__sh, last: window.lfProgLast }));
     ok('Share hands the phone a message with a link to the program', sent.sh.length === 1 && /Superset split/.test(sent.sh[0].text) && /\/lift\/#p=[A-Za-z0-9_-]+/.test(sent.sh[0].text), sent.sh);
