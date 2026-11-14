@@ -1127,6 +1127,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv-cap { text-align: center; max-width: 360px; margin: 0 auto; }
 .lf-cv-k { font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--good); }
 .lf-cv-n { font-size: 26px; font-weight: 800; letter-spacing: -.02em; margin: 6px 0 4px; }
+.lf-cv-tg { font-size: 15px; font-weight: 600; color: var(--dim); margin: 0 0 8px; }
 /* THE EYE names itself in its own colour, and says what it does under it. */
 .lf-cv.is-eye .lf-cv-n { font-size: 30px; background: linear-gradient(100deg, #ff3a00, #ffb23a 45%, #fff1c9 50%, #ffb23a 55%, #ff3a00) 100% 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 12px rgba(255,90,0,.55)); animation: cv-eye 5s ease-in-out infinite; }
 .lf-cv.is-eye .lf-cv-cap p { color: #ffb37a; letter-spacing: .1em; text-transform: uppercase; font-size: 11px; font-weight: 700; }
@@ -7235,6 +7236,23 @@ var BD_NEW = [
   ['lead52', 'Eternal Dynasty', 'friends', 'Fifty-two weeks finished in front, all told.', '#6366f1', 'lead', 52, 'radar', .72],
   ['tgt26', 'Dead Centre', 'target', 'Your priority muscles on target twenty-six weeks running.', '#10b981', 'tstreak', 26, 'shatter', .4]
 ];
+/* THE DAY STREAKS: every five days up to two hundred, each with a short line of its own. A day counts if you trained, pressed rest, or the programme had nothing on it; a programme day you missed breaks the run. */
+var BD_DST = [[5, "Rookie", "Motivation or dedication? Time will tell."], [10, "Warmed Up", "Ten days in. The habit is forming."], [15, "Stacking Days", "Showing up is most of the work."], [20, "No Excuses", "You stopped asking if you feel like it."], [25, "Twenty-Five Proof", "Twenty-five days of proof."], [30, "Locked In", "This is now your identity."], [35, "Dialled", "Ordinary days, done extraordinarily well."], [40, "Forty Deep", "Most people quit by now."], [45, "Relentless", "Momentum is doing the heavy lifting."], [50, "Fifty Days", "Fifty days. This is who you are."], [55, "Unmoved", "Tired, busy, you went anyway."], [60, "Two Months", "A routine now, not a project."], [65, "Iron Routine", "The bar does not care how you feel."], [70, "Ten Weeks", "Seventy days of keeping your word."], [75, "Seventy-Five", "Three quarters of a hundred, all earned."], [80, "Compounding", "Discipline, quietly adding up."], [85, "Unbroken", "Not one gap in eighty-five days."], [90, "A Season", "A whole season of showing up."], [95, "Almost There", "Five days from triple digits."], [100, "Centurion", "A hundred days. Few ever get here."], [105, "Past the Hundred", "Still going. Nobody asked you to stop."], [110, "Steady State", "This is just what you do now."], [115, "Second Nature", "It is part of you now."], [120, "Four Months", "A third of a year, every day."], [125, "Quiet Force", "No noise. Just results."], [130, "Layers", "Every day sits on the last."], [135, "Unshakeable", "Nothing knocks this over."], [140, "Twenty Weeks", "Half a year is not far."], [145, "Long Game", "You are playing it right."], [150, "One Fifty", "Half of two hundred. All of you."], [155, "Forged", "Made, not born."], [160, "Iron Will", "Will beats talent when talent rests."], [165, "Beyond Habit", "This is character now."], [170, "Rare Air", "Hardly anyone is up here."], [175, "Legend Territory", "People will hear about this."], [180, "Half a Year", "Six months. The habit never blinked."], [185, "Unstoppable", "What is left to stop you?"], [190, "Nearly There", "Ten days to two hundred."], [195, "Final Stretch", "Five more. You know you will."], [200, "Two Hundred", "Immortal. Keep it going."]], BD_TAG = {};
+(function () {
+  var ids = [];
+  BD_DST.forEach(function (r) { var id = 'd' + r[0]; ids.push(id); BD_TAG[id] = r[2]; BD_NEW.push([id, r[1], 'streak', r[0] + ' days in a row, every one trained or a planned rest.', '#ff7a1a', 'dst', r[0]]); });
+  for (var i = 0; i < ids.length; i += 5) BD_LAD.push(['dd' + i, ids.slice(i, i + 5)]);
+})();
+function lfDayRun() {
+  var ws = woSorted(), out = { best: 0, hit: {} }, on = {}, dows = {}, run = 0, tk = ymd(today());
+  if (!ws.length) return out;
+  ws.forEach(function (w) { on[w.d] = 1; }); lfProg().days.forEach(function (x) { dows[x.dow] = 1; });
+  for (var d = parseYmd(ws[0].d), g = 0; ymd(d) <= tk && g < 2000; d = addDays(d, 1), g++) {
+    var k = ymd(d), ok = on[k] || S.rd[k] === 1 || !dows[d.getDay()];
+    if (ok) { run++; if (!out.hit[run]) out.hit[run] = k; if (run > out.best) out.best = run; } else if (k < tk) run = 0;
+  }
+  return out;
+}
 var BD_NEWBY = {}; BD_NEW.forEach(function (r) { BD_NEWBY[r[0]] = r; });
 /* a rung's finish, where a badge that is being moved to it has none */
 var BD_RUNGFX = ['', 'ice', 'aurora', 'opal', 'prism'];
@@ -7658,12 +7676,13 @@ function lfBadges() {
     });
   });
   /* THE MISSING RUNGS: each is won on the first day its running figure reaches its count */
-  var lm = lfLadderMetrics(ws), leadD = [], synD = Object.keys(fx.sy || {}).map(function (k) { return fx.sy[k]; }).sort();
+  var dr = lfDayRun(), lm = lfLadderMetrics(ws), leadD = [], synD = Object.keys(fx.sy || {}).map(function (k) { return fx.sy[k]; }).sort();
   wks.forEach(function (m) { var v = fx.wk[m]; if (m >= thisMonF) return; if (frWon(v)) leadD.push(ymd(addDays(parseYmd(m), 6))); });
   BD_NEW.forEach(function (r) {
     var m = r[5], th = r[6];
     if (m === 'duo') { if (synD.length >= th) won(r[0], synD[th - 1]); return; }
     if (m === 'lead') { if (leadD.length >= th) won(r[0], leadD[th - 1]); return; }
+    if (m === 'dst') { if (dr.hit[th]) won(r[0], dr.hit[th]); return; }
     if (!(m in lm.last)) return;
     for (var q = 0; q < lm.snaps.length; q++) if (lm.snaps[q][1][m] >= th) { won(r[0], lm.snaps[q][0]); break; }
   });
@@ -7717,7 +7736,7 @@ function lfBadges() {
   prog.sands = [Math.min(Math.floor(minT / 60), 150), 150]; prog.vein = [Math.min(prDays.length, 150), 150]; prog.wayf = [Math.min(exNN, 120), 120]; prog.dontmiss = [Math.min(fullRun, 4), 4];
   [['ss', [5, 25, 100, 250, 600]], ['ds', [5, 25, 100, 250, 600]], ['wu', [25, 100, 300, 750, 1500]]].forEach(function (c) { c[1].forEach(function (th, i) { prog[c[0] + (i === 3 ? 'x' : i === 4 ? 'm' : i + 1)] = [Math.min(tcn[c[0]], th), th]; }); });
   BD_NEW.forEach(function (r) {
-    var m = r[5], th = r[6], val = m === 'duo' ? synD.length : m === 'lead' ? leadD.length : m === 'amrun' ? amBest : m === 'tstreak' ? tStreak : lm.last[m] || 0, hrs = m === 'min' || m === 'cdm';
+    var m = r[5], th = r[6], val = m === 'dst' ? dr.best : m === 'duo' ? synD.length : m === 'lead' ? leadD.length : m === 'amrun' ? amBest : m === 'tstreak' ? tStreak : lm.last[m] || 0, hrs = m === 'min' || m === 'cdm';
     prog[r[0]] = hrs ? [Math.min(Math.floor(val / 60), th / 60), th / 60] : [Math.min(val, th), th];
   });
   prog.drakefire = [Math.min(ws.length, 750), 750]; prog.phoenix = [Math.min(phBest, 10), 10]; prog.leviathan = [Math.min(Math.round(vol / uk), 25e6), 25e6]; prog.ouroboros = [Math.min(stBest, 104), 104];
@@ -8989,7 +9008,7 @@ function lfCoinView(x, earnedNow) {
     + '<div class="lf-cv-cap"><div class="lf-cv-k"></div><div class="lf-cv-n"></div><p></p><div class="lf-cv-h">Drag to spin · tap to flip</div></div></div>');
   var kd = $('.lf-cv-k', v); kd.textContent = earnedNow ? (x.b.k === 'month' ? 'Medal won' : 'Badge earned') : x.r ? 'Personal best' : x.d ? BD_KIND[x.b.k].n : x.b.k === 'month' ? 'This month' : 'Not yet earned';
   if (x.d) kd.style.color = x.b.c || BD_KIND[x.b.k].c;
-  $('.lf-cv-n', v).textContent = x.b.n; if (x.b.id === 'creator' && x.d) v.classList.add('is-eye');
+  $('.lf-cv-n', v).textContent = x.b.n; if (BD_TAG[x.b.id]) { var tg = el('<div class="lf-cv-tg"></div>'); tg.textContent = BD_TAG[x.b.id]; $('.lf-cv-n', v).after(tg); } if (x.b.id === 'creator' && x.d) v.classList.add('is-eye');
   /* the pill names the level, if it is one of a run, and the finish */
   if (x.b.fx || x.b.lv) { var tl = el('<span class="lf-cv-tier"></span>');
     if (x.b.t === 5) tl.classList.add('is-owner');
@@ -9191,6 +9210,7 @@ var BD_COLL = [
   ['fri', 'Friends', '#6366f1', ['duo1', 'duo10', 'duo50', 'lead1', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer', 'unbeat']]
 ];
 /* the new rungs go into the collection their ladder was already in */
+BD_COLL.push(['dys', 'Day streaks', '#ff7a1a', BD_DST.map(function (r) { return 'd' + r[0]; })]);
 (function () {
   var home = {}; BD_COLL.forEach(function (c) { c[3].forEach(function (id) { home[id] = c; }); });
   BD_LAD.forEach(function (l) { var c = l[1].map(function (id) { return home[id]; }).filter(Boolean)[0]; if (!c) return; l[1].forEach(function (id) { if (!home[id] && c[3].indexOf(id) < 0) c[3].push(id); }); });
@@ -9483,6 +9503,7 @@ else if (!S.bseen.v2) { var BS2 = { goal: 1, tgt1: 1, tgtall: 1, tgt4: 1, quad: 
 /* and the milestones, which a long record may already hold */
 /* the technique medals and the new rungs: whatever a long record already holds is not news */
 if (S.bseen && !S.bseen.v11) { var BS11 = {}; BD_NEW.forEach(function (r) { BS11[r[0]] = 1; }); ['ss', 'ds', 'wu'].forEach(function (f) { ['1', '2', '3', 'x', 'm'].forEach(function (k) { BS11[f + k] = 1; }); }); lfBadges().forEach(function (x) { if (x.d && BS11[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v11 = 1; lfSave(); }
+if (S.bseen && !S.bseen.v12) { var BS12 = lfBadges(); BS12.forEach(function (x) { if (x.d && BD_TAG[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v12 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v10) { var BS10 = { wo250: 1, wo500: 1, v500k: 1, ton25: 1, wkvol: 1, sets40: 1, setwk100: 1, pr25: 1, pr50: 1, ex15: 1, ex80: 1, sig50: 1, sig100: 1, tgt12: 1, allmus4: 1, post50: 1, cdwk: 1, cardio100: 1, cdh50: 1 }; lfBadges().forEach(function (x) { if (x.d && BS10[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v10 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v9) { var BS9 = { allmus: 1, dec31: 1, friday13: 1, leap: 1, ironwk: 1, plate4: 1, wo365: 1, st52: 1, v10m: 1 }; ['sets500', 'sets2k', 'sets5k', 'hr25', 'hr100', 'hr250', 'rp10k', 'rp50k', 'rp100k', 'mo3', 'mo6', 'mo12'].forEach(function (k) { BS9[k] = 1; }); lfBadges().forEach(function (x) { if (x.d && BS9[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v9 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v8) { var BS8 = { zero: 1, newyear: 1, century: 1, heavy2: 1, twice: 1, wave: 1, trio: 1, landslide: 1, photo: 1, pack: 1 }; ['chest', 'bk', 'sh', 'arm'].forEach(function (pp) { BS8[pp + '50'] = BS8[pp + '100'] = BS8[pp + '200'] = 1; }); lfBadges().forEach(function (x) { if (x.d && BS8[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v8 = 1; lfSave(); }
