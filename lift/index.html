@@ -8144,12 +8144,12 @@ BD_LAD.forEach(function (l) {
 })();
 /* NO TWO BADGES LOOK ALIKE ON THE SHELF. A sweep of all of them found about sixty pairs that differed only by the number or word in the middle: the same silhouette, the same finish, nearly the same colour. The day streaks are eight ladders of five, each with its own shape and colour, and the rungs of a ladder differ by finish; every other pair was moved to a shape or colour nothing else near it wears. tests/lift.js holds the whole set to this. */
 var BD_FIX = {
-  first: [null], wo10: ['squircle'], st4: ['shield'], pr10: ['crest'], plate3: ['trap'], pack: [null, '#a855f7'], onfire: ['burst'], bk50: ['hextall'],
-  hr25: ['pent'], rp10k: ['rosette'], ex80: ['star5', '#06b6d4'], sets500: ['sun'], sets40: ['hept', '#6366f1'], dawn: [null, '#fb7185'], dec31: ['star5', '#f43f5e'],
+  first: [null], wo10: ['ellt'], st4: ['tall'], pr10: ['crest'], plate3: ['trap'], pack: [null, '#a855f7'], onfire: ['burst'], bk50: ['hextall'],
+  hr25: ['pent'], rp10k: ['rosette'], ex80: ['star5', '#06b6d4'], sets500: ['sun'], sets40: ['hextall', '#6366f1'], dawn: [null, '#fb7185'], dec31: ['star5', '#f43f5e'],
   wum: ['burst'], rp250k: ['sun'], leg400: ['oct'], cardio200: ['trid'], wave: ['egg']
 };
 (function () {
-  var shapes = ['hexp', 'shield', 'oct', 'hept', 'scallop', 'burst', 'sun', 'trid'], cols = ['#ff7a1a', '#ef3b2d', '#ec4899', '#8b5cf6', '#3b82f6', '#22b8cf', '#eab308', '#cbd2dc'];
+  var shapes = ['hexp', 'pent', 'shard', 'crest', 'egg', 'capsule', 'flare', 'star5'], cols = ['#ff7a1a', '#ef3b2d', '#ec4899', '#8b5cf6', '#3b82f6', '#22b8cf', '#eab308', '#cbd2dc'];
   BD_DST.forEach(function (r, i) { var li = Math.floor(i / 5); BD_FIX['d' + r[0]] = [shapes[li], cols[li]]; });
   BADGES.forEach(function (o) { var f = BD_FIX[o.id]; if (!f) return; if (f[0]) BD_SHI[o.id] = f[0]; if (f[1]) o.c = f[1]; });
 })();
