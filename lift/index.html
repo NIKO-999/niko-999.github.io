@@ -293,6 +293,9 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-aim:not(.is-info)::after { content: ' ›'; color: var(--dim); }
 .lf-aim.is-info { color: var(--dim); cursor: default; }
 .lf-aim.is-up { color: var(--good); }
+/* A STALLED LIFT is a tag and the figure, never a sentence: the tag says what, the figure says what to do. Neutral, because a stall is not a failure. */
+.lf-aim.is-stall { display: flex; align-items: center; gap: 8px; }
+.lf-aim-k { font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 11%, transparent); color: var(--dim); line-height: 1.2; }
 .lf-ss-rest.is-ready { color: var(--good); }
 
 /* ── the day: steps, food, water ── */
@@ -890,6 +893,13 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-sum b { display: block; font-size: 16px; font-weight: 700; }
 .lf-sum span { font-size: 11px; color: var(--dim); }
 .lf-wo-ex { margin-top: 14px; }
+/* NEXT TIME: the lift on the left, what to do on the right in one figure, a hairline between. The lifts to add weight to are in the good colour. */
+.lf-nx { display: flex; align-items: center; justify-content: space-between; gap: 14px; width: 100%; text-align: left; background: none; border: 0; padding: 13px 0; color: inherit; font: inherit; border-top: 1px solid var(--line); min-height: 44px; }
+.lf-nx:first-of-type { border-top: 0; }
+.lf-nx b { display: block; font-weight: 600; font-size: 15px; }
+.lf-nx span { display: block; font-size: 12px; color: var(--dim); margin-top: 2px; }
+.lf-nx em { font-style: normal; font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lf-nx.is-up em { color: var(--good); }
 .lf-wo-ex b { font-weight: 600; }
 .lf-wo-ex div { font-size: 12.5px; color: var(--dim); margin-top: 4px; font-variant-numeric: tabular-nums; }
 .lf-hero { font-size: 40px; font-weight: 800; letter-spacing: -.03em; line-height: 1; margin-top: 4px; }
@@ -3505,6 +3515,11 @@ function lfPaintSession() {
     $('.lf-tg', card).textContent = (e.tg ? lfTgTxt(e.tg) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs);
     $('.lf-aim', card).textContent = aim.note;
     $('.lf-aim', card).classList.toggle('is-up', !!aim.up);
+    if (aim.stall && aim.sets && aim.sets.length) {
+      var aimEl = $('.lf-aim', card), aimF = (aim.fill || aim.sets)[0];
+      aimEl.classList.add('is-stall'); aimEl.setAttribute('aria-label', aim.note);
+      aimEl.innerHTML = '<i class="lf-aim-k">Stalled</i><span></span>'; $('span', aimEl).textContent = 'Try ' + fmtW(aimF.w) + ' × ' + aimF.r;
+    }
     if (!aim.note) $('.lf-aim', card).remove();
     else if (!aim.sets.length) { $('.lf-aim', card).classList.add('is-info'); $('.lf-aim', card).disabled = true; }
     else $('.lf-aim', card).addEventListener('click', function () {
@@ -3916,8 +3931,9 @@ function lfSummary(w, prs, review) {
   if (nx.length) {
     var nl = el('<div class="lf-fin-l lf-fin-sets" id="lfFinNext"><div class="lf-cap">Next time</div></div>');
     nx.forEach(function (r) {
-      var x = el('<button type="button" class="lf-wo-ex lf-tap"><b></b><div></div></button>');
-      $('b', x).textContent = r.n; $('div', x).textContent = r.kind + ' · ' + r.txt;
+      var x = el('<button type="button" class="lf-nx lf-tap"><div><b></b><span></span></div><em></em></button>');
+      if (r.rank === 0) x.classList.add('is-up');
+      $('b', x).textContent = r.n; $('span', x).textContent = r.kind; $('em', x).textContent = r.txt;
       x.addEventListener('click', function () { lfExSheet(r.id); });
       nl.appendChild(x);
     });

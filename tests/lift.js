@@ -2371,7 +2371,7 @@ const freeze = (at) => `(() => {
       const o = await ctx(seed([sess('a', '2026-10-19', [7, 6, 6]), sess('b', '2026-10-26', [7, 6, 6]), sess('c', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
       await o.page.click('#lfGo'); await settle(o.page);
       const aim = await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent();
-      ok('three sessions at 60 with no rep gained is a stall, and the aim is a lighter weight', aim === 'Stalled for 3 sessions. Try 55 × 5', aim);
+      ok('three sessions at 60 with no rep gained is a stall, and the aim is a lighter weight', /^Stalled\s*Try 55 × 5$/.test(aim) && await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim-k').count() === 1, aim);
       await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').click(); await settle(o.page);
       ok('one tap takes the lighter week', (await o.page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '55,5,55,5,55,5');
       for (let i = 0; i < 3; i++) await o.page.locator('.lf-session .lf-ex').first().locator('.lf-chk').nth(i).click();
