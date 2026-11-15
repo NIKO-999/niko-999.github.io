@@ -5688,15 +5688,18 @@ function lfPlugin() {
   return null;
 }
 var LF_WGT = lfPlugin(), lfWgLast = '', lfWgT = 0, lfWRest = 0;
+/* WHAT THIS BUILD CAN DO. Health needs a capability the build is signed with, and a Health call without it crashes the app, so Health is offered only once the build says it has it. Until the answer arrives, or if there is none, nothing is offered. */
+var lfCaps = { health: false, group: false };
+if (LF_WGT && LF_WGT.caps) { try { LF_WGT.caps().then(function (r) { if (r) { lfCaps = { health: !!r.health, group: !!r.group }; if (typeof view !== 'undefined' && view === 'you' && typeof lfRender === 'function') lfRender(); } }, function () {}); } catch (e) {} }
 /* what the Watch sends back is heard from here, once the plugin is known */
 if (LF_WGT && LF_WGT.addListener) { try { LF_WGT.addListener('watchMsg', function (m) { lfWatchMsg(m); }); } catch (e) {} }
 /* ── APPLE HEALTH, in the iPhone app only: a finished workout is saved to Health as a strength session (its start, its end and its name, never a set or a weight), and your latest body weight can be read back. Both are switched on by you, here, and the first press is when iPhone asks. */
 function lfHealthSave(w) {
-  if (!LF_WGT || !S.hk || !w || (S.hkd && S.hkd[w.id])) return;
+  if (!LF_WGT || !lfCaps.health || !S.hk || !w || (S.hkd && S.hkd[w.id])) return;
   LF_WGT.healthSave({ start: w.s, end: w.e, title: w.n }).then(function (r) { if (r && r.ok) { S.hkd = S.hkd || {}; S.hkd[w.id] = 1; lfSave(); } }, function () {});
 }
 function lfHealthCard() {
-  if (!LF_WGT || !LF_WGT.healthAuth) return null;
+  if (!LF_WGT || !LF_WGT.healthAuth || !lfCaps.health) return null;
   var c = el('<div class="lf-card" id="lfHealth"><div class="lf-lab" style="margin-bottom:10px">Apple Health</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfHkSave"></button><button type="button" class="lf-btn" style="flex:1" id="lfHkWt">Read weight</button></div></div>');
   var sv = $('#lfHkSave', c);
   function paint() { sv.textContent = S.hk ? 'Saving workouts · on' : 'Save workouts'; sv.classList.toggle('is-ink', !!S.hk); sv.setAttribute('aria-pressed', S.hk ? 'true' : 'false'); }

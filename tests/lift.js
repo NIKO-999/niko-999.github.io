@@ -2392,13 +2392,15 @@ const freeze = (at) => `(() => {
     await c6.addInitScript(freeze('2026-10-30T18:00:00'));
     await c6.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
     await c6.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, mseen: RK_SEEN, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [{ id: 'w1', d: '2026-10-27', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8 }] }] }] }))}); })();`);
-    await c6.addInitScript(`window.__calls = []; window.__reg = []; window.Capacitor = { isNativePlatform: () => true, registerPlugin: (n) => { window.__reg.push(n); return new Proxy({ addListener: () => Promise.resolve({ remove() {} }) }, { get: (t, k) => t[k] || ((a) => { window.__calls.push([k, a]); return Promise.resolve(k === 'readPlan' ? { cancelled: true } : {}); }) }); } };`);
+    await c6.addInitScript(`window.__calls = []; window.__reg = []; window.Capacitor = { isNativePlatform: () => true, registerPlugin: (n) => { window.__reg.push(n); return new Proxy({ addListener: () => Promise.resolve({ remove() {} }) }, { get: (t, k) => t[k] || ((a) => { window.__calls.push([k, a]); return Promise.resolve(k === 'readPlan' ? { cancelled: true } : k === 'caps' ? { health: true, group: true } : {}); }) }); } };`);
     const pg6 = await c6.newPage();
     pg6.on('pageerror', (e) => errors.push(String(e)));
     await pg6.goto(URL); await pg6.waitForTimeout(2600);
     ok('the page asks Capacitor for the plugin by name', await pg6.evaluate(() => window.__reg.join()) === 'LiftWidgets');
     const snap = await pg6.evaluate(() => window.__calls.filter((x) => x[0] === 'setSnapshot').map((x) => JSON.parse(x[1].json)));
     ok('and the widgets are handed this week, with the workout that was logged', snap.length >= 1 && snap[0].week.n === 1 && snap[0].week.days[1] === 1 && snap[0].week.goal === 3, snap);
+    await pg6.click('.lf-bar [data-v="you"]'); await settle(pg6);
+    ok('Health is offered once the build says it has the capability', await pg6.locator('#lfHealth').count() === 1);
     await pg6.click('.lf-bar [data-v="lib"]'); await settle(pg6);
     await pg6.click('#lfReadRt'); await settle(pg6);
     ok('Read a routine offers a photo and a PDF as well as pasted text', await top(pg6).locator('.lf-pln-src button').count() === 2, await top(pg6).locator('.lf-pln-src button').allTextContents());

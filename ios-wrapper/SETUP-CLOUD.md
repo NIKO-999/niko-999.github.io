@@ -47,3 +47,13 @@ When it finishes, App Store Connect > your app > **TestFlight** shows the build 
 - Each run makes a new build number on its own.
 - Your workouts live in Safari, not in this app: use Copy a backup there and Restore here.
 - To send the app to everyone, submit a TestFlight build for review from App Store Connect, after adding screenshots and a privacy policy.
+
+## The App Group and Health (once, by hand)
+
+The widgets read the app's data through an App Group, and saving workouts to Health needs its own capability. Apple's build key cannot create an App Group, so it is made once in the Apple Developer account:
+
+1. developer.apple.com/account, Certificates, Identifiers & Profiles, Identifiers, **+**, **App Groups**. Identifier: `group.` followed by the app's bundle ID, exactly.
+2. Open the app's own ID, tick **App Groups** (Configure, pick that group) and **HealthKit**, Save.
+3. Open the `.widgets` ID, tick **App Groups**, pick the same group, Save.
+
+Then run the workflow with **capabilities** ticked. Left unticked (the default) the build is signed without them: the widgets show no data and Health is not offered, and nothing else changes.

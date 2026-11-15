@@ -41,7 +41,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         CAPPluginMethod(name: "haptic", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "keepAwake", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "watchAct", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "shareStory", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "shareStory", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "caps", returnType: CAPPluginReturnPromise)
     ]
 
     // The Watch gets the same snapshot and the rest end time, over WatchConnectivity.
@@ -193,6 +194,13 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
     }
 
     private var groupId: String { "group." + (Bundle.main.bundleIdentifier ?? "") }
+
+    /// WHAT THIS BUILD HAS BEEN SIGNED FOR. Health needs its capability on the app and a Health call without it does not fail, it crashes the app, so the build says (LiftCaps in its Info.plist) and the page offers Health only when it is true. The App Group is asked of the system itself: if the shared container opens, the widgets can be handed their data.
+    @objc func caps(_ call: CAPPluginCall) {
+        let health = (Bundle.main.object(forInfoDictionaryKey: "LiftCaps") as? Bool) ?? false
+        let group = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId) != nil
+        call.resolve(["health": health, "group": group])
+    }
 
     @objc func setSnapshot(_ call: CAPPluginCall) {
         guard let json = call.getString("json") else { call.reject("no snapshot"); return }

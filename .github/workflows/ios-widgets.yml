@@ -7,6 +7,11 @@ name: Lift for iPhone with widgets (TestFlight)
 
 on:
   workflow_dispatch:
+    inputs:
+      capabilities:
+        description: 'Sign in the App Group and Health. Needs the App Group made once in the Apple Developer account (see ios-wrapper/SETUP-CLOUD.md); without it the export fails.'
+        type: boolean
+        default: false
 
 jobs:
   build:
@@ -61,6 +66,7 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :NSSupportsLiveActivities bool true" ios/App/App/Info.plist || /usr/libexec/PlistBuddy -c "Set :NSSupportsLiveActivities true" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string Lift reads your body weight from Health so you do not type it twice." ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :NSHealthUpdateUsageDescription string Lift saves your finished workouts to Health." ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :LiftCaps bool ${{ inputs.capabilities }}" ios/App/App/Info.plist || /usr/libexec/PlistBuddy -c "Set :LiftCaps ${{ inputs.capabilities }}" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string Lift saves your workout video to Photos." ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string instagram-stories" ios/App/App/Info.plist || true
@@ -98,6 +104,7 @@ jobs:
       # The archive is unsigned, so nothing in it says which capabilities the app has (the App Group the widgets read
       # the app's data through, Health). Stamping the entitlements in here, and printing them, is what the export keeps.
       - name: Keep the entitlements in the archive
+        if: ${{ inputs.capabilities }}
         working-directory: ios-wrapper/ios/App
         run: |
           APP="$RUNNER_TEMP/Lift.xcarchive/Products/Applications/App.app"
