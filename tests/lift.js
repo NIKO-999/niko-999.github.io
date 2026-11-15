@@ -2412,7 +2412,7 @@ const freeze = (at) => `(() => {
   {
     const dd = (n) => '2026-11-' + String(n).padStart(2, '0');
     const wk = (n) => ({ id: 'q' + n, d: dd(n), s: new Date(dd(n) + 'T07:00:00').getTime(), e: new Date(dd(n) + 'T07:50:00').getTime(), n: 'Press day', rt: 'r1', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8 }, { w: 60, r: 8 }] }] });
-    const o = await ctx({ unit: 'kg', goal: 7, rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 12, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
+    const o = await ctx({ unit: 'kg', goal: 7, wkSum: '2000-01-01', rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 12, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
     await o.page.click('#lfGo'); await settle(o.page);
     const ex = o.page.locator('.lf-session .lf-ex').first();
     await ex.locator('.lf-aim').click().catch(() => {}); await settle(o.page);
@@ -2425,7 +2425,7 @@ const freeze = (at) => `(() => {
     ok('it can be shared as the moving story, with Save', await o.page.locator('#lfWsShare').count() === 1);
     ok('and it comes once: the week is marked as reported', (await store(o.page)).wkSum === '2026-11-09');
     await o.c.close();
-    const q = await ctx({ unit: 'kg', goal: 7, rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
+    const q = await ctx({ unit: 'kg', goal: 7, wkSum: '2000-01-01', rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
     await q.page.click('#lfGo'); await settle(q.page);
     const qe = q.page.locator('.lf-session .lf-ex').first(); await qe.locator('.lf-aim').click().catch(() => {}); await settle(q.page);
     for (let i = 0; i < 2; i++) await qe.locator('.lf-chk').nth(i).click();
@@ -2452,7 +2452,7 @@ const freeze = (at) => `(() => {
     await c7.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
     const p7 = await c7.newPage();
     p7.on('pageerror', (e) => errors.push(String(e)));
-    await p7.route('**/lift/index.html', async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p7.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
     await p7.goto(URL); await p7.waitForTimeout(600);
     const eff = await p7.evaluate(() => {
       const out = {}; const box = document.createElement('div'); box.style.cssText = 'position:fixed;top:0;left:0'; document.body.appendChild(box);
@@ -2471,7 +2471,7 @@ const freeze = (at) => `(() => {
     const c8 = await browser.newContext(Object.assign({}, PHONE, { reducedMotion: 'reduce' }));
     await c8.addInitScript(freeze('2026-10-30T18:00:00')); await c8.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
     const p8 = await c8.newPage();
-    await p8.route('**/lift/index.html', async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p8.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
     await p8.goto(URL); await p8.waitForTimeout(600);
     ok('with Reduce Motion on, none of them moves', await p8.evaluate(() => ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic'].every((id) => { const r = document.createElement('div'); r.className = 'fr-ti'; const te = window.__tt.lfTitleEl(id); r.appendChild(te); document.body.appendChild(r); return [...te.querySelectorAll('*'), te].every((n) => ['', '::before', '::after'].every((ps) => getComputedStyle(n, ps || null).animationName === 'none')); })));
     await c8.close();
