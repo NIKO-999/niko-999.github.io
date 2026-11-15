@@ -1876,6 +1876,7 @@ const freeze = (at) => `(() => {
     ok('it holds appearance and the wheel', await page.locator('#lfTheme #lfMode').isVisible() && await page.locator('#lfWheel').isVisible());
     const tok = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('cream to begin with', (await tok()).toLowerCase() === '#e1d4c2', await tok());
+    await page.locator('#lfWheel').scrollIntoViewIfNeeded(); await settle(page);
     const b = await page.locator('#lfWheel').boundingBox();
     /* the bottom of the ring is 180 degrees: a cyan */
     await page.mouse.move(b.x + b.width / 2, b.y + b.height - 12); await page.mouse.down(); await page.mouse.up(); await settle(page);
