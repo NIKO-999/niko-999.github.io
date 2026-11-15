@@ -656,37 +656,17 @@ const freeze = (at) => `(() => {
   }
 
 
-  /* ── how it's done: a video one press away ── */
+  /* ── how it's done: one button, a YouTube search on the exercise's own name. No way to paste a video of your own. ── */
   {
-    const { c, page } = await ctx();
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, lk: { rdl: 'https://youtu.be/abc123' } });
     const sh = () => page.locator('.lf-sheet').last();
     await page.click('.lf-bar [data-v="lib"]');
     await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).click(); await settle(page);
     const a = await sh().locator('.lf-how-go').evaluate((x) => ({ href: x.href, t: x.target, rel: x.rel, txt: x.textContent }));
     ok('every exercise opens a YouTube search on its own name', a.href === 'https://www.youtube.com/results?search_query=' + encodeURIComponent('Romanian deadlift exercise proper form')
       && a.t === '_blank' && /noopener/.test(a.rel) && /Watch how it's done/.test(a.txt), a);
-    ok('and nothing is uploaded or stored to do it', await page.evaluate(() => { const v = JSON.parse(localStorage.getItem('lift.v1') || 'null'); return !v || (!(v.wo || []).length && !(v.ex || []).length); }) && await sh().locator('input[type=file]').count() === 0);
-    await sh().locator('.lf-how-l').click();
-    await sh().locator('.lf-how input').fill('javascript:alert(1)'); await sh().locator('.lf-how .lf-btn:not(.lf-how-go)').click();
-    ok('a link that is not a web address is refused', await sh().locator('.lf-how input').count() === 1 && /youtube\.com\/results/.test(await sh().locator('.lf-how-go').getAttribute('href')));
-    await sh().locator('.lf-how input').fill('youtu.be/abc123'); await sh().locator('.lf-how .lf-btn:not(.lf-how-go)').click();
-    ok('a specific video replaces the search', await sh().locator('.lf-how-go').getAttribute('href') === 'https://youtu.be/abc123'
-      && /Your saved video/.test(await sh().locator('.lf-how-sub').textContent()));
-    await page.reload(); await page.waitForTimeout(400);
-    await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).click(); await settle(page);
-    ok('and is still there next time', await sh().locator('.lf-how-go').getAttribute('href') === 'https://youtu.be/abc123');
-    ok('only on that exercise', await (async () => {
-      await page.keyboard.press('Escape'); await settle(page);
-      await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Hip thrusts' + '$') }) }).click(); await settle(page);
-      const h = await sh().locator('.lf-how-go').getAttribute('href');
-      await page.keyboard.press('Escape'); await settle(page);
-      await page.locator('#lfLibList .lf-li', { has: page.locator('b', { hasText: new RegExp('^' + 'Romanian deadlift' + '$') }) }).click(); await settle(page);
-      return /search_query=Hip%20thrusts/.test(h);
-    })());
-    await sh().locator('.lf-how-l').click();
-    ok('and it can go back to the search, with Undo', /youtube\.com\/results/.test(await sh().locator('.lf-how-go').getAttribute('href')));
-    await page.click('.lf-toast button');
-    ok('Undo puts the saved video back', await sh().locator('.lf-how-go').getAttribute('href') === 'https://youtu.be/abc123');
+    ok('there is no way to use a video of your own', await sh().locator('.lf-how-l').count() === 0 && !/specific video|saved video/i.test(await sh().locator('.lf-how').textContent()));
+    ok('and a link saved by an earlier version is not followed, or kept', !(await store(page)).lk);
     await c.close();
   }
 
@@ -2266,6 +2246,10 @@ const freeze = (at) => `(() => {
     const o = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page);
     await o.page.click('#lfReadRt'); await settle(o.page);
+    await top(o.page).locator('#lfPlnT').fill('Push Day\nExercise Sets Reps\nFlat DB Press 3 8-10\nSquat - 5 sets of 5'); await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
+    const tbl = await top(o.page).locator('.lf-li b').allTextContents(), tblN = await top(o.page).locator('input[aria-label="Routine name"]').evaluateAll((x) => x.map((e) => e.value));
+    ok('a table header is not a day, a Flat DB press is the dumbbell bench and a bare Squat is the barbell squat', tblN.join() === 'Push Day' && /dumbbell bench/i.test(tbl[0]) && /^barbell squat$/i.test(tbl[1]), [tblN, tbl]);
+    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfReadRt'); await settle(o.page);
     ok('Read a routine opens with a place to paste', await top(o.page).locator('#lfPlnT').count() === 1);
     ok('and offers no photo or PDF button on the web, where nothing can read one', await top(o.page).locator('.lf-pln-src button').count() === 0);
     await top(o.page).locator('#lfPlnT').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
@@ -2407,7 +2391,7 @@ const freeze = (at) => `(() => {
     await c6.addInitScript(freeze('2026-10-30T18:00:00'));
     await c6.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
     await c6.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, mseen: RK_SEEN, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [{ id: 'w1', d: '2026-10-27', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8 }] }] }] }))}); })();`);
-    await c6.addInitScript(`window.__calls = []; window.__reg = []; window.Capacitor = { isNativePlatform: () => true, registerPlugin: (n) => { window.__reg.push(n); return new Proxy({ addListener: () => Promise.resolve({ remove() {} }) }, { get: (t, k) => t[k] || ((a) => { window.__calls.push([k, a]); return Promise.resolve({}); }) }); } };`);
+    await c6.addInitScript(`window.__calls = []; window.__reg = []; window.Capacitor = { isNativePlatform: () => true, registerPlugin: (n) => { window.__reg.push(n); return new Proxy({ addListener: () => Promise.resolve({ remove() {} }) }, { get: (t, k) => t[k] || ((a) => { window.__calls.push([k, a]); return Promise.resolve(k === 'readPlan' ? { cancelled: true } : {}); }) }); } };`);
     const pg6 = await c6.newPage();
     pg6.on('pageerror', (e) => errors.push(String(e)));
     await pg6.goto(URL); await pg6.waitForTimeout(2600);
@@ -2419,7 +2403,34 @@ const freeze = (at) => `(() => {
     ok('Read a routine offers a photo and a PDF as well as pasted text', await top(pg6).locator('.lf-pln-src button').count() === 2, await top(pg6).locator('.lf-pln-src button').allTextContents());
     await pg6.locator('.lf-pln-src button').first().click(); await pg6.waitForTimeout(300);
     ok('and pressing one asks the phone to read it', await pg6.evaluate(() => window.__calls.filter((x) => x[0] === 'readPlan').length) === 1);
+    ok('and backing out of the picker says nothing', !/Nothing readable/.test(await pg6.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await c6.close();
+  }
+
+  /* ── SEVEN DAYS IN A WEEK: the weekly report comes up by itself, whatever the weekday, and says it was a perfect week ── */
+  {
+    const dd = (n) => '2026-11-' + String(n).padStart(2, '0');
+    const wk = (n) => ({ id: 'q' + n, d: dd(n), s: new Date(dd(n) + 'T07:00:00').getTime(), e: new Date(dd(n) + 'T07:50:00').getTime(), n: 'Press day', rt: 'r1', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8 }, { w: 60, r: 8 }] }] });
+    const o = await ctx({ unit: 'kg', goal: 7, rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 12, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
+    await o.page.click('#lfGo'); await settle(o.page);
+    const ex = o.page.locator('.lf-session .lf-ex').first();
+    await ex.locator('.lf-aim').click().catch(() => {}); await settle(o.page);
+    for (let i = 0; i < 2; i++) await ex.locator('.lf-chk').nth(i).click();
+    await o.page.click('#lfFinish'); await o.page.waitForTimeout(900);
+    await o.page.locator('#lfFinDone').click().catch(() => {});
+    await o.page.waitForSelector('#lfWeekSum', { timeout: 25000 }).catch(() => {});
+    ok('the seventh day of the week brings the weekly report up by itself, on a Wednesday', await o.page.locator('#lfWeekSum').count() === 1);
+    ok('and it says it was a perfect week', /Perfect week/.test(await o.page.locator('#lfWeekSum .lf-ws-k').textContent().catch(() => '')) && /Seven for seven/.test(await o.page.locator('#lfWeekSum .lf-ws-verdict').textContent().catch(() => '')));
+    ok('it can be shared as the moving story, with Save', await o.page.locator('#lfWsShare').count() === 1);
+    ok('and it comes once: the week is marked as reported', (await store(o.page)).wkSum === '2026-11-09');
+    await o.c.close();
+    const q = await ctx({ unit: 'kg', goal: 7, rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
+    await q.page.click('#lfGo'); await settle(q.page);
+    const qe = q.page.locator('.lf-session .lf-ex').first(); await qe.locator('.lf-aim').click().catch(() => {}); await settle(q.page);
+    for (let i = 0; i < 2; i++) await qe.locator('.lf-chk').nth(i).click();
+    await q.page.click('#lfFinish'); await q.page.waitForTimeout(900); await q.page.locator('#lfFinDone').click().catch(() => {}); await q.page.waitForTimeout(6000);
+    ok('six days is not seven: no report comes up on a Wednesday', await q.page.locator('#lfWeekSum').count() === 0);
+    await q.c.close();
   }
 
   /* ── THE IPHONE APP'S HOOKS: haptics, a screen that stays on, the set sent to the Watch and a set logged from it. The plugin is stood in for by a recorder. ── */

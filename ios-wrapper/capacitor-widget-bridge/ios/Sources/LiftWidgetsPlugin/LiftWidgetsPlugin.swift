@@ -4,6 +4,7 @@ import UIKit
 import UserNotifications
 import AVFoundation
 import Vision
+import ImageIO
 import PDFKit
 import PhotosUI
 import UniformTypeIdentifiers
@@ -305,13 +306,15 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         }
     }
 
-    private func finishPlan(_ lines: [String]) {
-        planCall?.resolve(["lines": lines]); planCall = nil
+    /// `cancelled` is for backing out of the picker, which is not the same as a picture with nothing readable in it.
+    private func finishPlan(_ lines: [String], cancelled: Bool = false) {
+        planCall?.resolve(["lines": lines, "cancelled": cancelled]); planCall = nil
     }
 
     public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
-        guard let r = results.first, r.itemProvider.canLoadObject(ofClass: UIImage.self) else { finishPlan([]); return }
+        guard let r = results.first else { finishPlan([], cancelled: true); return }
+        guard r.itemProvider.canLoadObject(ofClass: UIImage.self) else { finishPlan([]); return }
         r.itemProvider.loadObject(ofClass: UIImage.self) { obj, _ in
             guard let img = obj as? UIImage else { self.finishPlan([]); return }
             self.ocr(img) { self.finishPlan($0) }
@@ -345,11 +348,25 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         } else { finishPlan([]) }
     }
 
-    public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { finishPlan([]) }
+    public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) { finishPlan([], cancelled: true) }
 
     private func readAll(_ imgs: [UIImage], _ acc: [String]) {
         guard let first = imgs.first else { finishPlan(acc); return }
         ocr(first) { self.readAll(Array(imgs.dropFirst()), acc + $0) }
+    }
+
+    private static func cgOrientation(_ o: UIImage.Orientation) -> CGImagePropertyOrientation {
+        switch o {
+        case .up: return .up
+        case .upMirrored: return .upMirrored
+        case .down: return .down
+        case .downMirrored: return .downMirrored
+        case .left: return .left
+        case .leftMirrored: return .leftMirrored
+        case .right: return .right
+        case .rightMirrored: return .rightMirrored
+        @unknown default: return .up
+        }
     }
 
     /// Apple's text recognition. Words on the same row are joined left to right, so a table row stays one line.
@@ -371,7 +388,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         req.recognitionLevel = .accurate
         req.usesLanguageCorrection = false
         DispatchQueue.global(qos: .userInitiated).async {
-            try? VNImageRequestHandler(cgImage: cg, options: [:]).perform([req])
+            // A photo from the phone is stored upright-less with a rotation flag; without it a portrait shot is read sideways.
+            try? VNImageRequestHandler(cgImage: cg, orientation: Self.cgOrientation(img.imageOrientation), options: [:]).perform([req])
         }
     }
 }
