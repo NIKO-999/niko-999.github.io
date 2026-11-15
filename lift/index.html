@@ -4112,7 +4112,7 @@ function lfShareCardSheet(sp, name) {
   var file = function () { try { return new File([blob], name + '.' + ext, { type: mime.split(';')[0] }); } catch (e) { return null; } };
   var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.' + ext; document.body.appendChild(a); a.click(); a.remove(); };
   var toB64 = function (bl) { return new Promise(function (res) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.readAsDataURL(bl); }); };
-  var native = function (kind) { if (!blob) return; toB64(blob).then(function (d) { return LF_WGT.shareStory({ kind: kind, data: d, ext: ext, appId: LF_FB_APP_ID }); }).catch(function () {}); };
+  var native = function (kind) { if (!blob) return Promise.resolve(null); return toB64(blob).then(function (d) { return LF_WGT.shareStory({ kind: kind, data: d, ext: ext, appId: LF_FB_APP_ID }); }).catch(function () { return null; }); };
   if (ig) ig.addEventListener('click', function () { native('instagram'); });
   if (fb) fb.addEventListener('click', function () { native('facebook'); });
   gen.addEventListener('click', function () {
@@ -4121,7 +4121,11 @@ function lfShareCardSheet(sp, name) {
     var f = file();
     if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function () {}); else saveIt();
   });
-  save.addEventListener('click', function () { if (LF_WGT && LF_WGT.shareStory) native('sheet'); else saveIt(); });
+  /* in the iPhone app a download does nothing, so Save puts the video in Photos, and says so */
+  save.addEventListener('click', function () {
+    if (LF_WGT && LF_WGT.shareStory) native('save').then(function (r) { lfToast(r && r.ok ? 'Saved to Photos' : r && r.denied ? 'Allow Photos in Settings to save' : 'Could not save'); });
+    else saveIt();
+  });
   var DUR = 3600, HOLD = 1800, t0 = 0, chunks = [];
   var finish = function () {
     blob = new Blob(chunks, { type: mime.split(';')[0] || 'video/webm' }); if (dead) return;

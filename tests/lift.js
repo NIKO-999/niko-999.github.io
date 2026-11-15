@@ -2517,6 +2517,10 @@ const freeze = (at) => `(() => {
     await pg5.click('#lfCardFb'); await pg5.click('#lfCardShare'); await pg5.waitForTimeout(600);
     const kinds = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
     ok('Facebook and the share sheet each send it too', kinds.join() === 'instagram,facebook,sheet', kinds);
+    await pg5.click('#lfCardSave'); await pg5.waitForTimeout(500);
+    const kinds2 = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
+    ok('Save puts the video in Photos, not on a share sheet', kinds2[kinds2.length - 1] === 'save' && kinds2.length === 4, kinds2);
+    ok('and says whether it worked', /Could not save|Saved to Photos|Allow Photos/.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await c5.close();
   }
 

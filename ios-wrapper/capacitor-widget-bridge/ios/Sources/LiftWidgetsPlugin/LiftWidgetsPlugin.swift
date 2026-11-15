@@ -7,6 +7,7 @@ import Vision
 import ImageIO
 import PDFKit
 import PhotosUI
+import Photos
 import UniformTypeIdentifiers
 #if canImport(WidgetKit)
 import WidgetKit
@@ -127,6 +128,19 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         let kind = call.getString("kind") ?? "sheet"
         let ext = call.getString("ext") ?? "mp4"
         let appId = (call.getString("appId") ?? "").isEmpty ? (Bundle.main.bundleIdentifier ?? "") : (call.getString("appId") ?? "")
+        // SAVE: the video goes into Photos (add only: the app can put a video there and cannot read anything back)
+        if kind == "save" {
+            let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("lift-story-\(Int(Date().timeIntervalSince1970))." + ext)
+            do { try data.write(to: tmp) } catch { call.resolve(["ok": false]); return }
+            PHPhotoLibrary.requestAuthorization(for: .addOnly) { st in
+                guard st == .authorized || st == .limited else { call.resolve(["ok": false, "denied": true]); return }
+                PHPhotoLibrary.shared().performChanges({ PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: tmp) }) { ok, _ in
+                    try? FileManager.default.removeItem(at: tmp)
+                    call.resolve(["ok": ok])
+                }
+            }
+            return
+        }
         DispatchQueue.main.async {
             if kind == "instagram" || kind == "facebook" {
                 let scheme = kind == "instagram" ? "instagram-stories" : "facebook-stories"
