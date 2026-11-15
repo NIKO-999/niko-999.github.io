@@ -1241,8 +1241,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ti .tt-myth em { background: linear-gradient(100deg, #a78bfa, #38bdf8, #f472b6, #a78bfa) 0 0 / 300% 100% repeat-x; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-myth 8s linear infinite; }
 @keyframes tt-myth { to { background-position: -300% 0; } }
 @media (prefers-reduced-motion: reduce) { .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
-.lf-cu .lf-gh { margin-bottom: 8px; }
-.lf-cu-c { padding-top: 6px; }
+.lf-cu-c { padding-top: 14px; }
 .lf-cu-pv { display: flex; flex-direction: column; gap: 4px; padding: 10px 0 12px; }
 .lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .lf-cu-pv .fr-ti { margin: 0; }
@@ -5429,7 +5428,7 @@ function lfFoldSet(k, v) { if (v) lfFolds[k] = 1; else delete lfFolds[k]; }
    check marks, the lit days and the buttons can carry on both faces. */
 /* CUSTOMISE has a place of its own on You, so nobody has to go looking in Settings for it: how you look to your friends (your title, your flair, your frame, the badges you show), shown as it will be seen, and the theme right under it. */
 function lfCustomise() {
-  var w = el('<section class="lf-cu" id="lfCustom"><div class="lf-cap lf-gh">Customise</div><div class="lf-card lf-cu-c"><div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div><div class="lf-cu-r"></div></div></section>');
+  var w = el('<section class="lf-cu" id="lfCustom"><div class="lf-card lf-cu-c"><div class="lf-lab">Customise</div><div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div><div class="lf-cu-r"></div></div></section>');
   function preview() {
     var pv = $('#lfCuPv', w), nm = $('b', pv), ti = $('.fr-ti', pv), st = lfRkSt(); st.ac = lfAccent();
     nm.textContent = (FRS && FRS.name) || 'You'; lfNameOn(nm, st);
