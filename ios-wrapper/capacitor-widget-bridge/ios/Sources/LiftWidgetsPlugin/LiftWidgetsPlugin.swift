@@ -129,14 +129,20 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         let ext = call.getString("ext") ?? "mp4"
         let appId = (call.getString("appId") ?? "").isEmpty ? (Bundle.main.bundleIdentifier ?? "") : (call.getString("appId") ?? "")
         // SAVE: the video goes into Photos (add only: the app can put a video there and cannot read anything back)
-        if kind == "save" {
+        // TIKTOK has no way in for an app that is not registered with it, so the closest thing there is: the video goes into Photos and TikTok opens, ready to pick it.
+        if kind == "save" || kind == "tiktok" {
             let tmp = FileManager.default.temporaryDirectory.appendingPathComponent("lift-story-\(Int(Date().timeIntervalSince1970))." + ext)
             do { try data.write(to: tmp) } catch { call.resolve(["ok": false]); return }
             PHPhotoLibrary.requestAuthorization(for: .addOnly) { st in
                 guard st == .authorized || st == .limited else { call.resolve(["ok": false, "denied": true]); return }
                 PHPhotoLibrary.shared().performChanges({ PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: tmp) }) { ok, _ in
                     try? FileManager.default.removeItem(at: tmp)
-                    call.resolve(["ok": ok])
+                    if kind == "tiktok" && ok {
+                        DispatchQueue.main.async {
+                            if let u = URL(string: "tiktok://"), UIApplication.shared.canOpenURL(u) { UIApplication.shared.open(u, options: [:]) { o in call.resolve(["ok": true, "opened": o]) } }
+                            else { call.resolve(["ok": true, "opened": false]) }
+                        }
+                    } else { call.resolve(["ok": ok]) }
                 }
             }
             return

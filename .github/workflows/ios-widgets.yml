@@ -65,6 +65,7 @@ jobs:
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes array" ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:0 string instagram-stories" ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:1 string facebook-stories" ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :LSApplicationQueriesSchemes:2 string tiktok" ios/App/App/Info.plist || true
 
       - name: Portrait only, no encryption questions
         working-directory: ios-wrapper/ios/App/App

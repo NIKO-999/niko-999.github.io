@@ -2508,7 +2508,7 @@ const freeze = (at) => `(() => {
     await pg5.goto(URL); await pg5.waitForTimeout(500);
     await pg5.click('#lfPick'); await settle(pg5);
     await top(pg5).locator('#lfFinShare').click(); await settle(pg5);
-    ok('in the app the story has Instagram and Facebook buttons beside the share sheet', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardShare').count() === 1);
+    ok('in the app the story has Instagram, Facebook and TikTok buttons beside the share sheet and Save', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardTt').count() === 1 && await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardSave').count() === 1);
     ok('and none of them can be pressed until there is a video to send', await pg5.locator('#lfCardIg').isDisabled());
     await pg5.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 25000 }).catch(() => {});
     await pg5.click('#lfCardIg'); await pg5.waitForTimeout(600);
@@ -2520,6 +2520,8 @@ const freeze = (at) => `(() => {
     await pg5.click('#lfCardSave'); await pg5.waitForTimeout(500);
     const kinds2 = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
     ok('Save puts the video in Photos, not on a share sheet', kinds2[kinds2.length - 1] === 'save' && kinds2.length === 4, kinds2);
+    await pg5.click('#lfCardTt'); await pg5.waitForTimeout(500);
+    ok('TikTok saves it to Photos first and opens TikTok', (await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind))).slice(-1)[0] === 'tiktok');
     ok('and says whether it worked', /Could not save|Saved to Photos|Allow Photos/.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await c5.close();
   }

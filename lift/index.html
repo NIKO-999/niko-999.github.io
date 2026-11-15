@@ -3974,6 +3974,13 @@ function lfSummary(w, prs, review) {
    are on it, because a record is the point. Everything lives between 250
    and 1670 of 1920: the top and the foot of a story belong to the app. */
 /* THE CARD MOVES. Drawn with a second argument, 0 to 1, it is that moment of its animation: the title comes in, the ring fills, the figure counts up, the days light one after another, the rest follows. With none it is the finished card. A story is the animation, recorded. */
+/* THE APP'S ICON rides every card, in the top corner on the heading's own line: it is what tells somebody watching which app it came from, and that corner stays clear of the parts of a story that Instagram and TikTok cover. A same-origin file, so the canvas is never tainted and the video can still be recorded. */
+var LF_ICON = null;
+function lfIcon() {
+  if (!LF_ICON) { LF_ICON = new Image(); LF_ICON.src = 'icon-192.png'; }
+  return LF_ICON.complete && LF_ICON.naturalWidth ? LF_ICON : null;
+}
+lfIcon();
 function lfCardDraw(sp, prog, into) {
   var W = 1080, H = 1920, cv = into || document.createElement('canvas'); cv.width = W; cv.height = H;
   var anim = typeof prog === 'number', P = anim ? prog : 1;
@@ -3997,7 +4004,9 @@ function lfCardDraw(sp, prog, into) {
      and the big title give way to one line each, so the sets can be read. */
   var wk = !!sp.wk, cp = wk || (sp.lines || []).length > 4, y = cp ? 270 : 290;
   fade(0, .15);
-  T(sp.kicker.toUpperCase(), 34, 700, A(.95), y); y += cp ? 82 : 96;
+  T(sp.kicker.toUpperCase(), 34, 700, A(.95), y);
+  var ic = lfIcon(); if (ic) { x.save(); rr(W - 90 - 76, y - 56, 76, 76, 19); x.clip(); x.drawImage(ic, W - 90 - 76, y - 56, 76, 76); x.restore(); }
+  y += cp ? 82 : 96;
   var tpx = cp ? 76 : 104, tl = wrap(sp.title, tpx, 800, W - 180).slice(0, 2); tl.forEach(function (l) { T(l, tpx, 800, '#ffffff', y); y += tpx + 8; }); y -= tpx + 8;
   y += cp ? 54 : 64; if (!wk) T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += wk ? 52 : cp ? 150 : 200;
   if (wk) {
@@ -4105,9 +4114,10 @@ function lfShareCardSheet(sp, name) {
   var mk = function (id, txt, cls) { var q = el('<button type="button" class="lf-btn ' + (cls || '') + '" id="' + id + '" disabled></button>'); q.textContent = txt; return q; };
   var ig = LF_WGT && LF_WGT.shareStory ? mk('lfCardIg', 'Instagram story', 'is-log') : null;
   var fb = LF_WGT && LF_WGT.shareStory ? mk('lfCardFb', 'Facebook story') : null;
+  var tt = LF_WGT && LF_WGT.shareStory ? mk('lfCardTt', 'TikTok') : null;
   var gen = mk('lfCardShare', LF_WGT ? 'More ways to share' : 'Share', ig ? '' : 'is-log');
   var save = mk('lfCardSave', 'Save video');
-  [ig, fb, gen, save].forEach(function (q) { if (q) foot.push(q); });
+  [ig, fb, tt, gen, save].forEach(function (q) { if (q) foot.push(q); });
   var enable = function () { foot.forEach(function (q) { q.disabled = false; }); };
   var file = function () { try { return new File([blob], name + '.' + ext, { type: mime.split(';')[0] }); } catch (e) { return null; } };
   var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.' + ext; document.body.appendChild(a); a.click(); a.remove(); };
@@ -4115,6 +4125,7 @@ function lfShareCardSheet(sp, name) {
   var native = function (kind) { if (!blob) return Promise.resolve(null); return toB64(blob).then(function (d) { return LF_WGT.shareStory({ kind: kind, data: d, ext: ext, appId: LF_FB_APP_ID }); }).catch(function () { return null; }); };
   if (ig) ig.addEventListener('click', function () { native('instagram'); });
   if (fb) fb.addEventListener('click', function () { native('facebook'); });
+  if (tt) tt.addEventListener('click', function () { native('tiktok').then(function (r) { lfToast(r && r.ok ? (r.opened ? 'Saved. Choose it in TikTok' : 'Saved to Photos. Open TikTok to post it') : r && r.denied ? 'Allow Photos in Settings to post' : 'Could not save'); }); });
   gen.addEventListener('click', function () {
     if (!blob) return;
     if (LF_WGT && LF_WGT.shareStory) { native('sheet'); return; }
