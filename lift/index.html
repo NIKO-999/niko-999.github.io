@@ -1220,6 +1220,33 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes tt-eye-blink { 0%, 90%, 100% { transform: none; } 94%, 96% { transform: translateY(36px); } }
 @keyframes tt-blink { 50% { opacity: 0; } }
 @keyframes tt-glitch { 0%, 94%, 100% { transform: none; } 95% { transform: translateX(-2px); text-shadow: 2px 0 #ff3d71, -2px 0 #38f; } 97% { transform: translateX(2px) skewX(-6deg); text-shadow: -2px 0 #ff3d71, 2px 0 #38f; } }
+/* THE RARER MILESTONE TITLES: one quiet effect each */
+.tt-elite em { display: inline-block; position: relative; padding-bottom: 4px; }
+.tt-elite em::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.2) 18%, rgba(255,255,255,.2) 82%, transparent); }
+.tt-elite em::before { content: ''; position: absolute; bottom: -1px; left: 0; width: 20px; height: 3px; border-radius: 3px; background: radial-gradient(closest-side, #fff, transparent); animation: tt-elite 3.4s ease-in-out infinite; }
+@keyframes tt-elite { 0% { left: -6px; opacity: 0; } 15%, 85% { opacity: 1; } 100% { left: calc(100% - 14px); opacity: 0; } }
+.tt-vet .v-s { display: inline-flex; flex-direction: column-reverse; gap: 1.5px; width: 10px; }
+.tt-vet .v-s b { display: block; height: 3px; border-radius: 1px; background: var(--dim); opacity: .3; animation: tt-vet 3.2s ease-in-out infinite; }
+.tt-vet .v-s b:nth-child(2) { animation-delay: .28s; } .tt-vet .v-s b:nth-child(3) { animation-delay: .56s; }
+@keyframes tt-vet { 0%, 55%, 100% { opacity: .3; background: var(--dim); } 18%, 32% { opacity: 1; background: #fff; } }
+.fr-ti .tt-master em { color: transparent; -webkit-text-stroke: .8px var(--rc, #e1d4c2); background: linear-gradient(var(--rc, #e1d4c2), var(--rc, #e1d4c2)) no-repeat 0 0 / 0% 100%; -webkit-background-clip: text; background-clip: text; animation: tt-master 5.2s ease-in-out infinite alternate; }
+@keyframes tt-master { 0%, 14% { background-size: 0% 100%; } 52%, 100% { background-size: 100% 100%; } }
+.fr-ti .tt-legend em { background: linear-gradient(180deg, #fff3b0, #f5c451 55%, #b8862b); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tt-legend .lg-st { width: 10px; height: 10px; fill: #fff3b0; filter: drop-shadow(0 0 4px #f5c451); transform-origin: 50% 50%; animation: tt-legend 4.6s ease-in-out infinite; }
+@keyframes tt-legend { 0%, 62%, 100% { transform: scale(.2) rotate(0); opacity: 0; } 74% { transform: scale(1.1) rotate(45deg); opacity: 1; } 88% { transform: scale(.5) rotate(90deg); opacity: .4; } }
+.tt-rel .r-c { display: inline-flex; gap: 1px; margin-left: -2px; }
+.tt-rel .r-c b { display: block; width: 5px; height: 5px; border-top: 1.6px solid var(--dim); border-right: 1.6px solid var(--dim); transform: rotate(45deg); opacity: .2; animation: tt-rel 1.9s ease-in-out infinite; }
+.tt-rel .r-c b:nth-child(2) { animation-delay: .22s; } .tt-rel .r-c b:nth-child(3) { animation-delay: .44s; }
+@keyframes tt-rel { 0%, 100% { opacity: .2; } 28% { opacity: 1; border-color: #fff; } }
+.fr-ti .tt-myth em { background: linear-gradient(100deg, #a78bfa, #38bdf8, #f472b6, #a78bfa) 0 0 / 300% 100% repeat-x; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-myth 8s linear infinite; }
+@keyframes tt-myth { to { background-position: -300% 0; } }
+@media (prefers-reduced-motion: reduce) { .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
+.lf-cu .lf-gh { margin-bottom: 8px; }
+.lf-cu-c { padding-top: 6px; }
+.lf-cu-pv { display: flex; flex-direction: column; gap: 4px; padding: 10px 0 12px; }
+.lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+.lf-cu-pv .fr-ti { margin: 0; }
+.lf-cu > .lf-card + .lf-card, .lf-cu > .lf-card + section { margin-top: 10px; }
 .rk-o.is-creator { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 45%, transparent); }
 .rk-o.is-creator b { font-family: ui-monospace, Menlo, monospace; color: var(--today-ink); }
 .lf-fl { display: inline-block; width: .82em; height: .82em; margin-left: .38em; vertical-align: -.05em; color: var(--fc); filter: drop-shadow(0 0 4px var(--fc)); animation: lf-flp 3.4s ease-in-out infinite; }
@@ -3981,9 +4008,8 @@ function lfIconTint(col, sz) {
   var k = col + '|' + sz; if (LF_ICT[k]) return LF_ICT[k];
   var c = document.createElement('canvas'); c.width = c.height = sz; var g = c.getContext('2d');
   var rgb = /^#[0-9a-f]{6}$/i.test(col) ? [parseInt(col.slice(1, 3), 16), parseInt(col.slice(3, 5), 16), parseInt(col.slice(5, 7), 16)] : null;
-  g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, sz, sz);
   try {
-    /* the pinwheel's own brightness becomes its opacity, in the accent: shaded like the icon and never muddy the way multiplying over its greys was */
+    /* the pinwheel's own brightness becomes its opacity, in the accent, and the black tile behind it is simply not drawn: just the three pieces */
     var t = document.createElement('canvas'); t.width = t.height = sz; var tg = t.getContext('2d');
     tg.drawImage(ic, 0, 0, sz, sz);
     var d = tg.getImageData(0, 0, sz, sz), px = d.data, i;
@@ -4026,7 +4052,7 @@ function lfCardDraw(sp, prog, into) {
   var wk = !!sp.wk, cp = wk || (sp.lines || []).length > 4, y = (cp ? 270 : 290) + 100;
   fade(0, .15);
   T(sp.kicker.toUpperCase(), 34, 700, A(.95), y);
-  var ic = lfIconTint(acc, 104); if (ic) { x.save(); rr((W - 104) / 2, y - 184, 104, 104, 26); x.clip(); x.drawImage(ic, (W - 104) / 2, y - 184); x.restore(); }
+  var ic = lfIconTint(acc, 104); if (ic) x.drawImage(ic, (W - 104) / 2, y - 184);
   y += cp ? 82 : 96;
   var tpx = cp ? 76 : 104, tl = wrap(sp.title, tpx, 800, W - 180).slice(0, 2); tl.forEach(function (l) { T(l, tpx, 800, '#ffffff', y); y += tpx + 8; }); y -= tpx + 8;
   y += cp ? 54 : 64; if (!wk) T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += wk ? 52 : cp ? 150 : 200;
@@ -5360,10 +5386,9 @@ function lfRenderYou() {
     g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
     $('#lfGoal', c).appendChild(g);
   }
-  c.appendChild(el('<span class="lf-flab">Name and profile</span>')); c.appendChild(lfRkRows());
   if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
+  root.appendChild(lfCustomise());
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
-  root.appendChild(lfThemeCard());
   root.appendChild(lfBadgeCard());
   root.appendChild(lfMedalCard());
   if (TROPHY_CASE) root.appendChild(lfRecordCard());
@@ -5402,6 +5427,21 @@ function lfFoldSet(k, v) { if (v) lfFolds[k] = 1; else delete lfFolds[k]; }
 /* THEME: light or dark, and the accent. The accent is a HUE on a wheel;
    the app owns its strength, so every point on the ring is a colour the
    check marks, the lit days and the buttons can carry on both faces. */
+/* CUSTOMISE has a place of its own on You, so nobody has to go looking in Settings for it: how you look to your friends (your title, your flair, your frame, the badges you show), shown as it will be seen, and the theme right under it. */
+function lfCustomise() {
+  var w = el('<section class="lf-cu" id="lfCustom"><div class="lf-cap lf-gh">Customise</div><div class="lf-card lf-cu-c"><div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div><div class="lf-cu-r"></div></div></section>');
+  function preview() {
+    var pv = $('#lfCuPv', w), nm = $('b', pv), ti = $('.fr-ti', pv), st = lfRkSt(); st.ac = lfAccent();
+    nm.textContent = (FRS && FRS.name) || 'You'; lfNameOn(nm, st);
+    ti.textContent = ''; var te = st.ti && lfRkHas('ti', st.ti) ? lfTitleEl(st.ti) : null;
+    if (te && !te.classList.contains('tt-eye')) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti) && !te) ti.textContent = lfRkName('ti', st.ti);
+    ti.hidden = !ti.firstChild;
+  }
+  $('.lf-cu-r', w).appendChild(lfRkRows(preview));
+  w.appendChild(lfThemeCard());
+  preview();
+  return w;
+}
 function lfThemeCard() {
   var h = lfAccent();
   return lfFold('lfTheme', 'thm', 'Theme', lfAccName(h), function (bd) {
@@ -6137,6 +6177,13 @@ function lfTitleEl(id) {
   if (id === 'nodaysoff') { sp.className = 'tt tt-shine'; sp.innerHTML = '<em>No days off</em>'; return sp; }
   if (id === 'ironheart') { sp.className = 'tt tt-pulse'; sp.innerHTML = '<em>Iron heart</em><svg viewBox="0 0 44 16" aria-hidden="true"><path pathLength="100" d="M0 8h11l3-6 5 12 4-9 2 3h19"/></svg>'; return sp; }
   if (id === 'slayer') { sp.className = 'tt tt-slay'; sp.innerHTML = '<em>Giant slayer</em>'; return sp; }
+  /* THE RARER MILESTONE TITLES each get one quiet effect of their own, different from the animated set above and from each other: a light along an underline, rank stripes lighting in turn, letters that fill, a gold with a glint, chevrons going forward, and a slow iridescence. */
+  if (id === 'elite') { sp.className = 'tt tt-elite'; sp.innerHTML = '<em>Elite</em>'; return sp; }
+  if (id === 'veteran') { sp.className = 'tt tt-vet'; sp.innerHTML = '<i class="v-s" aria-hidden="true"><b></b><b></b><b></b></i><em>Veteran</em>'; return sp; }
+  if (id === 'master') { sp.className = 'tt tt-master'; sp.innerHTML = '<em>Master</em>'; return sp; }
+  if (id === 'legend') { sp.className = 'tt tt-legend'; sp.innerHTML = '<em>Living Legend</em><svg class="lg-st" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 1.500l2.400 8.100 8.100 2.400-8.100 2.400L12 22.500l-2.400-8.100-8.100-2.400 8.100-2.400z"/></svg>'; return sp; }
+  if (id === 'relentless') { sp.className = 'tt tt-rel'; sp.innerHTML = '<em>Relentless</em><i class="r-c" aria-hidden="true"><b></b><b></b><b></b></i>'; return sp; }
+  if (id === 'mythic') { sp.className = 'tt tt-myth'; sp.innerHTML = '<em>Mythic</em>'; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
   if (id === 'eye') {
     sp.className = 'tt tt-eye';
@@ -6599,7 +6646,7 @@ function lfRkPick(kind, onPick) {
   return lfSheet({ title: RK_HEAD[kind], body: b });
 }
 /* the four rows in Settings, each saying what is worn */
-function lfRkRows() {
+function lfRkRows(cb) {
   var w = el('<div class="rk-rows"></div>');
   ['ti', 'fl', 'fm'].forEach(function (k) {
     if (k === 'fm' && !LF_FM_ON) return;
@@ -6607,7 +6654,7 @@ function lfRkRows() {
     var b = el('<button type="button" class="lf-btn is-full rk-set"><span></span><b></b></button>'); b.dataset.k = k;
     $('span', b).textContent = RK_HEAD[k]; $('b', b).textContent = id ? lfRkName(k, id) : 'None';
     if (k === 'fl' && id) { var fe = lfFlairEl(id); if (fe) $('b', b).appendChild(fe); }
-    b.addEventListener('click', function () { lfRkPick(k, function () { var y = $('#lfYou'); if (!y) return; var nw = lfRkRows(); w.replaceWith(nw); }); });
+    b.addEventListener('click', function () { lfRkPick(k, function () { var y = $('#lfYou'); if (!y) return; var nw = lfRkRows(cb); w.replaceWith(nw); if (cb) cb(); }); });
     w.appendChild(b);
   });
   /* THE SHOWCASE CAN BE EMPTY. With nothing picked, friends were shown your

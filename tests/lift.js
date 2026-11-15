@@ -2433,6 +2433,49 @@ const freeze = (at) => `(() => {
     await q.c.close();
   }
 
+  /* ── CUSTOMISE has its own place on You, and the rarer titles each have one effect of their own ── */
+  {
+    const o = await ctx({ unit: 'kg', goal: 3, ti: 'rookie' }, '2026-10-30T18:00:00');
+    await o.page.click('.lf-bar [data-v="you"]'); await settle(o.page);
+    ok('You has a Customise section of its own, ahead of Settings', await o.page.locator('#lfYou #lfCustom').count() === 1 && await o.page.evaluate(() => { const a = document.querySelector('#lfCustom'), b = document.querySelector('#lfSet'); return !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
+    ok('it holds your title, flair and the badges you show, and shows them as they will be seen', await o.page.locator('#lfCustom .rk-set').count() >= 3 && await o.page.locator('#lfCustom #lfCuPv b').count() === 1);
+    ok('the theme is right under it', await o.page.locator('#lfCustom #lfTheme').count() === 1);
+    ok('and Settings no longer carries those rows', await o.page.locator('#lfSet .rk-set').count() === 0);
+    await o.page.click('#lfCustom .rk-set[data-k="ti"]'); await o.page.waitForTimeout(600);
+    ok('a title can still be none', await o.page.locator('.lf-sheet .rk-o[data-id="none"]').count() === 1);
+    await o.c.close();
+  }
+  {
+    const c7 = await browser.newContext(PHONE);
+    await c7.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c7.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
+    const p7 = await c7.newPage();
+    p7.on('pageerror', (e) => errors.push(String(e)));
+    await p7.route('**/lift/index.html', async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p7.goto(URL); await p7.waitForTimeout(600);
+    const eff = await p7.evaluate(() => {
+      const out = {}; const box = document.createElement('div'); box.style.cssText = 'position:fixed;top:0;left:0'; document.body.appendChild(box);
+      ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic', 'rookie'].forEach((id) => {
+        const r = document.createElement('div'); r.className = 'fr-ti'; const te = window.__tt.lfTitleEl(id); if (te) r.appendChild(te); box.appendChild(r);
+        out[id] = te ? [...te.querySelectorAll('*'), te].map((n) => [getComputedStyle(n).animationName, getComputedStyle(n, '::before').animationName, getComputedStyle(n, '::after').animationName]).flat().filter((n) => n && n !== 'none') : null;
+      });
+      return out;
+    });
+    const names = ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic'];
+    ok('each of the rarer titles moves, and a plain one does not have an element at all', names.every((n) => eff[n] && eff[n].length > 0) && eff.rookie === null, eff);
+    const sig = names.map((n) => eff[n].slice().sort().join('+'));
+    ok('and no two do it the same way', new Set(sig).size === names.length, sig);
+    ok('Elite, Veteran, Master, Legend, Relentless and Mythic keep their names as words', await p7.evaluate(() => ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic'].map((n) => window.__tt.lfTitleEl(n).textContent.trim().toLowerCase()).join()) === 'elite,veteran,master,living legend,relentless,mythic');
+    await c7.close();
+    const c8 = await browser.newContext(Object.assign({}, PHONE, { reducedMotion: 'reduce' }));
+    await c8.addInitScript(freeze('2026-10-30T18:00:00')); await c8.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
+    const p8 = await c8.newPage();
+    await p8.route('**/lift/index.html', async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p8.goto(URL); await p8.waitForTimeout(600);
+    ok('with Reduce Motion on, none of them moves', await p8.evaluate(() => ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic'].every((id) => { const r = document.createElement('div'); r.className = 'fr-ti'; const te = window.__tt.lfTitleEl(id); r.appendChild(te); document.body.appendChild(r); return [...te.querySelectorAll('*'), te].every((n) => ['', '::before', '::after'].every((ps) => getComputedStyle(n, ps || null).animationName === 'none')); })));
+    await c8.close();
+  }
+
   /* ── THE IPHONE APP'S HOOKS: haptics, a screen that stays on, the set sent to the Watch and a set logged from it. The plugin is stood in for by a recorder. ── */
   {
     const c2 = await browser.newContext(PHONE);
