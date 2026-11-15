@@ -8,7 +8,7 @@ require 'fileutils'
 bundle = ENV.fetch('BUNDLE_ID')
 team   = ENV.fetch('TEAM_ID')
 build  = ENV.fetch('BUILD_NUMBER', '1')
-version = ENV.fetch('MARKETING_VERSION', '1.1')
+version = ENV.fetch('MARKETING_VERSION', '1.2')
 group  = "group.#{bundle}"
 root   = File.expand_path('..', __dir__)
 ios    = File.join(root, 'ios', 'App')

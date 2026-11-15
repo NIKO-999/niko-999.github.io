@@ -183,7 +183,19 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         call.resolve()
     }
 
+    /// The rest between sets, written where the Rest widget reads it (an end time, what is next, the colour), and cleared when it is over.
+    private func saveRest(_ ms: Double, _ next: String, _ accent: String) {
+        let d = UserDefaults(suiteName: groupId)
+        if ms > 0, let data = try? JSONSerialization.data(withJSONObject: ["end": ms, "next": next, "accent": accent]), let s = String(data: data, encoding: .utf8) {
+            d?.set(s, forKey: "lift.rest")
+        } else { d?.removeObject(forKey: "lift.rest") }
+        #if canImport(WidgetKit)
+        if #available(iOS 14.0, *) { WidgetCenter.shared.reloadAllTimelines() }
+        #endif
+    }
+
     @objc func startRest(_ call: CAPPluginCall) {
+        saveRest(call.getDouble("end") ?? 0, call.getString("next") ?? "", call.getString("accent") ?? "#e1d4c2")
         #if canImport(ActivityKit)
         if #available(iOS 16.2, *) {
             let ms = call.getDouble("end") ?? 0
@@ -209,6 +221,7 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
     }
 
     @objc func endRest(_ call: CAPPluginCall) {
+        saveRest(0, "", "")
         toWatch("restEnd", 0.0)
         cancelRestNote()
         #if canImport(ActivityKit)

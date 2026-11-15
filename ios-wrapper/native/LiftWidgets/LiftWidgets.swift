@@ -135,6 +135,84 @@ struct StreakWidget: Widget {
     }
 }
 
+// MARK: Rest, on the Home Screen
+
+struct RestEntry: TimelineEntry {
+    let date: Date
+    let rest: LiftRest?
+}
+
+/// A timer that counts on its own: the entry for the moment the rest ends is queued with the first, so the widget flips to "Ready" by itself, and a few minutes later back to idle.
+struct RestProvider: TimelineProvider {
+    func placeholder(in context: Context) -> RestEntry { RestEntry(date: Date(), rest: nil) }
+    func getSnapshot(in context: Context, completion: @escaping (RestEntry) -> Void) { completion(RestEntry(date: Date(), rest: LiftRest.load())) }
+    func getTimeline(in context: Context, completion: @escaping (Timeline<RestEntry>) -> Void) {
+        let now = Date(), r = LiftRest.load()
+        var entries = [RestEntry(date: now, rest: r)]
+        if let r = r {
+            if r.endDate > now { entries.append(RestEntry(date: r.endDate, rest: r)) }
+            entries.append(RestEntry(date: max(r.endDate, now).addingTimeInterval(600), rest: nil))
+        }
+        completion(Timeline(entries: entries, policy: .after(now.addingTimeInterval(3600))))
+    }
+}
+
+struct RestView: View {
+    @Environment(\.widgetFamily) var family
+    var entry: RestEntry
+
+    var body: some View {
+        let r = entry.rest
+        let accent = Color(hex: r?.accent)
+        let live = r != nil && r!.endDate > entry.date
+        let over = r != nil && !live
+        let label = live ? "REST" : (over ? "READY" : "REST")
+        switch family {
+        case .accessoryCircular:
+            VStack(spacing: 0) {
+                Text(label).font(.system(size: 9, weight: .bold))
+                if live, let r = r { Text(timerInterval: entry.date...r.endDate, countsDown: true).font(.system(size: 15, weight: .heavy, design: .rounded)).monospacedDigit().minimumScaleFactor(0.6) }
+                else { Image(systemName: over ? "checkmark" : "timer").font(.system(size: 15, weight: .bold)) }
+            }
+        case .accessoryRectangular:
+            VStack(alignment: .leading, spacing: 1) {
+                Text(label).font(.system(size: 10, weight: .bold))
+                if live, let r = r { Text(timerInterval: entry.date...r.endDate, countsDown: true).font(.system(size: 22, weight: .heavy, design: .rounded)).monospacedDigit() }
+                else { Text(over ? "Next set" : "Starts between sets").font(.system(size: 14, weight: .bold)) }
+                if let n = r?.next, !n.isEmpty { Text(n).font(.system(size: 11)).lineLimit(1) }
+            }.frame(maxWidth: .infinity, alignment: .leading)
+        default:
+            VStack(alignment: .leading, spacing: 4) {
+                Text(label).font(.system(size: 11, weight: .bold)).foregroundColor(accent)
+                Spacer(minLength: 0)
+                if live, let r = r {
+                    Text(timerInterval: entry.date...r.endDate, countsDown: true)
+                        .font(.system(size: family == .systemSmall ? 44 : 56, weight: .heavy, design: .rounded)).monospacedDigit().minimumScaleFactor(0.6).lineLimit(1)
+                } else if over {
+                    Text("Go").font(.system(size: family == .systemSmall ? 44 : 56, weight: .heavy, design: .rounded)).foregroundColor(accent)
+                } else {
+                    Text("Rest timer").font(.system(size: family == .systemSmall ? 20 : 26, weight: .heavy))
+                    Text("Counts down here between sets").font(.system(size: 12)).foregroundColor(.white.opacity(0.6)).lineLimit(2)
+                }
+                Spacer(minLength: 0)
+                if let n = r?.next, !n.isEmpty { Text(n).font(.system(size: 12)).foregroundColor(.white.opacity(0.65)).lineLimit(2) }
+            }
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .liftBackground()
+        }
+    }
+}
+
+struct RestWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "LiftRest", provider: RestProvider()) { entry in RestView(entry: entry) }
+            .configurationDisplayName("Rest timer")
+            .description("Counts down the rest between sets, on the Home Screen or Lock Screen.")
+            .supportedFamilies([.systemSmall, .systemMedium, .accessoryRectangular, .accessoryCircular])
+    }
+}
+
 // MARK: Rest, as a Live Activity
 
 #if canImport(ActivityKit)
@@ -192,6 +270,7 @@ struct LiftWidgetBundle: WidgetBundle {
         TodayWidget()
         WeekWidget()
         StreakWidget()
+        RestWidget()
         if #available(iOS 16.1, *) { RestLiveActivity() }
     }
 }

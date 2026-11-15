@@ -35,6 +35,19 @@ struct LiftSnap: Codable {
     }
 }
 
+/// The rest the app is in right now, if it is in one: when it ends and what is next.
+struct LiftRest: Codable {
+    var end: Double
+    var next: String
+    var accent: String
+    var endDate: Date { Date(timeIntervalSince1970: end / 1000) }
+    static func load() -> LiftRest? {
+        guard let s = UserDefaults(suiteName: LiftSnap.groupId)?.string(forKey: "lift.rest"),
+              let data = s.data(using: .utf8), let r = try? JSONDecoder().decode(LiftRest.self, from: data) else { return nil }
+        return r
+    }
+}
+
 extension Color {
     init(hex: String?) {
         var s = (hex ?? "#e1d4c2").trimmingCharacters(in: .whitespaces)
