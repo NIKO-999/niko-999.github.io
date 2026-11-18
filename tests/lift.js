@@ -1057,7 +1057,7 @@ const freeze = (at) => `(() => {
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('nothing on You folds open and shut', await page.locator('#lfYou .lf-fold, #lfYou button[aria-expanded]').count() === 0);
-    ok('it is weight, goals and one list of five rows', await page.locator('#lfBw').count() === 1 && await page.locator('#lfTargets').count() === 1 && (await page.locator('#lfMenu .lf-rowl b').allTextContents()).join() === 'Muscle targets,Appearance,Badges,Monthly medals,Settings');
+    ok('it is weight, goals and one list of five rows', await page.locator('#lfYou #lfBw').count() === 1 && await page.locator('#lfTargets').count() === 1 && (await page.locator('#lfMenu .lf-rowl b').allTextContents()).join() === 'Muscle targets,Appearance,Badges,Monthly medals,Settings');
     ok('a shelf builds nothing until its row is pressed', await page.locator('.lf-coin').count() === 0 && /of 247/.test(await page.textContent('#lfBadges')));
     await page.click('#lfBadges'); await settle(page);
     ok('pressing a row opens its screen', await page.locator('.lf-sheet #lfBadgesBody .lf-coin').count() === 247);
