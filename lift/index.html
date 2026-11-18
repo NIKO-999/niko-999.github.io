@@ -4215,25 +4215,25 @@ function lfShareCardSheet(sp, name) {
   lfCardDraw(sp, 0, cv);
   var foot = [], blob = null, mime = lfCardMime(), ext = /mp4/.test(mime) ? 'mp4' : 'webm', url = '', rec = null, raf = 0, dead = false;
   var mk = function (id, txt, cls) { var q = el('<button type="button" class="lf-btn ' + (cls || '') + '" id="' + id + '" disabled></button>'); q.textContent = txt; return q; };
-  var ig = LF_WGT && LF_WGT.shareStory ? mk('lfCardIg', 'Instagram story', 'is-log') : null;
-  var fb = LF_WGT && LF_WGT.shareStory ? mk('lfCardFb', 'Facebook story') : null;
-  var tt = LF_WGT && LF_WGT.shareStory ? mk('lfCardTt', 'TikTok') : null;
-  /* ONE general button, Share video: the phone's own share sheet has Save Video in it, so a Save button of its own did nothing the sheet does not do better */
-  var gen = mk('lfCardShare', 'Share video', ig ? '' : 'is-log');
-  [ig, fb, tt, gen].forEach(function (q) { if (q) foot.push(q); });
+  /* ONE button, Share video: the phone's own share sheet has Save Video, Instagram, Facebook and TikTok in it, so none of them needs a button of its own */
+  var gen = mk('lfCardShare', 'Share video', 'is-log');
+  foot.push(gen);
   var enable = function () { foot.forEach(function (q) { q.disabled = false; }); };
   var file = function () { try { return new File([blob], name + '.' + ext, { type: mime.split(';')[0] }); } catch (e) { return null; } };
   var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.' + ext; document.body.appendChild(a); a.click(); a.remove(); };
   var toB64 = function (bl) { return new Promise(function (res) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.readAsDataURL(bl); }); };
   var native = function (kind) { if (!blob) return Promise.resolve(null); return toB64(blob).then(function (d) { return LF_WGT.shareStory({ kind: kind, data: d, ext: ext, appId: LF_FB_APP_ID }); }).catch(function () { return null; }); };
-  if (ig) ig.addEventListener('click', function () { native('instagram'); });
-  if (fb) fb.addEventListener('click', function () { native('facebook'); });
-  if (tt) tt.addEventListener('click', function () { native('tiktok').then(function (r) { lfToast(r && r.ok ? (r.opened ? 'Saved. Choose it in TikTok' : 'Saved to Photos. Open TikTok to post it') : r && r.denied ? 'Allow Photos in Settings to post' : 'Could not save'); }); });
+  /* THE WEB SHEET FIRST, THE NATIVE ONE IF IT CANNOT: sending ten seconds of video across the app's bridge as text can fail without a word, so the page's own file share goes first and the bridge is the way round it. Whatever fails says so, because a press that does nothing reads as a button that is broken. */
+  var fail = function () { lfToast('Could not open the share sheet'); };
+  var viaNative = function () {
+    if (!(LF_WGT && LF_WGT.shareStory)) { saveIt(); return; }
+    native('sheet').then(function (r) { if (!r || !r.via) fail(); });
+  };
   gen.addEventListener('click', function () {
     if (!blob) return;
-    if (LF_WGT && LF_WGT.shareStory) { native('sheet'); return; }
     var f = file();
-    if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function () {}); else saveIt();
+    if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function (e) { if (e && e.name === 'AbortError') return; viaNative(); });
+    else viaNative();
   });
   /* THE VIDEO TAKES ITS TIME: 7.6 seconds for the figures to count up and the lines to come in, then 2.6 held, so what is shared is a little over ten seconds. At five it was gone before you had read it. */
   var DUR = 7600, HOLD = 2600, t0 = 0, chunks = [];
@@ -5815,7 +5815,7 @@ var FRK = 'lift.fr.v1';
 var FR_MAX = 500;
 var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 /* THE HOST: whoever turns friends on has the app's maker on their list from the first minute, and shows up on the maker's list too. It is only a friend like any other: it can be removed from the list, and a removal is kept. */
-var LF_HOST = '';
+var LF_HOST = '4ADG5X5C';
 function frLoad() {
   var d = { on: false, code: '', key: '', name: '', list: [], pend: '', rx: [], no: [] };
   try {

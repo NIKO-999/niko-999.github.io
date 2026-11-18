@@ -2567,18 +2567,13 @@ const freeze = (at) => `(() => {
     await pg5.goto(URL); await pg5.waitForTimeout(500);
     await pg5.click('#lfPick'); await settle(pg5);
     await top(pg5).locator('#lfFinShare').click(); await settle(pg5);
-    ok('in the app the story has Instagram, Facebook and TikTok buttons beside Share video', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardTt').count() === 1 && await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardSave').count() === 0);
-    ok('and none of them can be pressed until there is a video to send', await pg5.locator('#lfCardIg').isDisabled());
+    ok('in the app the story has one button, Share video, and none for Instagram, Facebook or TikTok', await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardIg, #lfCardFb, #lfCardTt, #lfCardSave').count() === 0);
+    ok('and it cannot be pressed until there is a video to send', await pg5.locator('#lfCardShare').isDisabled());
     await pg5.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
-    await pg5.click('#lfCardIg'); await pg5.waitForTimeout(600);
-    const ig = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1]));
-    ok('Instagram is sent the recorded video, by name of the app', ig.length === 1 && ig[0].kind === 'instagram' && typeof ig[0].data === 'string' && ig[0].data.length > 1000 && /^(mp4|webm)$/.test(ig[0].ext), ig.map((x) => [x.kind, x.ext, (x.data || '').length]));
-    await pg5.click('#lfCardFb'); await pg5.click('#lfCardShare'); await pg5.waitForTimeout(600);
-    const kinds = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
-    ok('Facebook and the share sheet each send it too', kinds.join() === 'instagram,facebook,sheet', kinds);
-    await pg5.click('#lfCardTt'); await pg5.waitForTimeout(500);
-    ok('TikTok saves it to Photos first and opens TikTok', (await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind))).slice(-1)[0] === 'tiktok');
-    ok('and says whether it worked', /Could not save|Saved to Photos|Allow Photos|Saved\./.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
+    await pg5.click('#lfCardShare'); await pg5.waitForTimeout(700);
+    const sh = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1]));
+    ok('the phone\'s own share sheet is sent the recorded video', sh.length === 1 && sh[0].kind === 'sheet' && typeof sh[0].data === 'string' && sh[0].data.length > 1000 && /^(mp4|webm)$/.test(sh[0].ext), sh.map((x) => [x.kind, x.ext, (x.data || '').length]));
+    ok('and when the sheet does not open it says so instead of doing nothing', /Could not open the share sheet/.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await c5.close();
   }
 
