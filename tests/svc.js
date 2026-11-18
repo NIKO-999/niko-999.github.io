@@ -39,9 +39,13 @@ const SEED = { s: [
 (async () => {
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
   const errors = [], offOrigin = [];
-  async function ctx(seed) {
+  /* the week in review opens over the first visit of a week; checks that
+     are not about it have already seen it */
+  async function ctx(seed, at, init) {
+    if (seed && !('rev' in seed)) seed = Object.assign({ rev: '2026-11-09' }, seed);
     const c = await browser.newContext(DESK);
-    await c.addInitScript(freeze('2026-11-18T10:00:00'));
+    await c.addInitScript(freeze(at || '2026-11-18T10:00:00'));
+    if (init) await c.addInitScript(init);
     if (seed) await c.addInitScript(`(() => { if (!localStorage.getItem('svc.v1')) localStorage.setItem('svc.v1', ${JSON.stringify(JSON.stringify(seed))}); })();`);
     const page = await c.newPage();
     page.on('pageerror', (e) => errors.push(String(e)));
@@ -162,17 +166,108 @@ const SEED = { s: [
     await page.waitForTimeout(400);
     await page.evaluate(() => __adv(10 * 60e3));
     await page.reload(); await page.waitForSelector('#svBig');
-    ok('a reload keeps the notes', (await page.$eval('#svNotes', (e) => e.value)) === 'Sweep of the high <then> CISD\nSecond line');
+    const NOTE = '10:00  Sweep of the high <then> CISD\n10:00  Second line';
+    ok('every line of the notes starts with the time it was written', (await page.$eval('#svNotes', (e) => e.value)) === NOTE, await page.$eval('#svNotes', (e) => e.value));
     await page.evaluate(() => __adv(50 * 60e3));
     await page.waitForTimeout(1100);
     ok('a repaint leaves the field alone', (await page.$eval('#svNotes', (e) => e.value)).endsWith('Second line'));
     await page.click('#svGo');
     const s = await store(page), last = s.s[s.s.length - 1];
-    ok('the notes are filed with the session', last.k === 'live' && last.t === 'Sweep of the high <then> CISD\nSecond line' && last.b - last.a === 60 * 60e3, last);
+    ok('the notes are filed with the session, stamps and all', last.k === 'live' && last.t === NOTE && last.b - last.a === 60 * 60e3, last);
     ok('Today comes back', await page.$eval('#svTodayP', (e) => !e.hidden));
     const shown = await page.$eval('.note-r div', (e) => e.textContent);
-    ok('the log shows the notes as text, under the session', shown === 'Sweep of the high <then> CISD\nSecond line', shown);
+    ok('the log shows the notes as text, under the session', shown === NOTE, shown);
     await c.close();
+  }
+
+  console.log('\nSVC — the trade counter');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('no counter until a backtest runs', await page.$eval('#svCtr', (e) => e.hidden));
+    await page.click('#svGo');
+    ok('a backtest shows the counter', await page.$eval('#svCtr', (e) => !e.hidden));
+    for (let i = 0; i < 3; i++) await page.click('#svPlus');
+    await page.evaluate(() => document.activeElement.blur());
+    await page.keyboard.press('Enter'); await page.keyboard.press('Enter'); await page.keyboard.press('-');
+    ok('+1, Enter and the minus key count the trades', (await txt(page, '#svCount')) === '4', await txt(page, '#svCount'));
+    ok('the ring counts them toward today', Math.abs(await page.$eval('#svArc', (e) => 1 - parseFloat(e.style.strokeDashoffset) / parseFloat(e.style.strokeDasharray)) - 24 / 40) < 0.01);
+    await page.evaluate(() => __adv(12 * 60e3));
+    await page.reload(); await page.waitForSelector('#svBig');
+    ok('a reload keeps the count', (await txt(page, '#svCount')) === '4');
+    ok('and the pace of the session shows under the clock', /3m 00s each/.test(await txt(page, '#svSub')), await txt(page, '#svSub'));
+    await page.click('#svGo'); await page.waitForSelector('.dlg');
+    ok('ending fills the trades in from the counter', (await page.$eval('#svN', (e) => e.value)) === '4');
+    await page.keyboard.press('Enter');
+    const s = await store(page);
+    ok('and files them', s.s[s.s.length - 1].n === 4 && s.run === null);
+    ok('the counter goes away', await page.$eval('#svCtr', (e) => e.hidden));
+    await c.close();
+  }
+
+  console.log('\nSVC — pace');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('thirty days of bars', (await page.$$('#svPc i')).length === 30);
+    ok('the fastest day is the white one (Sunday, Monday and today all run 3m 00s)', (await page.$$('#svPc i.is-best')).length === 3);
+    const f = await txt(page, '#svPaceF');
+    ok('the thirty-day figure matches the pace above', /30 days3m 07s/.test(f), f);
+    ok('a change is only claimed against a week that has one', /Against the week before–/.test(f), f);
+    ok('a day with no backtests is an empty bar, not a slow one', (await page.$$('#svPc i.is-none')).length === 26);
+    await c.close();
+  }
+
+  console.log('\nSVC — the week in review');
+  {
+    const { c, page } = await ctx(SEED);
+    await page.click('#svRev'); await page.waitForSelector('.dlg.wide');
+    ok('Review opens this week so far', /THIS WEEK\./.test(await txt(page, '.dlg')) && (await txt(page, '.rv-big b')) === '85');
+    ok('seven days of bars', (await page.$$('.rv-days i')).length === 7);
+    await page.click('[data-a="prev"]');
+    ok('the arrow steps back a week', (await txt(page, '.rv-big b')) === '40' && /THE WEEK\./.test(await txt(page, '.rv-h')));
+    ok('and stops at the first week there is', await page.$eval('[data-a="prev"]', (e) => e.disabled));
+    ok('nothing in it is red', await page.evaluate(() => [...document.querySelectorAll('.dlg *')].every((e) => { const m = getComputedStyle(e).color.match(/\d+/g).map(Number); return !(m[0] > 150 && m[1] < 100); })));
+    await page.keyboard.press('Escape');
+    await c.close();
+    const n = await ctx(Object.assign({}, SEED, { rev: '' }));
+    await n.page.waitForSelector('.dlg.wide');
+    ok('the first open of a week reviews the week just gone', /9 Nov – 15 Nov/.test(await txt(n.page, '.dlg')));
+    await n.page.keyboard.press('Escape');
+    await n.page.reload(); await n.page.waitForSelector('#svBig');
+    ok('once', !(await n.page.$('.dlg')));
+    await n.c.close();
+    const big = { s: [0, 1, 2, 3, 4, 5].map((i) => ({ i: 'w' + i, k: 'bt', a: at(16 + (i % 3), 8 + i), b: at(16 + (i % 3), 8 + i, 50), n: 45 })) };
+    const w = await ctx(big);
+    await w.page.click('#svGo');
+    await w.page.evaluate(() => __adv(30 * 60e3));
+    await w.page.click('#svGo'); await w.page.waitForSelector('#svN');
+    await w.page.keyboard.type('20'); await w.page.keyboard.press('Enter');
+    await w.page.waitForSelector('.dlg.wide');
+    ok('crossing 280 opens the week, celebrating', /WEEK DONE\./.test(await txt(w.page, '.rv-h')) && (await w.page.$$('.cf')).length > 20);
+    ok('the head glows', await w.page.$eval('.rv-h', (e) => e.classList.contains('is-win')));
+    await w.c.close();
+  }
+
+  console.log('\nSVC — the 8pm reminder');
+  {
+    const stub = `(() => { window.__notes = []; window.Notification = class { constructor(t, o) { __notes.push(t); } static get permission() { return 'granted'; } static requestPermission() { return Promise.resolve('granted'); } }; })();`;
+    const { c, page } = await ctx(SEED, '2026-11-18T20:05:00', stub);
+    await page.waitForSelector('.toast');
+    ok('at 20:05 it says the New York hour is on', /New York hour/.test(await txt(page, '.toast')));
+    ok('and sends a desktop notification', (await page.evaluate(() => __notes)).length === 1);
+    await page.click('.toast button');
+    ok('Start live starts the live session', (await store(page)).run.k === 'live');
+    await page.reload(); await page.waitForSelector('#svBig');
+    ok('once a day', !(await page.$('.toast')) && (await page.evaluate(() => __notes)).length === 0);
+    await c.close();
+    const done = Object.assign({}, SEED, { s: SEED.s.concat([{ i: 'L', k: 'live', a: at(18, 19), b: at(18, 19, 50) }]) });
+    const d2 = await ctx(done, '2026-11-18T20:05:00', stub);
+    await d2.page.waitForTimeout(300);
+    ok('not once a live session has happened today', !(await d2.page.$('.toast')));
+    await d2.c.close();
+    const d3 = await ctx(SEED, '2026-11-18T16:00:00', stub);
+    await d3.page.waitForTimeout(300);
+    ok('not outside its hour', !(await d3.page.$('.toast')));
+    await d3.c.close();
   }
 
   console.log('\nSVC — damage and nothing');
