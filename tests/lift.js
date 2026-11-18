@@ -439,9 +439,10 @@ const freeze = (at) => `(() => {
         { id: 'hack', n: 'Hack squat', sets: reps.map((r) => ({ w: 80, r })) },
         { id: 'squat', n: 'Barbell squat', sets: [{ w: 100, r: 6 }, { w: 100, r: 6 }, { w: 100, r: 6 }] }] }] });
     {
-      const { c, page } = await ctx(last([8, 8, 7]), '2026-11-02T07:00:00');
+      const seed = last([8, 8, 7]); seed.wo[0].rt = 'p-mon';
+      const { c, page } = await ctx(seed, '2026-11-02T07:00:00');
       ok('a session logged under the old day name takes the new one', (await store(page)).wo.find((w) => w.id === 'm1').n === 'Quad strength');
-      ok('a Monday opens on Quad strength', (await page.textContent('#lfPick')).trim() === 'Quad strength');
+      ok('after a Monday session the next day of the plan comes up', (await page.textContent('#lfPick')).trim() === 'Chest & shoulders');
       await page.click('#lfGo'); await settle(page);
       const ex = page.locator('.lf-session .lf-ex').first();
       ok('the set count is the program\'s', await ex.locator('.lf-set:not(.is-hd)').count() === 4);
