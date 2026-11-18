@@ -536,9 +536,16 @@ body.lf-v-home .lf-glow { opacity: 1; }
 @keyframes lf-over { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.09); opacity: .55; } }
 [data-acc-g][data-acc-g] .lf-ss-rest.is-over :is(.lf-rs-c, .lf-rs-l) { color: var(--bad); background: none; -webkit-text-fill-color: var(--bad); }
 .lf-ss-rest.is-ready .lf-rs-fg { stroke: var(--log-s, var(--log)); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--log) 60%, transparent)); }
+/* PAST THE TARGET THE RING GOES RED WITH THE TIMER. Over is also ready, and the ready rule above is the later of the two at the same weight, so the ring stayed in the accent while only the number went red. This one names both states, so it wins. */
+.lf-ss-rest.is-ready.is-over .lf-rs-fg { stroke: var(--bad); filter: drop-shadow(0 0 7px color-mix(in srgb, var(--bad) 70%, transparent)); }
 @media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } .lf-ss-rest.is-over .lf-rs-c { animation: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
+.lf-grip { appearance: none; border: 0; background: none; width: 26px; height: 44px; margin: 0 -4px 0 -8px; display: grid; place-items: center; color: var(--quiet); cursor: grab; touch-action: none; flex: none; position: relative; }
+.lf-grip svg { width: 16px; height: 16px; fill: currentColor; }
+.lf-grip:active { cursor: grabbing; color: var(--ink); }
+.lf-ex.is-lift { position: relative; z-index: 6; box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.14); transition: none; }
+.lf-ex.is-shift { transition: transform .18s ease; }
 .lf-curb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; flex: none; }
 .lf-curb::before { content: ''; position: absolute; inset: -6px -3px; }
 .lf-curb svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
@@ -1241,7 +1248,6 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ti .tt-myth em { background: linear-gradient(100deg, #a78bfa, #38bdf8, #f472b6, #a78bfa) 0 0 / 300% 100% repeat-x; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-myth 8s linear infinite; }
 @keyframes tt-myth { to { background-position: -300% 0; } }
 @media (prefers-reduced-motion: reduce) { .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
-.lf-cu-c { padding-top: 14px; }
 .lf-cu-pv { display: flex; flex-direction: column; gap: 4px; padding: 10px 0 12px; }
 .lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .lf-cu-pv .fr-ti { margin: 0; }
@@ -2561,6 +2567,13 @@ function lfToday() {
   var t = today();
   if (S.pick && S.pick.d === ymd(t) && rtById(S.pick.id)) return rtById(S.pick.id);
   var P = lfProg().days;
+  /* THE NEXT ONE FOLLOWS THE PROGRAM, not the calendar: whatever day of the week it is, today is the day after the one you last trained. Only with nothing of this program to go on does the weekday decide. */
+  var ws = woSorted(), tk = ymd(t);
+  for (var j = ws.length - 1; j >= 0; j--) {
+    if (ws[j].d > tk) continue;
+    var k = -1; for (var q = 0; q < P.length; q++) if (P[q].id === ws[j].rt) { k = q; break; }
+    if (k >= 0) return P[(k + 1) % P.length];
+  }
   for (var i = 0; i < P.length; i++) if (P[i].dow === t.getDay()) return P[i];
   return null;
 }
@@ -3131,7 +3144,9 @@ function lfWeekCard(inSheet) {
   if (inSheet) c.style.background = 'var(--card)';
   else c.addEventListener('click', function () { lfTrendSheet('reps'); });
   $('.lf-big', c).innerHTML = tot + '<small>reps</small>';
-  if (last > 0 && tot > 0) { var p = Math.round((tot - last) / last * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '%'; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
+  /* AGAINST THE LAST TIME YOU DID THAT WORKOUT, not against last week: a week is a different number of sessions each time, and Pull against Legs says nothing. */
+  var lw = woSorted().filter(function (w) { return w.d <= t; }).pop(), pw = lw && woSorted().filter(function (w) { return w.d < lw.d && w.n === lw.n; }).pop();
+  if (pw && woReps(pw) > 0 && woReps(lw) > 0) { var p = Math.round((woReps(lw) - woReps(pw)) / woReps(pw) * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '% vs last ' + lw.n; $('.lf-pct', c).dataset.vs = lw.n; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
   var max = Math.max.apply(null, reps.map(function (x) { return x.r; }).concat([1]));
   var bars = $('.lf-bars', c);
   reps.forEach(function (x, i) {
@@ -3489,6 +3504,43 @@ function lfSwap(e) {
     lfSwapTo(e, id);
   }, 'Swap ' + e.n);
 }
+/* MOVING AN EXERCISE. The workout is as long as it is and nobody does it in the order a program wrote it down: pick an exercise up by its grip and put it where you will do it. The workout's own order follows, so it is saved, and logged, the way you set it. */
+function lfMoveEx(e, to) {
+  var from = lfOrd ? lfOrd.indexOf(e) : -1; if (from < 0 || to < 0 || to >= lfOrd.length || to === from) return false;
+  lfOrd.splice(from, 1); lfOrd.splice(to, 0, e);
+  act.x.sort(function (a, b) { return lfOrd.indexOf(a) - lfOrd.indexOf(b); });
+  lfSaveAct(); return true;
+}
+function lfGripWire(gp, card, e) {
+  gp.addEventListener('keydown', function (ev) {
+    var d = ev.key === 'ArrowUp' ? -1 : ev.key === 'ArrowDown' ? 1 : 0; if (!d) return; ev.preventDefault();
+    if (lfMoveEx(e, lfOrd.indexOf(e) + d)) { buzz(8); lfPaintSession(); var g = $('.lf-ex[data-ex="' + e.id + '"] .lf-grip'); if (g) g.focus(); }
+  });
+  gp.addEventListener('pointerdown', function (ev) {
+    if (ev.button > 0) return; ev.preventDefault();
+    var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
+    var cards = $$('.lf-ex', list), i0 = cards.indexOf(card); if (i0 < 0) return;
+    var rects = cards.map(function (c) { return c.getBoundingClientRect(); }), y0 = ev.clientY, s0 = bd.scrollTop, h = rects[i0].height + 12, to = i0;
+    try { gp.setPointerCapture(ev.pointerId); } catch (x) {}
+    card.classList.add('is-lift'); cards.forEach(function (c) { if (c !== card) c.classList.add('is-shift'); }); buzz(10);
+    function move(m) {
+      var eg = bd.getBoundingClientRect();
+      if (m.clientY > eg.bottom - 70) bd.scrollTop += 14; else if (m.clientY < eg.top + 70) bd.scrollTop -= 14;
+      var ds = bd.scrollTop - s0;
+      card.style.transform = 'translateY(' + (m.clientY - y0 + ds) + 'px) scale(1.02)';
+      var mid = rects[i0].top + rects[i0].height / 2 + (m.clientY - y0), n = 0;
+      cards.forEach(function (c, i) { if (i !== i0 && rects[i].top + rects[i].height / 2 - ds < mid) n++; });
+      to = n;
+      cards.forEach(function (c, i) { if (i === i0) return; c.style.transform = i > i0 && i <= to ? 'translateY(' + (-h) + 'px)' : i < i0 && i >= to ? 'translateY(' + h + 'px)' : ''; });
+    }
+    function end() {
+      gp.removeEventListener('pointermove', move); gp.removeEventListener('pointerup', end); gp.removeEventListener('pointercancel', end);
+      cards.forEach(function (c) { c.classList.remove('is-lift', 'is-shift'); c.style.transform = ''; });
+      if (to !== i0 && lfMoveEx(e, to)) { buzz(12); lfPaintSession(); }
+    }
+    gp.addEventListener('pointermove', move); gp.addEventListener('pointerup', end); gp.addEventListener('pointercancel', end);
+  });
+}
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
   /* THE LIST IS REBUILT, AND A REBUILT LIST HAS NO HEIGHT FOR A MOMENT, so the
@@ -3511,6 +3563,10 @@ function lfPaintSession() {
       + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><button type="button" class="lf-aim"></button>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
+    /* THE GRIP: pick the exercise up by it and move it up or down, or press the arrows on it */
+    var gp = el('<button type="button" class="lf-grip"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="5" r="1.8"/><circle cx="15" cy="5" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="19" r="1.8"/><circle cx="15" cy="19" r="1.8"/></svg></button>');
+    gp.setAttribute('aria-label', 'Move ' + e.n + '. Drag it, or press the up and down arrows');
+    var hdr = $('.lf-ex-hd', card); hdr.insertBefore(gp, hdr.firstChild); lfGripWire(gp, card, e);
     var ssb = $('.lf-ssb', card), ssg = e.ss ? lfSsGroup(e) : [];
     if (lfSsPend && act.x.indexOf(lfSsPend) < 0) lfSsPend = null;
     var pend = lfSsPend === e, pick = lfSsPend && !pend;
@@ -4161,9 +4217,9 @@ function lfShareCardSheet(sp, name) {
   var ig = LF_WGT && LF_WGT.shareStory ? mk('lfCardIg', 'Instagram story', 'is-log') : null;
   var fb = LF_WGT && LF_WGT.shareStory ? mk('lfCardFb', 'Facebook story') : null;
   var tt = LF_WGT && LF_WGT.shareStory ? mk('lfCardTt', 'TikTok') : null;
-  var gen = mk('lfCardShare', LF_WGT ? 'More ways to share' : 'Share', ig ? '' : 'is-log');
-  var save = mk('lfCardSave', 'Save video');
-  [ig, fb, tt, gen, save].forEach(function (q) { if (q) foot.push(q); });
+  /* ONE general button, Share video: the phone's own share sheet has Save Video in it, so a Save button of its own did nothing the sheet does not do better */
+  var gen = mk('lfCardShare', 'Share video', ig ? '' : 'is-log');
+  [ig, fb, tt, gen].forEach(function (q) { if (q) foot.push(q); });
   var enable = function () { foot.forEach(function (q) { q.disabled = false; }); };
   var file = function () { try { return new File([blob], name + '.' + ext, { type: mime.split(';')[0] }); } catch (e) { return null; } };
   var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.' + ext; document.body.appendChild(a); a.click(); a.remove(); };
@@ -4178,12 +4234,8 @@ function lfShareCardSheet(sp, name) {
     var f = file();
     if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function () {}); else saveIt();
   });
-  /* in the iPhone app a download does nothing, so Save puts the video in Photos, and says so */
-  save.addEventListener('click', function () {
-    if (LF_WGT && LF_WGT.shareStory) native('save').then(function (r) { lfToast(r && r.ok ? 'Saved to Photos' : r && r.denied ? 'Allow Photos in Settings to save' : 'Could not save'); });
-    else saveIt();
-  });
-  var DUR = 3600, HOLD = 1800, t0 = 0, chunks = [];
+  /* THE VIDEO TAKES ITS TIME: 7.6 seconds for the figures to count up and the lines to come in, then 2.6 held, so what is shared is a little over ten seconds. At five it was gone before you had read it. */
+  var DUR = 7600, HOLD = 2600, t0 = 0, chunks = [];
   var finish = function () {
     blob = new Blob(chunks, { type: mime.split(';')[0] || 'video/webm' }); if (dead) return;
     url = URL.createObjectURL(blob);
@@ -5428,17 +5480,22 @@ function lfFoldSet(k, v) { if (v) lfFolds[k] = 1; else delete lfFolds[k]; }
    check marks, the lit days and the buttons can carry on both faces. */
 /* CUSTOMISE has a place of its own on You, so nobody has to go looking in Settings for it: how you look to your friends (your title, your flair, your frame, the badges you show), shown as it will be seen, and the theme right under it. */
 function lfCustomise() {
-  var w = el('<section class="lf-cu" id="lfCustom"><div class="lf-card lf-cu-c"><div class="lf-lab">Customise</div><div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div><div class="lf-cu-r"></div></div></section>');
-  function preview() {
-    var pv = $('#lfCuPv', w), nm = $('b', pv), ti = $('.fr-ti', pv), st = lfRkSt(); st.ac = lfAccent();
-    nm.textContent = (FRS && FRS.name) || 'You'; lfNameOn(nm, st);
-    ti.textContent = ''; var te = st.ti && lfRkHas('ti', st.ti) ? lfTitleEl(st.ti) : null;
-    if (te && !te.classList.contains('tt-eye')) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti) && !te) ti.textContent = lfRkName('ti', st.ti);
-    ti.hidden = !ti.firstChild;
-  }
-  $('.lf-cu-r', w).appendChild(lfRkRows(preview));
+  var w = el('<section class="lf-cu" id="lfCustom"></section>');
+  var tid = S.ti === 'none' ? '' : lfRkTitle(lfRkCtx());
+  w.appendChild(lfFold('lfCuF', 'cu', 'Customise', tid ? lfRkName('ti', tid) : 'No title', function (bd) {
+    bd.appendChild(el('<div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div>'));
+    var rows = el('<div class="lf-cu-r"></div>'); bd.appendChild(rows);
+    function preview() {
+      var pv = $('#lfCuPv', bd), nm = $('b', pv), ti = $('.fr-ti', pv), st = lfRkSt(); st.ac = lfAccent();
+      nm.textContent = (FRS && FRS.name) || 'You'; lfNameOn(nm, st);
+      ti.textContent = ''; var te = st.ti && lfRkHas('ti', st.ti) ? lfTitleEl(st.ti) : null;
+      if (te && !te.classList.contains('tt-eye')) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti) && !te) ti.textContent = lfRkName('ti', st.ti);
+      ti.hidden = !ti.firstChild;
+      var cur = S.ti === 'none' ? '' : lfRkTitle(lfRkCtx()), hd = $('#lfCuF .lf-fh .lf-num'); if (hd) hd.textContent = cur ? lfRkName('ti', cur) : 'No title';
+    }
+    rows.appendChild(lfRkRows(preview)); preview();
+  }));
   w.appendChild(lfThemeCard());
-  preview();
   return w;
 }
 function lfThemeCard() {

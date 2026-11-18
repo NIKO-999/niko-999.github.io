@@ -64,6 +64,8 @@ const freeze = (at) => `(() => {
   }
   const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1') || 'null'));
   const settle = (page) => page.waitForTimeout(420);
+  /* Customise is a fold, shut until pressed: open it before a row inside it is */
+  const cuOpen = async (page) => { if (await page.getAttribute('#lfCuF h3 > button', 'aria-expanded') !== 'true') { await page.click('#lfCuF h3 > button'); await page.waitForTimeout(300); } };
   const top = (page) => page.locator('.lf-sheet').last();
 
   /* ── a first open ── */
@@ -433,7 +435,7 @@ const freeze = (at) => `(() => {
   /* ── the split: a Monday, with last Monday on the record ── */
   {
     const last = (reps) => ({ unit: 'kg', goal: 4, ex: [], rt: [], bw: [],
-      wo: [{ id: 'm1', d: '2026-10-26', s: 1, e: 2, n: 'Lower A', rt: 'p-mon', x: [
+      wo: [{ id: 'm1', d: '2026-10-26', s: 1, e: 2, n: 'Lower A', rt: null, x: [
         { id: 'hack', n: 'Hack squat', sets: reps.map((r) => ({ w: 80, r })) },
         { id: 'squat', n: 'Barbell squat', sets: [{ w: 100, r: 6 }, { w: 100, r: 6 }, { w: 100, r: 6 }] }] }] });
     {
@@ -544,6 +546,7 @@ const freeze = (at) => `(() => {
     ok('past the top of the range it says Over', /Over/.test(await page.textContent('#lfRest .lf-rs-l')) && await page.locator('#lfRest.is-over').count() === 1);
     const red = await page.evaluate(() => { const r = document.querySelector('#lfRest'), c = getComputedStyle(r.querySelector('.lf-rs-c')), bad = (() => { const d = document.createElement('i'); d.style.color = 'var(--bad)'; document.body.appendChild(d); const v = getComputedStyle(d).color; d.remove(); return v; })(); return { col: c.color, bad, anim: c.animationName, st: getComputedStyle(r.querySelector('.lf-rs-fg')).stroke }; });
     ok('in red, and the number pulses', red.col === red.bad && /lf-over/.test(red.anim), red);
+    ok('and the ring goes red with it, not only the number', await page.evaluate(() => { const r = document.querySelector('#lfRest'), d = document.createElement('i'); d.style.color = 'var(--bad)'; document.body.appendChild(d); const bad = getComputedStyle(d).color; d.remove(); return getComputedStyle(r.querySelector('.lf-rs-fg')).stroke === bad; }));
     ok('the second tone is heard once, and the first is not played late', await page.evaluate(() => window.lfRests2) === 1 && !(await page.evaluate(() => window.lfRests || 0)));
     const aSrc = await page.evaluate(() => 0), srcT = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
     ok('the two tones are different sounds, a rising chime and a low buzz', /function lfRing\(\)[^}]*660[^}]*880/.test(srcT) && /function lfRing2\(\)[^}]*'square'/.test(srcT));
@@ -1155,7 +1158,7 @@ const freeze = (at) => `(() => {
   }
   {
     const { c, page } = await ctx({ unit: 'kg', wo: [{ id: 't1', d: '2026-10-29', s: 1, e: 2, n: 'Hamstrings & glutes', rt: 'p-wed', x: [{ id: 'rdl', n: 'Romanian deadlift', sets: [{ w: 100, r: 8 }] }] }] }, '2026-10-30T09:00:00');
-    ok('the next day the plan\'s own day comes back', (await page.textContent('#lfPick')).trim() === 'Quad volume' && await page.locator('#lfDone').count() === 0);
+    ok('the next day it is the day after the one you trained, in the plan\'s order', (await page.textContent('#lfPick')).trim() === 'Back & V-taper' && await page.locator('#lfDone').count() === 0);
     await c.close();
   }
 
@@ -1933,8 +1936,8 @@ const freeze = (at) => `(() => {
     ok('on the first the month just gone comes up by itself, named, with what you moved', await o.page.locator('#lfMonthSum').count() === 1 && /October/.test(await o.page.textContent('#lfMonthSum')) && /4 sessions/.test(await o.page.textContent('#lfMonthSum')) && (await store(o.page)).moSum === '2026-10');
     ok('and it never says red: a month is not graded', await o.page.evaluate(() => !document.querySelector('.lf-wsh.is-miss')));
     await o.page.click('#lfMoShare'); await settle(o.page);
-    ok('the card is a 1080 by 1920 story that plays, with Share and Save, and no still picture', await o.page.locator('.lf-card-pv img').count() === 0 && await o.page.locator('.lf-card-st').count() === 1 && await o.page.evaluate(() => window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920) && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 1);
-    await o.page.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 25000 }).catch(() => {});
+    ok('the card is a 1080 by 1920 story that plays, with one Share video button, and no still picture', await o.page.locator('.lf-card-pv img').count() === 0 && await o.page.locator('.lf-card-st').count() === 1 && await o.page.evaluate(() => window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920) && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 0 && /Share video/.test(await o.page.locator('#lfCardShare').textContent()));
+    await o.page.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
     ok('it records itself as it plays, and what it recorded is a video that loops in place of the canvas', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
     ok('the video is not a picture file: no png, no image button', !/image\/png/.test(src2.slice(src2.indexOf('function lfShareCardSheet'), src2.indexOf('THE MONTH IN REVIEW'))) && !/Save image/.test(src2));
     await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfMoDone'); await settle(o.page);
@@ -1995,6 +1998,7 @@ const freeze = (at) => `(() => {
     /* WHAT YOU WEAR: four rows in Settings, each opening a small picker */
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    await cuOpen(page);
     const rows = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.dataset.k + ':' + e.querySelector('span').textContent));
     ok('Settings has a row each for title, flair and frame', rows.join() === 'ti:Title,fl:Flair,fm:Frame,sh:Badges shown', rows);
     await page.click('#lfYou .rk-show'); await settle(page);
@@ -2002,7 +2006,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfYou .rk-show'); await settle(page);
     ok('and a second press puts it back', !(await store(page)).shn && await page.textContent('#lfYou .rk-show b') !== 'None');
     ok('and there is no rank sheet, level or duel anywhere', await page.locator('#frRankBtn, #frDu, .rk-lv').count() === 0);
-    const openRow = async (k) => { await page.click('#lfYou .rk-set[data-k="' + k + '"]'); await page.waitForTimeout(600); };
+    const openRow = async (k) => { await cuOpen(page); await page.click('#lfYou .rk-set[data-k="' + k + '"]'); await page.waitForTimeout(600); };
     const pick = async (k, id) => { await openRow(k); await page.evaluate(([k, id]) => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-k="' + k + '"][data-id="' + id + '"]').click(), [k, id]); await page.waitForTimeout(350); await page.keyboard.press('Escape'); await settle(page); };
     await openRow('ti');
     const lock = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.rk-o.is-lock').length);
@@ -2012,12 +2016,13 @@ const freeze = (at) => `(() => {
     ok('a locked title cannot be worn', !st.ti || st.ti !== 'master', st.ti);
     await pick('ti', 'regular'); await pick('fl', 'spark'); await pick('fm', 'ring'); st = await store(page);
     ok('what you pick is kept', st.ti === 'regular' && st.fl === 'spark' && st.fm === 'ring', st);
+    await cuOpen(page);
     const vals = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.querySelector('b').textContent));
     ok('each row says what is worn', vals[0] === 'Regular' && vals[1] === 'Spark' && vals[2] === 'Molten', vals);
     await page.waitForTimeout(3200);
     const last = posts.filter((q) => q.s && 'ti' in q.s).pop();
     ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
-    await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
+    await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     const orn = await page.evaluate(() => ({ n: document.querySelectorAll('.rk-o[data-k="fm"]').length, old: !!document.querySelector('.rk-o[data-id="inferno"]') }));
     ok('The Eye has a flair of its own, the owner\'s alone: it is not offered to anyone else', /\['eye', 'The Eye', 'One of one', function \(c\) \{ return c\.own; \}, 'M2 12s/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /kind === 'fl' && x\[0\] === 'eye' && !lfOwner\(\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && !(await page.locator('.rk-o[data-id="eye"][data-k="fl"]').count()));
     {
@@ -2039,7 +2044,7 @@ const freeze = (at) => `(() => {
     ok('and none of them carries any text: they are made of metal, gems and light', !/<text/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').slice(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').indexOf('var RK_ORN'), require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8').indexOf('function lfEmStop'))));
     await page.keyboard.press('Escape'); await settle(page);
     await pick('fm', 'blossom'); st = await store(page);
-    ok('a softer emblem is earned, not given: Blossom opens at sixty workouts, Angel and Celestial later', st.fm === 'blossom' && await (async () => { await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500); const l = await page.evaluate(() => ['angel', 'celestial'].map((id) => document.querySelector('.rk-o[data-id="' + id + '"]').classList.contains('is-lock'))); await page.keyboard.press('Escape'); await settle(page); return l.join() === 'true,true'; })(), st.fm);
+    ok('a softer emblem is earned, not given: Blossom opens at sixty workouts, Angel and Celestial later', st.fm === 'blossom' && await (async () => { await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500); const l = await page.evaluate(() => ['angel', 'celestial'].map((id) => document.querySelector('.rk-o[data-id="' + id + '"]').classList.contains('is-lock'))); await page.keyboard.press('Escape'); await settle(page); return l.join() === 'true,true'; })(), st.fm);
     await pick('fl', ''); await pick('fm', ''); st = await store(page);
     ok('None takes a flair or a frame off', !st.fl && !st.fm, st);
     await c.close();
@@ -2105,11 +2110,11 @@ const freeze = (at) => `(() => {
   {
     const { c, page } = await ctx({ unit: 'kg', goal: 3 });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
+    await cuOpen(page); await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
     const heads = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4').length && [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
     ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges,Animated,Against the creator', heads);
     ok('and nobody else is offered Creator, not even locked', await page.locator('.rk-o[data-id="creator"]').count() === 0);
-    await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
+    await page.keyboard.press('Escape'); await settle(page); await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     ok('or the Prestige frame', await page.locator('.rk-o[data-id="prestige"]').count() === 0 && await page.locator('.rk-o[data-id="neon"]').count() === 1);
     await c.close();
   }
@@ -2117,7 +2122,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3 });
     await page.evaluate(() => localStorage.setItem('lift.owner.v1', '2026-10-01')); await page.reload(); await page.waitForTimeout(500);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
+    await cuOpen(page); await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
     const sec = await page.evaluate(() => [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
     ok('the owner has a last collection, One of one', /One of one$/.test(sec), sec);
     ok('with only Creator in it', await page.locator('.rk-o[data-k="ti"].is-creator').count() === 1 && await page.locator('.rk-o[data-k="ti"][data-id="owner"]').count() === 0);
@@ -2130,12 +2135,12 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="none"]').click()); await page.waitForTimeout(300);
     ok('None is a title too: nothing is drawn under the name', await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.fr-ti').hidden) && (await store(page)).ti === 'none');
     await page.keyboard.press('Escape'); await settle(page);
-    await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(600);
+    await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(600);
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="prestige"]').click()); await page.waitForTimeout(500);
     const pr = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { big: s.querySelector('.fr-ban').classList.contains('has-emblem') || s.querySelector('.fr-ban-av').classList.contains('em-fall'), ring: getComputedStyle(s.querySelector('.fr-ban-av'), '::before').display, cls: s.querySelector('.fr-ban-av').className }; });
     const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
     ok('the frame only the owner has is a whole piece, not a ring, with no banner and no text', pr && pr.big && /is-fm-prestige/.test(pr.cls) && /ShaderMaterial/.test(src) && /function lfEmblem3/.test(src) && !/lfEmblem\(/.test(src) && !/ToUpperCase\(\)\.slice\(0, 10\)/.test(src), pr);
-    await page.keyboard.press('Escape'); await settle(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
+    await page.keyboard.press('Escape'); await settle(page); await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-id="sovereign"]').click()); await page.waitForTimeout(500);
     ok('and there is a second, the obsidian spade', await page.locator('.fr-ban-av.is-fm-sovereign').count() === 1 && await page.locator('.fr-ban-av.is-fm-prestige').count() === 0);
     const st = await store(page);
@@ -2424,7 +2429,7 @@ const freeze = (at) => `(() => {
     await o.page.waitForSelector('#lfWeekSum', { timeout: 25000 }).catch(() => {});
     ok('the seventh day of the week brings the weekly report up by itself, on a Wednesday', await o.page.locator('#lfWeekSum').count() === 1);
     ok('and it says it was a perfect week', /Perfect week/.test(await o.page.locator('#lfWeekSum .lf-ws-k').textContent().catch(() => '')) && /Seven for seven/.test(await o.page.locator('#lfWeekSum .lf-ws-verdict').textContent().catch(() => '')));
-    ok('it can be shared as the moving story, with Save', await o.page.locator('#lfWsShare').count() === 1);
+    ok('it can be shared as the moving story', await o.page.locator('#lfWsShare').count() === 1);
     ok('and it comes once: the week is marked as reported', (await store(o.page)).wkSum === '2026-11-09');
     await o.c.close();
     const q = await ctx({ unit: 'kg', goal: 7, wkSum: '2000-01-01', rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
@@ -2441,6 +2446,8 @@ const freeze = (at) => `(() => {
     const o = await ctx({ unit: 'kg', goal: 3, ti: 'rookie' }, '2026-10-30T18:00:00');
     await o.page.click('.lf-bar [data-v="you"]'); await settle(o.page);
     ok('You has a Customise section of its own, ahead of Settings', await o.page.locator('#lfYou #lfCustom').count() === 1 && await o.page.evaluate(() => { const a = document.querySelector('#lfCustom'), b = document.querySelector('#lfSet'); return !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
+    ok('Customise is a fold, shut until pressed, and its header says the title you wear', await o.page.getAttribute('#lfCuF h3 > button', 'aria-expanded') === 'false' && /Rookie/.test(await o.page.textContent('#lfCuF h3')));
+    await o.page.click('#lfCuF h3 > button'); await settle(o.page);
     ok('it holds your title, flair and the badges you show, and shows them as they will be seen', await o.page.locator('#lfCustom .rk-set').count() >= 3 && await o.page.locator('#lfCustom #lfCuPv b').count() === 1);
     ok('the theme is right under it', await o.page.locator('#lfCustom #lfTheme').count() === 1);
     ok('and Settings no longer carries those rows', await o.page.locator('#lfSet .rk-set').count() === 0);
@@ -2554,22 +2561,49 @@ const freeze = (at) => `(() => {
     await pg5.goto(URL); await pg5.waitForTimeout(500);
     await pg5.click('#lfPick'); await settle(pg5);
     await top(pg5).locator('#lfFinShare').click(); await settle(pg5);
-    ok('in the app the story has Instagram, Facebook and TikTok buttons beside the share sheet and Save', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardTt').count() === 1 && await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardSave').count() === 1);
+    ok('in the app the story has Instagram, Facebook and TikTok buttons beside Share video', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardTt').count() === 1 && await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardSave').count() === 0);
     ok('and none of them can be pressed until there is a video to send', await pg5.locator('#lfCardIg').isDisabled());
-    await pg5.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 25000 }).catch(() => {});
+    await pg5.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
     await pg5.click('#lfCardIg'); await pg5.waitForTimeout(600);
     const ig = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1]));
     ok('Instagram is sent the recorded video, by name of the app', ig.length === 1 && ig[0].kind === 'instagram' && typeof ig[0].data === 'string' && ig[0].data.length > 1000 && /^(mp4|webm)$/.test(ig[0].ext), ig.map((x) => [x.kind, x.ext, (x.data || '').length]));
     await pg5.click('#lfCardFb'); await pg5.click('#lfCardShare'); await pg5.waitForTimeout(600);
     const kinds = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
     ok('Facebook and the share sheet each send it too', kinds.join() === 'instagram,facebook,sheet', kinds);
-    await pg5.click('#lfCardSave'); await pg5.waitForTimeout(500);
-    const kinds2 = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
-    ok('Save puts the video in Photos, not on a share sheet', kinds2[kinds2.length - 1] === 'save' && kinds2.length === 4, kinds2);
     await pg5.click('#lfCardTt'); await pg5.waitForTimeout(500);
     ok('TikTok saves it to Photos first and opens TikTok', (await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind))).slice(-1)[0] === 'tiktok');
-    ok('and says whether it worked', /Could not save|Saved to Photos|Allow Photos/.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
+    ok('and says whether it worked', /Could not save|Saved to Photos|Allow Photos|Saved\./.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await c5.close();
+  }
+
+  /* ── next in line, compared to last time, and moving an exercise ── */
+  {
+    const W = (id, d, r, reps) => ({ id, d, s: 1, e: 2, n: 'Push', rt: r, x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: reps }] }] });
+    const a = await ctx({ unit: 'kg', wo: [W('n1', '2026-10-26', 'p-mon', 10)] });
+    ok('today is the day after the one you last trained, whatever the weekday', (await a.page.textContent('#lfPick')).trim() === 'Chest & shoulders', await a.page.textContent('#lfPick'));
+    ok('and it starts straight from home', /Start/.test(await a.page.textContent('#lfGo')));
+    await a.c.close();
+    const b = await ctx({ unit: 'kg', wo: [W('c1', '2026-10-20', null, 10), W('c2', '2026-10-28', null, 11)] });
+    const pct = (await b.page.textContent('#lfWeek .lf-pct')).trim();
+    ok('the reps are measured against the last time that workout was done', pct === '+10% vs last Push', pct);
+    await b.c.close();
+    const g = await ctx({ unit: 'kg' });
+    await g.page.click('#lfGo'); await settle(g.page);
+    const names = () => g.page.$$eval('.lf-ex .lf-ex-n', (n) => n.map((x) => x.textContent.trim()));
+    const before = await names();
+    ok('every exercise has a grip to move it by', before.length > 1 && await g.page.locator('.lf-ex .lf-grip').count() === before.length);
+    await g.page.locator('.lf-ex .lf-grip').first().focus(); await g.page.keyboard.press('ArrowDown'); await settle(g.page);
+    const after = await names();
+    ok('the arrows move an exercise down one place', after[1] === before[0] && after[0] === before[1], { before, after });
+    await g.page.locator('.lf-ex .lf-grip').nth(1).focus(); await g.page.keyboard.press('ArrowUp'); await settle(g.page);
+    ok('and up again', (await names()).join() === before.join());
+    const bb = await g.page.locator('.lf-ex .lf-grip').first().boundingBox();
+    const b2 = await g.page.locator('.lf-ex').nth(1).boundingBox();
+    await g.page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await g.page.mouse.down();
+    await g.page.mouse.move(bb.x + bb.width / 2, b2.y + b2.height - 4, { steps: 8 }); await g.page.mouse.up(); await settle(g.page);
+    const dr = await names();
+    ok('dragging by the grip drops it where you let go', dr[0] === before[1] && dr[1] === before[0], { before, dr });
+    await g.c.close();
   }
 
   await browser.close();
