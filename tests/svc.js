@@ -180,6 +180,37 @@ const SEED = { s: [
     await c.close();
   }
 
+  console.log('\nSVC — the visuals');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('today as a line holds one segment a session', (await page.$$('#svTl .seg')).length === 2);
+    ok('the backtest is solid, the content session grey', await page.evaluate(() => {
+      const bt = getComputedStyle(document.querySelector('#svTl .seg.bt')).backgroundColor, cn = getComputedStyle(document.querySelector('#svTl .seg.cnt')).backgroundColor;
+      return bt === 'rgb(255, 255, 255)' && cn === 'rgb(106, 106, 106)';
+    }));
+    const geo = await page.evaluate(() => {
+      const t = document.querySelector('#svTl').getBoundingClientRect(), s = (e) => e.getBoundingClientRect();
+      const bt = s(document.querySelector('#svTl .seg.bt')), n = s(document.querySelector('#svTl .nowl')), slot = s(document.querySelector('#svTl .slot'));
+      /* 06:00 to 24:00 is eighteen hours: 08:00 sits one ninth along, 10:00 two ninths, 20:00 seven ninths */
+      return { bt: (bt.left - t.left) / t.width, now: (n.left - t.left) / t.width, slot: (slot.left - t.left) / t.width };
+    });
+    ok('segments are placed by the clock', Math.abs(geo.bt - 2 / 18) < 0.01 && Math.abs(geo.now - 4 / 18) < 0.01 && Math.abs(geo.slot - 14 / 18) < 0.01, geo);
+    ok('the year is fifty-three weeks of seven', (await page.$$('#svYr i')).length === 371);
+    ok('two days on target light white (Sunday and Monday)', (await page.$$('#svYr i.l3')).length === 2);
+    ok('the days still to come are outlines, not misses', (await page.$$('#svYr i.is-ahead')).length === 4);
+    ok('the year says what it counts', /2 days on target · best run 2/.test(await txt(page, '#svYrX')), await txt(page, '#svYrX'));
+    ok('Monday is the top row: the first square is a Monday', await page.evaluate(() => /Mon/.test(document.querySelector('#svYr i').title)));
+    ok('the ring has no halo before the target', await page.evaluate(() => !document.querySelector('.ring').classList.contains('is-hit')));
+    await page.click('#svGo');
+    ok('a running session breathes and grows a segment', await page.evaluate(() => document.querySelector('.ring').classList.contains('is-run')) && (await page.$$('#svTl .seg.is-run')).length === 1);
+    await page.click('#svGo'); await page.waitForSelector('#svN'); await page.keyboard.press('Escape');
+    await c.close();
+    const full = await ctx({ s: [{ i: 'h', k: 'bt', a: at(18, 8), b: at(18, 9), n: 40 }] });
+    ok('the ring lights up once the target is hit', await full.page.evaluate(() => document.querySelector('.ring').classList.contains('is-hit')));
+    ok('and that square is white on the year', (await full.page.$$('#svYr i.l3')).length === 1);
+    await full.c.close();
+  }
+
   console.log('\nSVC — the trade counter');
   {
     const { c, page } = await ctx(SEED);

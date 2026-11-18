@@ -165,6 +165,49 @@ td.x { width: 56px; text-align: right; }
 .btn.pri { background: var(--ink); color: #000; }
 .btn.pri:hover { background: #e6e6e6; }
 
+/* ── the ring lights up: breathing while a session runs, a halo once the
+   day's target is hit. Filter on one 300px svg, nothing per frame in JS. ── */
+.ring .fl { transition: stroke-dashoffset .5s ease, filter .6s ease; }
+.ring.is-run .fl { animation: sv-breathe 3.2s ease-in-out infinite; }
+.ring.is-hit .fl { filter: drop-shadow(0 0 7px rgba(255,255,255,.7)) drop-shadow(0 0 22px rgba(255,255,255,.35)); }
+@keyframes sv-breathe { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); } 50% { filter: drop-shadow(0 0 9px rgba(255,255,255,.55)); } }
+@media (prefers-reduced-motion: reduce) { .ring.is-run .fl { animation: none; } }
+
+/* ── today as a line ── */
+.tl { margin-top: 22px; }
+.tl-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+.tl-k { display: flex; gap: 16px; font-size: 11px; color: var(--quiet); }
+.tl-k i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.tl-k .k-bt { background: var(--ink); }
+.tl-k .k-live { box-shadow: inset 0 0 0 1.5px var(--ink); background: repeating-linear-gradient(135deg, transparent 0 2px, rgba(255,255,255,.55) 2px 3px); }
+.tl-k .k-cnt { background: #6a6a6a; }
+.tl-t { position: relative; height: 34px; border-radius: 10px; background: #111; overflow: hidden; }
+.tl-t .slot { position: absolute; top: 3px; bottom: 3px; border-radius: 7px; border: 1px dashed #4a4a4a; }
+.tl-t .seg { position: absolute; top: 5px; bottom: 5px; border-radius: 6px; min-width: 4px; }
+.tl-t .seg.bt { background: var(--ink); }
+.tl-t .seg.live { box-shadow: inset 0 0 0 1.5px var(--ink); background: repeating-linear-gradient(135deg, transparent 0 4px, rgba(255,255,255,.5) 4px 5.5px); }
+.tl-t .seg.cnt { background: #6a6a6a; }
+.tl-t .seg.is-run { animation: sv-breathe 3.2s ease-in-out infinite; }
+.tl-t .nowl { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); box-shadow: 0 0 10px rgba(255,255,255,.8); }
+.tl-x { position: relative; height: 14px; margin-top: 7px; font-size: 11px; color: var(--quiet); }
+.tl-x span { position: absolute; transform: translateX(-50%); }
+
+/* ── the year ── */
+.yr-c { margin-top: var(--gap); }
+.yr-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; gap: 20px; }
+.yr-m { display: grid; grid-template-columns: repeat(53, 1fr); gap: 3px; font-size: 11px; color: var(--quiet); height: 16px; }
+.yr-m span { white-space: nowrap; overflow: visible; }
+.yr { display: grid; grid-template-columns: repeat(53, 1fr); grid-template-rows: repeat(7, auto); grid-auto-flow: column; gap: 3px; }
+.yr i { aspect-ratio: 1; border-radius: 3px; background: #141414; }
+.yr i.l1 { background: #3a3a3a; }
+.yr i.l2 { background: #7d7d7d; }
+.yr i.l3 { background: var(--ink); }
+.yr i.l4 { background: var(--ink); box-shadow: 0 0 8px rgba(255,255,255,.85); }
+.yr i.is-ahead { background: transparent; box-shadow: inset 0 0 0 1px #1a1a1a; }
+.yr i.is-now { outline: 1px solid var(--dim); outline-offset: 1px; }
+.yr-k { display: flex; justify-content: flex-end; align-items: center; gap: 4px; margin-top: 12px; font-size: 11px; color: var(--quiet); }
+.yr-k i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+
 /* ── the counter: one press a trade while a backtest runs ── */
 .ctr { width: 100%; display: grid; grid-template-columns: 64px 1fr 120px; gap: 10px; align-items: center; }
 .ctr button { height: 64px; border-radius: 16px; background: #161616; font-size: 22px; font-weight: 800; }
@@ -279,6 +322,12 @@ td.x { width: 56px; text-align: right; }
       <div class="pane" id="svTodayP">
         <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
         <div id="svRows"></div>
+        <div class="tl">
+          <div class="tl-h"><span class="lbl">Today as a line</span>
+            <span class="tl-k"><span><i class="k-bt"></i>Backtest</span><span><i class="k-live"></i>Live</span><span><i class="k-cnt"></i>Content</span></span></div>
+          <div class="tl-t" id="svTl"></div>
+          <div class="tl-x" id="svTlX"></div>
+        </div>
         <div class="pace">
           <div class="fig"><span>Per trade</span><b class="num" id="svPer">–</b></div>
           <div class="fig"><span id="svFor40">40 trades take</span><b class="num" id="svEta">–</b></div>
@@ -306,6 +355,13 @@ td.x { width: 56px; text-align: right; }
     </div>
     <div class="pc" id="svPc"></div>
     <div class="pc-x"><span id="svPcA"></span><span>Today</span></div>
+  </section>
+
+  <section class="card yr-c">
+    <div class="yr-h"><span class="lbl">The year · a square a day</span><span class="hint-k num" id="svYrX"></span></div>
+    <div class="yr-m" id="svYrM"></div>
+    <div class="yr" id="svYr" role="img" aria-label="Every day this year, brighter the closer you got to your trade target"></div>
+    <div class="yr-k"><span>Less</span><i style="background:#141414"></i><i style="background:#3a3a3a"></i><i style="background:#7d7d7d"></i><i style="background:#fff"></i><i style="background:#fff;box-shadow:0 0 8px rgba(255,255,255,.85)"></i><span>More</span></div>
   </section>
 
   <section class="card log">
@@ -426,6 +482,9 @@ function paintRing() {
     sub.textContent = 'of ' + S.g.bt + ' trades today';
     arc.style.strokeDashoffset = C * (1 - Math.min(1, done / S.g.bt));
   }
+  var rg = document.querySelector('.ring');
+  rg.classList.toggle('is-run', !!S.run);
+  rg.classList.toggle('is-hit', done + (S.run && S.run.k === 'bt' ? S.run.n || 0 : 0) >= S.g.bt);
   document.title = S.run ? clock(now - S.run.a) + ' · ' + KINDS[S.run.k] : 'SVC';
 }
 
@@ -557,8 +616,59 @@ function paintControls() {
 
 function paint() {
   $('svDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-  paintRing(); paintToday(); paintStats(); paintPace(); paintLog(); paintControls();
+  paintRing(); paintToday(); paintTimeline(); paintStats(); paintPace(); paintYear(); paintLog(); paintControls();
   remind();
+}
+
+/* ── today as a line ──
+   Six in the morning to midnight, widened if a session began earlier.
+   The dashed slot is the New York hour. A session still running reaches
+   the line for now, so the bar grows while you watch. */
+function paintTimeline() {
+  var now = Date.now(), d0 = dayStart(now), H = 36e5;
+  var list = within(d0, d0 + DAY).map(function (x) { return { k: x.k, a: x.a, b: x.b, run: false }; });
+  if (S.run && S.run.a >= d0) list.push({ k: S.run.k, a: S.run.a, b: now, run: true });
+  var lo = 6; list.forEach(function (x) { lo = Math.min(lo, Math.floor((x.a - d0) / H)); });
+  var hi = 24, span = (hi - lo) * H, tl = $('svTl'), html = '';
+  var pct = function (t) { return Math.max(0, Math.min(100, (t - d0 - lo * H) / span * 100)); };
+  html += '<span class="slot" title="The New York hour" style="left:' + pct(d0 + 20 * H) + '%;width:' + (pct(d0 + 21 * H) - pct(d0 + 20 * H)) + '%"></span>';
+  list.forEach(function (x) {
+    var l = pct(x.a), w = pct(x.b) - l;
+    html += '<span class="seg ' + x.k + (x.run ? ' is-run' : '') + '" style="left:' + l + '%;width:' + w + '%" title="' + KINDS[x.k] + ' · ' + hm(x.a) + '–' + hm(x.b) + '"></span>';
+  });
+  html += '<span class="nowl" style="left:' + pct(now) + '%" title="Now"></span>';
+  tl.innerHTML = html;
+  var lab = '';
+  for (var h = Math.ceil(lo / 3) * 3; h <= hi; h += 3) lab += '<span style="left:' + ((h - lo) / (hi - lo) * 100) + '%">' + pad(h % 24) + (h === 24 ? ':00' : '') + '</span>';
+  $('svTlX').innerHTML = lab;
+}
+
+/* ── the year ──
+   Fifty-three weeks, Monday at the top. A day is one square: dark for
+   nothing, brighter up to the target, white at the target and haloed at
+   half as much again. Days still to come are an outline, not a miss. */
+function paintYear() {
+  var now = Date.now(), d0 = dayStart(now), start = addDays(weekStart(now), -52 * 7);
+  var by = {};
+  S.s.forEach(function (x) { if (x.k === 'bt' && x.n > 0) { var k = dayStart(x.a); by[k] = (by[k] || 0) + x.n; } });
+  var html = '', mo = '', last = -1, hits = 0, run = 0, best = 0;
+  for (var i = 0; i < 53 * 7; i++) {
+    var t = addDays(start, i), n = by[t] || 0, cls;
+    if (t > d0) cls = 'is-ahead';
+    else {
+      var f = n / S.g.bt;
+      cls = !n ? '' : f >= 1.5 ? 'l4' : f >= 1 ? 'l3' : f >= .5 ? 'l2' : 'l1';
+      if (f >= 1) { hits++; run++; if (run > best) best = run; } else run = 0;
+    }
+    html += '<i class="' + cls + (t === d0 ? ' is-now' : '') + '" title="' + esc(new Date(t).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + (t <= d0 ? ' · ' + n + ' trades' : '') + '"></i>';
+    if (i % 7 === 0) {
+      var m = new Date(t).getMonth();
+      mo += '<span>' + (m !== last && new Date(t).getDate() <= 7 ? new Date(t).toLocaleDateString('en-GB', { month: 'short' }) : '') + '</span>';
+      last = m;
+    }
+  }
+  $('svYr').innerHTML = html; $('svYrM').innerHTML = mo;
+  $('svYrX').textContent = hits + ' days on target · best run ' + best;
 }
 
 /* ── pace ──
@@ -618,7 +728,7 @@ function remind() {
 var tick = null;
 function clockOn() {
   if (tick) clearInterval(tick);
-  tick = S.run ? setInterval(paintRing, 1000) : null;
+  tick = S.run ? setInterval(function () { paintRing(); paintTimeline(); }, 1000) : null;
 }
 
 /* ── toast ── */
