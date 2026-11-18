@@ -7589,8 +7589,9 @@ function frWoSheet(w, f) {
 function frAddSheet() {
   var b = el('<div><label class="lf-flab" for="frCode" style="margin-top:0">Their friend code</label><input class="lf-field lf-num" id="frCode" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345" /><p class="lf-lab fr-err" hidden></p></div>');
   var go = el('<button type="button" class="lf-btn is-ink is-full">Add</button>');
-  b.insertBefore(frCodeRow(), b.firstChild);
-  var s = lfSheet({ title: 'Add a friend', body: b, foot: [go] });
+  var s;
+  b.insertBefore(frCodeRow(function () { if (s) s.close(true); }), b.firstChild);
+  s = lfSheet({ title: 'Add a friend', body: b, foot: [go] });
   var inp = $('#frCode', b), err = $('.fr-err', b);
   go.addEventListener('click', function () {
     go.disabled = true;
@@ -7603,7 +7604,7 @@ function frAddSheet() {
 }
 
 /* YOUR CODE LIVES IN THE ADD-A-FRIEND SHEET, where you hand it over: the code, share, and your name and turning off behind a press. */
-function frCodeRow() {
+function frCodeRow(onOff) {
   var code = el('<div class="fr-me" id="frMe"><div class="fr-me-t"><span>Your code</span><b class="fr-code lf-num"></b></div>'
     + '<button type="button" class="fr-ib" id="frShare" aria-label="Share your code"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button>'
     + '<button type="button" class="fr-ib" id="frMore" aria-label="Friends settings"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg></button></div>');
@@ -7621,7 +7622,7 @@ function frCodeRow() {
     var s2 = lfSheet({ title: 'Friends', body: b, foot: [off, sv] });
     $('#frNewName', b).value = FRS.name;
     sv.addEventListener('click', function () { var n = $('#frNewName', b).value.trim(); if (!n) return; FRS.name = n; frSave(); frSig = ''; frPush(); s2.close(true); lfRender(); });
-    off.addEventListener('click', function () { s2.close(true); frTurnOff(); });
+    off.addEventListener('click', function () { s2.close(true); if (onOff) onOff(); frTurnOff(); });
   });
   return code;
 }
