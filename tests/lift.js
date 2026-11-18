@@ -1416,7 +1416,8 @@ const freeze = (at) => `(() => {
     await A.page.click('.lf-toast button'); await A.page.waitForTimeout(150);
     ok('and Undo puts them back', await A.page.locator('#frBoard .fr-row').count() === 2);
 
-    await B.page.click('.lf-bar [data-v="you"]'); await settle(B.page);
+    await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
+    await B.page.click('#frAdd'); await settle(B.page);
     await B.page.click('#frMore'); await settle(B.page);
     ok('name and turning off live behind settings', await top(B.page).locator('#frNewName').count() === 1);
     await top(B.page).locator('#frOffBtn').click(); await settle(B.page);
