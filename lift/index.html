@@ -2942,7 +2942,7 @@ function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
   /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
-  $('#lfTgEdit', c).addEventListener('click', function () { lfGo('you'); lfFoldSet('foc', 1); lfRender(); var f = $('#lfFocus'); if (f) f.scrollIntoView({ block: 'start' }); });
+  $('#lfTgEdit', c).addEventListener('click', function () { lfGo('you'); lfRender(); var r = $('#lfRowFocusRow') || $('#lfRowFocus'); if (r) r.click(); });
   var ts = lfTargets(), cdm = 0, a0 = ymd(m), a1 = ymd(addDays(m, 6));
   S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
   if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
@@ -5575,9 +5575,22 @@ function lfColourSheet() {
 /* A ROW THAT OPENS A SCREEN: the one way a list on You leads anywhere. It names the thing, says in a word what is in it, and a press opens it on a sheet of its own, built the first time it is asked for. */
 function lfRow(id, title, side, fill) {
   var b = el('<button type="button" class="lf-li lf-rowl"><div class="lf-li-t"><b></b></div><em class="lf-num"></em>' + IC.chev + '</button>');
-  b.id = id; $('b', b).textContent = title; $('em', b).textContent = side || '';
-  b.addEventListener('click', function () { var w = el('<div class="lf-rowbody"></div>'); w.id = id + 'Body'; fill(w); lfSheet({ title: title, body: w }); });
+  b.id = id; b._fill = fill; $('b', b).textContent = title; $('em', b).textContent = side || '';
+  /* THE SUITE DRAWS A ROW'S SCREEN IN PLACE, UNDER ITS ROW, so a check can reach what is on it without a sheet over the page; it sets this before the page runs. Nobody else does. */
+  if (window.__lfInline) { var d = el('<div></div>'); d.id = id; b.id = id + 'Row'; var w0 = el('<div class="lf-rowbody"></div>'); w0.id = id + 'Body'; fill(w0); d.appendChild(b); d.appendChild(w0); return d; }
+  b.addEventListener('click', function () {
+    var w = el('<div class="lf-rowbody"></div>'); w.id = id + 'Body'; fill(w);
+    lfRowShown = { id: id, w: w };
+    lfSheet({ title: title, body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } });
+  });
   return b;
+}
+/* A SCREEN OPENED FROM A ROW IS REDRAWN WHEN THE PAGE IS: a press inside it saves and redraws the page, and the controls on the screen must show the new state, not the one they were built with. */
+var lfRowShown = null;
+function lfRowRefresh() {
+  if (!lfRowShown) return;
+  var r = document.getElementById(lfRowShown.id), w = lfRowShown.w; if (!r || !r._fill || !w.parentNode) return;
+  var sc = w.parentNode.scrollTop; w.textContent = ''; r._fill(w); w.parentNode.scrollTop = sc;
 }
 function lfFold(id, key, title, side, fill, dflt) {
   var c = el('<div class="lf-card lf-fold"><h3 class="lf-fh"><button type="button" class="lf-hd"><span class="lf-lab"></span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3><div class="lf-fb"></div></div>');
@@ -10207,6 +10220,7 @@ function lfRender() {
   else if (view === 'lib') lfRenderLib();
   else if (view === 'fr') lfRenderFr();
   else lfRenderYou();
+  if (typeof lfRowRefresh === 'function') lfRowRefresh();
   var live = $('#lfLive');
   live.hidden = !act || !!sessSheet;
   document.body.classList.toggle('lf-has-live', !live.hidden);
