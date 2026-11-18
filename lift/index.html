@@ -5084,7 +5084,8 @@ function lfProgManage() {
   s = lfSheet({ title: 'Programs', body: b, foot: [add] });
 }
 
-var libQ = '', libG = 'push';
+/* THE LIBRARY OPENS ON ONE GROUP, not on two hundred and fifty exercises; the suite's in-place mode keeps it on All so its checks can reach any exercise */
+var libQ = '', libG = window.__lfInline ? 'all' : 'push';
 function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
