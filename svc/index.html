@@ -165,6 +165,46 @@ td.x { width: 56px; text-align: right; }
 .btn.pri { background: var(--ink); color: #000; }
 .btn.pri:hover { background: #e6e6e6; }
 
+/* ── the page comes up card by card: opacity only, so nothing moves and
+   nothing that measures a box is ever measuring a moving one ── */
+.card { animation: sv-in .7s ease both; }
+.timer-card { animation-delay: .05s; } .today { animation-delay: .13s; }
+.stats .card:nth-child(1) { animation-delay: .21s; } .stats .card:nth-child(2) { animation-delay: .26s; }
+.stats .card:nth-child(3) { animation-delay: .31s; } .stats .card:nth-child(4) { animation-delay: .36s; }
+.pace-c { animation-delay: .43s; } .yr-c { animation-delay: .5s; } .log { animation-delay: .57s; }
+@keyframes sv-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .card { animation: none; } }
+
+/* ── ticks and a lit head on the ring ── */
+.ring .hd { fill: #fff; stroke: none; filter: drop-shadow(0 0 6px rgba(255,255,255,.9)); transition: opacity .3s; }
+.ring .tk { stroke: #2a2a2a; stroke-width: 2; stroke-linecap: round; }
+
+/* ── a live session says so ── */
+.live-d { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); margin-right: 10px; vertical-align: 1px; animation: sv-ping 1.8s ease-out infinite; }
+@keyframes sv-ping { 0% { box-shadow: 0 0 0 0 rgba(255,255,255,.7); } 100% { box-shadow: 0 0 0 10px rgba(255,255,255,0); } }
+@media (prefers-reduced-motion: reduce) { .live-d { animation: none; } }
+
+/* ── the small charts that fill the stat cards ── */
+.mini { flex: 1; min-height: 64px; margin-top: 4px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; position: relative; }
+.mini > div { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.mini u { flex: 1; display: flex; align-items: flex-end; position: relative; text-decoration: none; }
+.mini s { position: absolute; left: -3px; right: -3px; border-top: 1px dashed #3d3d3d; text-decoration: none; pointer-events: none; }
+.mini i { display: block; width: 100%; border-radius: 5px 5px 2px 2px; background: #3a3a3a; min-height: 3px; }
+.mini i.is-hit { background: var(--ink); }
+.mini i.is-zero { background: #1c1c1c; }
+.mini i.is-ahead { background: transparent; box-shadow: inset 0 0 0 1px #1c1c1c; }
+.mini i.is-now { outline: 1px solid var(--dim); outline-offset: 2px; }
+.mini span { font-size: 10px; color: var(--quiet); text-align: center; }
+.mini.is-line { display: block; }
+.mini.is-line svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.mini.is-line .area { fill: rgba(255,255,255,.07); stroke: none; }
+.mini.is-line .ln { fill: none; stroke: var(--ink); stroke-width: 2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.mini.is-line .pc-l { fill: none; stroke: #4a4a4a; stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+
+/* ── a tooltip that is the app's own ── */
+.tip { position: fixed; z-index: 80; pointer-events: none; display: none; background: #000; color: var(--ink); border: 1px solid #2c2c2c; border-radius: 10px; padding: 7px 11px; font-size: 12px; white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,.6); }
+.tip.on { display: block; }
+
 /* ── the ring lights up: breathing while a session runs, a halo once the
    day's target is hit. Filter on one 300px svg, nothing per frame in JS. ── */
 .ring .fl { transition: stroke-dashoffset .5s ease, filter .6s ease; }
@@ -174,7 +214,7 @@ td.x { width: 56px; text-align: right; }
 @media (prefers-reduced-motion: reduce) { .ring.is-run .fl { animation: none; } }
 
 /* ── today as a line ── */
-.tl { margin-top: 22px; }
+.tl { margin-top: auto; padding-top: 22px; }
 .tl-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
 .tl-k { display: flex; gap: 16px; font-size: 11px; color: var(--quiet); }
 .tl-k i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
@@ -297,7 +337,9 @@ td.x { width: 56px; text-align: right; }
       <div class="ring">
         <svg viewBox="0 0 300 300" aria-hidden="true">
           <circle class="tr" cx="150" cy="150" r="136" />
+          <g id="svTicks"></g>
           <circle class="fl" id="svArc" cx="150" cy="150" r="136" />
+          <circle class="hd" id="svHead" cx="150" cy="14" r="8" style="opacity:0" />
         </svg>
         <div class="ring-mid">
           <div class="ring-big num" id="svBig">0</div>
@@ -335,16 +377,16 @@ td.x { width: 56px; text-align: right; }
         </div>
       </div>
       <div class="pane" id="svNotesP" hidden>
-        <div class="today-h"><span class="lbl">Live notes</span><span class="hint-k" id="svNotesT"></span></div>
+        <div class="today-h"><span class="lbl"><i class="live-d"></i>Live notes</span><span class="hint-k" id="svNotesT"></span></div>
         <textarea class="notes" id="svNotes" aria-label="Live notes" placeholder="What you see, as you see it"></textarea>
       </div>
     </div>
   </section>
 
   <section class="stats">
-    <div class="card stat"><div class="stat-h"><span class="lbl">This week · trades</span><button class="link" id="svRev">Review</button></div><div class="stat-v num" id="svWk"></div><div class="stat-x" id="svWkX"></div><div class="bar"><i id="svWkB"></i></div></div>
-    <div class="card stat"><span class="lbl">This week · live charts</span><div class="stat-v num" id="svLv"></div><div class="stat-x" id="svLvX"></div><div class="bar"><i id="svLvB"></i></div></div>
-    <div class="card stat"><span class="lbl">This month · trades</span><div class="stat-v num" id="svMo"></div><div class="stat-x" id="svMoX"></div><div class="bar"><i id="svMoB"></i></div></div>
+    <div class="card stat"><div class="stat-h"><span class="lbl">This week · trades</span><button class="link" id="svRev">Review</button></div><div class="stat-v num" id="svWk"></div><div class="stat-x" id="svWkX"></div><div class="mini" id="svWkC"></div><div class="bar"><i id="svWkB"></i></div></div>
+    <div class="card stat"><span class="lbl">This week · live charts</span><div class="stat-v num" id="svLv"></div><div class="stat-x" id="svLvX"></div><div class="mini" id="svLvC"></div><div class="bar"><i id="svLvB"></i></div></div>
+    <div class="card stat"><span class="lbl">This month · trades</span><div class="stat-v num" id="svMo"></div><div class="stat-x" id="svMoX"></div><div class="mini is-line" id="svMoC"></div><div class="bar"><i id="svMoB"></i></div></div>
     <div class="card stat"><span class="lbl">Consistency</span><div class="stat-v num" id="svSt"></div><div class="stat-x" id="svStX"></div><div class="dots" id="svDots"></div></div>
   </section>
 
@@ -462,11 +504,16 @@ function pace() {
 
 /* ── the ring ── */
 var R = 136, C = 2 * Math.PI * R;
+/* four ticks just inside the ring: a quarter of the day's target each */
+$('svTicks').innerHTML = [0, 1, 2, 3].map(function (k) {
+  var a = k * Math.PI / 2, c = Math.cos(a), s0 = Math.sin(a);
+  return '<line class="tk" x1="' + (150 + 116 * c).toFixed(1) + '" y1="' + (150 + 116 * s0).toFixed(1) + '" x2="' + (150 + 124 * c).toFixed(1) + '" y2="' + (150 + 124 * s0).toFixed(1) + '"/>';
+}).join('');
 function paintRing() {
   var arc = $('svArc'), big = $('svBig'), sub = $('svSub');
   arc.style.strokeDasharray = C;
   var now = Date.now(), today = within(dayStart(now), dayStart(now) + DAY);
-  var done = trades(today);
+  var done = trades(today), fr = 0;
   if (S.run) {
     var el = now - S.run.a;
     big.textContent = clock(el); big.classList.add('is-clock');
@@ -476,12 +523,18 @@ function paintRing() {
     /* On a timed session the ring fills toward that session's own target.
        A backtest keeps the day's trades, because trades are the target. */
     var f = goal ? (mins(today, S.run.k) * 6e4 + el) / goal : (done + (S.run.n || 0)) / S.g.bt;
+    fr = f;
     arc.style.strokeDashoffset = C * (1 - Math.min(1, f));
   } else {
     big.textContent = fmt(done); big.classList.remove('is-clock');
     sub.textContent = 'of ' + S.g.bt + ' trades today';
+    fr = done / S.g.bt;
     arc.style.strokeDashoffset = C * (1 - Math.min(1, done / S.g.bt));
   }
+  /* the head is a lit dot where the arc ends, only while it is on its way */
+  var hd = $('svHead'), th = Math.min(1, fr) * 2 * Math.PI;
+  hd.setAttribute('cx', (150 + R * Math.cos(th)).toFixed(2)); hd.setAttribute('cy', (150 + R * Math.sin(th)).toFixed(2));
+  hd.style.opacity = fr > 0.003 && fr < 1 ? 1 : 0;
   var rg = document.querySelector('.ring');
   rg.classList.toggle('is-run', !!S.run);
   rg.classList.toggle('is-hit', done + (S.run && S.run.k === 'bt' ? S.run.n || 0 : 0) >= S.g.bt);
@@ -551,7 +604,7 @@ function paintStats() {
     var day = addDays(start, i), n = trades(within(day, day + DAY));
     var cls = day > d0 ? 'is-ahead' : n >= S.g.bt ? 'is-hit' : n > 0 ? 'is-part' : '';
     if (day <= d0) { days++; if (n >= S.g.bt) hits++; }
-    html += '<span class="dot ' + cls + (day === d0 ? ' is-now' : '') + '" title="' + dayName(day) + ' · ' + n + ' trades"></span>';
+    html += '<span class="dot ' + cls + (day === d0 ? ' is-now' : '') + '" data-tip="' + dayName(day) + ' · ' + n + ' trades"></span>';
   }
   $('svDots').innerHTML = html;
   $('svStX').textContent = 'Best ' + best + ' · ' + hits + ' of the last ' + days + ' days on target';
@@ -616,7 +669,7 @@ function paintControls() {
 
 function paint() {
   $('svDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-  paintRing(); paintToday(); paintTimeline(); paintStats(); paintPace(); paintYear(); paintLog(); paintControls();
+  paintRing(); paintToday(); paintTimeline(); paintStats(); paintMini(); paintPace(); paintYear(); paintLog(); paintControls();
   remind();
 }
 
@@ -631,16 +684,49 @@ function paintTimeline() {
   var lo = 6; list.forEach(function (x) { lo = Math.min(lo, Math.floor((x.a - d0) / H)); });
   var hi = 24, span = (hi - lo) * H, tl = $('svTl'), html = '';
   var pct = function (t) { return Math.max(0, Math.min(100, (t - d0 - lo * H) / span * 100)); };
-  html += '<span class="slot" title="The New York hour" style="left:' + pct(d0 + 20 * H) + '%;width:' + (pct(d0 + 21 * H) - pct(d0 + 20 * H)) + '%"></span>';
+  html += '<span class="slot" data-tip="The New York hour" style="left:' + pct(d0 + 20 * H) + '%;width:' + (pct(d0 + 21 * H) - pct(d0 + 20 * H)) + '%"></span>';
   list.forEach(function (x) {
     var l = pct(x.a), w = pct(x.b) - l;
-    html += '<span class="seg ' + x.k + (x.run ? ' is-run' : '') + '" style="left:' + l + '%;width:' + w + '%" title="' + KINDS[x.k] + ' · ' + hm(x.a) + '–' + hm(x.b) + '"></span>';
+    html += '<span class="seg ' + x.k + (x.run ? ' is-run' : '') + '" style="left:' + l + '%;width:' + w + '%" data-tip="' + KINDS[x.k] + ' · ' + hm(x.a) + '–' + hm(x.b) + '"></span>';
   });
-  html += '<span class="nowl" style="left:' + pct(now) + '%" title="Now"></span>';
+  html += '<span class="nowl" style="left:' + pct(now) + '%" data-tip="Now"></span>';
   tl.innerHTML = html;
   var lab = '';
   for (var h = Math.ceil(lo / 3) * 3; h <= hi; h += 3) lab += '<span style="left:' + ((h - lo) / (hi - lo) * 100) + '%">' + pad(h % 24) + (h === 24 ? ':00' : '') + '</span>';
   $('svTlX').innerHTML = lab;
+}
+
+/* ── the small charts in the stat cards ──
+   The week: a bar a day against the daily target. Live: minutes a day
+   against the hour. The month: the running total against the straight
+   line that would hit the target. Each answers what the number beside
+   it cannot, which is the shape. */
+function bars(el, vals, cap, d0, w0, fmtTip) {
+  var max = Math.max.apply(null, vals.concat([cap])), html = '';
+  var L = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  vals.forEach(function (v, i) {
+    var t = addDays(w0, i), cls = t > d0 ? 'is-ahead' : v >= cap ? 'is-hit' : v ? '' : 'is-zero';
+    html += '<div><u><s style="bottom:' + (cap / max * 100) + '%"></s><i class="' + cls + (t === d0 ? ' is-now' : '') + '" style="height:' + (t > d0 ? 3 : Math.max(3, v / max * 100)) + (t > d0 ? 'px' : '%') + '" data-tip="'
+      + esc(new Date(t).toLocaleDateString('en-GB', { weekday: 'long' }) + (t > d0 ? '' : ' · ' + fmtTip(v))) + '"></i></u><span>' + L[i] + '</span></div>';
+  });
+  el.innerHTML = html;
+}
+function paintMini() {
+  var now = Date.now(), d0 = dayStart(now), w0 = weekStart(now), m0 = monthStart(now), dim = daysInMonth(now);
+  var tv = [], lv = [];
+  for (var i = 0; i < 7; i++) { var t = addDays(w0, i), l = within(t, t + DAY); tv.push(trades(l)); lv.push(Math.round(mins(l, 'live'))); }
+  bars($('svWkC'), tv, S.g.bt, d0, w0, function (v) { return v + ' trades'; });
+  bars($('svLvC'), lv, S.g.live, d0, w0, function (v) { return dur(v * 6e4); });
+  /* the month, as a running total */
+  var days = Math.round((d0 - m0) / DAY), cum = 0, pts = [], goal = S.g.bt * dim, tops = [];
+  for (var k = 0; k <= days; k++) { var tk = addDays(m0, k); cum += trades(within(tk, tk + DAY)); tops.push(cum); }
+  var ymax = Math.max(goal, cum, 1);
+  tops.forEach(function (c, k) { pts.push((k / dim * 100).toFixed(2) + ',' + (40 - c / ymax * 40).toFixed(2)); });
+  var line = pts.join(' '), lastX = (days / dim * 100).toFixed(2);
+  $('svMoC').innerHTML = '<svg viewBox="0 0 100 40" preserveAspectRatio="none" aria-hidden="true">'
+    + '<polygon class="area" points="0,40 ' + line + ' ' + lastX + ',40"></polygon>'
+    + '<line class="pc-l" x1="0" y1="40" x2="100" y2="' + (40 - goal / ymax * 40).toFixed(2) + '"></line>'
+    + '<polyline class="ln" points="' + line + '"></polyline></svg>';
 }
 
 /* ── the year ──
@@ -660,7 +746,7 @@ function paintYear() {
       cls = !n ? '' : f >= 1.5 ? 'l4' : f >= 1 ? 'l3' : f >= .5 ? 'l2' : 'l1';
       if (f >= 1) { hits++; run++; if (run > best) best = run; } else run = 0;
     }
-    html += '<i class="' + cls + (t === d0 ? ' is-now' : '') + '" title="' + esc(new Date(t).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + (t <= d0 ? ' · ' + n + ' trades' : '') + '"></i>';
+    html += '<i class="' + cls + (t === d0 ? ' is-now' : '') + '" data-tip="' + esc(new Date(t).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })) + (t <= d0 ? ' · ' + n + ' trades' : '') + '"></i>';
     if (i % 7 === 0) {
       var m = new Date(t).getMonth();
       mo += '<span>' + (m !== last && new Date(t).getDate() <= 7 ? new Date(t).toLocaleDateString('en-GB', { month: 'short' }) : '') + '</span>';
@@ -687,7 +773,7 @@ function paintPace() {
   var html = '';
   days.forEach(function (d) {
     var cls = !d.p ? 'is-none' : d.p === best ? 'is-best' : '';
-    html += '<i class="' + cls + (d.t === d0 ? ' is-now' : '') + '" style="height:' + (d.p ? Math.max(3, Math.round(d.p / max * 100)) : 100) + '%" title="'
+    html += '<i class="' + cls + (d.t === d0 ? ' is-now' : '') + '" style="height:' + (d.p ? Math.max(3, Math.round(d.p / max * 100)) : 100) + '%" data-tip="'
       + esc(dayName(d.t)) + (d.p ? ' · ' + per(d.p) + ' a trade' : ' · no backtests') + '"></i>';
   });
   if (avg && max) html += '<span class="pc-avg" style="bottom:' + (avg / max * 100) + '%"></span>';
@@ -975,6 +1061,22 @@ $('svAdd').addEventListener('click', addPast);
 $('svPlus').addEventListener('click', function () { count(1); });
 $('svMinus').addEventListener('click', function () { count(-1); });
 $('svRev').addEventListener('click', function () { review(weekStart(Date.now()), false); });
+
+/* ── tooltips ── one for the whole page, moved to wherever you point ── */
+var tip = document.createElement('div');
+tip.className = 'tip'; tip.setAttribute('role', 'tooltip');
+document.body.appendChild(tip);
+document.addEventListener('mouseover', function (e) {
+  var t = e.target.closest && e.target.closest('[data-tip]');
+  if (!t) { tip.classList.remove('on'); return; }
+  tip.textContent = t.getAttribute('data-tip'); tip.classList.add('on');
+});
+document.addEventListener('mousemove', function (e) {
+  if (!tip.classList.contains('on')) return;
+  var w = tip.offsetWidth, x = Math.max(8, Math.min(innerWidth - w - 8, e.clientX - w / 2));
+  tip.style.left = x + 'px'; tip.style.top = Math.max(8, e.clientY - 44) + 'px';
+});
+document.addEventListener('mouseleave', function () { tip.classList.remove('on'); });
 
 /* ── time-stamped notes ──
    Every line of the live notes starts with the time it was begun, so

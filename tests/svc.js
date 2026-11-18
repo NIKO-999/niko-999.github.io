@@ -199,7 +199,7 @@ const SEED = { s: [
     ok('two days on target light white (Sunday and Monday)', (await page.$$('#svYr i.l3')).length === 2);
     ok('the days still to come are outlines, not misses', (await page.$$('#svYr i.is-ahead')).length === 4);
     ok('the year says what it counts', /2 days on target · best run 2/.test(await txt(page, '#svYrX')), await txt(page, '#svYrX'));
-    ok('Monday is the top row: the first square is a Monday', await page.evaluate(() => /Mon/.test(document.querySelector('#svYr i').title)));
+    ok('Monday is the top row: the first square is a Monday', await page.evaluate(() => /Mon/.test(document.querySelector('#svYr i').dataset.tip)));
     ok('the ring has no halo before the target', await page.evaluate(() => !document.querySelector('.ring').classList.contains('is-hit')));
     await page.click('#svGo');
     ok('a running session breathes and grows a segment', await page.evaluate(() => document.querySelector('.ring').classList.contains('is-run')) && (await page.$$('#svTl .seg.is-run')).length === 1);
@@ -209,6 +209,38 @@ const SEED = { s: [
     ok('the ring lights up once the target is hit', await full.page.evaluate(() => document.querySelector('.ring').classList.contains('is-hit')));
     ok('and that square is white on the year', (await full.page.$$('#svYr i.l3')).length === 1);
     await full.c.close();
+  }
+
+  console.log('\nSVC — the small charts, the ring and the tooltips');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('the week card draws seven days, the days to come as outlines', (await page.$$('#svWkC i')).length === 7 && (await page.$$('#svWkC i.is-ahead')).length === 4);
+    ok('only Monday is on target that week', (await page.$$('#svWkC i.is-hit')).length === 1);
+    ok('the live card has Tuesday\'s hour, full height', (await page.$$('#svLvC i.is-hit')).length === 1);
+    const pts = await page.$eval('#svMoC polyline', (e) => e.getAttribute('points').split(' ').length);
+    ok('the month is a running total with a point a day so far (1st to 18th)', pts === 18, pts);
+    ok('and a dashed line for the pace that would hit the target', await page.$eval('#svMoC .pc-l', (e) => getComputedStyle(e).strokeDasharray !== 'none'));
+    ok('the stat cards are no longer empty: the chart takes the space', await page.evaluate(() => [...document.querySelectorAll('.stat')].slice(0, 3).every((c) => c.querySelector('.mini').getBoundingClientRect().height > 55)));
+    ok('four ticks on the ring', (await page.$$('#svTicks line')).length === 4);
+    ok('a lit head sits where the arc ends: the bottom of the ring at 20 of 40', await page.evaluate(() => {
+      const h = document.querySelector('#svHead'); return h.style.opacity === '1' && Math.abs(+h.getAttribute('cx') - 14) < 0.5 && Math.abs(+h.getAttribute('cy') - 150) < 0.5;
+    }));
+    await page.hover('#svYr i.l3');
+    await page.waitForSelector('.tip.on');
+    ok('hovering a day names it', /trades/.test(await txt(page, '.tip')) && /Sun|Mon/.test(await txt(page, '.tip')), await txt(page, '.tip'));
+    ok('the tip sits beside the pointer, inside the window', await page.evaluate(() => { const r = document.querySelector('.tip').getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && r.top >= 0; }));
+    await page.mouse.move(5, 5);
+    ok('and goes when you leave', await page.evaluate(() => !document.querySelector('.tip').classList.contains('on')));
+    ok('the browser\'s own tooltips are gone from the charts', await page.evaluate(() => !document.querySelector('#svYr i[title], #svPc i[title], #svTl [title], .mini i[title]')));
+    ok('no live dot until a live session runs', await page.$eval('.live-d', (e) => e.getBoundingClientRect().width === 0));
+    await page.click('.kind[data-k="live"]'); await page.click('#svGo');
+    ok('a live session pulses a dot beside the notes', await page.$eval('.live-d', (e) => e.getBoundingClientRect().width === 8 && getComputedStyle(e).animationName === 'sv-ping'));
+    await page.click('#svGo');
+    ok('the cards come up fully drawn', await page.waitForFunction(() => [...document.querySelectorAll('.card')].every((c) => getComputedStyle(c).opacity === '1'), null, { timeout: 4000 }).then(() => true, () => false));
+    await c.close();
+    const e0 = await ctx(null);
+    ok('with nothing logged the head is not drawn', await e0.page.$eval('#svHead', (e) => e.style.opacity === '0'));
+    await e0.c.close();
   }
 
   console.log('\nSVC — the trade counter');
