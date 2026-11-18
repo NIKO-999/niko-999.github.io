@@ -65,6 +65,8 @@ const APPS = [
   ['doors/index.html'],
   /* gxt/ joined the day it shipped: the backtest journal, one file. */
   ['gxt/index.html'],
+  /* svc/ joined the day it shipped: the session timer, one file, its own :root. */
+  ['svc/index.html'],
 ];
 const NAMED = (app) => app[0];
 const MARKUP = (app) => app.filter(f => f.endsWith('.html'));
