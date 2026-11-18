@@ -417,7 +417,7 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         req.usesLanguageCorrection = false
         DispatchQueue.global(qos: .userInitiated).async {
             // A photo from the phone is stored upright-less with a rotation flag; without it a portrait shot is read sideways.
-            try? VNImageRequestHandler(cgImage: cg, orientation: Self.cgOrientation(img.imageOrientation), options: [:]).perform([req])
+            try? VNImageRequestHandler(cgImage: cg, orientation: LiftWidgetsPlugin.cgOrientation(img.imageOrientation), options: [:]).perform([req])
         }
     }
 }

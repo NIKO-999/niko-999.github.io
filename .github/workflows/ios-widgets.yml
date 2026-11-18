@@ -49,11 +49,14 @@ jobs:
         run: |
           sed -i '' "s/com.yourname.lift/${BUNDLE_ID}/" capacitor.config.json
           npm install
-          npm install --no-save ./capacitor-widget-bridge
+          # SAVED, not --no-save: Capacitor only registers a plugin that package.json lists, and with --no-save the app was built without its native half (no photo or PDF reading, no widget data, no haptics)
+          npm install ./capacitor-widget-bridge
           sh build-www.sh
           npx cap add ios
           npx @capacitor/assets generate --ios --iconBackgroundColor '#0b0b0d' --splashBackgroundColor '#000000' || true
           npx cap sync ios
+          echo "--- the plugins Capacitor registered"; cat ios/App/App/capacitor.config.json
+          grep -q LiftWidgetsPlugin ios/App/App/capacitor.config.json || { echo "The Lift plugin was not registered with the app. Everything native would silently do nothing."; exit 1; }
 
       - name: Add the widget extension and the App Group
         working-directory: ios-wrapper
