@@ -5407,8 +5407,14 @@ function lfRenderYou() {
   var root = $('#lfYou'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">You</h2>'));
   root.appendChild(lfBwCard());
+  /* GOALS: what you are aiming at, in one place, open when you arrive. The workouts a week and the body weight you are heading for. */
+  var gb = el('<div><span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
+    + '<label class="lf-flab" for="lfGoalBw">Body weight, in ' + S.unit + '</label><input class="lf-field lf-num" id="lfGoalBw" inputmode="decimal" autocomplete="off" placeholder="Not set" /><div class="lf-sub" id="lfGoalBwNote"></div></div>');
+  var gin = $('#lfGoalBw', gb), gnote = $('#lfGoalBwNote', gb), lb = S.bw[S.bw.length - 1];
+  if (S.bwGoal) gin.value = fmtW(S.bwGoal);
+  gnote.textContent = !S.bwGoal ? (lb ? 'Now ' + fmtW(lb.kg) + ' ' + S.unit : 'Log your weight to see how far you are') : !lb ? 'Log your weight to see how far you are' : Math.abs(lb.kg - S.bwGoal) < .05 ? 'You are at your goal' : fmtW(Math.abs(S.bwGoal - lb.kg)) + ' ' + S.unit + ' to ' + (S.bwGoal < lb.kg ? 'lose' : 'gain') + ' from ' + fmtW(lb.kg);
+  gin.addEventListener('change', function () { var v = gin.value.trim(); S.bwGoal = v && num(parseFloat(v)) ? fromDisp(parseFloat(v)) : null; lfSave(); lfRender(); });
   var c = el('<div><span class="lf-flab">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
-    + '<span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest on lock screen</span><div class="lf-seg" id="lfRl"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest and reaction alerts</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
@@ -5435,9 +5441,10 @@ function lfRenderYou() {
     var g = el('<button type="button"></button>'); g.textContent = i; g.dataset.g = i;
     g.setAttribute('aria-pressed', i === S.goal ? 'true' : 'false'); g.setAttribute('aria-label', i + ' a week');
     g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
-    $('#lfGoal', c).appendChild(g);
+    $('#lfGoal', gb).appendChild(g);
   }
   if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
+  root.appendChild(lfFold('lfGoals', 'goals', 'Goals', '', function (bd) { bd.appendChild(gb); }, true));
   root.appendChild(lfCustomise());
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfBadgeCard());
@@ -5474,7 +5481,7 @@ function lfRenderYou() {
 var lfFolds = {};
 try { localStorage.removeItem('lift.fold.v1'); } catch (e) {}
 function lfFoldOpen(k) { return !!lfFolds[k]; }
-function lfFoldSet(k, v) { if (v) lfFolds[k] = 1; else delete lfFolds[k]; }
+function lfFoldSet(k, v) { lfFolds[k] = v ? 1 : 0; }
 /* THEME: light or dark, and the accent. The accent is a HUE on a wheel;
    the app owns its strength, so every point on the ring is a colour the
    check marks, the lit days and the buttons can carry on both faces. */
@@ -5558,7 +5565,7 @@ function lfThemeCard() {
     bd.appendChild(c);
   });
 }
-function lfFold(id, key, title, side, fill) {
+function lfFold(id, key, title, side, fill, dflt) {
   var c = el('<div class="lf-card lf-fold"><h3 class="lf-fh"><button type="button" class="lf-hd"><span class="lf-lab"></span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3><div class="lf-fb"></div></div>');
   c.id = id; var bt = $('.lf-fh button', c), bd = $('.lf-fb', c), built = false;
   bd.id = id + 'Body'; bt.setAttribute('aria-controls', bd.id);
@@ -5568,7 +5575,7 @@ function lfFold(id, key, title, side, fill) {
     if (open && !built) { built = true; fill(bd); }
   }
   bt.addEventListener('click', function () { var o = bt.getAttribute('aria-expanded') !== 'true'; lfFoldSet(key, o); set(o); });
-  set(lfFoldOpen(key));
+  set(key in lfFolds ? !!lfFolds[key] : !!dflt);
   return c;
 }
 function lfFocusCard() {

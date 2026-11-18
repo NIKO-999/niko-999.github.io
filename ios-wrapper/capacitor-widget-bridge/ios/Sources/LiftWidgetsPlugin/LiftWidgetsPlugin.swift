@@ -6,7 +6,6 @@ import AVFoundation
 import Vision
 import ImageIO
 import PDFKit
-import PhotosUI
 import Photos
 import UniformTypeIdentifiers
 #if canImport(WidgetKit)
@@ -26,7 +25,7 @@ import WatchConnectivity
 /// redraw. startRest / endRest run the rest between sets as a Live Activity on the Lock Screen.
 /// Nothing here reads a set, a weight or a note: the page decides what goes, and it sends counts and names.
 @objc(LiftWidgetsPlugin)
-public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControllerDelegate, UIDocumentPickerDelegate, WCSessionDelegate {
+public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, UIImagePickerControllerDelegate, UINavigationControllerDelegate, UIDocumentPickerDelegate, WCSessionDelegate {
     public let identifier = "LiftWidgetsPlugin"
     public let jsName = "LiftWidgets"
     public let pluginMethods: [CAPPluginMethod] = [
@@ -326,8 +325,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
                 p.delegate = self
                 vc.present(p, animated: true)
             } else {
-                var cfg = PHPickerConfiguration(); cfg.filter = .images; cfg.selectionLimit = 1
-                let p = PHPickerViewController(configuration: cfg)
+                let p = UIImagePickerController()
+                p.sourceType = .photoLibrary
                 p.delegate = self
                 vc.present(p, animated: true)
             }
@@ -339,14 +338,15 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, PHPickerViewControl
         planCall?.resolve(["lines": lines, "cancelled": cancelled]); planCall = nil
     }
 
-    public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         picker.dismiss(animated: true)
-        guard let r = results.first else { finishPlan([], cancelled: true); return }
-        guard r.itemProvider.canLoadObject(ofClass: UIImage.self) else { finishPlan([]); return }
-        r.itemProvider.loadObject(ofClass: UIImage.self) { obj, _ in
-            guard let img = obj as? UIImage else { self.finishPlan([]); return }
-            self.ocr(img) { self.finishPlan($0) }
-        }
+        guard let img = info[.originalImage] as? UIImage else { finishPlan([]); return }
+        ocr(img) { self.finishPlan($0) }
+    }
+
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true)
+        finishPlan([], cancelled: true)
     }
 
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
