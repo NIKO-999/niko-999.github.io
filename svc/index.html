@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#000000" />
+<meta name="description" content="Structure. Volume. Consistency. Time every backtest, live and journal session." />
+<title>SVC</title>
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<style>
+/* SVC is its own app. It loads nothing from the rest of this repo — no
+   shell, no shared fonts, no tokens — so it can be lifted out whole.
+   Black, white and greys. Colour would say which; the three kinds of
+   session are told apart by their names and their place in the list. */
+:root {
+  --bg: #000;
+  --card: #0a0a0a;
+  --edge: #1c1c1c;
+  --track: #1a1a1a;
+  --ink: #fff;
+  --dim: #a3a3a3;
+  --quiet: #8a8a8a;
+  --mute: #555;
+  --gap: 20px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px; line-height: 1.35; -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 40px 48px 64px; }
+
+/* ── head ── */
+.hd { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 36px; }
+.mark { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.mark span { white-space: nowrap; }
+.hd-r { display: flex; align-items: center; gap: 14px; color: var(--dim); }
+.hd-date { font-size: 13px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--dim); }
+.icon-btn:hover { background: var(--card); color: var(--ink); }
+.icon-btn svg { width: 20px; height: 20px; }
+
+/* ── grid ── */
+.grid { display: grid; grid-template-columns: 420px 1fr; gap: var(--gap); align-items: stretch; }
+.card { background: var(--card); border: 1px solid var(--edge); border-radius: 22px; padding: 26px 28px; }
+.lbl { font-size: 11px; color: var(--quiet); text-transform: uppercase; letter-spacing: .12em; }
+
+/* ── the ring ── */
+.timer-card { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+.ring { position: relative; width: 300px; height: 300px; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring circle { fill: none; stroke-width: 14; }
+.ring .tr { stroke: var(--track); }
+.ring .fl { stroke: var(--ink); stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
+.ring-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.ring-big { font-size: 64px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.ring-big.is-clock { font-size: 48px; }
+.ring-sub { margin-top: 8px; color: var(--dim); font-size: 13px; }
+.kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 100%; padding: 4px; background: #111; border-radius: 14px; }
+.kind { height: 40px; border-radius: 10px; color: var(--dim); font-size: 13px; }
+.kind[aria-pressed="true"] { background: #262626; color: var(--ink); }
+.kind:disabled { cursor: default; }
+.go { width: 100%; height: 58px; border-radius: 16px; background: var(--ink); color: #000; font-size: 16px; font-weight: 800; letter-spacing: .02em; }
+.go:hover { background: #e6e6e6; }
+.go.is-on { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.go.is-on:hover { background: #111; }
+.hint-k { font-size: 12px; color: var(--quiet); }
+
+/* ── today ── */
+.today { display: flex; flex-direction: column; }
+.today-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+.row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 6px 16px; padding: 16px 0; border-top: 1px solid var(--edge); }
+.row:first-of-type { border-top: 0; }
+.row-n { font-size: 15px; font-weight: 600; }
+.row-n small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
+.row-v { font-size: 15px; font-weight: 600; }
+.row-v small { font-weight: 400; color: var(--quiet); }
+.bar { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--track); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--ink); border-radius: 4px; }
+.row-x { grid-column: 1 / -1; color: var(--dim); font-size: 12px; }
+.pace { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--edge); display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.fig b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-top: 6px; }
+.fig span { color: var(--quiet); font-size: 12px; }
+
+/* ── week, month, consistency ── */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr) 1.3fr; gap: var(--gap); margin-top: var(--gap); align-items: stretch; }
+.stat { display: flex; flex-direction: column; gap: 10px; }
+.stat-v { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
+.stat-v small { font-size: 14px; font-weight: 400; color: var(--quiet); letter-spacing: 0; }
+.stat .bar { margin-top: auto; }
+.stat-x { color: var(--dim); font-size: 12px; }
+.dots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: auto; }
+.dots .dw { font-size: 10px; color: var(--quiet); text-align: center; }
+.dot { height: 16px; border-radius: 5px; background: var(--track); }
+.dot.is-part { background: #4a4a4a; }
+.dot.is-hit { background: var(--ink); }
+.dot.is-ahead { background: transparent; box-shadow: inset 0 0 0 1px var(--track); }
+.dot.is-now { outline: 1px solid var(--dim); outline-offset: 2px; }
+
+/* ── log ── */
+.log { margin-top: var(--gap); }
+.log-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.link { color: var(--dim); font-size: 13px; padding: 8px 10px; border-radius: 10px; }
+.link:hover { color: var(--ink); background: #111; }
+.day-h { display: flex; justify-content: space-between; color: var(--quiet); font-size: 12px; padding: 18px 0 8px; border-bottom: 1px solid var(--edge); }
+table { width: 100%; border-collapse: collapse; }
+td { padding: 12px 0; border-bottom: 1px solid #141414; font-size: 14px; }
+td.t { width: 140px; color: var(--dim); }
+td.k { font-weight: 600; }
+td.d, td.n, td.p { width: 120px; text-align: right; }
+td.n { font-weight: 600; }
+td.p { color: var(--dim); }
+td.x { width: 56px; text-align: right; }
+.del { width: 32px; height: 32px; border-radius: 8px; color: var(--mute); }
+.del:hover { color: var(--ink); background: #161616; }
+.empty { color: var(--quiet); padding: 28px 0 8px; }
+
+/* ── dialog ── */
+.veil { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: grid; place-items: center; z-index: 50; }
+.dlg { width: 420px; background: #0d0d0d; border: 1px solid #222; border-radius: 22px; padding: 28px; }
+.dlg h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; }
+.dlg p { color: var(--dim); margin-top: 6px; }
+.fld { display: block; margin-top: 18px; }
+.fld span { display: block; font-size: 12px; color: var(--quiet); margin-bottom: 6px; }
+.in { width: 100%; height: 46px; padding: 0 14px; border-radius: 12px; background: #161616; border: 1px solid #262626; outline: none; font-size: 16px; }
+.in:focus { border-color: #555; }
+.in.big { height: 72px; font-size: 40px; font-weight: 800; text-align: center; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.acts { display: flex; gap: 10px; margin-top: 24px; }
+.btn { flex: 1; height: 46px; border-radius: 12px; font-weight: 700; background: #1a1a1a; }
+.btn:hover { background: #242424; }
+.btn.pri { background: var(--ink); color: #000; }
+.btn.pri:hover { background: #e6e6e6; }
+
+/* ── toast ── */
+.toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #161616; border: 1px solid #262626; border-radius: 14px; padding: 6px 6px 6px 18px; display: flex; align-items: center; gap: 14px; z-index: 60; width: max-content; }
+.toast.is-bare { padding: 14px 18px; }
+.toast button { height: 36px; padding: 0 14px; border-radius: 10px; background: var(--ink); color: #000; font-weight: 700; }
+
+/* A narrow window still works, stacked, but this is built for a desk. */
+@media (max-width: 1080px) {
+  .grid { grid-template-columns: 1fr; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .mark { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hd">
+    <h1 class="mark"><span>STRUCTURE.</span> <span>VOLUME.</span> <span>CONSISTENCY.</span></h1>
+    <div class="hd-r">
+      <span class="hd-date" id="svDate"></span>
+      <button class="icon-btn" id="svSet" aria-label="Targets and backup" title="Targets and backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="grid">
+    <div class="card timer-card">
+      <div class="ring">
+        <svg viewBox="0 0 300 300" aria-hidden="true">
+          <circle class="tr" cx="150" cy="150" r="136" />
+          <circle class="fl" id="svArc" cx="150" cy="150" r="136" />
+        </svg>
+        <div class="ring-mid">
+          <div class="ring-big num" id="svBig">0</div>
+          <div class="ring-sub" id="svSub"></div>
+        </div>
+      </div>
+      <div class="kinds" role="group" aria-label="Session" id="svKinds">
+        <button class="kind" data-k="bt" aria-pressed="true">Backtest</button>
+        <button class="kind" data-k="live" aria-pressed="false">Live charts</button>
+        <button class="kind" data-k="cnt" aria-pressed="false">Content + journal</button>
+      </div>
+      <button class="go" id="svGo">Start session</button>
+      <div class="hint-k">Space starts and stops</div>
+    </div>
+
+    <div class="card today">
+      <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
+      <div id="svRows"></div>
+      <div class="pace">
+        <div class="fig"><span>Per trade</span><b class="num" id="svPer">–</b></div>
+        <div class="fig"><span id="svFor40">40 trades take</span><b class="num" id="svEta">–</b></div>
+        <div class="fig"><span>100 trades would take</span><b class="num" id="svEta100">–</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="card stat"><span class="lbl">This week · trades</span><div class="stat-v num" id="svWk"></div><div class="stat-x" id="svWkX"></div><div class="bar"><i id="svWkB"></i></div></div>
+    <div class="card stat"><span class="lbl">This week · live charts</span><div class="stat-v num" id="svLv"></div><div class="stat-x" id="svLvX"></div><div class="bar"><i id="svLvB"></i></div></div>
+    <div class="card stat"><span class="lbl">This month · trades</span><div class="stat-v num" id="svMo"></div><div class="stat-x" id="svMoX"></div><div class="bar"><i id="svMoB"></i></div></div>
+    <div class="card stat"><span class="lbl">Consistency</span><div class="stat-v num" id="svSt"></div><div class="stat-x" id="svStX"></div><div class="dots" id="svDots"></div></div>
+  </section>
+
+  <section class="card log">
+    <div class="log-h"><span class="lbl">Sessions</span><button class="link" id="svAdd">+ Add a past session</button></div>
+    <div id="svLog"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+'use strict';
+
+var KEY = 'svc.v1';
+var KINDS = { bt: 'Backtest', live: 'Live charts', cnt: 'Content + journal' };
+var GOAL0 = { bt: 40, live: 60, cnt: 30, wkLive: 300 };
+var DAY = 864e5;
+var $ = function (id) { return document.getElementById(id); };
+
+/* ── store ──
+   One key. A session is a kind, a start and an end in epoch ms, and for
+   a backtest the number of trades. `run` is the session on the clock, so
+   a reload or a closed laptop picks it back up where it was. A damaged
+   session costs itself and never the log. */
+function load() {
+  var o = null;
+  try { o = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { o = null; }
+  if (!o || typeof o !== 'object') o = {};
+  var s = Array.isArray(o.s) ? o.s.filter(function (x) {
+    return x && KINDS[x.k] && isFinite(x.a) && isFinite(x.b) && x.b >= x.a;
+  }).map(function (x) {
+    return { i: String(x.i || id()), k: x.k, a: +x.a, b: +x.b, n: x.k === 'bt' ? Math.max(0, Math.round(+x.n || 0)) : 0 };
+  }) : [];
+  var g = Object.assign({}, GOAL0);
+  if (o.g) Object.keys(GOAL0).forEach(function (k) { var v = +o.g[k]; if (v > 0) g[k] = Math.round(v); });
+  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a } : null;
+  return { s: s, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt' };
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function id() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+var S = load();
+
+/* ── time ── */
+function dayStart(t) { var d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); }
+function weekStart(t) { var d = new Date(dayStart(t)); var w = (d.getDay() + 6) % 7; d.setDate(d.getDate() - w); return d.getTime(); }
+function monthStart(t) { var d = new Date(dayStart(t)); d.setDate(1); return d.getTime(); }
+function addDays(t, n) { var d = new Date(t); d.setDate(d.getDate() + n); return d.getTime(); }
+function daysInMonth(t) { var d = new Date(t); return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate(); }
+function hm(t) { var d = new Date(t); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function dur(ms) {
+  var s = Math.round(ms / 1000);
+  if (!s) return '0m';
+  if (s < 60) return s + 's';
+  var m = Math.round(s / 60), h = Math.floor(m / 60);
+  return h ? h + 'h' + (m % 60 ? ' ' + (m % 60) + 'm' : '') : m + 'm';
+}
+function per(ms) {
+  var s = Math.round(ms / 1000), m = Math.floor(s / 60);
+  return m ? m + 'm ' + pad(s % 60) + 's' : s + 's';
+}
+function clock(ms) {
+  var s = Math.max(0, Math.floor(ms / 1000));
+  var h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60;
+  return (h ? h + ':' + pad(m) : m) + ':' + pad(s % 60);
+}
+function dayName(t) {
+  var now = dayStart(Date.now());
+  if (t === now) return 'Today';
+  if (t === addDays(now, -1)) return 'Yesterday';
+  return new Date(t).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+}
+function fmt(n) { return n.toLocaleString('en-GB'); }
+
+/* ── sums ── */
+function within(a, b) { return S.s.filter(function (x) { return x.a >= a && x.a < b; }); }
+function sum(list, k, f) { return list.reduce(function (t, x) { return x.k === k ? t + f(x) : t; }, 0); }
+function trades(list) { return sum(list, 'bt', function (x) { return x.n; }); }
+function mins(list, k) { return sum(list, k, function (x) { return (x.b - x.a) / 6e4; }); }
+
+/* Pace is time over trades for every backtest that carried a trade
+   count. Thirty days, so the figure moves when you get faster and
+   does not swing on one slow session. */
+function pace() {
+  var now = Date.now(), list = within(dayStart(now) - 29 * DAY, now + DAY).filter(function (x) { return x.k === 'bt' && x.n > 0; });
+  var n = trades(list), ms = list.reduce(function (t, x) { return t + (x.b - x.a); }, 0);
+  return n ? ms / n : 0;
+}
+
+/* ── the ring ── */
+var R = 136, C = 2 * Math.PI * R;
+function paintRing() {
+  var arc = $('svArc'), big = $('svBig'), sub = $('svSub');
+  arc.style.strokeDasharray = C;
+  var now = Date.now(), today = within(dayStart(now), dayStart(now) + DAY);
+  var done = trades(today);
+  if (S.run) {
+    var el = now - S.run.a;
+    big.textContent = clock(el); big.classList.add('is-clock');
+    var goal = S.run.k === 'bt' ? 0 : (S.run.k === 'live' ? S.g.live : S.g.cnt) * 6e4;
+    sub.textContent = KINDS[S.run.k] + ' · since ' + hm(S.run.a);
+    /* On a timed session the ring fills toward that session's own target.
+       A backtest keeps the day's trades, because trades are the target. */
+    var f = goal ? (mins(today, S.run.k) * 6e4 + el) / goal : done / S.g.bt;
+    arc.style.strokeDashoffset = C * (1 - Math.min(1, f));
+  } else {
+    big.textContent = fmt(done); big.classList.remove('is-clock');
+    sub.textContent = 'of ' + S.g.bt + ' trades today';
+    arc.style.strokeDashoffset = C * (1 - Math.min(1, done / S.g.bt));
+  }
+  document.title = S.run ? clock(now - S.run.a) + ' · ' + KINDS[S.run.k] : 'SVC';
+}
+
+/* ── today ── */
+function row(name, note, val, valNote, frac, extra) {
+  return '<div class="row"><div class="row-n">' + name + (note ? '<small>' + note + '</small>' : '') + '</div>'
+    + '<div class="row-v num">' + val + (valNote ? ' <small>' + valNote + '</small>' : '') + '</div>'
+    + '<div class="bar"><i style="width:' + Math.round(Math.min(1, frac) * 100) + '%"></i></div>'
+    + (extra ? '<div class="row-x num">' + extra + '</div>' : '') + '</div>';
+}
+function paintToday() {
+  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY), noon = d0 + 12 * 36e5;
+  var bt = trades(today), am = trades(today.filter(function (x) { return x.a < noon; })), pm = bt - am;
+  var half = Math.ceil(S.g.bt / 2);
+  var btMs = sum(today, 'bt', function (x) { return x.b - x.a; });
+  var lv = mins(today, 'live'), cn = mins(today, 'cnt');
+  $('svRows').innerHTML =
+    row('Backtesting', half + ' morning · ' + (S.g.bt - half) + ' afternoon', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt,
+      'Morning ' + am + ' · Afternoon ' + pm + (btMs ? ' · ' + dur(btMs) + ' on the clock' : ''))
+    + row('Live charts', '20:00–21:00 New York', dur(lv * 6e4), '/ ' + dur(S.g.live * 6e4), lv / S.g.live, '')
+    + row('Content + journal', '', dur(cn * 6e4), '/ ' + dur(S.g.cnt * 6e4), cn / S.g.cnt, '');
+  var p = pace();
+  $('svPer').textContent = p ? per(p) : '–';
+  $('svFor40').textContent = S.g.bt + ' trades take';
+  $('svEta').textContent = p ? dur(p * S.g.bt) : '–';
+  $('svEta100').textContent = p ? dur(p * 100) : '–';
+  $('svPlan').textContent = new Date(now).toLocaleDateString('en-GB', { weekday: 'long' });
+}
+
+/* ── week, month, consistency ── */
+function bar(id, f) { $(id).style.width = Math.round(Math.min(1, f) * 100) + '%'; }
+function paintStats() {
+  var now = Date.now(), w0 = weekStart(now), m0 = monthStart(now);
+  var wk = within(w0, addDays(w0, 7)), mo = within(m0, addDays(m0, daysInMonth(now)));
+  var wkT = trades(wk), wkGoal = S.g.bt * 7;
+  $('svWk').innerHTML = fmt(wkT) + ' <small>/ ' + fmt(wkGoal) + '</small>';
+  var left = Math.max(0, wkGoal - wkT), daysLeft = 7 - Math.round((dayStart(now) - w0) / DAY);
+  $('svWkX').textContent = left ? fmt(left) + ' to go · ' + Math.ceil(left / daysLeft) + ' a day for ' + daysLeft + (daysLeft === 1 ? ' day' : ' days') : 'Week done';
+  bar('svWkB', wkT / wkGoal);
+
+  var lv = mins(wk, 'live');
+  $('svLv').innerHTML = dur(lv * 6e4) + ' <small>/ ' + dur(S.g.wkLive * 6e4) + '</small>';
+  $('svLvX').textContent = lv >= S.g.wkLive ? 'Week done' : dur((S.g.wkLive - lv) * 6e4) + ' to go';
+  bar('svLvB', lv / S.g.wkLive);
+
+  var moT = trades(mo), moGoal = S.g.bt * daysInMonth(now);
+  $('svMo').innerHTML = fmt(moT) + ' <small>/ ' + fmt(moGoal) + '</small>';
+  var expect = S.g.bt * Math.round((dayStart(now) - m0) / DAY + 1);
+  $('svMoX').textContent = moT >= expect ? fmt(moT - expect) + ' ahead of pace' : fmt(expect - moT) + ' behind pace';
+  bar('svMoB', moT / moGoal);
+
+  /* A day counts when the backtest target was reached. The streak may
+     end yesterday: today is not over, so not having hit it yet is not a
+     break. Four weeks, Monday first, so a weekday sits in one column. */
+  function hit(t) { return trades(within(t, t + DAY)) >= S.g.bt; }
+  var d0 = dayStart(now), run = 0, t = hit(d0) ? d0 : addDays(d0, -1);
+  while (hit(t) && run < 3650) { run++; t = addDays(t, -1); }
+  var best = 0, cur = 0, first = S.s.length ? dayStart(Math.min.apply(null, S.s.map(function (x) { return x.a; }))) : d0;
+  for (t = first; t <= d0; t = addDays(t, 1)) { cur = hit(t) ? cur + 1 : 0; if (cur > best) best = cur; }
+  $('svSt').innerHTML = run + ' <small>' + (run === 1 ? 'day' : 'days') + ' in a row</small>';
+  var start = addDays(weekStart(now), -21), hits = 0, days = 0, html = '';
+  ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(function (l) { html += '<span class="dw">' + l + '</span>'; });
+  for (var i = 0; i < 28; i++) {
+    var day = addDays(start, i), n = trades(within(day, day + DAY));
+    var cls = day > d0 ? 'is-ahead' : n >= S.g.bt ? 'is-hit' : n > 0 ? 'is-part' : '';
+    if (day <= d0) { days++; if (n >= S.g.bt) hits++; }
+    html += '<span class="dot ' + cls + (day === d0 ? ' is-now' : '') + '" title="' + dayName(day) + ' · ' + n + ' trades"></span>';
+  }
+  $('svDots').innerHTML = html;
+  $('svStX').textContent = 'Best ' + best + ' · ' + hits + ' of the last ' + days + ' days on target';
+}
+
+/* ── log ── */
+/* A week of sessions, newest first; the rest one press away. Not
+   stored: a long log is something you open on purpose. */
+var logAll = false;
+function paintLog() {
+  var all = S.s.slice().sort(function (a, b) { return b.a - a.a; });
+  var cut = addDays(dayStart(Date.now()), -6);
+  var list = logAll ? all : all.filter(function (x) { return x.a >= cut; });
+  var more = all.length - list.length;
+  if (!all.length) { $('svLog').innerHTML = '<div class="empty">Nothing yet. Press Start session.</div>'; return; }
+  var html = '', last = null, rows = '';
+  function flush() {
+    if (last === null) return;
+    var items = list.filter(function (x) { return dayStart(x.a) === last; });
+    var n = trades(items), ms = items.reduce(function (t, x) { return t + x.b - x.a; }, 0);
+    html += '<div class="day-h"><span>' + dayName(last) + '</span><span class="num">' + (n ? n + ' trades · ' : '') + dur(ms) + '</span></div><table>' + rows + '</table>';
+    rows = '';
+  }
+  list.slice(0, 200).forEach(function (x) {
+    var d = dayStart(x.a);
+    if (d !== last) { flush(); last = d; }
+    var ms = x.b - x.a;
+    rows += '<tr data-i="' + x.i + '"><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + '</td>'
+      + '<td class="d num">' + dur(ms) + '</td><td class="n num">' + (x.k === 'bt' ? x.n + ' trades' : '') + '</td>'
+      + '<td class="p num">' + (x.k === 'bt' && x.n ? per(ms / x.n) + ' each' : '') + '</td>'
+      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>';
+  });
+  flush();
+  if (more) html += '<div class="empty"><button class="link" data-more="1">Show ' + more + ' older ' + (more === 1 ? 'session' : 'sessions') + '</button></div>';
+  else if (logAll && all.some(function (x) { return x.a < cut; })) html += '<div class="empty"><button class="link" data-more="1">Show this week only</button></div>';
+  $('svLog').innerHTML = html;
+}
+
+function paintControls() {
+  var on = !!S.run, k = on ? S.run.k : S.kind;
+  Array.prototype.forEach.call(document.querySelectorAll('.kind'), function (b) {
+    b.setAttribute('aria-pressed', String(b.dataset.k === k));
+    b.disabled = on && b.dataset.k !== k;
+  });
+  var go = $('svGo');
+  go.textContent = on ? 'End session' : 'Start session';
+  go.classList.toggle('is-on', on);
+}
+
+function paint() {
+  $('svDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+  paintRing(); paintToday(); paintStats(); paintLog(); paintControls();
+}
+
+/* ── the clock ── */
+var tick = null;
+function clockOn() {
+  if (tick) clearInterval(tick);
+  tick = S.run ? setInterval(paintRing, 1000) : null;
+}
+
+/* ── toast ── */
+var toastT = null;
+function toast(msg, undo) {
+  var old = document.querySelector('.toast'); if (old) old.remove();
+  clearTimeout(toastT);
+  var t = document.createElement('div');
+  t.className = 'toast' + (undo ? '' : ' is-bare');
+  t.setAttribute('role', 'status');
+  var s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+  if (undo) {
+    var b = document.createElement('button'); b.textContent = 'Undo';
+    b.addEventListener('click', function () { undo(); t.remove(); });
+    t.appendChild(b);
+  }
+  document.body.appendChild(t);
+  toastT = setTimeout(function () { t.remove(); }, 6000);
+}
+
+/* ── dialogs ──
+   Built and removed, never hidden, so a put-away dialog cannot go on
+   taking presses. Escape and a press on the veil both cancel. */
+function dialog(html, onOpen) {
+  var v = document.createElement('div');
+  v.className = 'veil';
+  v.innerHTML = '<div class="dlg" role="dialog" aria-modal="true">' + html + '</div>';
+  function close() { v.remove(); document.removeEventListener('keydown', esc, true); }
+  function esc(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } }
+  v.addEventListener('mousedown', function (e) { if (e.target === v) close(); });
+  document.addEventListener('keydown', esc, true);
+  document.body.appendChild(v);
+  onOpen(v.firstChild, close);
+}
+function dialogOpen() { return !!document.querySelector('.veil'); }
+
+/* ── start and end ── */
+function start() {
+  S.run = { k: S.kind, a: Date.now() };
+  save(); clockOn(); paint();
+}
+function file(sess) {
+  S.s.push(sess); save(); paint();
+  toast(KINDS[sess.k] + ' · ' + dur(sess.b - sess.a) + (sess.k === 'bt' ? ' · ' + sess.n + ' trades' : ''), function () {
+    S.s = S.s.filter(function (x) { return x.i !== sess.i; }); save(); paint();
+  });
+}
+function end() {
+  var run = S.run, b = Date.now();
+  if (!run) return;
+  if (run.k !== 'bt') {
+    S.run = null; clockOn();
+    file({ i: id(), k: run.k, a: run.a, b: b, n: 0 });
+    return;
+  }
+  /* A backtest is not filed until it says how many trades it was. The
+     clock stops at the press, so time spent typing is not counted. */
+  dialog('<h2>How many trades?</h2><p class="num">Backtest · ' + dur(b - run.a) + ' · ' + hm(run.a) + '–' + hm(b) + '</p>'
+    + '<label class="fld"><span>Trades backtested</span><input class="in big num" id="svN" type="number" min="0" max="999" inputmode="numeric" /></label>'
+    + '<div class="acts"><button class="btn" data-a="keep">Keep going</button><button class="btn pri" data-a="save">Save</button></div>', function (d, close) {
+    var inp = d.querySelector('input');
+    inp.focus();
+    function done() {
+      var n = Math.max(0, Math.min(999, Math.round(+inp.value || 0)));
+      close(); S.run = null; clockOn();
+      file({ i: id(), k: 'bt', a: run.a, b: b, n: n });
+    }
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); done(); } });
+    d.querySelector('[data-a="save"]').addEventListener('click', done);
+    d.querySelector('[data-a="keep"]').addEventListener('click', close);
+  });
+}
+function toggle() { if (S.run) end(); else start(); }
+
+/* ── a session you forgot to time ── */
+function addPast() {
+  var now = new Date(), iso = now.getFullYear() + '-' + pad(now.getMonth() + 1) + '-' + pad(now.getDate());
+  dialog('<h2>Add a past session</h2>'
+    + '<label class="fld"><span>Session</span><select class="in" id="svPK"><option value="bt">Backtest</option><option value="live">Live charts</option><option value="cnt">Content + journal</option></select></label>'
+    + '<div class="two"><label class="fld"><span>Day</span><input class="in num" id="svPD" type="date" value="' + iso + '" max="' + iso + '" /></label>'
+    + '<label class="fld"><span>Started</span><input class="in num" id="svPS" type="time" value="' + pad(now.getHours()) + ':00" /></label></div>'
+    + '<div class="two"><label class="fld"><span>Minutes</span><input class="in num" id="svPM" type="number" min="1" max="720" value="60" /></label>'
+    + '<label class="fld" id="svPNf"><span>Trades</span><input class="in num" id="svPN" type="number" min="0" max="999" value="20" /></label></div>'
+    + '<div class="acts"><button class="btn" data-a="x">Cancel</button><button class="btn pri" data-a="save">Add</button></div>', function (d, close) {
+    var k = d.querySelector('#svPK'), nf = d.querySelector('#svPNf');
+    k.addEventListener('change', function () { nf.style.visibility = k.value === 'bt' ? '' : 'hidden'; });
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    d.querySelector('[data-a="save"]').addEventListener('click', function () {
+      var dv = d.querySelector('#svPD').value, sv = d.querySelector('#svPS').value;
+      var m = Math.round(+d.querySelector('#svPM').value || 0);
+      if (!dv || !sv || !(m > 0)) return;
+      var p = dv.split('-'), q = sv.split(':');
+      var a = new Date(+p[0], +p[1] - 1, +p[2], +q[0], +q[1]).getTime();
+      close();
+      file({ i: id(), k: k.value, a: a, b: a + m * 6e4, n: k.value === 'bt' ? Math.max(0, Math.round(+d.querySelector('#svPN').value || 0)) : 0 });
+    });
+  });
+}
+
+/* ── targets and backup ── */
+function settings() {
+  dialog('<h2>Targets</h2>'
+    + '<div class="two"><label class="fld"><span>Trades a day</span><input class="in num" data-g="bt" type="number" min="1" value="' + S.g.bt + '" /></label>'
+    + '<label class="fld"><span>Live minutes a day</span><input class="in num" data-g="live" type="number" min="1" value="' + S.g.live + '" /></label></div>'
+    + '<div class="two"><label class="fld"><span>Live hours a week</span><input class="in num" data-g="wkLive" type="number" min="0.5" step="0.5" value="' + (S.g.wkLive / 60) + '" /></label>'
+    + '<label class="fld"><span>Content minutes a day</span><input class="in num" data-g="cnt" type="number" min="1" value="' + S.g.cnt + '" /></label></div>'
+    + '<div class="acts"><button class="btn" data-a="exp">Download backup</button><button class="btn" data-a="imp">Restore</button></div>'
+    + '<div class="acts"><button class="btn" data-a="x">Cancel</button><button class="btn pri" data-a="save">Save</button></div>', function (d, close) {
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    d.querySelector('[data-a="save"]').addEventListener('click', function () {
+      Array.prototype.forEach.call(d.querySelectorAll('[data-g]'), function (inp) {
+        var v = +inp.value, k = inp.dataset.g;
+        if (k === 'wkLive') v = v * 60;
+        if (v > 0) S.g[k] = Math.round(v);
+      });
+      save(); close(); paint();
+    });
+    d.querySelector('[data-a="exp"]').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(S, null, 1)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'svc-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    });
+    d.querySelector('[data-a="imp"]').addEventListener('click', function () {
+      var f = document.createElement('input'); f.type = 'file'; f.accept = 'application/json,.json';
+      f.addEventListener('change', function () {
+        var file0 = f.files && f.files[0]; if (!file0) return;
+        file0.text().then(function (txt) {
+          var prev = JSON.stringify(S);
+          try { JSON.parse(txt); } catch (e) { toast('That file is not a backup'); return; }
+          localStorage.setItem(KEY, txt); S = load(); save(); close(); clockOn(); paint();
+          toast('Restored ' + S.s.length + ' sessions', function () { localStorage.setItem(KEY, prev); S = load(); clockOn(); paint(); });
+        });
+      });
+      f.click();
+    });
+  });
+}
+
+/* ── wiring ── */
+$('svGo').addEventListener('click', toggle);
+$('svKinds').addEventListener('click', function (e) {
+  var b = e.target.closest('.kind'); if (!b || S.run) return;
+  S.kind = b.dataset.k; save(); paintControls();
+  /* so Space, which starts a session, does not press this chip again */
+  b.blur();
+});
+$('svAdd').addEventListener('click', addPast);
+$('svSet').addEventListener('click', settings);
+$('svLog').addEventListener('click', function (e) {
+  if (e.target.closest('[data-more]')) { logAll = !logAll; paintLog(); return; }
+  var b = e.target.closest('.del'); if (!b) return;
+  var i = b.closest('tr').dataset.i, gone = S.s.filter(function (x) { return x.i === i; })[0];
+  if (!gone) return;
+  S.s = S.s.filter(function (x) { return x.i !== i; }); save(); paint();
+  toast('Session deleted', function () { S.s.push(gone); save(); paint(); });
+});
+document.addEventListener('keydown', function (e) {
+  if (e.code !== 'Space' || dialogOpen() || e.repeat) return;
+  var t = e.target, tag = t && t.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+  e.preventDefault(); toggle();
+});
+/* Another window, or the same app open twice, writes the key: follow it. */
+window.addEventListener('storage', function (e) { if (e.key === KEY) { S = load(); clockOn(); paint(); } });
+/* The date can roll over while the app sits open; repaint once a minute. */
+setInterval(paint, 60000);
+document.addEventListener('visibilitychange', function () { if (!document.hidden) paint(); });
+
+/* Between 20:00 and 21:00 the session on offer is the live one. */
+if (!S.run) { var hr = new Date().getHours(); if (hr === 20) S.kind = 'live'; }
+paint(); clockOn();
+
+if ('serviceWorker' in navigator && /^(https:|http:\/\/(localhost|127\.0\.0\.1))/.test(location.href)) {
+  navigator.serviceWorker.register('sw.js').catch(function () {});
+}
+})();
+</script>
+</body>
+</html>
