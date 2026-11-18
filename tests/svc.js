@@ -57,6 +57,11 @@ const SEED = { s: [
   {
     const { c, page } = await ctx(SEED);
     ok('the head reads STRUCTURE. VOLUME. CONSISTENCY.', (await txt(page, '.mark')).replace(/\s+/g, ' ') === 'STRUCTURE. VOLUME. CONSISTENCY.');
+    ok('the head is built from its letters, each staggered', await page.evaluate(() => {
+      const l = [...document.querySelectorAll('#svMark i')];
+      return l.length === 29 && new Set(l.map((e) => getComputedStyle(e).animationDelay)).size === 29;
+    }));
+    ok('and it lands fully drawn', await page.waitForFunction(() => [...document.querySelectorAll('#svMark i')].every((e) => getComputedStyle(e).opacity === '1'), null, { timeout: 5000 }).then(() => true, () => false));
     const look = await page.evaluate(() => {
       const b = getComputedStyle(document.body), h = getComputedStyle(document.querySelector('.mark'));
       return { bg: b.backgroundColor, ink: h.color, w: +h.fontWeight, sub: +getComputedStyle(document.querySelector('.ring-sub')).fontWeight,
@@ -68,7 +73,7 @@ const SEED = { s: [
     const off = await page.$eval('#svArc', (e) => [parseFloat(e.style.strokeDashoffset), parseFloat(e.style.strokeDasharray)]);
     ok('the ring is half full', Math.abs(off[0] / off[1] - 0.5) < 0.01, off);
     const rows = await txt(page, '#svRows');
-    ok('today splits the trades morning and afternoon', /Morning 20 · Afternoon 0/.test(rows), rows);
+    ok('today counts volume only, with no morning or afternoon split', /20 to go/.test(rows) && !/morning|afternoon/i.test(rows), rows);
     ok('content counts its fifteen minutes of thirty', /Content \+ journal15m\s*\/ 30m/.test(rows), rows);
     ok('the week reads 85 of 280 (Sunday was last week)', /^85\s*\/ 280$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
     ok('live this week reads 1h of 5h', /^1h\s*\/ 5h$/.test(await txt(page, '#svLv')), await txt(page, '#svLv'));
@@ -109,7 +114,7 @@ const SEED = { s: [
     ok('the session is filed with 20 trades and 45 minutes', last.k === 'bt' && last.n === 20 && last.b - last.a === 45 * 60e3, last);
     ok('the run is cleared', s.run === null);
     ok('the ring reads 40 and is full', (await txt(page, '#svBig')) === '40');
-    ok('a session started at 10:00 counts as morning', /Morning 40/.test(await txt(page, '#svRows')));
+    ok('the day reads target hit', /Target hit/.test(await txt(page, '#svRows')));
     await page.click('.toast button');
     ok('Undo takes it back off', (await store(page)).s.length === SEED.s.length && (await txt(page, '#svBig')) === '20');
     await c.close();
@@ -141,6 +146,32 @@ const SEED = { s: [
     await page.click('#svSet'); await page.waitForSelector('.dlg');
     await page.fill('[data-g="bt"]', '100'); await page.click('.dlg [data-a="save"]');
     ok('the daily target moves to 100', /of 100 trades/.test(await txt(page, '#svSub')) && /\/ 700$/.test(await txt(page, '#svWk')));
+    await c.close();
+  }
+
+  console.log('\nSVC — live notes');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('no notepad until a live session runs', await page.$eval('#svNotesP', (e) => e.hidden) && await page.$eval('#svTodayP', (e) => !e.hidden));
+    await page.click('.kind[data-k="live"]'); await page.click('#svGo');
+    ok('a live session opens the notepad in place of Today, focused', await page.$eval('#svNotesP', (e) => !e.hidden)
+      && await page.$eval('#svTodayP', (e) => e.hidden) && await page.evaluate(() => document.activeElement.id === 'svNotes'));
+    await page.keyboard.type('Sweep of the high <then> CISD');
+    await page.keyboard.press('Enter'); await page.keyboard.type('Second line');
+    ok('Space in the notes is a space, not a stop', (await store(page)).run !== null);
+    await page.waitForTimeout(400);
+    await page.evaluate(() => __adv(10 * 60e3));
+    await page.reload(); await page.waitForSelector('#svBig');
+    ok('a reload keeps the notes', (await page.$eval('#svNotes', (e) => e.value)) === 'Sweep of the high <then> CISD\nSecond line');
+    await page.evaluate(() => __adv(50 * 60e3));
+    await page.waitForTimeout(1100);
+    ok('a repaint leaves the field alone', (await page.$eval('#svNotes', (e) => e.value)).endsWith('Second line'));
+    await page.click('#svGo');
+    const s = await store(page), last = s.s[s.s.length - 1];
+    ok('the notes are filed with the session', last.k === 'live' && last.t === 'Sweep of the high <then> CISD\nSecond line' && last.b - last.a === 60 * 60e3, last);
+    ok('Today comes back', await page.$eval('#svTodayP', (e) => !e.hidden));
+    const shown = await page.$eval('.note-r div', (e) => e.textContent);
+    ok('the log shows the notes as text, under the session', shown === 'Sweep of the high <then> CISD\nSecond line', shown);
     await c.close();
   }
 

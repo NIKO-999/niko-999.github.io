@@ -33,7 +33,7 @@ body {
   font-size: 14px; line-height: 1.35; -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-button, input, select { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
 .num { font-variant-numeric: tabular-nums; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 40px 48px 64px; }
@@ -42,6 +42,23 @@ button { cursor: pointer; background: none; border: 0; }
 .hd { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 36px; }
 .mark { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
 .mark span { white-space: nowrap; }
+/* The head builds itself: every letter comes up out of a blur in turn,
+   flashes as it lands, and then a soft light keeps travelling through
+   the three words so the page is never quite still. Only opacity,
+   transform, filter and text-shadow, on thirty-odd glyphs. */
+.mark i { display: inline-block; font-style: normal; opacity: 0;
+  animation: sv-build .7s cubic-bezier(.2, .7, .2, 1) calc(var(--n) * 45ms) forwards,
+             sv-glow 7s ease-in-out calc(1.9s + var(--n) * 60ms) infinite; }
+@keyframes sv-build {
+  0% { opacity: 0; transform: translateY(.35em) scale(.9); filter: blur(10px); }
+  60% { opacity: 1; text-shadow: 0 0 22px rgba(255,255,255,.9), 0 0 48px rgba(255,255,255,.45); filter: blur(0); }
+  100% { opacity: 1; transform: none; filter: none; text-shadow: 0 0 0 rgba(255,255,255,0); }
+}
+@keyframes sv-glow {
+  0%, 18%, 100% { text-shadow: 0 0 0 rgba(255,255,255,0); }
+  9% { text-shadow: 0 0 14px rgba(255,255,255,.75), 0 0 36px rgba(255,255,255,.3); }
+}
+@media (prefers-reduced-motion: reduce) { .mark i { animation: none; opacity: 1; } }
 .hd-r { display: flex; align-items: center; gap: 14px; color: var(--dim); }
 .hd-date { font-size: 13px; }
 .icon-btn { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--dim); }
@@ -76,6 +93,14 @@ button { cursor: pointer; background: none; border: 0; }
 
 /* ── today ── */
 .today { display: flex; flex-direction: column; }
+.pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+/* The notes take the whole panel: while the chart is live, this is the
+   thing you are looking at between candles, so it gets the room. */
+.notes { flex: 1; min-height: 360px; width: 100%; resize: none; background: transparent; border: 0; outline: none; color: var(--ink); font-size: 16px; line-height: 1.6; }
+.notes::placeholder { color: var(--mute); }
+.note-r td { padding: 0 0 14px; border-bottom: 1px solid #141414; }
+.note-r div { white-space: pre-wrap; color: var(--dim); font-size: 13px; line-height: 1.5; padding-left: 140px; max-width: 900px; }
+tr.has-note td { border-bottom: 0; }
 .today-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
 .row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 6px 16px; padding: 16px 0; border-top: 1px solid var(--edge); }
 .row:first-of-type { border-top: 0; }
@@ -156,7 +181,7 @@ td.x { width: 56px; text-align: right; }
 <body>
 <div class="wrap">
   <header class="hd">
-    <h1 class="mark"><span>STRUCTURE.</span> <span>VOLUME.</span> <span>CONSISTENCY.</span></h1>
+    <h1 class="mark" id="svMark" aria-label="Structure. Volume. Consistency."><span>STRUCTURE.</span> <span>VOLUME.</span> <span>CONSISTENCY.</span></h1>
     <div class="hd-r">
       <span class="hd-date" id="svDate"></span>
       <button class="icon-btn" id="svSet" aria-label="Targets and backup" title="Targets and backup">
@@ -187,12 +212,18 @@ td.x { width: 56px; text-align: right; }
     </div>
 
     <div class="card today">
-      <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
-      <div id="svRows"></div>
-      <div class="pace">
-        <div class="fig"><span>Per trade</span><b class="num" id="svPer">–</b></div>
-        <div class="fig"><span id="svFor40">40 trades take</span><b class="num" id="svEta">–</b></div>
-        <div class="fig"><span>100 trades would take</span><b class="num" id="svEta100">–</b></div>
+      <div class="pane" id="svTodayP">
+        <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
+        <div id="svRows"></div>
+        <div class="pace">
+          <div class="fig"><span>Per trade</span><b class="num" id="svPer">–</b></div>
+          <div class="fig"><span id="svFor40">40 trades take</span><b class="num" id="svEta">–</b></div>
+          <div class="fig"><span>100 trades would take</span><b class="num" id="svEta100">–</b></div>
+        </div>
+      </div>
+      <div class="pane" id="svNotesP" hidden>
+        <div class="today-h"><span class="lbl">Live notes</span><span class="hint-k" id="svNotesT"></span></div>
+        <textarea class="notes" id="svNotes" aria-label="Live notes" placeholder="What you see, as you see it"></textarea>
       </div>
     </div>
   </section>
@@ -232,11 +263,13 @@ function load() {
   var s = Array.isArray(o.s) ? o.s.filter(function (x) {
     return x && KINDS[x.k] && isFinite(x.a) && isFinite(x.b) && x.b >= x.a;
   }).map(function (x) {
-    return { i: String(x.i || id()), k: x.k, a: +x.a, b: +x.b, n: x.k === 'bt' ? Math.max(0, Math.round(+x.n || 0)) : 0 };
+    var o2 = { i: String(x.i || id()), k: x.k, a: +x.a, b: +x.b, n: x.k === 'bt' ? Math.max(0, Math.round(+x.n || 0)) : 0 };
+    if (typeof x.t === 'string' && x.t.trim()) o2.t = x.t.slice(0, 20000);
+    return o2;
   }) : [];
   var g = Object.assign({}, GOAL0);
   if (o.g) Object.keys(GOAL0).forEach(function (k) { var v = +o.g[k]; if (v > 0) g[k] = Math.round(v); });
-  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a } : null;
+  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a, t: typeof o.run.t === 'string' ? o.run.t.slice(0, 20000) : '' } : null;
   return { s: s, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt' };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -273,6 +306,7 @@ function dayName(t) {
   if (t === addDays(now, -1)) return 'Yesterday';
   return new Date(t).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
 }
+function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 function fmt(n) { return n.toLocaleString('en-GB'); }
 
 /* ── sums ── */
@@ -322,14 +356,14 @@ function row(name, note, val, valNote, frac, extra) {
     + (extra ? '<div class="row-x num">' + extra + '</div>' : '') + '</div>';
 }
 function paintToday() {
-  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY), noon = d0 + 12 * 36e5;
-  var bt = trades(today), am = trades(today.filter(function (x) { return x.a < noon; })), pm = bt - am;
-  var half = Math.ceil(S.g.bt / 2);
+  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY);
+  var bt = trades(today);
   var btMs = sum(today, 'bt', function (x) { return x.b - x.a; });
   var lv = mins(today, 'live'), cn = mins(today, 'cnt');
   $('svRows').innerHTML =
-    row('Backtesting', half + ' morning · ' + (S.g.bt - half) + ' afternoon', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt,
-      'Morning ' + am + ' · Afternoon ' + pm + (btMs ? ' · ' + dur(btMs) + ' on the clock' : ''))
+    /* Volume is the point: how many, not when. No morning and afternoon. */
+    row('Backtesting', '', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt,
+      bt >= S.g.bt ? 'Target hit' + (btMs ? ' · ' + dur(btMs) + ' on the clock' : '') : fmt(S.g.bt - bt) + ' to go' + (btMs ? ' · ' + dur(btMs) + ' on the clock' : ''))
     + row('Live charts', '20:00–21:00 New York', dur(lv * 6e4), '/ ' + dur(S.g.live * 6e4), lv / S.g.live, '')
     + row('Content + journal', '', dur(cn * 6e4), '/ ' + dur(S.g.cnt * 6e4), cn / S.g.cnt, '');
   var p = pace();
@@ -405,10 +439,11 @@ function paintLog() {
     var d = dayStart(x.a);
     if (d !== last) { flush(); last = d; }
     var ms = x.b - x.a;
-    rows += '<tr data-i="' + x.i + '"><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + '</td>'
+    rows += '<tr data-i="' + x.i + '"' + (x.t ? ' class="has-note"' : '') + '><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + '</td>'
       + '<td class="d num">' + dur(ms) + '</td><td class="n num">' + (x.k === 'bt' ? x.n + ' trades' : '') + '</td>'
       + '<td class="p num">' + (x.k === 'bt' && x.n ? per(ms / x.n) + ' each' : '') + '</td>'
-      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>';
+      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>'
+      + (x.t ? '<tr class="note-r"><td colspan="6"><div>' + esc(x.t) + '</div></td></tr>' : '');
   });
   flush();
   if (more) html += '<div class="empty"><button class="link" data-more="1">Show ' + more + ' older ' + (more === 1 ? 'session' : 'sessions') + '</button></div>';
@@ -422,6 +457,14 @@ function paintControls() {
     b.setAttribute('aria-pressed', String(b.dataset.k === k));
     b.disabled = on && b.dataset.k !== k;
   });
+  /* A live session swaps Today for a notepad, filled from the run so a
+     reload keeps what you wrote. Only on the change of state: a repaint
+     must never touch the field you are typing in. */
+  var live = on && S.run.k === 'live', np = $('svNotesP');
+  if (live === np.hidden) {
+    np.hidden = !live; $('svTodayP').hidden = live;
+    if (live) { $('svNotes').value = S.run.t || ''; $('svNotesT').textContent = 'since ' + hm(S.run.a); }
+  }
   var go = $('svGo');
   go.textContent = on ? 'End session' : 'Start session';
   go.classList.toggle('is-on', on);
@@ -475,8 +518,9 @@ function dialogOpen() { return !!document.querySelector('.veil'); }
 
 /* ── start and end ── */
 function start() {
-  S.run = { k: S.kind, a: Date.now() };
+  S.run = { k: S.kind, a: Date.now(), t: '' };
   save(); clockOn(); paint();
+  if (S.run.k === 'live') $('svNotes').focus();
 }
 function file(sess) {
   S.s.push(sess); save(); paint();
@@ -489,7 +533,9 @@ function end() {
   if (!run) return;
   if (run.k !== 'bt') {
     S.run = null; clockOn();
-    file({ i: id(), k: run.k, a: run.a, b: b, n: 0 });
+    var sess = { i: id(), k: run.k, a: run.a, b: b, n: 0 };
+    if (run.k === 'live') { var t = $('svNotes').value; if (t.trim()) sess.t = t.slice(0, 20000); }
+    file(sess);
     return;
   }
   /* A backtest is not filed until it says how many trades it was. The
@@ -585,6 +631,12 @@ $('svKinds').addEventListener('click', function (e) {
   b.blur();
 });
 $('svAdd').addEventListener('click', addPast);
+var noteT = null;
+$('svNotes').addEventListener('input', function () {
+  if (!S.run) return;
+  S.run.t = this.value;
+  clearTimeout(noteT); noteT = setTimeout(save, 250);
+});
 $('svSet').addEventListener('click', settings);
 $('svLog').addEventListener('click', function (e) {
   if (e.target.closest('[data-more]')) { logAll = !logAll; paintLog(); return; }
@@ -601,10 +653,22 @@ document.addEventListener('keydown', function (e) {
   e.preventDefault(); toggle();
 });
 /* Another window, or the same app open twice, writes the key: follow it. */
+/* typing is saved on a short timer; closing the window must not lose the last line */
+window.addEventListener('pagehide', function () { if (noteT) { clearTimeout(noteT); save(); } });
 window.addEventListener('storage', function (e) { if (e.key === KEY) { S = load(); clockOn(); paint(); } });
 /* The date can roll over while the app sits open; repaint once a minute. */
 setInterval(paint, 60000);
 document.addEventListener('visibilitychange', function () { if (!document.hidden) paint(); });
+
+/* Split the head into letters, each carrying its place for the stagger.
+   The words stay one span each so a word never breaks across lines. */
+(function () {
+  var n = 0;
+  Array.prototype.forEach.call($('svMark').children, function (w) {
+    w.setAttribute('aria-hidden', 'true');
+    w.innerHTML = w.textContent.split('').map(function (ch) { return '<i style="--n:' + (n++) + '">' + ch + '</i>'; }).join('');
+  });
+})();
 
 /* Between 20:00 and 21:00 the session on offer is the live one. */
 if (!S.run) { var hr = new Date().getHours(); if (hr === 20) S.kind = 'live'; }
