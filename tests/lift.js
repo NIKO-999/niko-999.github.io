@@ -1873,6 +1873,7 @@ const freeze = (at) => `(() => {
   /* ── THEME: light and dark, and the accent on a wheel ── */
   {
     const c = await newCtx(PHONE);
+    await c.addInitScript('window.__lfInline = 1;');
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
     await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"bseen":{"v2":1,"v3":1}}'); })();`);
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
