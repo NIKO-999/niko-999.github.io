@@ -5432,19 +5432,20 @@ function lfRenderYou() {
     g.addEventListener('click', function (e) { S.goal = +e.currentTarget.dataset.g; lfSave(); lfRender(); });
     $('#lfGoal', gb).appendChild(g);
   }
-  if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
+  /* THE MUSCLE TARGETS ARE GOALS TOO: one place for everything you are aiming at */
+  gb.appendChild(el('<span class="lf-flab">Sets a week, per muscle</span>')); gb.appendChild(lfFocusBody());
   root.appendChild(lfFold('lfTargets', 'goals', 'Goals', '', function (bd) { bd.appendChild(gb); }, true));
-  root.appendChild(lfCustomise());
-  root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
+  /* EVERYTHING ABOUT HOW YOU LOOK IS ONE FOLD: the colour, the mode, your title, flair and frame */
+  root.appendChild(lfAppearance());
   root.appendChild(lfBadgeCard());
   root.appendChild(lfMedalCard());
   if (TROPHY_CASE) root.appendChild(lfRecordCard());
-  root.appendChild(lfFocusCard());
   var all = windowStats(new Date(2000, 0, 1), today());
   var t = el('<div class="lf-card"><div class="lf-lab">All time</div></div>');
   t.appendChild(lfSum([[all.wo, 'workouts'], [all.sets, 'sets'], [fmtBig(toDisp(all.vol)), S.unit]]));
   root.appendChild(t);
-  var bk = el('<div class="lf-card"><div class="lf-lab" style="margin-bottom:10px">Backup</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfCopy">Copy a backup</button><button type="button" class="lf-btn" style="flex:1" id="lfRestore">Restore</button></div></div>');
+  /* SETTINGS HOLDS THE REST, IN ORDER: how it behaves, then your data, then Health */
+  var bk = el('<div><span class="lf-flab">Backup</span><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfCopy">Copy a backup</button><button type="button" class="lf-btn" style="flex:1" id="lfRestore">Restore</button></div></div>');
   $('#lfCopy', bk).addEventListener('click', lfCopy);
   $('#lfRestore', bk).addEventListener('click', lfRestore);
   /* in the app: bring it over; on the web: send it. A copy that has moved says so, and can be taken back */
@@ -5455,8 +5456,9 @@ function lfRenderYou() {
   if (LF_NATIVE) mvb.addEventListener('click', lfMoveIn);
   else if (lfMoved()) $('#lfMoveBack', bk).addEventListener('click', function () { try { localStorage.removeItem(LF_MV); } catch (e) {} lfRender(); if (typeof frPushNow === 'function') frPushNow(); });
   else mvb.addEventListener('click', lfMoveOut);
-  root.appendChild(bk);
-  var hk = lfHealthCard(); if (hk) root.appendChild(hk);
+  c.appendChild(bk);
+  var hk = lfHealthCard(); if (hk) { hk.classList.remove('lf-card'); hk.style.marginTop = '4px'; $('.lf-lab', hk).className = 'lf-flab'; c.appendChild(hk); }
+  root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
 }
 /* A CARD THAT FOLDS: its title is a button inside the heading, it says
    whether it is open, and it remembers per card. Shut until opened — a
@@ -5475,30 +5477,33 @@ function lfFoldSet(k, v) { lfFolds[k] = v ? 1 : 0; }
    the app owns its strength, so every point on the ring is a colour the
    check marks, the lit days and the buttons can carry on both faces. */
 /* CUSTOMISE has a place of its own on You, so nobody has to go looking in Settings for it: how you look to your friends (your title, your flair, your frame, the badges you show), shown as it will be seen, and the theme right under it. */
-function lfCustomise() {
+function lfLookBody() {
+  var bd = el('<div></div>');
+  bd.appendChild(el('<div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div>'));
+  var rows = el('<div class="lf-cu-r"></div>'); bd.appendChild(rows);
+  function preview() {
+    var pv = $('#lfCuPv', bd), nm = $('b', pv), ti = $('.fr-ti', pv), st = lfRkSt(); st.ac = lfAccent();
+    nm.textContent = (FRS && FRS.name) || 'You'; lfNameOn(nm, st);
+    ti.textContent = ''; var te = st.ti && lfRkHas('ti', st.ti) ? lfTitleEl(st.ti) : null;
+    if (te && !te.classList.contains('tt-eye')) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti) && !te) ti.textContent = lfRkName('ti', st.ti);
+    ti.hidden = !ti.firstChild;
+  }
+  rows.appendChild(lfRkRows(preview)); preview();
+  return bd;
+}
+/* APPEARANCE is one place for all of it: how you look to your friends (your title, flair, frame and the badges you show, as they will be seen) and the colour, the mode and the earned colours under it. */
+function lfAppearance() {
   var w = el('<section class="lf-cu" id="lfCustom"></section>');
-  var tid = S.ti === 'none' ? '' : lfRkTitle(lfRkCtx());
-  w.appendChild(lfFold('lfCuF', 'cu', 'Customise', tid ? lfRkName('ti', tid) : 'No title', function (bd) {
-    bd.appendChild(el('<div class="lf-cu-pv" id="lfCuPv"><b></b><span class="fr-ti"></span></div>'));
-    var rows = el('<div class="lf-cu-r"></div>'); bd.appendChild(rows);
-    function preview() {
-      var pv = $('#lfCuPv', bd), nm = $('b', pv), ti = $('.fr-ti', pv), st = lfRkSt(); st.ac = lfAccent();
-      nm.textContent = (FRS && FRS.name) || 'You'; lfNameOn(nm, st);
-      ti.textContent = ''; var te = st.ti && lfRkHas('ti', st.ti) ? lfTitleEl(st.ti) : null;
-      if (te && !te.classList.contains('tt-eye')) ti.appendChild(te); else if (st.ti && lfRkHas('ti', st.ti) && !te) ti.textContent = lfRkName('ti', st.ti);
-      ti.hidden = !ti.firstChild;
-      var cur = S.ti === 'none' ? '' : lfRkTitle(lfRkCtx()), hd = $('#lfCuF .lf-fh .lf-num'); if (hd) hd.textContent = cur ? lfRkName('ti', cur) : 'No title';
-    }
-    rows.appendChild(lfRkRows(preview)); preview();
+  w.appendChild(lfFold('lfTheme', 'thm', 'Appearance', lfAccName(lfAccent()), function (bd) {
+    bd.appendChild(lfLookBody());
+    bd.appendChild(lfThemeBody());
   }));
-  w.appendChild(lfThemeCard());
   return w;
 }
-function lfThemeCard() {
-  var h = lfAccent();
-  return lfFold('lfTheme', 'thm', 'Theme', lfAccName(h), function (bd) {
-    var c = el('<div><span class="lf-flab" style="margin-top:0">Appearance</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
-      + '<span class="lf-flab">Accent</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span><i class="lf-wh-nk"></i></div>'
+function lfThemeBody() {
+  {
+    var c = el('<div><span class="lf-flab" style="margin-top:0">Mode</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
+      + '<span class="lf-flab">Colour</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span><i class="lf-wh-nk"></i></div>'
       + '<p class="lf-wh-cap" id="lfWhCap"></p>'
       + '<span class="lf-flab">Earned colours</span><div class="lf-thg" id="lfThemes"></div>'
       + '<button type="button" class="lf-btn is-full" id="lfAccReset" style="margin-top:12px">Back to cream</button></div>');
@@ -5551,8 +5556,15 @@ function lfThemeCard() {
     });
     rs.addEventListener('click', function () { lfAccentSet(null, true); lfRender(); });
     show(lfAccent());
-    bd.appendChild(c);
-  });
+    return c;
+  }
+}
+/* THE COLOUR, ASKED FOR THE MOMENT YOU TURN FRIENDS ON: everyone starts on the same colour, and the wheel is how they stop. */
+function lfColourSheet() {
+  var done = el('<button type="button" class="lf-btn is-ink is-full" id="lfColDone">Done</button>');
+  var s = lfSheet({ title: 'Pick your colour', body: lfThemeBody(), foot: [done] });
+  done.addEventListener('click', function () { s.close(true); });
+  return s;
 }
 function lfFold(id, key, title, side, fill, dflt) {
   var c = el('<div class="lf-card lf-fold"><h3 class="lf-fh"><button type="button" class="lf-hd"><span class="lf-lab"></span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3><div class="lf-fb"></div></div>');
@@ -5567,8 +5579,9 @@ function lfFold(id, key, title, side, fill, dflt) {
   set(key in lfFolds ? !!lfFolds[key] : !!dflt);
   return c;
 }
-function lfFocusCard() {
-  return lfFold('lfFocus', 'foc', 'Focus', 'sets a week', function (bd) {
+function lfFocusBody() {
+  var bd = el('<div id="lfFocus"></div>');
+  {
     var list = el('<div class="lf-list"></div>'); bd.appendChild(list);
     lfTargets().forEach(function (t) {
       var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><em class="lf-num"></em>' + IC.chev + '</button>');
@@ -5582,7 +5595,8 @@ function lfFocusCard() {
     if (S.focus.length >= MUSCLES.length) add.disabled = true;
     add.addEventListener('click', function () { lfFocusSheet(null); });
     bd.appendChild(add);
-  });
+  }
+  return bd;
 }
 function lfFocusSheet(m) {
   var f = m ? S.focus.filter(function (x) { return x.m === m; })[0] : null;
@@ -6086,7 +6100,7 @@ function frTurnOn(name, btn) {
       if (r.st === 403 && ++tries < 4) return claim();
       if (r.st !== 200) throw new Error(r.st);
       FRS.on = true; FRS.name = name; frSave(); frSig = '';
-      lfToast('Friends is on'); lfRender(); frAddHost();
+      lfToast('Friends is on'); lfRender(); frAddHost(); lfColourSheet();
     }).catch(function () { FRS.code = ''; FRS.key = ''; btn.disabled = false; lfToast('Could not reach the server — try again'); });
   })();
 }
@@ -7524,6 +7538,7 @@ function frWoSheet(w, f) {
 function frAddSheet() {
   var b = el('<div><label class="lf-flab" for="frCode" style="margin-top:0">Their friend code</label><input class="lf-field lf-num" id="frCode" maxlength="9" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABCD2345" /><p class="lf-lab fr-err" hidden></p></div>');
   var go = el('<button type="button" class="lf-btn is-ink is-full">Add</button>');
+  b.insertBefore(frCodeRow(), b.firstChild);
   var s = lfSheet({ title: 'Add a friend', body: b, foot: [go] });
   var inp = $('#frCode', b), err = $('.fr-err', b);
   go.addEventListener('click', function () {
@@ -7536,8 +7551,7 @@ function frAddSheet() {
   });
 }
 
-/* YOUR CODE LIVES IN SETTINGS: the code, share, and your name and turning
-   off behind a press. You set those once, so they are not on the tab. */
+/* YOUR CODE LIVES IN THE ADD-A-FRIEND SHEET, where you hand it over: the code, share, and your name and turning off behind a press. */
 function frCodeRow() {
   var code = el('<div class="fr-me" id="frMe"><div class="fr-me-t"><span>Your code</span><b class="fr-code lf-num"></b></div>'
     + '<button type="button" class="fr-ib" id="frShare" aria-label="Share your code"><svg class="lf-ic" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M6 12v7h12v-7"/></svg></button>'
