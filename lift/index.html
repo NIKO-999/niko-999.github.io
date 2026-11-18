@@ -382,6 +382,11 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-field[type="date"]::-webkit-date-and-time-value, .lf-field[type="time"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
 .lf-row > label { min-width: 0; }
 .lf-fh { margin: 0; font: inherit; }
+.lf-force { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: grid; place-items: center; padding: 28px; }
+.lf-force-c { max-width: 340px; width: 100%; text-align: center; display: grid; gap: 12px; }
+.lf-force-c b { font-size: 22px; font-weight: 700; }
+.lf-force-c p { margin: 0 0 8px; color: var(--dim); font-size: 15px; line-height: 1.35; }
+.lf-force-c a { display: flex; align-items: center; justify-content: center; }
 .lf-rowl em { font-style: normal; color: var(--dim); }
 .lf-rowl b { font-weight: 600; }
 .lf-menu { padding-top: 4px; padding-bottom: 4px; }
@@ -5782,8 +5787,27 @@ function lfPlugin() {
 }
 var LF_WGT = lfPlugin(), lfWgLast = '', lfWgT = 0, lfWRest = 0;
 /* WHAT THIS BUILD CAN DO. Health needs a capability the build is signed with, and a Health call without it crashes the app, so Health is offered only once the build says it has it. Until the answer arrives, or if there is none, nothing is offered. */
-var lfCaps = { health: false, group: false };
-if (LF_WGT && LF_WGT.caps) { try { LF_WGT.caps().then(function (r) { if (r) { lfCaps = { health: !!r.health, group: !!r.group }; if (typeof view !== 'undefined' && view === 'you' && typeof lfRender === 'function') lfRender(); } }, function () {}); } catch (e) {} }
+var lfCaps = { health: false, group: false, version: '' };
+/* AN OUT-OF-DATE APP CAN BE MADE TO UPDATE. The installed app asks for the lowest version it may run as, on opening and on coming back to it; below that it shows one screen and nothing else works. The number is a file in this folder (min.json), so raising it is a one-line change and not a release. The web copy is always current and never asked; with no signal nothing is blocked. */
+var LF_MIN_URL = 'https://niko-999.github.io/lift/min.json';
+function lfVerCmp(a, b) { var x = String(a).split('.'), y = String(b).split('.'); for (var i = 0; i < 4; i++) { var p = parseInt(x[i] || 0, 10) || 0, q = parseInt(y[i] || 0, 10) || 0; if (p !== q) return p < q ? -1 : 1; } return 0; }
+function lfForceUpdate(url) {
+  if (document.getElementById('lfForce')) return;
+  var o = el('<div class="lf-force" id="lfForce" role="alertdialog" aria-modal="true" aria-labelledby="lfForceT"><div class="lf-force-c"><b id="lfForceT">Update Lift</b><p>This version is out of date. Update to keep going.</p><a class="lf-btn is-log is-full" id="lfForceGo" rel="noopener">Update from the App Store</a></div></div>');
+  var a = $('#lfForceGo', o); /* the link comes from the file if it is the App Store, and from the app's own address otherwise: never a link anyone else can set */
+  a.href = /^https:\/\/apps\.apple\.com\//.test(url || '') ? url : LF_APP_URL;
+  document.body.appendChild(o); document.body.style.overflow = 'hidden';
+}
+function lfVersionCheck() {
+  if (!lfCaps.version) return;
+  try {
+    fetch(LF_MIN_URL + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+      if (j && typeof j.min === 'string' && lfVerCmp(lfCaps.version, j.min) < 0) lfForceUpdate(j.url);
+    }).catch(function () {});
+  } catch (e) {}
+}
+document.addEventListener('visibilitychange', function () { if (!document.hidden) lfVersionCheck(); });
+if (LF_WGT && LF_WGT.caps) { try { LF_WGT.caps().then(function (r) { if (r) { lfCaps = { health: !!r.health, group: !!r.group, version: typeof r.version === 'string' ? r.version : '' }; lfVersionCheck(); if (typeof view !== 'undefined' && view === 'you' && typeof lfRender === 'function') lfRender(); } }, function () {}); } catch (e) {} }
 /* what the Watch sends back is heard from here, once the plugin is known */
 if (LF_WGT && LF_WGT.addListener) { try { LF_WGT.addListener('watchMsg', function (m) { lfWatchMsg(m); }); } catch (e) {} }
 /* ── APPLE HEALTH, in the iPhone app only: a finished workout is saved to Health as a strength session (its start, its end and its name, never a set or a weight), and your latest body weight can be read back. Both are switched on by you, here, and the first press is when iPhone asks. */
