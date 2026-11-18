@@ -2616,11 +2616,11 @@ const freeze = (at) => `(() => {
   {
     const { c, page } = await ctx({ unit: 'kg', bw: [{ d: '2026-10-29', kg: 80 }] });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    const open = await page.getAttribute('#lfGoals h3 > button', 'aria-expanded');
+    const open = await page.getAttribute('#lfTargets h3 > button', 'aria-expanded');
     ok('Goals is open when you arrive', open === 'true');
-    const ys = await page.evaluate(() => ['lfGoals', 'lfCuF'].map((id) => document.getElementById(id).getBoundingClientRect().top));
+    const ys = await page.evaluate(() => ['lfTargets', 'lfCuF'].map((id) => document.getElementById(id).getBoundingClientRect().top));
     ok('and sits above Customise', ys[0] < ys[1], ys);
-    await page.locator('#lfGoals #lfGoal button').nth(2).click(); await settle(page);
+    await page.locator('#lfTargets #lfGoal button').nth(2).click(); await settle(page);
     ok('the weekly goal is set from it', (await store(page)).goal === 3);
     await page.fill('#lfGoalBw', '75'); await page.press('#lfGoalBw', 'Tab'); await settle(page);
     ok('the body weight goal is set from it', (await store(page)).bwGoal === 75);

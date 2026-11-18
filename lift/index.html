@@ -5444,7 +5444,7 @@ function lfRenderYou() {
     $('#lfGoal', gb).appendChild(g);
   }
   if (FRS.on) { c.appendChild(el('<span class="lf-flab">Friends</span>')); c.appendChild(frCodeRow()); }
-  root.appendChild(lfFold('lfGoals', 'goals', 'Goals', '', function (bd) { bd.appendChild(gb); }, true));
+  root.appendChild(lfFold('lfTargets', 'goals', 'Goals', '', function (bd) { bd.appendChild(gb); }, true));
   root.appendChild(lfCustomise());
   root.appendChild(lfFold('lfSet', 'set', 'Settings', '', function (bd) { bd.appendChild(c); }));
   root.appendChild(lfBadgeCard());
