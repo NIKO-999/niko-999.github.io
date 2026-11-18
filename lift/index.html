@@ -243,6 +243,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-set input.is-cap { animation: lf-capn .35s; }
 @keyframes lf-capn { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .lf-pct { font-size: 11px; font-weight: 600; color: var(--good); }
+.lf-pct b { display: block; font-size: 15px; font-weight: 700; text-align: right; line-height: 1.1; }
+.lf-pct small { display: block; font-size: 9.5px; font-weight: 500; color: var(--dim); text-align: right; white-space: nowrap; }
 /* goal hit: the screen goes dark, the ring closes, the sky lights up */
 .lf-gol { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; overflow: hidden; cursor: pointer;
   background: radial-gradient(120% 80% at 50% 45%, color-mix(in srgb, var(--log) 22%, #000 78%), rgba(0,0,0,.94) 70%); animation: lf-ghin .35s var(--ease) backwards; }
@@ -3146,7 +3148,7 @@ function lfWeekCard(inSheet) {
   $('.lf-big', c).innerHTML = tot + '<small>reps</small>';
   /* AGAINST THE LAST TIME YOU DID THAT WORKOUT, not against last week: a week is a different number of sessions each time, and Pull against Legs says nothing. */
   var lw = woSorted().filter(function (w) { return w.d <= t; }).pop(), pw = lw && woSorted().filter(function (w) { return w.d < lw.d && w.n === lw.n; }).pop();
-  if (pw && woReps(pw) > 0 && woReps(lw) > 0) { var p = Math.round((woReps(lw) - woReps(pw)) / woReps(pw) * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '% vs last ' + lw.n; $('.lf-pct', c).dataset.vs = lw.n; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
+  if (pw && woReps(pw) > 0 && woReps(lw) > 0) { var p = Math.round((woReps(lw) - woReps(pw)) / woReps(pw) * 100); $('.lf-pct', c).innerHTML = '<b></b><small>vs last time</small>'; $('.lf-pct b', c).textContent = (p >= 0 ? '+' : '') + p + '%'; $('.lf-pct', c).dataset.vs = lw.n; $('.lf-pct', c).setAttribute('aria-label', (p >= 0 ? '+' : '') + p + '% against the last ' + lw.n); if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
   var max = Math.max.apply(null, reps.map(function (x) { return x.r; }).concat([1]));
   var bars = $('.lf-bars', c);
   reps.forEach(function (x, i) {

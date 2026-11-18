@@ -2591,7 +2591,7 @@ const freeze = (at) => `(() => {
     await a.c.close();
     const b = await ctx({ unit: 'kg', wo: [W('c1', '2026-10-20', null, 10), W('c2', '2026-10-28', null, 11)] });
     const pct = (await b.page.textContent('#lfWeek .lf-pct')).trim();
-    ok('the reps are measured against the last time that workout was done', pct === '+10% vs last Push', pct);
+    ok('the reps are measured against the last time that workout was done', /^\+10%\s*vs last time$/.test(pct) && (await b.page.getAttribute('#lfWeek .lf-pct', 'data-vs')) === 'Push', pct);
     await b.c.close();
     const g = await ctx({ unit: 'kg' });
     await g.page.click('#lfGo'); await settle(g.page);
