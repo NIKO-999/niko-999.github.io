@@ -183,6 +183,19 @@ td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left
 .yr i.is-now { outline: 1px solid var(--dim); outline-offset: 1px; }
 
 /* ── log ── */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; padding: 2px 0 18px; }
+.sp-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 13px; color: var(--dim); }
+.sp-h b { color: var(--ink); font-weight: 600; }
+.sp-h small { color: var(--quiet); font-weight: 400; }
+.sp-x { font-size: 12px; color: var(--dim); margin-top: 6px; }
+.sp-w { grid-column: 1 / -1; margin-top: 0; color: var(--quiet); }
+/* days at work: seven chips, white when on */
+.wk { display: flex; gap: 6px; margin-top: 8px; }
+.wk label { flex: 1; position: relative; }
+.wk input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.wk span { display: block; text-align: center; height: 38px; line-height: 38px; border-radius: 10px; background: #161616; color: var(--dim); font-size: 13px; }
+.wk input:checked + span { background: var(--ink); color: #000; font-weight: 700; }
+.wk input:focus-visible + span { outline: 2px solid var(--dim); outline-offset: 2px; }
 .log { margin-top: var(--gap); }
 .log-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .link { color: var(--dim); font-size: 13px; padding: 8px 10px; border-radius: 10px; }
@@ -370,7 +383,13 @@ var $ = function (id) { return document.getElementById(id); };
    starts where the last recorded day ended, so on an ordinary day the
    only thing typed is where it ended. `run` is the session on the clock,
    so a reload or a closed laptop picks it back up. A damaged entry costs
-   itself and never the rest. */
+   itself and never the rest.
+
+   The two checkpoints are read off the same counter. `m` is the last
+   number typed in "sitting at" before 12:00 and `e` the last typed
+   before 18:00, so the morning is m less the start and the afternoon
+   is e less m. Nothing extra is asked: it is when you type that says
+   where you were. */
 function numOrNull(v) { return v !== undefined && v !== null && v !== '' && isFinite(+v) && +v >= 0 && +v < 1e9 ? Math.round(+v) : null; }
 function load() {
   var o = null;
@@ -389,18 +408,23 @@ function load() {
   var d = {};
   if (o.d && typeof o.d === 'object') Object.keys(o.d).forEach(function (k) {
     if (!/^\d{4}-\d\d-\d\d$/.test(k) || !o.d[k] || typeof o.d[k] !== 'object') return;
-    var a = numOrNull(o.d[k].a), b = numOrNull(o.d[k].b), r = {};
+    var a = numOrNull(o.d[k].a), b = numOrNull(o.d[k].b), m = numOrNull(o.d[k].m), e = numOrNull(o.d[k].e), r = {};
     if (a !== null) r.a = a;
     if (b !== null) r.b = b;
+    if (m !== null) r.m = m;
+    if (e !== null) r.e = e;
     if (a !== null || b !== null) d[k] = r;
   });
   var g = Object.assign({}, GOAL0);
   if (o.g) Object.keys(GOAL0).forEach(function (k) { var v = +o.g[k]; if (v > 0) g[k] = Math.round(v); });
   var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a, t: typeof o.run.t === 'string' ? o.run.t.slice(0, 20000) : '',
     p: isFinite(o.run.p) && +o.run.p > 0 ? Math.round(+o.run.p) : 0, pa: isFinite(o.run.pa) && +o.run.pa >= +o.run.a ? +o.run.pa : null } : null;
+  /* the weekdays spent at work, as the numbers Date gives them: Sunday is
+     0. Saturday and Sunday until told otherwise; none is a fair answer */
+  var work = Array.isArray(o.work) ? o.work.map(Number).filter(function (x, i, arr) { return x >= 0 && x <= 6 && x % 1 === 0 && arr.indexOf(x) === i; }) : [6, 0];
   var rm = o.rem || {};
   var rem = { on: rm.on !== false, at: /^\d\d:\d\d$/.test(rm.at) ? rm.at : '20:00', last: typeof rm.last === 'string' ? rm.last : '' };
-  return { s: s, d: d, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt', rem: rem,
+  return { s: s, d: d, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt', rem: rem, work: work,
     rev: typeof o.rev === 'string' ? o.rev : '', cel: typeof o.cel === 'string' ? o.cel : '' };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -514,11 +538,37 @@ function paintCounter() {
   if (document.activeElement !== A) A.value = r.a !== undefined ? r.a : '';
   if (document.activeElement !== B) B.value = r.b !== undefined ? r.b : '';
 }
-function setCounter(k, which, val) {
+function setCounter(k, which, val, t) {
   var r = S.d[k] || (S.d[k] = {}), v = numOrNull(val);
-  if (v === null) delete r[which]; else r[which] = v;
+  if (v === null) { delete r[which]; if (which === 'b') { delete r.m; delete r.e; } }
+  else {
+    r[which] = v;
+    /* typed before noon it is where the morning stood, and still where the
+       afternoon stands until typed again; typed in the afternoon it moves
+       only the afternoon; typed after six it moves neither */
+    if (which === 'b' && t !== undefined) { var h = new Date(t).getHours(); if (h < 12) { r.m = v; r.e = v; } else if (h < 18) r.e = v; }
+  }
   if (r.a === undefined && r.b === undefined) delete S.d[k];
   save();
+}
+/* A past day, all four numbers at once. */
+function setDay(k, f) {
+  var r = {};
+  ['a', 'm', 'e', 'b'].forEach(function (w) { var v = numOrNull(f[w]); if (v !== null) r[w] = v; });
+  if (r.a === undefined && r.b === undefined) delete S.d[k]; else S.d[k] = r;
+  save();
+}
+/* ── twenty before noon, twenty before six ──
+   Counted from the counter as it stood at each time. A trade logged ahead
+   of schedule counts toward the next block, so forty by eleven is both
+   done. A day at work (Saturday and Sunday unless told otherwise) has no
+   checkpoints: the target is the day's, whenever it is met. */
+function isWork(t) { return S.work.indexOf(new Date(t).getDay()) >= 0; }
+function splitOf(t) {
+  var r = S.d[isoDay(t)] || {}, st = startOf(t), g1 = Math.ceil(S.g.bt / 2), g2 = S.g.bt - g1;
+  var c12 = r.m !== undefined && st !== null ? Math.max(0, r.m - st) : 0;
+  var c18 = r.e !== undefined && st !== null ? Math.max(c12, r.e - st) : c12;
+  return { g1: g1, g2: g2, c12: c12, c18: c18, am: Math.min(c12, g1), pm: Math.max(0, Math.min(c18 - g1, g2)) };
 }
 
 /* ── today ── */
@@ -528,13 +578,28 @@ function row(name, note, val, valNote, frac, extra) {
     + '<div class="bar"><i style="width:' + Math.round(Math.min(1, frac) * 100) + '%"></i></div>'
     + (extra ? '<div class="row-x num">' + extra + '</div>' : '') + '</div>';
 }
+function block(label, have, goal, open) {
+  var left = goal - have;
+  return '<div><div class="sp-h"><span>' + label + '</span><b class="num">' + have + ' <small>/ ' + goal + '</small></b></div>'
+    + '<div class="bar"><i style="width:' + Math.round(Math.min(1, have / goal) * 100) + '%"></i></div>'
+    + '<div class="sp-x">' + (left <= 0 ? 'Done' : left + (open ? ' to go' : ' short')) + '</div></div>';
+}
 function paintToday() {
-  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY);
-  var bt = dayTrades(d0), ms = btMs(d0, d0 + DAY);
+  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY), hr = new Date(now).getHours();
+  var bt = dayTrades(d0), ms = btMs(d0, d0 + DAY), work = isWork(now);
   var lv = mins(today, 'live'), cn = mins(today, 'cnt');
   var clockNote = ms ? ' · ' + dur(ms) + ' on the clock' : '';
+  var sp = '';
+  if (!work) {
+    var q = splitOf(d0), r = S.d[isoDay(d0)];
+    sp = '<div class="split">' + block('Before 12:00', q.am, q.g1, hr < 12) + block('By 18:00', q.pm, q.g2, hr < 18);
+    /* what was typed only after six, so it is not mistaken for missing */
+    if (r && r.b !== undefined && bt > q.c18) sp += '<div class="sp-x sp-w">' + (bt - q.c18) + ' logged after 18:00</div>';
+    sp += '</div>';
+  }
   $('svRows').innerHTML =
-    row('Backtesting', '', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt, (bt >= S.g.bt ? 'Target hit' : fmt(S.g.bt - bt) + ' to go') + clockNote)
+    row('Backtesting', work ? 'Work day' : '', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt, (bt >= S.g.bt ? 'Target hit' : fmt(S.g.bt - bt) + ' to go') + clockNote)
+    + sp
     + row('Live charts', '20:00–21:00 New York', dur(lv * 6e4), '/ ' + dur(S.g.live * 6e4), lv / S.g.live, '')
     + row('Content + journal', '', dur(cn * 6e4), '/ ' + dur(S.g.cnt * 6e4), cn / S.g.cnt, '');
   var p = pace();
@@ -895,16 +960,18 @@ function addPast() {
 
 /* ── a day's counter, for a day you forgot ── */
 function dayEdit(k) {
-  var r = S.d[k] || {}, pe = prevEnd(isoMs(k));
-  dialog('<h2>' + esc(dayName(isoMs(k))) + '</h2><p>Where the counter was, and where it ended.</p>'
-    + '<div class="two"><label class="fld"><span>Started the day at</span><input class="in num" data-f="a" type="number" min="0" inputmode="numeric" placeholder="' + (pe !== null ? pe : 0) + '" value="' + (r.a !== undefined ? r.a : '') + '" /></label>'
-    + '<label class="fld"><span>Ended at</span><input class="in num" data-f="b" type="number" min="0" inputmode="numeric" value="' + (r.b !== undefined ? r.b : '') + '" /></label></div>'
+  var r = S.d[k] || {}, pe = prevEnd(isoMs(k)), v = function (w) { return r[w] !== undefined ? r[w] : ''; };
+  var inp = function (w, label, ph) { return '<label class="fld"><span>' + label + '</span><input class="in num" data-f="' + w + '" type="number" min="0" inputmode="numeric"' + (ph !== undefined ? ' placeholder="' + ph + '"' : '') + ' value="' + v(w) + '" /></label>'; };
+  dialog('<h2>' + esc(dayName(isoMs(k))) + '</h2><p>Where the counter was through the day.</p>'
+    + '<div class="two">' + inp('a', 'Started the day at', pe !== null ? pe : 0) + inp('m', 'At 12:00') + '</div>'
+    + '<div class="two">' + inp('e', 'At 18:00') + inp('b', 'Ended at') + '</div>'
     + '<div class="acts"><button class="btn" data-a="x">Cancel</button><button class="btn pri" data-a="save">Save</button></div>', function (d, close) {
-    var f = d.querySelector('[data-f="b"]'); f.focus();
+    d.querySelector('[data-f="b"]').focus();
     d.querySelector('[data-a="x"]').addEventListener('click', close);
     function done() {
-      var wk = weekStart(isoMs(k)), before = tradesIn(wk, addDays(wk, 7));
-      setCounter(k, 'a', d.querySelector('[data-f="a"]').value); setCounter(k, 'b', d.querySelector('[data-f="b"]').value);
+      var wk = weekStart(isoMs(k)), before = tradesIn(wk, addDays(wk, 7)), f = {};
+      ['a', 'm', 'e', 'b'].forEach(function (w) { f[w] = d.querySelector('[data-f="' + w + '"]').value; });
+      setDay(k, f);
       close(); paint(); crossed(wk, before);
     }
     d.querySelector('[data-a="save"]').addEventListener('click', done);
@@ -924,6 +991,10 @@ function settings() {
     + '<label class="fld"><span>Live minutes a day</span><input class="in num" data-g="live" type="number" min="1" value="' + S.g.live + '" /></label></div>'
     + '<div class="two"><label class="fld"><span>Live hours a week</span><input class="in num" data-g="wkLive" type="number" min="0.5" step="0.5" value="' + (S.g.wkLive / 60) + '" /></label>'
     + '<label class="fld"><span>Content minutes a day</span><input class="in num" data-g="cnt" type="number" min="1" value="' + S.g.cnt + '" /></label></div>'
+    + '<div class="fld"><span>Days at work: no morning and afternoon split</span></div>'
+    + '<div class="wk">' + [[1, 'Mon'], [2, 'Tue'], [3, 'Wed'], [4, 'Thu'], [5, 'Fri'], [6, 'Sat'], [0, 'Sun']].map(function (w) {
+      return '<label><input type="checkbox" data-w="' + w[0] + '"' + (S.work.indexOf(w[0]) >= 0 ? ' checked' : '') + ' /><span>' + w[1] + '</span></label>';
+    }).join('') + '</div>'
     + '<label class="chk"><input type="checkbox" id="svRemOn"' + (S.rem.on ? ' checked' : '') + ' /> Remind me to start live charts at</label>'
     + '<label class="fld"><input class="in num" id="svRemAt" type="time" value="' + S.rem.at + '" aria-label="Reminder time" /></label>'
     + '<div class="acts"><button class="btn" data-a="exp">Download backup</button><button class="btn" data-a="imp">Restore</button></div>'
@@ -938,6 +1009,7 @@ function settings() {
       var on = d.querySelector('#svRemOn').checked, at = d.querySelector('#svRemAt').value;
       if (/^\d\d:\d\d$/.test(at) && at !== S.rem.at) { S.rem.at = at; S.rem.last = ''; }
       S.rem.on = on;
+      S.work = Array.prototype.filter.call(d.querySelectorAll('[data-w]'), function (c) { return c.checked; }).map(function (c) { return +c.dataset.w; });
       /* asked on this press, which is a real gesture: the only honest moment */
       if (on && 'Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
       save(); close(); paint();
@@ -983,7 +1055,7 @@ var wkAtFocus = 0;
 [['svA', 'a'], ['svB', 'b']].forEach(function (p) {
   var el = $(p[0]);
   el.addEventListener('focus', function () { var w = weekStart(Date.now()); wkAtFocus = tradesIn(w, addDays(w, 7)); });
-  el.addEventListener('input', function () { setCounter(isoDay(Date.now()), p[1], el.value); paint(); });
+  el.addEventListener('input', function () { setCounter(isoDay(Date.now()), p[1], el.value, Date.now()); paint(); });
   el.addEventListener('change', function () { var w = weekStart(Date.now()); crossed(w, wkAtFocus); wkAtFocus = tradesIn(w, addDays(w, 7)); });
   el.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
 });

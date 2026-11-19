@@ -41,7 +41,15 @@ const SEED = {
     { i: 'f', k: 'bt', a: at(18, 8), b: at(18, 9) },
     { i: 'g', k: 'cnt', a: at(18, 9, 10), b: at(18, 9, 25) },
   ],
-  d: { '2026-11-15': { a: 1000, b: 1040 }, '2026-11-16': { b: 1080 }, '2026-11-17': { b: 1105 }, '2026-11-18': { b: 1125 } },
+  /* m and e are the counter as it was typed before noon and before six:
+     Sunday and Monday had twenty by noon and forty by six, Tuesday ten by
+     noon and twenty-five by six, and today twenty already at ten o'clock */
+  d: {
+    '2026-11-15': { a: 1000, b: 1040, m: 1020, e: 1040 },
+    '2026-11-16': { b: 1080, m: 1060, e: 1080 },
+    '2026-11-17': { b: 1105, m: 1090, e: 1105 },
+    '2026-11-18': { b: 1125, m: 1125, e: 1125 },
+  },
 };
 
 (async () => {
@@ -85,7 +93,7 @@ const SEED = {
     const off = await page.$eval('#svArc', (e) => [parseFloat(e.style.strokeDashoffset), parseFloat(e.style.strokeDasharray)]);
     ok('the ring is half full', Math.abs(off[0] / off[1] - 0.5) < 0.01, off);
     const rows = await txt(page, '#svRows');
-    ok('today counts volume only, with no morning or afternoon split', /20 to go/.test(rows) && !/morning|afternoon/i.test(rows), rows);
+    ok('today shows the two blocks the day is made of', /Before 12:00/.test(rows) && /By 18:00/.test(rows), rows);
     ok('content counts its fifteen minutes of thirty', /Content \+ journal15m\s*\/ 30m/.test(rows), rows);
     ok('the week reads 85 of 280', /^85\s*\/ 280$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
     ok('live this week reads 1h of 5h', /^1h\s*\/ 5h$/.test(await txt(page, '#svLv')), await txt(page, '#svLv'));
@@ -144,14 +152,67 @@ const SEED = {
     await e2.c.close();
   }
 
+  console.log('\nSVC — twenty before noon, twenty before six');
+  {
+    const blocks = (page) => page.$$eval('.split > div:not(.sp-w)', (e) => e.map((x) => x.textContent.replace(/\s+/g, ' ').trim()));
+    const { c, page } = await ctx(SEED);
+    let b = await blocks(page);
+    ok('at ten: the morning is done, the afternoon has twenty to go', b.length === 2 && /Before 12:00\s*20 \/ 20\s*Done/.test(b[0]) && /By 18:00\s*0 \/ 20\s*20 to go/.test(b[1]), b);
+    await page.fill('#svB', '1145');
+    b = await blocks(page);
+    ok('typing 1145 before noon: forty on the counter, both blocks done', /Done/.test(b[0]) && /20 \/ 20\s*Done/.test(b[1]), b);
+    const r = (await store(page)).d['2026-11-18'];
+    ok('what was typed before noon is both the noon number and the six o\'clock number', r.b === 1145 && r.m === 1145 && r.e === 1145, r);
+    await c.close();
+
+    const seed2 = Object.assign({}, SEED, { d: Object.assign({}, SEED.d, { '2026-11-18': { b: 1115, m: 1115, e: 1115 } }) });
+    const p2 = await ctx(seed2, '2026-11-18T14:00:00');
+    b = await blocks(p2.page);
+    ok('at two: ten by noon is ten short of twenty, and no longer on its way', /10 \/ 20\s*10 short/.test(b[0]) && /0 \/ 20\s*20 to go/.test(b[1]), b);
+    await p2.page.fill('#svB', '1135');
+    const r2 = (await store(p2.page)).d['2026-11-18'];
+    ok('typed in the afternoon it moves the six o\'clock number and leaves the noon one', r2.m === 1115 && r2.e === 1135, r2);
+    b = await blocks(p2.page);
+    ok('thirty by six: ten of the afternoon\'s twenty, still the morning\'s ten short', /10 short/.test(b[0]) && /10 \/ 20\s*10 to go/.test(b[1]), b);
+    await p2.c.close();
+
+    const p3 = await ctx(Object.assign({}, seed2, { d: Object.assign({}, seed2.d, { '2026-11-18': { b: 1135, m: 1115, e: 1135 } }) }), '2026-11-18T19:00:00');
+    await p3.page.fill('#svB', '1160');
+    const r3 = (await store(p3.page)).d['2026-11-18'];
+    ok('typed after six it moves neither checkpoint', r3.m === 1115 && r3.e === 1135 && r3.b === 1160, r3);
+    b = await blocks(p3.page);
+    ok('and the afternoon is judged at six: ten of twenty, ten short', /10 \/ 20\s*10 short/.test(b[1]), b);
+    const late = await p3.page.$('.sp-w') ? await txt(p3.page, '.sp-w') : 'none';
+    ok('what came after is said, not lost', /25 logged after 18:00/.test(late), late);
+    await p3.c.close();
+
+    const w = await ctx(SEED, '2026-11-21T10:00:00');
+    ok('on a Saturday, a work day, there is no split', (await w.page.$$('.split')).length === 0 && /Work day/.test(await txt(w.page, '#svRows')), await txt(w.page, '#svRows'));
+    ok('the day is still forty, whenever', /\/ 40/.test(await txt(w.page, '#svRows')));
+    await w.c.close();
+
+    const s1 = await ctx(SEED);
+    await s1.page.click('#svSet'); await s1.page.waitForSelector('.dlg');
+    const on = await s1.page.$$eval('[data-w]', (e) => e.filter((x) => x.checked).map((x) => +x.dataset.w).sort());
+    ok('Saturday and Sunday are the days at work until told otherwise', on.join() === '0,6', on);
+    await s1.page.check('[data-w="3"]'); await s1.page.uncheck('[data-w="0"]');
+    await s1.page.click('.dlg [data-a="save"]');
+    ok('Wednesday made a work day takes the split away at once', (await s1.page.$$('.split')).length === 0);
+    ok('and the choice is kept', (await store(s1.page)).work.slice().sort().join() === '3,6', (await store(s1.page)).work);
+    await s1.c.close();
+  }
+
   console.log('\nSVC — a day you forgot');
   {
     const { c, page } = await ctx(SEED);
     await page.click('button[data-day="2026-11-17"]'); await page.waitForSelector('.dlg');
     ok('a day header opens that day\'s counter', /Yesterday/.test(await txt(page, '.dlg h2')) && (await page.$eval('[data-f="b"]', (e) => e.value)) === '1105');
+    ok('with the noon and six o\'clock numbers too', (await page.$eval('[data-f="m"]', (e) => e.value)) === '1090' && (await page.$eval('[data-f="e"]', (e) => e.value)) === '1105');
+    await page.fill('[data-f="m"]', '1100');
     await page.fill('[data-f="b"]', '1110');
     await page.keyboard.press('Enter');
     await page.waitForSelector('.veil', { state: 'detached' });
+    ok('the noon number is saved too', (await store(page)).d['2026-11-17'].m === 1100);
     ok('the day recomputes: 1110 less 1080 is 30', (await store(page)).d['2026-11-17'].b === 1110 && /30 trades/.test(await txt(page, 'button[data-day="2026-11-17"]')), await txt(page, 'button[data-day="2026-11-17"]'));
     ok('and today starts where that day now ends: 1125 less 1110 is 15', (await txt(page, '#svBig')) === '15', await txt(page, '#svBig'));
     await c.close();
