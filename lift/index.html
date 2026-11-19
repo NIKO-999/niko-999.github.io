@@ -529,6 +529,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
 .lf-session .lf-sh-ft { flex-wrap: wrap; }
 .lf-session .lf-sh-ft > .lf-ss-rest { flex: 0 0 100%; }
+.lf-session .lf-sh-ft > #lfFinishBar { flex: 0 0 100%; min-height: 52px; }
 .lf-ss-rest { display: flex; align-items: center; gap: 12px; position: relative; padding: 2px 0 4px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .lf-rs-c { flex: none; min-width: 88px; font-size: 32px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: var(--ink); }
 .lf-rs-btn { margin-left: auto; flex: none; padding: 0 26px; min-height: 46px; }
@@ -3352,7 +3353,9 @@ function lfOpenSession() {
   var discard = el('<button type="button" class="lf-btn">Discard</button>');
   var finish = el('<button type="button" class="lf-btn is-log" id="lfFinish">Finish</button>');
   var endActs = el('<div class="lf-ss-end"></div>'); endActs.appendChild(discard); endActs.appendChild(finish); body.appendChild(endActs);
-  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest], cls: 'lf-session', title: 'Workout',
+  /* WHEN EVERY SET IS TICKED the rest clock gives its place to the one thing left to do: Finish workout. Add a set and the clock is back. */
+  var finBar = el('<button type="button" class="lf-btn is-log" id="lfFinishBar" style="display:none">Finish workout</button>');
+  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest, finBar], cls: 'lf-session', title: 'Workout',
     onClose: function () { sessSheet = null; clearInterval(tick); lfRender(); } });
   $('.lf-x', head).addEventListener('click', function () { sessSheet && sessSheet.close(); });
   discard.addEventListener('click', function () {
@@ -3361,6 +3364,7 @@ function lfOpenSession() {
     });
   });
   finish.addEventListener('click', lfFinish);
+  finBar.addEventListener('click', lfFinish);
   $('#lfRestBtn', rest).addEventListener('click', function () {
     if (!act) return;
     if (act.rest) { act.rest = 0; act.rang = 0; lfSaveAct(); if (LPU && S.ra) { try { lfPushPut([]).catch(function () {}); } catch (e) {} } lfTick(); return; }
@@ -3371,8 +3375,14 @@ function lfOpenSession() {
   clearInterval(tick);
   tick = setInterval(lfTick, 1000); lfTick();
 }
+function lfAllTicked() { return !!(act && act.x.length && act.x.every(function (e) { return e.sets.length && e.sets.every(function (q) { return q && q.ok; }); })); }
 function lfTick() {
   if (!act) return;
+  /* the last set ticked: there is nothing left to rest for, so a rest that began with it is put away, and the bar offers the finish */
+  var allDone = lfAllTicked();
+  if (allDone && act.rest) { act.rest = 0; act.rang = 0; lfSaveAct(); }
+  var rEl = $('#lfRest'), fBar = $('#lfFinishBar');
+  if (rEl) rEl.style.display = allDone ? 'none' : ''; if (fBar) fBar.style.display = allDone ? '' : 'none';
   var c = $('#lfClock'); if (c) c.textContent = fmtClock(Date.now() - act.s);
   var r = $('#lfRest');
   if (r) {

@@ -220,6 +220,16 @@ const freeze = (at) => `(() => {
   ok('End stops the rest and the button reads Start', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')) && (await page.textContent('#lfRestBtn')).trim() === 'Start');
   await page.click('#lfRestBtn'); await page.waitForTimeout(1300);
   ok('Start begins one by hand, and it reads End again', !(await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle'))) && (await page.textContent('#lfRestBtn')).trim() === 'End' && /^0:0\d$/.test((await page.textContent('#lfRest .lf-rs-c')).trim()));
+  /* EVERY SET TICKED: the bar offers Finish workout in place of the rest clock */
+  await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); a.rest = 0; a.x.forEach((e, i) => e.sets.forEach((q, k) => { if (!(i === a.x.length - 1 && k === e.sets.length - 1)) { q.w = 50; q.r = 8; q.ok = 1; } })); localStorage.setItem('lift.active.v1', JSON.stringify(a)); });
+  await page.reload(); await page.waitForTimeout(500); if (!(await page.locator('.lf-session').count())) await page.click('#lfLive'); await page.waitForTimeout(600);
+  ok('with one set left the rest clock is still there and there is no Finish workout', await page.locator('#lfFinishBar').isHidden() && await page.locator('#lfRest').isVisible());
+  const lastSet = page.locator('.lf-session .lf-ex').last().locator('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop)').last();
+  await lastSet.scrollIntoViewIfNeeded(); await lastSet.locator('input').nth(0).fill('40'); await lastSet.locator('input').nth(1).fill('10'); await lastSet.locator('.lf-chk').click(); await page.waitForTimeout(700);
+  ok('tick the last one and the bar is Finish workout, and the rest clock is gone', await page.locator('#lfFinishBar').isVisible() && await page.locator('#lfRest').isHidden() && (await page.textContent('#lfFinishBar')).trim() === 'Finish workout');
+  ok('and no rest was left running behind it', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.active.v1'))).rest === 0);
+  await page.locator('.lf-session .lf-ex').last().locator('.lf-add, button', { hasText: '+ Add set' }).first().click(); await page.waitForTimeout(500);
+  ok('add a set and the rest clock comes back', await page.locator('#lfFinishBar').isHidden() && await page.locator('#lfRest').isVisible());
   await set(0, 1).locator('input').nth(0).fill('60'); await set(0, 1).locator('input').nth(1).fill('7');
   await set(0, 1).locator('.lf-chk').click();
   await set(1, 0).locator('input').nth(0).fill('40'); await set(1, 0).locator('input').nth(1).fill('10');
