@@ -529,26 +529,22 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
 .lf-session .lf-sh-ft { flex-wrap: wrap; }
 .lf-session .lf-sh-ft > .lf-ss-rest { flex: 0 0 100%; }
-.lf-ss-rest { display: flex; align-items: center; gap: 16px; position: relative; padding: 2px 0 12px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.lf-rs-ring { position: relative; width: 84px; height: 84px; flex: none; }
-.lf-rs-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); display: block; }
-.lf-rs-ring circle { fill: none; stroke-width: 8; }
-.lf-rs-bg { stroke: var(--card3); }
-.lf-rs-fg { stroke: var(--ink); stroke-linecap: round; stroke-dasharray: 276.5; stroke-dashoffset: 276.5; transition: stroke-dashoffset 1s linear, stroke .3s; }
-.lf-rs-c { position: absolute; inset: 0; display: grid; place-items: center; font-size: 23px; font-weight: 800; letter-spacing: -.02em; color: var(--ink); }
+.lf-ss-rest { display: flex; align-items: center; gap: 12px; position: relative; padding: 2px 0 4px; font-size: 13px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.lf-rs-c { flex: none; min-width: 88px; font-size: 32px; font-weight: 800; letter-spacing: -.02em; line-height: 1; color: var(--ink); }
+.lf-rs-btn { margin-left: auto; flex: none; padding: 0 26px; min-height: 46px; }
+.lf-rs-t { font-size: 12px; line-height: 1.3; }
+.lf-ss-end { display: flex; gap: 10px; margin: 22px 0 8px; }
+.lf-ss-end .lf-btn { flex: 1; }
 .lf-rs-side { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.lf-rs-l { font-size: 17px; font-weight: 700; color: var(--ink); }
+.lf-rs-l { font-size: 14px; font-weight: 700; color: var(--ink); }
 .lf-ss-rest.is-idle .lf-rs-c, .lf-ss-rest.is-idle .lf-rs-l { color: var(--quiet); }
 .lf-ss-rest.is-ready .lf-rs-c, .lf-ss-rest.is-ready .lf-rs-l { color: var(--good); }
 .lf-ss-rest.is-over .lf-rs-c, .lf-ss-rest.is-over .lf-rs-l { color: var(--bad); }
-.lf-ss-rest.is-over .lf-rs-fg { stroke: var(--bad); filter: drop-shadow(0 0 7px color-mix(in srgb, var(--bad) 70%, transparent)); }
 .lf-ss-rest.is-over .lf-rs-c { animation: lf-over 1s ease-in-out infinite; }
 @keyframes lf-over { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.09); opacity: .55; } }
 [data-acc-g][data-acc-g] .lf-ss-rest.is-over :is(.lf-rs-c, .lf-rs-l) { color: var(--bad); background: none; -webkit-text-fill-color: var(--bad); }
-.lf-ss-rest.is-ready .lf-rs-fg { stroke: var(--log-s, var(--log)); filter: drop-shadow(0 0 6px color-mix(in srgb, var(--log) 60%, transparent)); }
 /* PAST THE TARGET THE RING GOES RED WITH THE TIMER. Over is also ready, and the ready rule above is the later of the two at the same weight, so the ring stayed in the accent while only the number went red. This one names both states, so it wins. */
-.lf-ss-rest.is-ready.is-over .lf-rs-fg { stroke: var(--bad); filter: drop-shadow(0 0 7px color-mix(in srgb, var(--bad) 70%, transparent)); }
-@media (prefers-reduced-motion: reduce) { .lf-rs-fg { transition: none; } .lf-ss-rest.is-over .lf-rs-c { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .lf-ss-rest.is-over .lf-rs-c { animation: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 .lf-grip { appearance: none; border: 0; background: none; width: 26px; height: 44px; margin: 0 -4px 0 -8px; display: grid; place-items: center; color: var(--quiet); cursor: grab; touch-action: none; flex: none; position: relative; }
@@ -3350,11 +3346,13 @@ function lfOpenSession() {
   /* THE REST CLOCK IS A RING: the time big in the middle, the ring filling
      toward the start of the target, and beside it how long is left. It
      lights in the accent the moment the rest is done. */
-  var rest = el('<div class="lf-ss-rest" id="lfRest" role="timer" aria-live="off"><div class="lf-rs-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="lf-rs-bg" cx="50" cy="50" r="44"/><circle class="lf-rs-fg" cx="50" cy="50" r="44"/></svg><b class="lf-rs-c lf-num"></b></div>'
-    + '<div class="lf-rs-side"><span class="lf-rs-l"></span><span class="lf-rs-t"></span></div></div>');
+  /* THE REST BAR IS THREE THINGS: the time, what it is doing, and one button. Start when no rest is running, End while one is. A rest still starts by itself when a set is ticked (not mid-superset); the button is for starting one by hand and for ending one early. Discard and Finish are not here any more: next to the rest clock, people pressed Finish thinking it ended the rest. */
+  var rest = el('<div class="lf-ss-rest" id="lfRest" role="timer" aria-live="off"><b class="lf-rs-c lf-num"></b>'
+    + '<div class="lf-rs-side"><span class="lf-rs-l"></span><span class="lf-rs-t"></span></div><button type="button" class="lf-btn lf-rs-btn" id="lfRestBtn"></button></div>');
   var discard = el('<button type="button" class="lf-btn">Discard</button>');
   var finish = el('<button type="button" class="lf-btn is-log" id="lfFinish">Finish</button>');
-  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest, discard, finish], cls: 'lf-session', title: 'Workout',
+  var endActs = el('<div class="lf-ss-end"></div>'); endActs.appendChild(discard); endActs.appendChild(finish); body.appendChild(endActs);
+  sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest], cls: 'lf-session', title: 'Workout',
     onClose: function () { sessSheet = null; clearInterval(tick); lfRender(); } });
   $('.lf-x', head).addEventListener('click', function () { sessSheet && sessSheet.close(); });
   discard.addEventListener('click', function () {
@@ -3363,6 +3361,12 @@ function lfOpenSession() {
     });
   });
   finish.addEventListener('click', lfFinish);
+  $('#lfRestBtn', rest).addEventListener('click', function () {
+    if (!act) return;
+    if (act.rest) { act.rest = 0; act.rang = 0; lfSaveAct(); if (LPU && S.ra) { try { lfPushPut([]).catch(function () {}); } catch (e) {} } lfTick(); return; }
+    var cur = (lfResumeEx && lfResumeEx()) || (act.x[0] && act.x[0].id); if (!cur) return;
+    act.rest = Date.now(); act.restEx = cur; act.rang = 0; lfRestPush(); lfLockStart(); lfSaveAct(); lfTick();
+  });
   lfCurGo = 2; lfPaintSession();
   clearInterval(tick);
   tick = setInterval(lfTick, 1000); lfTick();
@@ -3380,8 +3384,7 @@ function lfTick() {
     var over = !!(act.rest && rt && gone > (split ? hiMs : rt.lo * 1000 + 30000));
     $('.lf-rs-l', r).textContent = !act.rest ? 'Rest' : over ? 'Over' : ready ? 'Ready' : 'Resting';
     $('.lf-rs-t', r).textContent = !act.rest ? 'Starts when you tick a set' : rt ? (ready ? '' : fmtClock(Math.max(0, left) + 999) + ' to go · ') + 'target ' + lfRestTxt(rt) : '';
-    /* the ring's circumference is 2π·44 ≈ 276.5; full when the rest reaches the start of its target */
-    $('.lf-rs-fg', r).style.strokeDashoffset = (276.5 * (1 - (act.rest && rt ? Math.min(1, gone / (rt.lo * 1000)) : 0))).toFixed(1);
+    var rb = $('#lfRestBtn', r); if (rb) { rb.textContent = act.rest ? 'End' : 'Start'; rb.classList.toggle('is-log', !act.rest); rb.setAttribute('aria-label', act.rest ? 'End the rest' : 'Start a rest'); }
     r.classList.toggle('is-idle', !act.rest);
     r.classList.toggle('is-ready', ready);
     r.classList.toggle('is-over', over);

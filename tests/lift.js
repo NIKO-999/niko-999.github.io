@@ -208,12 +208,18 @@ const freeze = (at) => `(() => {
   await set(0, 0).locator('input').nth(0).fill('60'); await set(0, 0).locator('input').nth(1).fill('8');
   await set(0, 0).locator('.lf-chk').click();
   ok('logging a set turns its check cream', await set(0, 0).locator('.lf-chk span').evaluate((e) => getComputedStyle(e).backgroundColor) === 'rgb(225, 212, 194)');
-  ok('and starts the rest clock: a ring, the time in it, how long is left beside it', /^0:0\d$/.test((await page.textContent('#lfRest .lf-rs-c')).trim()) && /Resting/.test(await page.textContent('#lfRest')) && /to go · target 2–3 min/.test(await page.textContent('#lfRest')) && await page.locator('#lfRest .lf-rs-ring svg').count() === 1);
+  ok('and starts the rest clock: the time, and how long is left beside it', /^0:0\d$/.test((await page.textContent('#lfRest .lf-rs-c')).trim()) && /Resting/.test(await page.textContent('#lfRest')) && /to go · target 2–3 min/.test(await page.textContent('#lfRest')) && await page.locator('#lfRest .lf-rs-ring svg').count() === 1);
   ok('the rest clock is always on screen, even scrolled to the end of the workout', await page.evaluate(() => {
     const bd = document.querySelector('.lf-session .lf-sh-bd'); bd.scrollTop = bd.scrollHeight;
     const r = document.querySelector('#lfRest').getBoundingClientRect();
     return r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && !bd.contains(document.querySelector('#lfRest'));
   }));
+  ok('while a rest runs the bar has one button, End', (await page.textContent('#lfRestBtn')).trim() === 'End' && await page.locator('#lfRest .lf-rs-ring').count() === 0);
+  ok('Discard and Finish are at the very end of the workout, after the cardio, and not in the footer', await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), ft = document.querySelector('.lf-session .lf-sh-ft'), f = document.querySelector('#lfFinish'), c = document.querySelector('#lfCardio'); return !!(bd.contains(f) && !ft.contains(f) && (c.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_FOLLOWING) && [...bd.querySelectorAll('button')].filter((b) => /^(Discard|Finish)$/.test(b.textContent.trim())).length === 2); }));
+  await page.click('#lfRestBtn'); await page.waitForTimeout(300);
+  ok('End stops the rest and the button reads Start', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')) && (await page.textContent('#lfRestBtn')).trim() === 'Start');
+  await page.click('#lfRestBtn'); await page.waitForTimeout(1300);
+  ok('Start begins one by hand, and it reads End again', !(await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle'))) && (await page.textContent('#lfRestBtn')).trim() === 'End' && /^0:0\d$/.test((await page.textContent('#lfRest .lf-rs-c')).trim()));
   await set(0, 1).locator('input').nth(0).fill('60'); await set(0, 1).locator('input').nth(1).fill('7');
   await set(0, 1).locator('.lf-chk').click();
   await set(1, 0).locator('input').nth(0).fill('40'); await set(1, 0).locator('input').nth(1).fill('10');
@@ -552,7 +558,6 @@ const freeze = (at) => `(() => {
     ok('past the top of the range it says Over', /Over/.test(await page.textContent('#lfRest .lf-rs-l')) && await page.locator('#lfRest.is-over').count() === 1);
     const red = await page.evaluate(() => { const r = document.querySelector('#lfRest'), c = getComputedStyle(r.querySelector('.lf-rs-c')), bad = (() => { const d = document.createElement('i'); d.style.color = 'var(--bad)'; document.body.appendChild(d); const v = getComputedStyle(d).color; d.remove(); return v; })(); return { col: c.color, bad, anim: c.animationName, st: getComputedStyle(r.querySelector('.lf-rs-fg')).stroke }; });
     ok('in red, and the number pulses', red.col === red.bad && /lf-over/.test(red.anim), red);
-    ok('and the ring goes red with it, not only the number', await page.evaluate(() => { const r = document.querySelector('#lfRest'), d = document.createElement('i'); d.style.color = 'var(--bad)'; document.body.appendChild(d); const bad = getComputedStyle(d).color; d.remove(); return getComputedStyle(r.querySelector('.lf-rs-fg')).stroke === bad; }));
     ok('the second tone is heard once, and the first is not played late', await page.evaluate(() => window.lfRests2) === 1 && !(await page.evaluate(() => window.lfRests || 0)));
     const aSrc = await page.evaluate(() => 0), srcT = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
     ok('the two tones are different sounds, a rising chime and a low buzz', /function lfRing\(\)[^}]*660[^}]*880/.test(srcT) && /function lfRing2\(\)[^}]*'square'/.test(srcT));
