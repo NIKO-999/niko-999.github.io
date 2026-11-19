@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#000000" />
-<meta name="description" content="Structure. Volume. Consistency. Time every backtest, live and journal session." />
+<meta name="description" content="Structure. Volume. Consistency. Backtest volume, every day." />
 <title>SVC</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -32,7 +32,7 @@ body {
   font-size: 14px; line-height: 1.35; -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-button, input, select, textarea { font: inherit; color: inherit; }
+button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
 .num { font-variant-numeric: tabular-nums; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 40px 48px 64px; }
@@ -82,9 +82,11 @@ button { cursor: pointer; background: none; border: 0; }
 .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
 .ring circle { fill: none; stroke-width: 14; }
 .ring .tr { stroke: var(--track); }
-.ring .fl { stroke: var(--ink); stroke-linecap: round; transition: stroke-dashoffset .5s ease, filter .6s ease; }
+.ring .fl { stroke: var(--ink); stroke-linecap: round; transition: stroke-dashoffset .5s ease, filter .6s ease, opacity .3s; }
 .ring.is-run .fl { animation: sv-breathe 3.2s ease-in-out infinite; }
 .ring.is-hit .fl { filter: drop-shadow(0 0 7px rgba(255,255,255,.7)) drop-shadow(0 0 22px rgba(255,255,255,.35)); }
+.ring.is-paused .fl { opacity: .45; }
+.ring.is-paused .ring-big { color: var(--dim); }
 @keyframes sv-breathe { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); } 50% { filter: drop-shadow(0 0 9px rgba(255,255,255,.55)); } }
 @media (prefers-reduced-motion: reduce) { .ring.is-run .fl { animation: none; } }
 .ring-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -99,27 +101,19 @@ button { cursor: pointer; background: none; border: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-.kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 100%; padding: 4px; background: #111; border-radius: 14px; }
-.kind { height: 40px; border-radius: 10px; color: var(--dim); font-size: 13px; }
-.kind[aria-pressed="true"] { background: #262626; color: var(--ink); }
-.kind:disabled { cursor: default; }
-.go { width: 100%; height: 58px; border-radius: 16px; background: var(--ink); color: #000; font-size: 16px; font-weight: 800; letter-spacing: .02em; }
+/* start, and once running pause and end beside each other */
+.gobar { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+.gobar.is-two { grid-template-columns: 1fr 1fr; }
+.go { height: 58px; border-radius: 16px; background: var(--ink); color: #000; font-size: 16px; font-weight: 800; letter-spacing: .02em; }
 .go:hover { background: #e6e6e6; }
 .go.is-on { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
 .go.is-on:hover { background: #111; }
-/* Running, the one button becomes two: pause (or resume) beside end. */
-.gobar { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
-.gobar.is-two { grid-template-columns: 1fr 1fr; }
 .go.soft { background: #1a1a1a; color: var(--ink); }
 .go.soft:hover { background: #262626; }
-.ring.is-paused .fl { opacity: .45; }
-.ring.is-paused .ring-big { color: var(--dim); }
-td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 .hint-k { font-size: 12px; color: var(--quiet); }
 
 /* ── today ── */
 .today { display: flex; flex-direction: column; }
-.pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .today-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
 .row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 6px 16px; padding: 16px 0; border-top: 1px solid var(--edge); }
 .row:first-of-type { border-top: 0; }
@@ -130,15 +124,17 @@ td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left
 .bar { grid-column: 1 / -1; height: 4px; border-radius: 4px; background: var(--track); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--ink); border-radius: 4px; }
 .row-x { grid-column: 1 / -1; color: var(--dim); font-size: 12px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; padding: 6px 0 22px; }
+.sp-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 13px; color: var(--dim); }
+.sp-h b { color: var(--ink); font-weight: 600; }
+.sp-h small { color: var(--quiet); font-weight: 400; }
+.sp-x { font-size: 12px; color: var(--dim); margin-top: 6px; }
+.sp-w { grid-column: 1 / -1; margin-top: 0; color: var(--quiet); }
 .pace { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--edge); display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .fig b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-top: 6px; }
 .fig span { color: var(--quiet); font-size: 12px; }
-/* The notes take the whole panel: while the chart is live, this is the
-   thing you are looking at between candles, so it gets the room. */
-.notes { flex: 1; min-height: 360px; width: 100%; resize: none; background: transparent; border: 0; outline: none; color: var(--ink); font-size: 16px; line-height: 1.6; }
-.notes::placeholder { color: var(--mute); }
 
-/* ── week, month, streak ── */
+/* ── week, target, month, streak ── */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin-top: var(--gap); align-items: stretch; }
 .stat { display: flex; flex-direction: column; gap: 10px; }
 .stat-h { display: flex; justify-content: space-between; align-items: center; margin: -8px -10px -6px 0; }
@@ -183,19 +179,6 @@ td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left
 .yr i.is-now { outline: 1px solid var(--dim); outline-offset: 1px; }
 
 /* ── log ── */
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; padding: 2px 0 18px; }
-.sp-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 13px; color: var(--dim); }
-.sp-h b { color: var(--ink); font-weight: 600; }
-.sp-h small { color: var(--quiet); font-weight: 400; }
-.sp-x { font-size: 12px; color: var(--dim); margin-top: 6px; }
-.sp-w { grid-column: 1 / -1; margin-top: 0; color: var(--quiet); }
-/* days at work: seven chips, white when on */
-.wk { display: flex; gap: 6px; margin-top: 8px; }
-.wk label { flex: 1; position: relative; }
-.wk input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
-.wk span { display: block; text-align: center; height: 38px; line-height: 38px; border-radius: 10px; background: #161616; color: var(--dim); font-size: 13px; }
-.wk input:checked + span { background: var(--ink); color: #000; font-weight: 700; }
-.wk input:focus-visible + span { outline: 2px solid var(--dim); outline-offset: 2px; }
 .log { margin-top: var(--gap); }
 .log-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .link { color: var(--dim); font-size: 13px; padding: 8px 10px; border-radius: 10px; }
@@ -206,14 +189,12 @@ table { width: 100%; border-collapse: collapse; }
 td { padding: 12px 0; border-bottom: 1px solid #141414; font-size: 14px; }
 td.t { width: 140px; color: var(--dim); }
 td.k { font-weight: 600; }
+td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 td.d { width: 120px; text-align: right; }
 td.x { width: 56px; text-align: right; }
 .del { width: 32px; height: 32px; border-radius: 8px; color: var(--mute); }
 .del:hover { color: var(--ink); background: #161616; }
 .empty { color: var(--quiet); padding: 28px 0 8px; }
-.note-r td { padding: 0 0 14px; border-bottom: 1px solid #141414; }
-.note-r div { white-space: pre-wrap; color: var(--dim); font-size: 13px; line-height: 1.5; padding-left: 140px; max-width: 900px; }
-tr.has-note td { border-bottom: 0; }
 
 /* ── dialog ── */
 .veil { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: grid; place-items: center; z-index: 50; }
@@ -230,8 +211,13 @@ tr.has-note td { border-bottom: 0; }
 .btn:hover { background: #242424; }
 .btn.pri { background: var(--ink); color: #000; }
 .btn.pri:hover { background: #e6e6e6; }
-.chk { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 14px; }
-.chk input { width: 18px; height: 18px; accent-color: #fff; }
+/* days at work: seven chips, white when on */
+.wk { display: flex; gap: 6px; margin-top: 8px; }
+.wk label { flex: 1; position: relative; }
+.wk input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.wk span { display: block; text-align: center; height: 38px; line-height: 38px; border-radius: 10px; background: #161616; color: var(--dim); font-size: 13px; }
+.wk input:checked + span { background: var(--ink); color: #000; font-weight: 700; }
+.wk input:focus-visible + span { outline: 2px solid var(--dim); outline-offset: 2px; }
 
 /* ── the week in review ── */
 .dlg.wide { width: 760px; padding: 36px 40px; position: relative; overflow: hidden; }
@@ -247,7 +233,7 @@ tr.has-note td { border-bottom: 0; }
 .rv-big span { color: var(--dim); font-size: 16px; }
 .rv-bar { height: 6px; border-radius: 6px; background: var(--track); margin-top: 16px; overflow: hidden; }
 .rv-bar i { display: block; height: 100%; background: var(--ink); border-radius: 6px; }
-.rv-figs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 28px; }
+.rv-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
 .rv-figs span { display: block; font-size: 12px; color: var(--quiet); }
 .rv-figs b { display: block; font-size: 22px; font-weight: 700; margin-top: 6px; }
 .rv-figs small { display: block; color: var(--dim); font-size: 12px; margin-top: 4px; }
@@ -269,7 +255,6 @@ tr.has-note td { border-bottom: 0; }
 
 /* ── toast ── */
 .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #161616; border: 1px solid #262626; border-radius: 14px; padding: 6px 6px 6px 18px; display: flex; align-items: center; gap: 14px; z-index: 60; width: max-content; }
-.toast.is-bare { padding: 14px 18px; }
 .toast button { height: 36px; padding: 0 14px; border-radius: 10px; background: var(--ink); color: #000; font-weight: 700; }
 
 /* A narrow window still works, stacked, but this is built for a desk. */
@@ -286,7 +271,7 @@ tr.has-note td { border-bottom: 0; }
     <h1 class="mark" id="svMark" aria-label="Structure. Volume. Consistency."><span>STRUCTURE.</span> <span>VOLUME.</span> <span>CONSISTENCY.</span></h1>
     <div class="hd-r">
       <span class="hd-date" id="svDate"></span>
-      <button class="icon-btn" id="svSet" aria-label="Targets and backup" title="Targets and backup">
+      <button class="icon-btn" id="svSet" aria-label="Target and backup" title="Target and backup">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
       </button>
     </div>
@@ -308,37 +293,26 @@ tr.has-note td { border-bottom: 0; }
         <label><span>Started the day at</span><input class="in num" id="svA" type="number" min="0" inputmode="numeric" placeholder="0" /></label>
         <label><span>Sitting at</span><input class="in num" id="svB" type="number" min="0" inputmode="numeric" placeholder="0" /></label>
       </div>
-      <div class="kinds" role="group" aria-label="Session" id="svKinds">
-        <button class="kind" data-k="bt" aria-pressed="true">Backtest</button>
-        <button class="kind" data-k="live" aria-pressed="false">Live charts</button>
-        <button class="kind" data-k="cnt" aria-pressed="false">Content + journal</button>
-      </div>
       <div class="gobar" id="svBar">
         <button class="go soft" id="svPause" hidden>Pause</button>
-        <button class="go" id="svGo">Start session</button>
+        <button class="go" id="svGo">Start backtesting</button>
       </div>
-      <div class="hint-k" id="svKeys">Space starts a session</div>
+      <div class="hint-k" id="svKeys">Space starts</div>
     </div>
 
     <div class="card today">
-      <div class="pane" id="svTodayP">
-        <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
-        <div id="svRows"></div>
-        <div class="pace">
-          <div class="fig"><span id="svFor40">40 trades take</span><b class="num" id="svEta">–</b></div>
-          <div class="fig"><span>100 trades would take</span><b class="num" id="svEta100">–</b></div>
-        </div>
-      </div>
-      <div class="pane" id="svNotesP" hidden>
-        <div class="today-h"><span class="lbl">Live notes</span><span class="hint-k" id="svNotesT"></span></div>
-        <textarea class="notes" id="svNotes" aria-label="Live notes" placeholder="What you see, as you see it"></textarea>
+      <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
+      <div id="svRows"></div>
+      <div class="pace">
+        <div class="fig"><span id="svT1L"></span><b class="num" id="svT1">–</b></div>
+        <div class="fig"><span id="svT2L"></span><b class="num" id="svT2">–</b></div>
       </div>
     </div>
   </section>
 
   <section class="stats">
     <div class="card stat"><div class="stat-h"><span class="lbl">This week</span><button class="link" id="svRev">Review</button></div><div class="stat-v num" id="svWk"></div><div class="stat-x" id="svWkX"></div><div class="bar"><i id="svWkB"></i></div></div>
-    <div class="card stat"><span class="lbl">Live charts this week</span><div class="stat-v num" id="svLv"></div><div class="stat-x" id="svLvX"></div><div class="bar"><i id="svLvB"></i></div></div>
+    <div class="card stat"><span class="lbl">Target</span><div class="stat-v num" id="svTg"></div><div class="stat-x" id="svTgX"></div><div class="bar"><i id="svTgB"></i></div></div>
     <div class="card stat"><span class="lbl">This month</span><div class="stat-v num" id="svMo"></div><div class="stat-x" id="svMoX"></div><div class="bar"><i id="svMoB"></i></div></div>
     <div class="card stat"><span class="lbl">Streak</span><div class="stat-v num" id="svSt"></div><div class="stat-x" id="svStX"></div><div class="dots" id="svDots"></div></div>
   </section>
@@ -355,11 +329,11 @@ tr.has-note td { border-bottom: 0; }
   <section class="card yr-c">
     <div class="yr-h"><span class="lbl">The year · a square a day</span><span class="hint-k num" id="svYrX"></span></div>
     <div class="yr-m" id="svYrM"></div>
-    <div class="yr" id="svYr" role="img" aria-label="Every day this year, brighter the closer you got to your trade target"></div>
+    <div class="yr" id="svYr" role="img" aria-label="Every day this year, brighter the closer you got to that day's trade target"></div>
   </section>
 
   <section class="card log">
-    <div class="log-h"><span class="lbl">Sessions</span><button class="link" id="svAdd">+ Add a past session</button></div>
+    <div class="log-h"><span class="lbl">Backtesting sessions</span><button class="link" id="svAdd">+ Add a past session</button></div>
     <div id="svLog"></div>
   </section>
 </div>
@@ -369,27 +343,30 @@ tr.has-note td { border-bottom: 0; }
 'use strict';
 
 var KEY = 'svc.v1';
+/* Only backtesting is tracked now. The other two are what earlier
+   versions saved: they are still read, so nothing already logged is
+   lost, and they are never shown or counted. */
 var KINDS = { bt: 'Backtest', live: 'Live charts', cnt: 'Content + journal' };
-var GOAL0 = { bt: 40, live: 60, cnt: 30, wkLive: 300 };
 var DAY = 864e5;
+var FIRST = 50, STEP = 15, EVERY = 14;
 var $ = function (id) { return document.getElementById(id); };
 
 /* ── store ──
-   One key. A session is a kind, a start and an end in epoch ms: it is
-   time and nothing else. Trades are not counted per session. They come
-   from the day's counter, `d`, keyed by date: the number the counter
-   started the day at (`a`) and the number it sits at now (`b`), and the
-   day's trades are the difference. `a` may be left out, and then the day
-   starts where the last recorded day ended, so on an ordinary day the
-   only thing typed is where it ended. `run` is the session on the clock,
-   so a reload or a closed laptop picks it back up. A damaged entry costs
-   itself and never the rest.
+   One key. A session is a start and an end in epoch ms, and the time
+   paused (`p`): it is time and nothing else. Trades are not counted per
+   session. They come from the day's counter, `d`, keyed by date: the
+   number the counter started the day at (`a`) and the number it sits at
+   now (`b`), and the day's trades are the difference. `a` may be left
+   out, and then the day starts where the last recorded day ended, so on
+   an ordinary day the only thing typed is where it ended. `m` and `e`
+   are the last number typed before 12:00 and before 18:00: the morning
+   is m less the start and the afternoon is e less m. `run` is the
+   session on the clock, so a reload or a closed laptop picks it back
+   up. A damaged entry costs itself and never the rest.
 
-   The two checkpoints are read off the same counter. `m` is the last
-   number typed in "sitting at" before 12:00 and `e` the last typed
-   before 18:00, so the morning is m less the start and the afternoon
-   is e less m. Nothing extra is asked: it is when you type that says
-   where you were. */
+   The target is a history, `t`: the target in force from each date. A
+   day is judged against the one it was lived under, so raising the
+   target never turns last week's hit into a miss. */
 function numOrNull(v) { return v !== undefined && v !== null && v !== '' && isFinite(+v) && +v >= 0 && +v < 1e9 ? Math.round(+v) : null; }
 function load() {
   var o = null;
@@ -399,10 +376,9 @@ function load() {
     return x && KINDS[x.k] && isFinite(x.a) && isFinite(x.b) && x.b >= x.a;
   }).map(function (x) {
     var o2 = { i: String(x.i || id()), k: x.k, a: +x.a, b: +x.b, n: x.k === 'bt' ? Math.max(0, Math.round(+x.n || 0)) : 0 };
-    /* time spent paused, written only when there was some, so every
-       session saved before pausing existed reads back as it was */
-    if (isFinite(x.p) && +x.p > 0 && +x.p < o2.b - o2.a) o2.p = Math.round(+x.p);
     if (typeof x.t === 'string' && x.t.trim()) o2.t = x.t.slice(0, 20000);
+    /* time spent paused, written only when there was some */
+    if (isFinite(x.p) && +x.p > 0 && +x.p < o2.b - o2.a) o2.p = Math.round(+x.p);
     return o2;
   }) : [];
   var d = {};
@@ -415,16 +391,19 @@ function load() {
     if (e !== null) r.e = e;
     if (a !== null || b !== null) d[k] = r;
   });
-  var g = Object.assign({}, GOAL0);
-  if (o.g) Object.keys(GOAL0).forEach(function (k) { var v = +o.g[k]; if (v > 0) g[k] = Math.round(v); });
-  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a, t: typeof o.run.t === 'string' ? o.run.t.slice(0, 20000) : '',
-    p: isFinite(o.run.p) && +o.run.p > 0 ? Math.round(+o.run.p) : 0, pa: isFinite(o.run.pa) && +o.run.pa >= +o.run.a ? +o.run.pa : null } : null;
-  /* the weekdays spent at work, as the numbers Date gives them: Sunday is
-     0. Saturday and Sunday until told otherwise; none is a fair answer */
+  var g = o.g || {};
+  g = { step: isFinite(g.step) && +g.step >= 0 ? Math.round(+g.step) : STEP, every: isFinite(g.every) && +g.every >= 1 ? Math.round(+g.every) : EVERY };
+  var t = Array.isArray(o.t) ? o.t.filter(function (x) { return x && /^\d{4}-\d\d-\d\d$/.test(x.f) && isFinite(x.n) && +x.n > 0; })
+    .map(function (x) { return { f: x.f, n: Math.round(+x.n) }; }).sort(function (p, q) { return p.f < q.f ? -1 : p.f > q.f ? 1 : 0; }) : [];
+  if (!t.length) {
+    /* From before the target had a history: whatever was logged was
+       judged against the old daily target, and fifty starts today */
+    var old = o.g && +o.g.bt > 0 ? Math.round(+o.g.bt) : 40, td = isoDay(Date.now());
+    t = s.length || Object.keys(d).length ? [{ f: '2000-01-01', n: old }, { f: td, n: FIRST }] : [{ f: td, n: FIRST }];
+  }
   var work = Array.isArray(o.work) ? o.work.map(Number).filter(function (x, i, arr) { return x >= 0 && x <= 6 && x % 1 === 0 && arr.indexOf(x) === i; }) : [6, 0];
-  var rm = o.rem || {};
-  var rem = { on: rm.on !== false, at: /^\d\d:\d\d$/.test(rm.at) ? rm.at : '20:00', last: typeof rm.last === 'string' ? rm.last : '' };
-  return { s: s, d: d, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt', rem: rem, work: work,
+  var run = o.run && isFinite(o.run.a) ? { a: +o.run.a, p: isFinite(o.run.p) && +o.run.p > 0 ? Math.round(+o.run.p) : 0, pa: isFinite(o.run.pa) && +o.run.pa >= +o.run.a ? +o.run.pa : null } : null;
+  return { s: s, d: d, g: g, t: t, run: run, work: work,
     rev: typeof o.rev === 'string' ? o.rev : '', cel: typeof o.cel === 'string' ? o.cel : '' };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -467,12 +446,42 @@ function isoDay(t) { var d = new Date(t); return d.getFullYear() + '-' + pad(d.g
 function isoMs(k) { var p = k.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); }
 function short(t) { return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
 
+/* ── the target ──
+   Fifty a day, and fifteen more every fortnight. `goal(t)` is the target
+   in force on day t. Past the last entry it carries on up the same
+   ladder, so a month that has a raise inside it already knows what its
+   later days ask. The raises that have come due are written into the
+   history, which is what stops a later change to the step or the
+   fortnight from rewriting the days already lived. */
+function goal(t) {
+  var k = isoDay(t), e = S.t[0];
+  S.t.forEach(function (x) { if (x.f <= k) e = x; });
+  if (e !== S.t[S.t.length - 1] || k < e.f) return e.n;
+  return e.n + Math.floor(Math.round((dayStart(t) - isoMs(e.f)) / DAY) / S.g.every) * S.g.step;
+}
+function goalIn(a, b) { var n = 0; for (var t = dayStart(a); t < b; t = addDays(t, 1)) n += goal(t); return n; }
+function applyRaises() {
+  var last = S.t[S.t.length - 1], today = isoDay(Date.now()), changed = false;
+  for (var n = 0; n < 200 && S.g.step > 0; n++) {
+    var f = isoDay(addDays(isoMs(last.f), S.g.every));
+    if (f > today) break;
+    last = { f: f, n: last.n + S.g.step }; S.t.push(last); changed = true;
+  }
+  if (changed) save();
+}
+function nextRaise() {
+  var last = S.t[S.t.length - 1];
+  if (!S.g.step) return null;
+  var f = isoDay(addDays(isoMs(last.f), S.g.every));
+  return { f: f, n: last.n + S.g.step, days: Math.round((isoMs(f) - dayStart(Date.now())) / DAY), since: Math.round((dayStart(Date.now()) - isoMs(last.f)) / DAY) };
+}
+
 /* ── sums ──
-   A session is on the clock for its range less the time paused. */
+   Backtesting sessions only. A session is on the clock for its range
+   less the time paused. */
+function within(a, b) { return S.s.filter(function (x) { return x.k === 'bt' && x.a >= a && x.a < b; }); }
 function len(x) { return x.b - x.a - (x.p || 0); }
-function within(a, b) { return S.s.filter(function (x) { return x.a >= a && x.a < b; }); }
-function sum(list, k, f) { return list.reduce(function (t, x) { return x.k === k ? t + f(x) : t; }, 0); }
-function mins(list, k) { return sum(list, k, function (x) { return len(x) / 6e4; }); }
+function btMs(a, b) { return within(a, b).reduce(function (t, x) { return t + len(x); }, 0); }
 
 /* The counter at the end of the last recorded day before this one. */
 function prevEnd(t) {
@@ -487,10 +496,9 @@ function startOf(t) { var r = S.d[isoDay(t)]; return r && r.a !== undefined ? r.
 function dayTrades(t) {
   var r = S.d[isoDay(t)];
   if (r && r.b !== undefined) { var a = startOf(t); return a === null ? 0 : Math.max(0, r.b - a); }
-  return within(t, t + DAY).reduce(function (n, x) { return n + (x.k === 'bt' ? x.n : 0); }, 0);
+  return within(t, t + DAY).reduce(function (n, x) { return n + x.n; }, 0);
 }
 function tradesIn(a, b) { var n = 0; for (var t = dayStart(a); t < b; t = addDays(t, 1)) n += dayTrades(t); return n; }
-function btMs(a, b) { return sum(within(a, b), 'bt', len); }
 /* Pace is backtesting time over trades, for the days that have both. */
 function rangePace(a, b) {
   var n = 0, ms = 0;
@@ -505,27 +513,23 @@ function el0() { return S.run ? (S.run.pa || Date.now()) - S.run.a - S.run.p : 0
 function paintRing() {
   var arc = $('svArc'), big = $('svBig'), sub = $('svSub');
   arc.style.strokeDasharray = C;
-  var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), fr = done / S.g.bt;
+  var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), g = goal(d0);
   if (S.run) {
     /* on the clock: since the start, less every pause, and frozen at the
        moment of the pause while one is on */
-    var el = (S.run.pa || now) - S.run.a - S.run.p;
-    big.textContent = clock(el); big.classList.add('is-clock');
-    var goal = S.run.k === 'bt' ? 0 : (S.run.k === 'live' ? S.g.live : S.g.cnt) * 6e4;
-    sub.textContent = KINDS[S.run.k] + (S.run.pa ? ' · paused' : ' · since ' + hm(S.run.a));
-    /* On a timed session the ring fills toward that session's own target.
-       A backtest keeps the day's trades, because trades are the target. */
-    if (goal) fr = (mins(within(d0, d0 + DAY), S.run.k) * 6e4 + el) / goal;
+    big.textContent = clock(el0()); big.classList.add('is-clock');
+    sub.textContent = S.run.pa ? 'Paused' : 'Backtesting since ' + hm(S.run.a);
   } else {
     big.textContent = fmt(done); big.classList.remove('is-clock');
-    sub.textContent = 'of ' + S.g.bt + ' trades today';
+    sub.textContent = 'of ' + g + ' trades today';
   }
-  arc.style.strokeDashoffset = C * (1 - Math.min(1, fr));
+  /* the ring is the day's trades even while the clock runs: trades are the target */
+  arc.style.strokeDashoffset = C * (1 - Math.min(1, done / g));
   var rg = document.querySelector('.ring');
   rg.classList.toggle('is-run', !!S.run && !S.run.pa);
   rg.classList.toggle('is-paused', !!(S.run && S.run.pa));
-  rg.classList.toggle('is-hit', done >= S.g.bt);
-  document.title = S.run ? (S.run.pa ? 'Paused · ' : '') + clock(el0()) + ' · ' + KINDS[S.run.k] : 'SVC';
+  rg.classList.toggle('is-hit', done >= g);
+  document.title = S.run ? (S.run.pa ? 'Paused · ' : '') + clock(el0()) : 'SVC';
 }
 
 /* ── the counter ──
@@ -558,14 +562,14 @@ function setDay(k, f) {
   if (r.a === undefined && r.b === undefined) delete S.d[k]; else S.d[k] = r;
   save();
 }
-/* ── twenty before noon, twenty before six ──
+/* ── half before noon, half before six ──
    Counted from the counter as it stood at each time. A trade logged ahead
-   of schedule counts toward the next block, so forty by eleven is both
-   done. A day at work (Saturday and Sunday unless told otherwise) has no
-   checkpoints: the target is the day's, whenever it is met. */
+   of schedule counts toward the next block, so the whole day by eleven is
+   both done. A day at work (Saturday and Sunday unless told otherwise) has
+   no checkpoints: the target is the day's, whenever it is met. */
 function isWork(t) { return S.work.indexOf(new Date(t).getDay()) >= 0; }
 function splitOf(t) {
-  var r = S.d[isoDay(t)] || {}, st = startOf(t), g1 = Math.ceil(S.g.bt / 2), g2 = S.g.bt - g1;
+  var r = S.d[isoDay(t)] || {}, st = startOf(t), g1 = Math.ceil(goal(t) / 2), g2 = goal(t) - g1;
   var c12 = r.m !== undefined && st !== null ? Math.max(0, r.m - st) : 0;
   var c18 = r.e !== undefined && st !== null ? Math.max(c12, r.e - st) : c12;
   return { g1: g1, g2: g2, c12: c12, c18: c18, am: Math.min(c12, g1), pm: Math.max(0, Math.min(c18 - g1, g2)) };
@@ -578,16 +582,15 @@ function row(name, note, val, valNote, frac, extra) {
     + '<div class="bar"><i style="width:' + Math.round(Math.min(1, frac) * 100) + '%"></i></div>'
     + (extra ? '<div class="row-x num">' + extra + '</div>' : '') + '</div>';
 }
-function block(label, have, goal, open) {
-  var left = goal - have;
-  return '<div><div class="sp-h"><span>' + label + '</span><b class="num">' + have + ' <small>/ ' + goal + '</small></b></div>'
-    + '<div class="bar"><i style="width:' + Math.round(Math.min(1, have / goal) * 100) + '%"></i></div>'
+function block(label, have, g, open) {
+  var left = g - have;
+  return '<div><div class="sp-h"><span>' + label + '</span><b class="num">' + have + ' <small>/ ' + g + '</small></b></div>'
+    + '<div class="bar"><i style="width:' + Math.round(Math.min(1, have / g) * 100) + '%"></i></div>'
     + '<div class="sp-x">' + (left <= 0 ? 'Done' : left + (open ? ' to go' : ' short')) + '</div></div>';
 }
 function paintToday() {
-  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY), hr = new Date(now).getHours();
-  var bt = dayTrades(d0), ms = btMs(d0, d0 + DAY), work = isWork(now);
-  var lv = mins(today, 'live'), cn = mins(today, 'cnt');
+  var now = Date.now(), d0 = dayStart(now), hr = new Date(now).getHours();
+  var bt = dayTrades(d0), ms = btMs(d0, d0 + DAY), work = isWork(now), g = goal(d0);
   var clockNote = ms ? ' · ' + dur(ms) + ' on the clock' : '';
   var sp = '';
   if (!work) {
@@ -597,43 +600,40 @@ function paintToday() {
     if (r && r.b !== undefined && bt > q.c18) sp += '<div class="sp-x sp-w">' + (bt - q.c18) + ' logged after 18:00</div>';
     sp += '</div>';
   }
-  $('svRows').innerHTML =
-    row('Backtesting', work ? 'Work day' : '', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt, (bt >= S.g.bt ? 'Target hit' : fmt(S.g.bt - bt) + ' to go') + clockNote)
-    + sp
-    + row('Live charts', '20:00–21:00 New York', dur(lv * 6e4), '/ ' + dur(S.g.live * 6e4), lv / S.g.live, '')
-    + row('Content + journal', '', dur(cn * 6e4), '/ ' + dur(S.g.cnt * 6e4), cn / S.g.cnt, '');
-  var p = pace();
-  $('svFor40').textContent = S.g.bt + ' trades take';
-  $('svEta').textContent = p ? dur(p * S.g.bt) : '–';
-  $('svEta100').textContent = p ? dur(p * 100) : '–';
-  $('svPlan').textContent = new Date(now).toLocaleDateString('en-GB', { weekday: 'long' });
+  $('svRows').innerHTML = row('Backtesting', work ? 'Work day' : '', fmt(bt), '/ ' + g, bt / g, (bt >= g ? 'Target hit' : fmt(g - bt) + ' to go') + clockNote) + sp;
+  var p = pace(), nx = nextRaise();
+  $('svT1L').textContent = g + ' trades take';
+  $('svT1').textContent = p ? dur(p * g) : '–';
+  $('svT2L').textContent = nx ? nx.n + ' trades would take' : g + 100 + ' trades would take';
+  $('svT2').textContent = p ? dur(p * (nx ? nx.n : g + 100)) : '–';
+  $('svPlan').textContent = nx ? 'Target ' + g + ' · ' + nx.n + ' from ' + short(isoMs(nx.f)) : 'Target ' + g;
 }
 
-/* ── week, month, streak ── */
+/* ── week, target, month, streak ── */
 function bar(id, f) { $(id).style.width = Math.round(Math.min(1, f) * 100) + '%'; }
 function paintStats() {
-  var now = Date.now(), w0 = weekStart(now), m0 = monthStart(now);
-  var wkT = tradesIn(w0, addDays(w0, 7)), wkGoal = S.g.bt * 7;
+  var now = Date.now(), w0 = weekStart(now), m0 = monthStart(now), d0 = dayStart(now);
+  var wkT = tradesIn(w0, addDays(w0, 7)), wkGoal = goalIn(w0, addDays(w0, 7));
   $('svWk').innerHTML = fmt(wkT) + ' <small>/ ' + fmt(wkGoal) + '</small>';
   $('svWkX').textContent = wkT >= wkGoal ? 'Week done' : fmt(wkGoal - wkT) + ' to go';
   bar('svWkB', wkT / wkGoal);
 
-  var lv = mins(within(w0, addDays(w0, 7)), 'live');
-  $('svLv').innerHTML = dur(lv * 6e4) + ' <small>/ ' + dur(S.g.wkLive * 6e4) + '</small>';
-  $('svLvX').textContent = lv >= S.g.wkLive ? 'Week done' : dur((S.g.wkLive - lv) * 6e4) + ' to go';
-  bar('svLvB', lv / S.g.wkLive);
+  var nx = nextRaise();
+  $('svTg').innerHTML = goal(d0) + ' <small>a day</small>';
+  $('svTgX').textContent = nx ? nx.n + ' from ' + short(isoMs(nx.f)) + ' · ' + nx.days + (nx.days === 1 ? ' day' : ' days') : 'No raise set';
+  bar('svTgB', nx ? nx.since / S.g.every : 0);
 
-  var dim = daysInMonth(now), moT = tradesIn(m0, addDays(m0, dim)), moGoal = S.g.bt * dim;
+  var dim = daysInMonth(now), moT = tradesIn(m0, addDays(m0, dim)), moGoal = goalIn(m0, addDays(m0, dim));
   $('svMo').innerHTML = fmt(moT) + ' <small>/ ' + fmt(moGoal) + '</small>';
-  var expect = S.g.bt * Math.round((dayStart(now) - m0) / DAY + 1);
+  var expect = goalIn(m0, d0 + DAY);
   $('svMoX').textContent = moT >= expect ? fmt(moT - expect) + ' ahead of pace' : fmt(expect - moT) + ' behind pace';
   bar('svMoB', moT / moGoal);
 
-  /* A day counts when the trade target was reached. The streak may end
+  /* A day counts when that day's target was reached. The streak may end
      yesterday: today is not over, so not having hit it yet is not a
      break. Four weeks, Monday first, so a weekday sits in one column. */
-  function hit(t) { return dayTrades(t) >= S.g.bt; }
-  var d0 = dayStart(now), run = 0, t = hit(d0) ? d0 : addDays(d0, -1);
+  function hit(t) { return dayTrades(t) >= goal(t); }
+  var run = 0, t = hit(d0) ? d0 : addDays(d0, -1);
   while (hit(t) && run < 3650) { run++; t = addDays(t, -1); }
   var best = 0, cur = 0;
   for (t = firstDay(); t <= d0; t = addDays(t, 1)) { cur = hit(t) ? cur + 1 : 0; if (cur > best) best = cur; }
@@ -642,7 +642,7 @@ function paintStats() {
   ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(function (l) { html += '<span class="dw">' + l + '</span>'; });
   for (var i = 0; i < 28; i++) {
     var day = addDays(start, i), n = dayTrades(day);
-    var cls = day > d0 ? 'is-ahead' : n >= S.g.bt ? 'is-hit' : n > 0 ? 'is-part' : '';
+    var cls = day > d0 ? 'is-ahead' : n >= goal(day) ? 'is-hit' : n > 0 ? 'is-part' : '';
     html += '<span class="dot ' + cls + (day === d0 ? ' is-now' : '') + '" data-tip="' + esc(dayName(day)) + ' · ' + n + ' trades"></span>';
   }
   $('svDots').innerHTML = html;
@@ -651,7 +651,7 @@ function paintStats() {
 /* The first day anything was recorded, by session or by counter. */
 function firstDay() {
   var t = dayStart(Date.now());
-  S.s.forEach(function (x) { t = Math.min(t, dayStart(x.a)); });
+  within(0, Infinity).forEach(function (x) { t = Math.min(t, dayStart(x.a)); });
   Object.keys(S.d).forEach(function (k) { t = Math.min(t, isoMs(k)); });
   return t;
 }
@@ -661,11 +661,11 @@ function firstDay() {
    stored: a long log is something you open on purpose. */
 var logAll = false;
 function paintLog() {
-  var all = S.s.slice().sort(function (a, b) { return b.a - a.a; });
+  var all = within(0, Infinity).sort(function (a, b) { return b.a - a.a; });
   var cut = addDays(dayStart(Date.now()), -6);
   var list = logAll ? all : all.filter(function (x) { return x.a >= cut; });
   var more = all.length - list.length;
-  if (!all.length) { $('svLog').innerHTML = '<div class="empty">Nothing yet. Press Start session.</div>'; return; }
+  if (!all.length) { $('svLog').innerHTML = '<div class="empty">Nothing yet. Press Start backtesting.</div>'; return; }
   var html = '', last = null, rows = '';
   function flush() {
     if (last === null) return;
@@ -677,10 +677,9 @@ function paintLog() {
   list.slice(0, 200).forEach(function (x) {
     var d = dayStart(x.a);
     if (d !== last) { flush(); last = d; }
-    rows += '<tr data-i="' + x.i + '"' + (x.t ? ' class="has-note"' : '') + '><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + (x.p ? '<small>' + dur(x.p) + ' paused</small>' : '') + '</td>'
+    rows += '<tr data-i="' + x.i + '"><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">Backtest' + (x.p ? '<small>' + dur(x.p) + ' paused</small>' : '') + '</td>'
       + '<td class="d num">' + dur(len(x)) + '</td>'
-      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>'
-      + (x.t ? '<tr class="note-r"><td colspan="4"><div>' + esc(x.t) + '</div></td></tr>' : '');
+      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>';
   });
   flush();
   if (more) html += '<div class="empty"><button class="link" data-more="1">Show ' + more + ' older ' + (more === 1 ? 'session' : 'sessions') + '</button></div>';
@@ -689,34 +688,21 @@ function paintLog() {
 }
 
 function paintControls() {
-  var on = !!S.run, k = on ? S.run.k : S.kind;
-  Array.prototype.forEach.call(document.querySelectorAll('.kind'), function (b) {
-    b.setAttribute('aria-pressed', String(b.dataset.k === k));
-    b.disabled = on && b.dataset.k !== k;
-  });
-  /* A live session swaps Today for a notepad, filled from the run so a
-     reload keeps what you wrote. Only on the change of state: a repaint
-     must never touch the field you are typing in. */
-  var live = on && S.run.k === 'live', np = $('svNotesP');
-  if (live === np.hidden) {
-    np.hidden = !live; $('svTodayP').hidden = live;
-    if (live) { $('svNotes').value = S.run.t || ''; $('svNotesT').textContent = 'since ' + hm(S.run.a); }
-  }
-  var go = $('svGo'), ps = $('svPause'), paused = on && !!S.run.pa;
-  go.textContent = on ? 'End session' : 'Start session';
+  var on = !!S.run, paused = on && !!S.run.pa, go = $('svGo'), ps = $('svPause');
+  go.textContent = on ? 'End session' : 'Start backtesting';
   go.classList.toggle('is-on', on);
   ps.hidden = !on;
   ps.textContent = paused ? 'Resume' : 'Pause';
   /* the action on offer is the white one: resume while paused */
   ps.classList.toggle('soft', !paused);
   $('svBar').classList.toggle('is-two', on);
-  $('svKeys').textContent = on ? (paused ? 'Space resumes' : 'Space pauses') : 'Space starts a session';
+  $('svKeys').textContent = on ? (paused ? 'Space resumes' : 'Space pauses') : 'Space starts';
 }
 
 function paint() {
+  applyRaises();
   $('svDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
   paintRing(); paintCounter(); paintToday(); paintStats(); paintPace(); paintYear(); paintLog(); paintControls();
-  remind();
 }
 
 /* ── pace ──
@@ -742,7 +728,7 @@ function paintPace() {
 
 /* ── the year ──
    Fifty-three weeks, Monday at the top. A day is one square: dark for
-   nothing, brighter up to the target, white at the target and haloed at
+   nothing, brighter up to that day's target, white at it and haloed at
    half as much again. Days still to come are an outline, not a miss. */
 function paintYear() {
   var now = Date.now(), d0 = dayStart(now), start = addDays(weekStart(now), -52 * 7);
@@ -752,7 +738,7 @@ function paintYear() {
     if (t > d0) cls = 'is-ahead';
     else {
       n = dayTrades(t);
-      var f = n / S.g.bt;
+      var f = n / goal(t);
       cls = !n ? '' : f >= 1.5 ? 'l4' : f >= 1 ? 'l3' : f >= .5 ? 'l2' : 'l1';
       if (f >= 1) { hits++; run++; if (run > best) best = run; } else run = 0;
     }
@@ -767,26 +753,6 @@ function paintYear() {
   $('svYrX').textContent = hits + ' days on target · best run ' + best;
 }
 
-/* ── the 8pm reminder ──
-   A page cannot be woken, so this only goes off while the app is open,
-   installed or in a tab. Once a day, inside the hour it names, and not
-   at all once a live session has happened or is running. */
-function remind() {
-  var R0 = S.rem; if (!R0.on) return;
-  var now = Date.now(), d = new Date(now), key = isoDay(now);
-  var at = R0.at.split(':'), m = d.getHours() * 60 + d.getMinutes(), m0 = +at[0] * 60 + +at[1];
-  if (R0.last === key || m < m0 || m >= m0 + 60) return;
-  if ((S.run && S.run.k === 'live') || within(dayStart(now), dayStart(now) + DAY).some(function (x) { return x.k === 'live'; })) return;
-  R0.last = key; save();
-  try {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      var nt = new Notification('Live charts · ' + R0.at, { body: 'The New York hour is on. Start your live session.', tag: 'svc-live', icon: 'icon-192.png' });
-      nt.onclick = function () { window.focus(); nt.close(); };
-    }
-  } catch (e) {}
-  toast('Live charts · ' + R0.at + ' — the New York hour is on', S.run ? null : function () { S.kind = 'live'; start(); }, 'Start live', 60000);
-}
-
 /* ── the clock ── */
 var tick = null;
 function clockOn() {
@@ -796,20 +762,20 @@ function clockOn() {
 
 /* ── toast ── */
 var toastT = null;
-function toast(msg, undo, label, ms) {
+function toast(msg, undo) {
   var old = document.querySelector('.toast'); if (old) old.remove();
   clearTimeout(toastT);
   var t = document.createElement('div');
-  t.className = 'toast' + (undo ? '' : ' is-bare');
+  t.className = 'toast';
   t.setAttribute('role', 'status');
   var s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
   if (undo) {
-    var b = document.createElement('button'); b.textContent = label || 'Undo';
+    var b = document.createElement('button'); b.textContent = 'Undo';
     b.addEventListener('click', function () { undo(); t.remove(); });
     t.appendChild(b);
-  }
+  } else t.style.padding = '14px 18px';
   document.body.appendChild(t);
-  toastT = setTimeout(function () { t.remove(); }, ms || 6000);
+  toastT = setTimeout(function () { t.remove(); }, 6000);
 }
 
 /* ── dialogs ──
@@ -828,15 +794,14 @@ function dialog(html, onOpen, cls) {
 }
 function dialogOpen() { return !!document.querySelector('.veil'); }
 
-/* ── start and end ── */
+/* ── start, pause and end ── */
 function start() {
-  S.run = { k: S.kind, a: Date.now(), t: '', p: 0, pa: null };
+  S.run = { a: Date.now(), p: 0, pa: null };
   save(); clockOn(); paint();
-  if (S.run.k === 'live') { stampFirst(); $('svNotes').focus(); }
 }
 function file(sess) {
   S.s.push(sess); save(); paint();
-  toast(KINDS[sess.k] + ' · ' + dur(len(sess)), function () {
+  toast('Backtest · ' + dur(len(sess)), function () {
     S.s = S.s.filter(function (x) { return x.i !== sess.i; }); save(); paint();
   });
 }
@@ -846,9 +811,8 @@ function end() {
   S.run = null; clockOn();
   /* ended while paused, it ends where the pause began: the time away is
      not part of the session, however long it was */
-  var sess = { i: id(), k: run.k, a: run.a, b: b, n: 0 };
+  var sess = { i: id(), k: 'bt', a: run.a, b: b, n: 0 };
   if (run.p > 0) sess.p = run.p;
-  if (run.k === 'live') { var t = $('svNotes').value; if (t.trim()) sess.t = t.slice(0, 20000); }
   file(sess);
 }
 function toggle() { if (S.run) end(); else start(); }
@@ -875,21 +839,19 @@ function weekData(w0) {
   var days = [], hit = 0, best = null, total = 0;
   for (var i = 0; i < 7; i++) {
     var t = addDays(w0, i), n = dayTrades(t);
-    days.push({ t: t, n: n }); total += n;
-    if (t <= d0 && n >= S.g.bt) hit++;
+    days.push({ t: t, n: n, g: goal(t) }); total += n;
+    if (t <= d0 && n >= goal(t)) hit++;
     if (n && (!best || n > best.n)) best = { t: t, n: n };
   }
-  var list = within(w0, w1);
-  return { trades: total, goal: S.g.bt * 7, live: mins(list, 'live'), cnt: mins(list, 'cnt'),
-    btMs: btMs(w0, w1), pace: rangePace(w0, w1), prevPace: rangePace(addDays(w0, -7), w0),
-    days: days, hit: hit, best: best };
+  return { trades: total, goal: goalIn(w0, w1), btMs: btMs(w0, w1), pace: rangePace(w0, w1), prevPace: rangePace(addDays(w0, -7), w0),
+    days: days, hit: hit, best: best, daily: goal(w0) };
 }
 function review(w0, celebrate) {
   var first = weekStart(firstDay()), cur = weekStart(Date.now());
   dialog('', function (d) {
     function draw() {
       var W = weekData(w0), win = W.trades >= W.goal, live = w0 === cur;
-      var max = Math.max.apply(null, W.days.map(function (x) { return x.n; }).concat([S.g.bt]));
+      var max = Math.max.apply(null, W.days.map(function (x) { return x.n; }).concat(W.days.map(function (x) { return x.g; })));
       var pc = '';
       if (W.pace && W.prevPace) {
         var dd = Math.round((W.prevPace - W.pace) / 1000);
@@ -903,13 +865,12 @@ function review(w0, celebrate) {
         + '<div class="rv-big num"><b>' + fmt(W.trades) + '</b><span>trades of ' + fmt(W.goal) + (win ? ' · target hit' : ' · ' + fmt(W.goal - W.trades) + (live ? ' to go' : ' short')) + '</span></div>'
         + '<div class="rv-bar"><i style="width:' + Math.round(Math.min(1, W.trades / W.goal) * 100) + '%"></i></div>'
         + '<div class="rv-figs num">'
-        + '<div><span>Live charts</span><b>' + dur(W.live * 6e4) + '</b><small>of ' + dur(S.g.wkLive * 6e4) + '</small></div>'
-        + '<div><span>Days on target</span><b>' + W.hit + ' / 7</b><small>' + S.g.bt + ' a day</small></div>'
-        + '<div><span>Backtesting time</span><b>' + dur(W.btMs) + '</b><small>content ' + dur(W.cnt * 6e4) + '</small></div>'
+        + '<div><span>Days on target</span><b>' + W.hit + ' / 7</b><small>' + W.daily + ' a day</small></div>'
+        + '<div><span>Backtesting time</span><b>' + dur(W.btMs) + '</b><small>on the clock</small></div>'
         + '<div><span>Pace</span><b>' + (W.pace ? per(W.pace) : '–') + '</b><small>' + (pc || 'a trade') + '</small></div>'
         + '</div><div class="rv-days num">'
         + W.days.map(function (x) {
-          return '<div><em>' + (x.n || '') + '</em><i class="' + (x.n >= S.g.bt ? 'is-hit' : '') + '" style="height:' + Math.max(3, Math.round(x.n / max * 70)) + 'px"></i><span>'
+          return '<div><em>' + (x.n || '') + '</em><i class="' + (x.n >= x.g ? 'is-hit' : '') + '" style="height:' + Math.max(3, Math.round(x.n / max * 70)) + 'px"></i><span>'
             + new Date(x.t).toLocaleDateString('en-GB', { weekday: 'short' }) + '</span></div>';
         }).join('')
         + '</div><p class="rv-best">' + (W.best ? 'Best day: ' + new Date(W.best.t).toLocaleDateString('en-GB', { weekday: 'long' }) + ' · ' + W.best.n + ' trades' : 'No trades logged this week') + '</p>'
@@ -940,7 +901,6 @@ function burst(host) {
 function addPast() {
   var now = new Date(), iso = isoDay(now.getTime());
   dialog('<h2>Add a past session</h2>'
-    + '<label class="fld"><span>Session</span><select class="in" id="svPK"><option value="bt">Backtest</option><option value="live">Live charts</option><option value="cnt">Content + journal</option></select></label>'
     + '<div class="two"><label class="fld"><span>Day</span><input class="in num" id="svPD" type="date" value="' + iso + '" max="' + iso + '" /></label>'
     + '<label class="fld"><span>Started</span><input class="in num" id="svPS" type="time" value="' + pad(now.getHours()) + ':00" /></label></div>'
     + '<label class="fld"><span>Minutes</span><input class="in num" id="svPM" type="number" min="1" max="720" value="60" /></label>'
@@ -953,7 +913,7 @@ function addPast() {
       var p = dv.split('-'), q = sv.split(':');
       var a = new Date(+p[0], +p[1] - 1, +p[2], +q[0], +q[1]).getTime();
       close();
-      file({ i: id(), k: d.querySelector('#svPK').value, a: a, b: a + m * 6e4, n: 0 });
+      file({ i: id(), k: 'bt', a: a, b: a + m * 6e4, n: 0 });
     });
   });
 }
@@ -980,38 +940,38 @@ function dayEdit(k) {
 }
 /* Crossing the week's target is the one moment the app makes a fuss. */
 function crossed(w0, before) {
-  var goal = S.g.bt * 7, after = tradesIn(w0, addDays(w0, 7));
-  if (before < goal && after >= goal && S.cel !== isoDay(w0)) { S.cel = isoDay(w0); save(); setTimeout(function () { review(w0, true); }, 300); }
+  var g = goalIn(w0, addDays(w0, 7)), after = tradesIn(w0, addDays(w0, 7));
+  if (before < g && after >= g && S.cel !== isoDay(w0)) { S.cel = isoDay(w0); save(); setTimeout(function () { review(w0, true); }, 300); }
 }
 
-/* ── targets and backup ── */
+/* ── the target and backup ──
+   Changing the target here starts a new fortnight from today: it is
+   written into the history from this day on, and every day before it
+   stays judged against what it was. */
 function settings() {
-  dialog('<h2>Targets</h2>'
-    + '<div class="two"><label class="fld"><span>Trades a day</span><input class="in num" data-g="bt" type="number" min="1" value="' + S.g.bt + '" /></label>'
-    + '<label class="fld"><span>Live minutes a day</span><input class="in num" data-g="live" type="number" min="1" value="' + S.g.live + '" /></label></div>'
-    + '<div class="two"><label class="fld"><span>Live hours a week</span><input class="in num" data-g="wkLive" type="number" min="0.5" step="0.5" value="' + (S.g.wkLive / 60) + '" /></label>'
-    + '<label class="fld"><span>Content minutes a day</span><input class="in num" data-g="cnt" type="number" min="1" value="' + S.g.cnt + '" /></label></div>'
+  var g0 = goal(dayStart(Date.now()));
+  dialog('<h2>Target</h2>'
+    + '<div class="two"><label class="fld"><span>Trades a day</span><input class="in num" data-g="n" type="number" min="1" value="' + g0 + '" /></label>'
+    + '<label class="fld"><span>Raise it by</span><input class="in num" data-g="step" type="number" min="0" value="' + S.g.step + '" /></label></div>'
+    + '<label class="fld"><span>Every how many days</span><input class="in num" data-g="every" type="number" min="1" value="' + S.g.every + '" /></label>'
     + '<div class="fld"><span>Days at work: no morning and afternoon split</span></div>'
     + '<div class="wk">' + [[1, 'Mon'], [2, 'Tue'], [3, 'Wed'], [4, 'Thu'], [5, 'Fri'], [6, 'Sat'], [0, 'Sun']].map(function (w) {
       return '<label><input type="checkbox" data-w="' + w[0] + '"' + (S.work.indexOf(w[0]) >= 0 ? ' checked' : '') + ' /><span>' + w[1] + '</span></label>';
     }).join('') + '</div>'
-    + '<label class="chk"><input type="checkbox" id="svRemOn"' + (S.rem.on ? ' checked' : '') + ' /> Remind me to start live charts at</label>'
-    + '<label class="fld"><input class="in num" id="svRemAt" type="time" value="' + S.rem.at + '" aria-label="Reminder time" /></label>'
     + '<div class="acts"><button class="btn" data-a="exp">Download backup</button><button class="btn" data-a="imp">Restore</button></div>'
     + '<div class="acts"><button class="btn" data-a="x">Cancel</button><button class="btn pri" data-a="save">Save</button></div>', function (d, close) {
     d.querySelector('[data-a="x"]').addEventListener('click', close);
     d.querySelector('[data-a="save"]').addEventListener('click', function () {
-      Array.prototype.forEach.call(d.querySelectorAll('[data-g]'), function (inp) {
-        var v = +inp.value, k = inp.dataset.g;
-        if (k === 'wkLive') v = v * 60;
-        if (v > 0) S.g[k] = Math.round(v);
-      });
-      var on = d.querySelector('#svRemOn').checked, at = d.querySelector('#svRemAt').value;
-      if (/^\d\d:\d\d$/.test(at) && at !== S.rem.at) { S.rem.at = at; S.rem.last = ''; }
-      S.rem.on = on;
+      var q = function (w) { return +d.querySelector('[data-g="' + w + '"]').value; };
+      var step = q('step'), every = q('every'), n = Math.round(q('n')), today = isoDay(Date.now());
+      var changed = false;
+      if (isFinite(step) && step >= 0 && Math.round(step) !== S.g.step) { S.g.step = Math.round(step); changed = true; }
+      if (isFinite(every) && every >= 1 && Math.round(every) !== S.g.every) { S.g.every = Math.round(every); changed = true; }
+      if (n > 0 && (n !== g0 || changed)) {
+        var last = S.t[S.t.length - 1];
+        if (last.f === today) last.n = n; else S.t.push({ f: today, n: n });
+      }
       S.work = Array.prototype.filter.call(d.querySelectorAll('[data-w]'), function (c) { return c.checked; }).map(function (c) { return +c.dataset.w; });
-      /* asked on this press, which is a real gesture: the only honest moment */
-      if (on && 'Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
       save(); close(); paint();
     });
     d.querySelector('[data-a="exp"]').addEventListener('click', function () {
@@ -1039,13 +999,8 @@ function settings() {
 /* ── wiring ── */
 $('svGo').addEventListener('click', toggle);
 $('svPause').addEventListener('click', togglePause);
-$('svKinds').addEventListener('click', function (e) {
-  var b = e.target.closest('.kind'); if (!b || S.run) return;
-  S.kind = b.dataset.k; save(); paintControls();
-  /* so Space, which starts a session, does not press this chip again */
-  b.blur();
-});
 $('svAdd').addEventListener('click', addPast);
+$('svSet').addEventListener('click', settings);
 $('svRev').addEventListener('click', function () { review(weekStart(Date.now()), false); });
 
 /* The counter is saved as it is typed, so a closed window loses nothing,
@@ -1076,28 +1031,6 @@ document.addEventListener('mousemove', function (e) {
 });
 document.addEventListener('mouseleave', function () { tip.classList.remove('on'); });
 
-/* ── time-stamped notes ──
-   Every line of the live notes starts with the time it was begun, so
-   the page reads back as the session happened. Shift+Enter is a plain
-   new line, for a thought that runs on. */
-function stamp() { return hm(Date.now()) + '  '; }
-function stampFirst() { var n = $('svNotes'); if (!n.value) { n.value = stamp(); if (S.run) S.run.t = n.value; } }
-var noteT = null;
-$('svNotes').addEventListener('input', function () {
-  if (!S.run) return;
-  S.run.t = this.value;
-  clearTimeout(noteT); noteT = setTimeout(save, 250);
-});
-$('svNotes').addEventListener('keydown', function (e) {
-  if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
-  e.preventDefault();
-  var n = this, a = n.selectionStart, b = n.selectionEnd, ins = '\n' + stamp();
-  n.value = n.value.slice(0, a) + ins + n.value.slice(b);
-  n.selectionStart = n.selectionEnd = a + ins.length;
-  n.dispatchEvent(new Event('input'));
-});
-$('svNotes').addEventListener('focus', function () { if (S.run && S.run.k === 'live') stampFirst(); });
-$('svSet').addEventListener('click', settings);
 $('svLog').addEventListener('click', function (e) {
   if (e.target.closest('[data-more]')) { logAll = !logAll; paintLog(); return; }
   var dd = e.target.closest('[data-day]'); if (dd) { dayEdit(dd.dataset.day); return; }
@@ -1117,8 +1050,6 @@ document.addEventListener('keydown', function (e) {
   if (S.run) togglePause(); else start();
 });
 /* Another window, or the same app open twice, writes the key: follow it. */
-/* typing is saved on a short timer; closing the window must not lose the last line */
-window.addEventListener('pagehide', function () { if (noteT) { clearTimeout(noteT); save(); } });
 window.addEventListener('storage', function (e) { if (e.key === KEY) { S = load(); clockOn(); paint(); } });
 /* The date can roll over while the app sits open; repaint once a minute. */
 setInterval(paint, 60000);
@@ -1134,8 +1065,6 @@ document.addEventListener('visibilitychange', function () { if (!document.hidden
   });
 })();
 
-/* Between 20:00 and 21:00 the session on offer is the live one. */
-if (!S.run) { var hr = new Date().getHours(); if (hr === 20) S.kind = 'live'; }
 paint(); clockOn();
 
 /* The first open of a new week reviews the week just gone, once. */

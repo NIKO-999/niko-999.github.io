@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════════════════════════════
-   SVC — the session timer. Desktop, 1440x900.
+   SVC — backtest volume. Desktop, 1440x900.
 
    The clock is frozen at Wednesday 18 November 2026, 10:00 and moved by
    hand (`__adv`), so a session's length is a fact about the fixture.
 
    Trades come from a day's counter (where it started, where it sits),
-   never from the sessions, which are time and nothing else.
+   never from the sessions, which are time and nothing else. The target
+   is fifty a day, fifteen more every fortnight.
    ═══════════════════════════════════════════════════════════════ */
 const { chromium, chrome, BASE } = require('./lib.js');
 
@@ -26,29 +27,28 @@ const freeze = (at) => `(() => {
   };
 })();`;
 const at = (d, h, m) => new Date(`2026-11-${String(d).padStart(2, '0')}T${String(h).padStart(2, '0')}:${String(m || 0).padStart(2, '0')}:00`).getTime();
-/* Sessions are time. Sunday 15th and Monday 16th: 2h for 40 trades each.
-   Tuesday 17th: 1h30 for 25, and an hour of live charts. Today, Wednesday
-   18th: an hour for 20 and a quarter of an hour of content. The counter
-   starts the 15th at 1000, so Monday starts where Sunday ended, and the
-   days after start where the last one ended, with nothing typed. */
+/* Fifty a day from the 10th, so the next raise (to 65) is on the 24th.
+   Sessions are time. Sunday 15th and Monday 16th: two hours for fifty
+   trades each. Tuesday 17th: an hour and a half for thirty. Today,
+   Wednesday 18th: an hour for twenty-five. The counter starts the 15th at
+   1000, and every day after starts where the last one ended. m and e are
+   the counter as typed before noon and before six: Sunday and Monday had
+   thirty and fifty-ish by noon, Tuesday fifteen by noon and thirty by
+   six, today twenty-five already at ten o'clock. */
 const SEED = {
+  t: [{ f: '2026-11-10', n: 50 }],
   s: [
     { i: 'a', k: 'bt', a: at(15, 9), b: at(15, 11) },
     { i: 'b', k: 'bt', a: at(16, 8), b: at(16, 9) },
     { i: 'c', k: 'bt', a: at(16, 14), b: at(16, 15) },
     { i: 'd', k: 'bt', a: at(17, 8), b: at(17, 9, 30) },
-    { i: 'e', k: 'live', a: at(17, 20), b: at(17, 21) },
     { i: 'f', k: 'bt', a: at(18, 8), b: at(18, 9) },
-    { i: 'g', k: 'cnt', a: at(18, 9, 10), b: at(18, 9, 25) },
   ],
-  /* m and e are the counter as it was typed before noon and before six:
-     Sunday and Monday had twenty by noon and forty by six, Tuesday ten by
-     noon and twenty-five by six, and today twenty already at ten o'clock */
   d: {
-    '2026-11-15': { a: 1000, b: 1040, m: 1020, e: 1040 },
-    '2026-11-16': { b: 1080, m: 1060, e: 1080 },
-    '2026-11-17': { b: 1105, m: 1090, e: 1105 },
-    '2026-11-18': { b: 1125, m: 1125, e: 1125 },
+    '2026-11-15': { a: 1000, b: 1050, m: 1030, e: 1050 },
+    '2026-11-16': { b: 1100, m: 1075, e: 1100 },
+    '2026-11-17': { b: 1130, m: 1115, e: 1130 },
+    '2026-11-18': { b: 1155, m: 1155, e: 1155 },
   },
 };
 
@@ -85,51 +85,54 @@ const SEED = {
     const look = await page.evaluate(() => {
       const b = getComputedStyle(document.body), h = getComputedStyle(document.querySelector('.mark'));
       return { bg: b.backgroundColor, ink: h.color, w: +h.fontWeight, sub: +getComputedStyle(document.querySelector('.ring-sub')).fontWeight,
-        rowN: +getComputedStyle(document.querySelector('.row-n small')).fontWeight };
+        rowN: +getComputedStyle(document.querySelector('.stat-x')).fontWeight };
     });
     ok('jet black ground, white bold head', look.bg === 'rgb(0, 0, 0)' && look.ink === 'rgb(255, 255, 255)' && look.w >= 700, look);
     ok('the small type is not bold', look.sub < 600 && look.rowN < 600, look);
-    ok('the ring says today\'s trades of 40', (await txt(page, '#svBig')) === '20' && /of 40 trades/.test(await txt(page, '#svSub')));
+    ok('the ring says today\'s trades of fifty', (await txt(page, '#svBig')) === '25' && /of 50 trades/.test(await txt(page, '#svSub')), [await txt(page, '#svBig'), await txt(page, '#svSub')]);
     const off = await page.$eval('#svArc', (e) => [parseFloat(e.style.strokeDashoffset), parseFloat(e.style.strokeDasharray)]);
     ok('the ring is half full', Math.abs(off[0] / off[1] - 0.5) < 0.01, off);
     const rows = await txt(page, '#svRows');
-    ok('today shows the two blocks the day is made of', /Before 12:00/.test(rows) && /By 18:00/.test(rows), rows);
-    ok('content counts its fifteen minutes of thirty', /Content \+ journal15m\s*\/ 30m/.test(rows), rows);
-    ok('the week reads 85 of 280', /^85\s*\/ 280$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
-    ok('live this week reads 1h of 5h', /^1h\s*\/ 5h$/.test(await txt(page, '#svLv')), await txt(page, '#svLv'));
-    ok('the month target is 40 a day for thirty days', /\/ 1,200$/.test(await txt(page, '#svMo')), await txt(page, '#svMo'));
-    /* 6h 30m of backtesting over 125 trades: 3m 07s a trade, so 40 take 2h 5m */
-    ok('pace is time over trades', (await txt(page, '#svEta')) === '2h 5m' && /30 days3m 07s/.test(await txt(page, '#svPaceF')), [await txt(page, '#svEta'), await txt(page, '#svPaceF')]);
-    ok('the streak is broken by Tuesday\'s 25 and today is not over', /^0 days/.test(await txt(page, '#svSt')), await txt(page, '#svSt'));
+    ok('today is backtesting and nothing else', /Backtesting/.test(rows) && !/Live|Content|journal/i.test(rows), rows);
+    ok('25 to go on the day', /25 to go/.test(rows), rows);
+    ok('the week reads 105 of 350', /^105\s*\/ 350$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
+    /* twenty-three November days at fifty, then the raise on the 24th takes the last seven to sixty-five */
+    ok('the month knows the raise is coming: 23 days of 50 and 7 of 65', /^155\s*\/ 1,605$/.test(await txt(page, '#svMo')), await txt(page, '#svMo'));
+    /* 6h 30m of backtesting over 155 trades is 2m 31s a trade; fifty take 2h 6m, sixty-five 2h 44m */
+    ok('pace is time over trades', /30 days2m 31s/.test(await txt(page, '#svPaceF')), await txt(page, '#svPaceF'));
+    ok('what fifty take, and what the next target would take', /50 trades take2h 6m/.test(await txt(page, '.pace')) && /65 trades would take2h 44m/.test(await txt(page, '.pace')), await txt(page, '.pace'));
+    ok('the streak is broken by Tuesday\'s 30 and today is not over', /^0 days/.test(await txt(page, '#svSt')), await txt(page, '#svSt'));
     ok('best run is two days', /Best run 2/.test(await txt(page, '#svStX')), await txt(page, '#svStX'));
     ok('four weeks of dots, Monday first', (await page.$$('#svDots .dot')).length === 28);
     ok('the log groups by day, newest first', (await page.$$eval('.day-h span:first-child', (e) => e.map((x) => x.textContent)))[0] === 'Today');
     ok('a backtest row is time only: no trade count on it', !/trades/.test(await txt(page, 'tr[data-i="f"]')), await txt(page, 'tr[data-i="f"]'));
-    ok('the day header says the trades and the time', /20 trades · 1h 15m/.test(await txt(page, '.day-h .link')), await txt(page, '.day-h .link'));
+    ok('the day header says the trades and the time', /25 trades · 1h/.test(await txt(page, '.day-h .link')), await txt(page, '.day-h .link'));
     ok('the two top cards are one row, top-aligned, one height', await page.evaluate(() => {
       const a = document.querySelector('.timer-card').getBoundingClientRect(), b = document.querySelector('.today').getBoundingClientRect();
       return Math.abs(a.top - b.top) < 1 && Math.abs(a.height - b.height) < 1;
     }));
     ok('the four stat cards are one height', await page.evaluate(() => new Set([...document.querySelectorAll('.stat')].map((e) => Math.round(e.getBoundingClientRect().height))).size === 1));
     ok('nothing runs off the side', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    ok('and none of the clutter is on the page', await page.evaluate(() => !document.querySelector('#svTl, .mini, #svTicks, #svHead, #svPlus, #svMinus, .live-d')));
+    ok('and everything that is not backtesting is gone from the page', await page.evaluate(() => {
+      const t = document.body.innerText;
+      return !document.querySelector('#svKinds, #svNotes, #svLv, .kind') && !/Live charts|Content|journal|Remind/i.test(t);
+    }));
     await c.close();
   }
 
   console.log('\nSVC — the day\'s counter');
   {
     const { c, page } = await ctx(SEED);
-    ok('the fields are where the day started and where it sits', (await page.$eval('#svA', (e) => e.value)) === '' && (await page.$eval('#svB', (e) => e.value)) === '1125');
-    ok('the start is carried from last night, and shown as the hint', (await page.$eval('#svA', (e) => e.placeholder)) === '1105', await page.$eval('#svA', (e) => e.placeholder));
-    await page.fill('#svB', '1145');
-    ok('typing where it sits does the sum: 1145 less 1105 is 40', (await txt(page, '#svBig')) === '40' && /Target hit/.test(await txt(page, '#svRows')));
+    ok('the fields are where the day started and where it sits', (await page.$eval('#svA', (e) => e.value)) === '' && (await page.$eval('#svB', (e) => e.value)) === '1155');
+    ok('the start is carried from last night, and shown as the hint', (await page.$eval('#svA', (e) => e.placeholder)) === '1130', await page.$eval('#svA', (e) => e.placeholder));
+    await page.fill('#svB', '1180');
+    ok('typing where it sits does the sum: 1180 less 1130 is 50', (await txt(page, '#svBig')) === '50' && /Target hit/.test(await txt(page, '#svRows')));
     ok('the ring lights up once the target is hit', await page.$eval('.ring', (e) => e.classList.contains('is-hit')));
-    ok('and it is saved as it is typed', (await store(page)).d['2026-11-18'].b === 1145);
-    await page.fill('#svA', '1100');
-    ok('typing a start overrides the carried one: 1145 less 1100', (await txt(page, '#svBig')) === '45');
-    ok('the field keeps the digits you typed through the repaint', (await page.$eval('#svA', (e) => e.value)) === '1100');
-    await page.fill('#svB', '1145');
-    ok('the week follows the counter: Monday 40, Tuesday 25, today 45', /^110\s*\/ 280$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
+    ok('and it is saved as it is typed', (await store(page)).d['2026-11-18'].b === 1180);
+    await page.fill('#svA', '1125');
+    ok('typing a start overrides the carried one: 1180 less 1125', (await txt(page, '#svBig')) === '55');
+    ok('the field keeps the digits you typed through the repaint', (await page.$eval('#svA', (e) => e.value)) === '1125');
+    ok('the week follows the counter: Monday 50, Tuesday 30, today 55', /^135\s*\/ 350$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
     await page.fill('#svB', '');
     ok('clearing where it sits clears the day', (await txt(page, '#svBig')) === '0');
     await page.fill('#svA', '');
@@ -152,43 +155,93 @@ const SEED = {
     await e2.c.close();
   }
 
-  console.log('\nSVC — twenty before noon, twenty before six');
+  console.log('\nSVC — fifty a day, fifteen more every fortnight');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('the target card says fifty a day and what is next', /^50\s*a day$/.test(await txt(page, '#svTg')) && /65 from 24 Nov · 6 days/.test(await txt(page, '#svTgX')), [await txt(page, '#svTg'), await txt(page, '#svTgX')]);
+    ok('and the bar is how far through the fortnight: 8 of 14 days', Math.abs(parseFloat(await page.$eval('#svTgB', (e) => e.style.width)) - 57) <= 1, await page.$eval('#svTgB', (e) => e.style.width));
+    ok('the Today panel carries the same line', /Target 50 · 65 from 24 Nov/.test(await txt(page, '#svPlan')), await txt(page, '#svPlan'));
+    ok('two days on target light white (Sunday and Monday)', (await page.$$('#svYr i.l3')).length === 2);
+    await c.close();
+
+    const r = await ctx(Object.assign({}, SEED, { rev: '2026-11-16' }), '2026-11-24T10:00:00');
+    const st = await store(r.page);
+    ok('on the 24th the raise comes due and is written into the history', st.t.length === 2 && st.t[1].f === '2026-11-24' && st.t[1].n === 65, st.t);
+    ok('the ring now asks for 65', /of 65 trades/.test(await txt(r.page, '#svSub')), await txt(r.page, '#svSub'));
+    ok('and the next one is already named: 80 from 8 Dec', /80 from 8 Dec · 14 days/.test(await txt(r.page, '#svTgX')), await txt(r.page, '#svTgX'));
+    ok('the days already lived are still judged at fifty: Sunday and Monday stay white', (await r.page.$$('#svYr i.l3')).length === 2, (await r.page.$$('#svYr i.l3')).length);
+    ok('and the best run is still two', /Best run 2/.test(await txt(r.page, '#svStX')), await txt(r.page, '#svStX'));
+    await r.c.close();
+
+    const late = await ctx(Object.assign({}, SEED, { rev: '2026-11-30' }), '2026-12-10T10:00:00');
+    const lt = (await store(late.page)).t.map((x) => x.n + '@' + x.f);
+    ok('a month away catches up: 65 on the 24th, 80 on the 8th', lt.join() === '50@2026-11-10,65@2026-11-24,80@2026-12-08', lt);
+    await late.c.close();
+
+    const s1 = await ctx(SEED);
+    await s1.page.click('#svSet'); await s1.page.waitForSelector('.dlg');
+    ok('settings holds the target, the raise and the fortnight', (await s1.page.$eval('[data-g="n"]', (e) => e.value)) === '50' && (await s1.page.$eval('[data-g="step"]', (e) => e.value)) === '15' && (await s1.page.$eval('[data-g="every"]', (e) => e.value)) === '14');
+    await s1.page.fill('[data-g="n"]', '60');
+    await s1.page.click('.dlg [data-a="save"]');
+    const s1s = await store(s1.page);
+    ok('changing the target starts it from today and keeps the history', s1s.t.length === 2 && s1s.t[0].n === 50 && s1s.t[1].f === '2026-11-18' && s1s.t[1].n === 60, s1s.t);
+    ok('the ring asks for 60', /of 60 trades/.test(await txt(s1.page, '#svSub')));
+    ok('the days before are not rewritten: Sunday and Monday were fifty and stay white', (await s1.page.$$('#svYr i.l3')).length === 2);
+    ok('a new fortnight starts: 75 from 2 Dec', /75 from 2 Dec · 14 days/.test(await txt(s1.page, '#svTgX')), await txt(s1.page, '#svTgX'));
+    await s1.c.close();
+
+    const s2 = await ctx(SEED);
+    await s2.page.click('#svSet'); await s2.page.waitForSelector('.dlg');
+    await s2.page.fill('[data-g="step"]', '0');
+    await s2.page.click('.dlg [data-a="save"]');
+    ok('a raise of nothing says so and holds the target', /No raise set/.test(await txt(s2.page, '#svTgX')) && /^50\s*a day$/.test(await txt(s2.page, '#svTg')), [await txt(s2.page, '#svTgX'), await txt(s2.page, '#svTg')]);
+    await s2.c.close();
+
+    const old = await ctx({ s: SEED.s, d: SEED.d, g: { bt: 40 } });
+    await old.page.click('#svSet'); await old.page.waitForSelector('.dlg');
+    await old.page.click('.dlg [data-a="save"]');
+    const om = await store(old.page);
+    ok('the old target is kept for the days behind and fifty starts today', om && om.t && om.t.length === 2 && om.t[0].n === 40 && om.t[1].n === 50 && om.t[1].f === '2026-11-18', om && om.t);
+    await old.c.close();
+  }
+
+  console.log('\nSVC — twenty-five before noon, twenty-five before six');
   {
     const blocks = (page) => page.$$eval('.split > div:not(.sp-w)', (e) => e.map((x) => x.textContent.replace(/\s+/g, ' ').trim()));
     const { c, page } = await ctx(SEED);
     let b = await blocks(page);
-    ok('at ten: the morning is done, the afternoon has twenty to go', b.length === 2 && /Before 12:00\s*20 \/ 20\s*Done/.test(b[0]) && /By 18:00\s*0 \/ 20\s*20 to go/.test(b[1]), b);
-    await page.fill('#svB', '1145');
+    ok('at ten: the morning is done, the afternoon has twenty-five to go', b.length === 2 && /Before 12:00\s*25 \/ 25\s*Done/.test(b[0]) && /By 18:00\s*0 \/ 25\s*25 to go/.test(b[1]), b);
+    await page.fill('#svB', '1180');
     b = await blocks(page);
-    ok('typing 1145 before noon: forty on the counter, both blocks done', /Done/.test(b[0]) && /20 \/ 20\s*Done/.test(b[1]), b);
+    ok('typing 1180 before noon: fifty on the counter, both blocks done', /Done/.test(b[0]) && /25 \/ 25\s*Done/.test(b[1]), b);
     const r = (await store(page)).d['2026-11-18'];
-    ok('what was typed before noon is both the noon number and the six o\'clock number', r.b === 1145 && r.m === 1145 && r.e === 1145, r);
+    ok('what was typed before noon is both the noon number and the six o\'clock number', r.b === 1180 && r.m === 1180 && r.e === 1180, r);
     await c.close();
 
-    const seed2 = Object.assign({}, SEED, { d: Object.assign({}, SEED.d, { '2026-11-18': { b: 1115, m: 1115, e: 1115 } }) });
+    const seed2 = Object.assign({}, SEED, { d: Object.assign({}, SEED.d, { '2026-11-18': { b: 1145, m: 1145, e: 1145 } }) });
     const p2 = await ctx(seed2, '2026-11-18T14:00:00');
     b = await blocks(p2.page);
-    ok('at two: ten by noon is ten short of twenty, and no longer on its way', /10 \/ 20\s*10 short/.test(b[0]) && /0 \/ 20\s*20 to go/.test(b[1]), b);
-    await p2.page.fill('#svB', '1135');
+    ok('at two: fifteen by noon is ten short of twenty-five, no longer on its way', /15 \/ 25\s*10 short/.test(b[0]) && /0 \/ 25\s*25 to go/.test(b[1]), b);
+    await p2.page.fill('#svB', '1165');
     const r2 = (await store(p2.page)).d['2026-11-18'];
-    ok('typed in the afternoon it moves the six o\'clock number and leaves the noon one', r2.m === 1115 && r2.e === 1135, r2);
+    ok('typed in the afternoon it moves the six o\'clock number and leaves the noon one', r2.m === 1145 && r2.e === 1165, r2);
     b = await blocks(p2.page);
-    ok('thirty by six: ten of the afternoon\'s twenty, still the morning\'s ten short', /10 short/.test(b[0]) && /10 \/ 20\s*10 to go/.test(b[1]), b);
+    ok('thirty-five by six: ten of the afternoon\'s twenty-five', /10 short/.test(b[0]) && /10 \/ 25\s*15 to go/.test(b[1]), b);
     await p2.c.close();
 
-    const p3 = await ctx(Object.assign({}, seed2, { d: Object.assign({}, seed2.d, { '2026-11-18': { b: 1135, m: 1115, e: 1135 } }) }), '2026-11-18T19:00:00');
-    await p3.page.fill('#svB', '1160');
+    const p3 = await ctx(Object.assign({}, seed2, { d: Object.assign({}, seed2.d, { '2026-11-18': { b: 1165, m: 1145, e: 1165 } }) }), '2026-11-18T19:00:00');
+    await p3.page.fill('#svB', '1190');
     const r3 = (await store(p3.page)).d['2026-11-18'];
-    ok('typed after six it moves neither checkpoint', r3.m === 1115 && r3.e === 1135 && r3.b === 1160, r3);
+    ok('typed after six it moves neither checkpoint', r3.m === 1145 && r3.e === 1165 && r3.b === 1190, r3);
     b = await blocks(p3.page);
-    ok('and the afternoon is judged at six: ten of twenty, ten short', /10 \/ 20\s*10 short/.test(b[1]), b);
+    ok('and the afternoon is judged at six: ten of twenty-five, fifteen short', /10 \/ 25\s*15 short/.test(b[1]), b);
     const late = await p3.page.$('.sp-w') ? await txt(p3.page, '.sp-w') : 'none';
     ok('what came after is said, not lost', /25 logged after 18:00/.test(late), late);
     await p3.c.close();
 
     const w = await ctx(SEED, '2026-11-21T10:00:00');
     ok('on a Saturday, a work day, there is no split', (await w.page.$$('.split')).length === 0 && /Work day/.test(await txt(w.page, '#svRows')), await txt(w.page, '#svRows'));
-    ok('the day is still forty, whenever', /\/ 40/.test(await txt(w.page, '#svRows')));
+    ok('the day is still the day\'s target, whenever', /\/ 50/.test(await txt(w.page, '#svRows')));
     await w.c.close();
 
     const s1 = await ctx(SEED);
@@ -200,21 +253,26 @@ const SEED = {
     ok('Wednesday made a work day takes the split away at once', (await s1.page.$$('.split')).length === 0);
     ok('and the choice is kept', (await store(s1.page)).work.slice().sort().join() === '3,6', (await store(s1.page)).work);
     await s1.c.close();
+
+    const odd = await ctx(Object.assign({}, SEED, { t: [{ f: '2026-11-10', n: 65 }] }));
+    const ob = await blocks(odd.page);
+    ok('at sixty-five the halves are thirty-three and thirty-two', /\/ 33/.test(ob[0]) && /\/ 32/.test(ob[1]), ob);
+    await odd.c.close();
   }
 
   console.log('\nSVC — a day you forgot');
   {
     const { c, page } = await ctx(SEED);
     await page.click('button[data-day="2026-11-17"]'); await page.waitForSelector('.dlg');
-    ok('a day header opens that day\'s counter', /Yesterday/.test(await txt(page, '.dlg h2')) && (await page.$eval('[data-f="b"]', (e) => e.value)) === '1105');
-    ok('with the noon and six o\'clock numbers too', (await page.$eval('[data-f="m"]', (e) => e.value)) === '1090' && (await page.$eval('[data-f="e"]', (e) => e.value)) === '1105');
-    await page.fill('[data-f="m"]', '1100');
-    await page.fill('[data-f="b"]', '1110');
+    ok('a day header opens that day\'s counter', /Yesterday/.test(await txt(page, '.dlg h2')) && (await page.$eval('[data-f="b"]', (e) => e.value)) === '1130');
+    ok('with the noon and six o\'clock numbers too', (await page.$eval('[data-f="m"]', (e) => e.value)) === '1115' && (await page.$eval('[data-f="e"]', (e) => e.value)) === '1130');
+    await page.fill('[data-f="m"]', '1120');
+    await page.fill('[data-f="b"]', '1135');
     await page.keyboard.press('Enter');
     await page.waitForSelector('.veil', { state: 'detached' });
-    ok('the noon number is saved too', (await store(page)).d['2026-11-17'].m === 1100);
-    ok('the day recomputes: 1110 less 1080 is 30', (await store(page)).d['2026-11-17'].b === 1110 && /30 trades/.test(await txt(page, 'button[data-day="2026-11-17"]')), await txt(page, 'button[data-day="2026-11-17"]'));
-    ok('and today starts where that day now ends: 1125 less 1110 is 15', (await txt(page, '#svBig')) === '15', await txt(page, '#svBig'));
+    ok('the noon number is saved too', (await store(page)).d['2026-11-17'].m === 1120);
+    ok('the day recomputes: 1135 less 1100 is 35', (await store(page)).d['2026-11-17'].b === 1135 && /35 trades/.test(await txt(page, 'button[data-day="2026-11-17"]')), await txt(page, 'button[data-day="2026-11-17"]'));
+    ok('and today starts where that day now ends: 1155 less 1135 is 20', (await txt(page, '#svBig')) === '20', await txt(page, '#svBig'));
     await c.close();
   }
 
@@ -224,49 +282,28 @@ const SEED = {
     await page.click('#svGo');
     ok('start turns the button to End session', (await txt(page, '#svGo')) === 'End session');
     ok('the ring becomes a clock', await page.$eval('#svBig', (e) => e.classList.contains('is-clock')));
-    ok('the other kinds are locked while running', await page.$$eval('.kind', (b) => b.filter((x) => x.disabled).length === 2));
     ok('the ring breathes while a session runs', await page.$eval('.ring', (e) => e.classList.contains('is-run')));
     await page.evaluate(() => __adv(45 * 60e3));
     await page.reload(); await page.waitForSelector('#svBig');
     ok('a reload keeps the session on the clock', (await txt(page, '#svBig')) === '45:00', await txt(page, '#svBig'));
-    ok('the counter can be typed into while it runs, without stopping it', await page.fill('#svB', '1130').then(() => true) && (await store(page)).run !== null && (await store(page)).d['2026-11-18'].b === 1130);
+    ok('the counter can be typed into while it runs, without stopping it', await page.fill('#svB', '1160').then(() => true) && (await store(page)).run !== null && (await store(page)).d['2026-11-18'].b === 1160);
     await page.click('#svGo');
     ok('ending a backtest does not ask anything: it is filed with the time', !(await page.$('.dlg')));
     const s = await store(page), last = s.s[s.s.length - 1];
     ok('45 minutes, no trade count on it', last.k === 'bt' && last.b - last.a === 45 * 60e3 && last.n === 0 && s.run === null, last);
-    ok('the trades are the counter\'s: 25', (await txt(page, '#svBig')) === '25');
+    ok('the trades are the counter\'s: 30', (await txt(page, '#svBig')) === '30');
     await page.click('.toast button');
     ok('Undo takes the session back off', (await store(page)).s.length === SEED.s.length);
-    await c.close();
-  }
-
-  console.log('\nSVC — a live session, Space, delete, add');
-  {
-    const { c, page } = await ctx(SEED);
-    await page.click('.kind[data-k="live"]');
-    await page.keyboard.press('Space');
-    ok('Space starts a session', (await store(page)).run && (await store(page)).run.k === 'live');
-    await page.evaluate(() => __adv(30 * 60e3));
-    await page.evaluate(() => document.activeElement.blur());
-    await page.click('#svGo');
-    const s = await store(page);
-    ok('a live session files without asking', !(await page.$('.dlg')) && s.s[s.s.length - 1].k === 'live' && !s.run);
-    ok('live this week moves to 1h 30m', /^1h 30m/.test(await txt(page, '#svLv')), await txt(page, '#svLv'));
+    await page.click('#svAdd'); await page.waitForSelector('.dlg');
+    ok('a past session asks for the time and nothing about trades or kinds', !/trades/i.test(await txt(page, '.dlg')) && !(await page.$('#svPK')));
+    await page.fill('#svPS', '07:00'); await page.fill('#svPM', '50');
+    await page.click('.dlg [data-a="save"]');
+    ok('a past session is added, and the trades do not move', (await txt(page, '#svBig')) === '30' && (await store(page)).s.length === SEED.s.length + 1);
     const before = (await store(page)).s.length;
     await page.click('tr[data-i="f"] .del');
     ok('delete takes a session off', (await store(page)).s.length === before - 1);
     await page.click('.toast button');
     ok('and Undo puts it back', (await store(page)).s.length === before);
-    await page.click('#svAdd'); await page.waitForSelector('.dlg');
-    ok('a past session asks for the time and nothing about trades', !/trades/i.test(await txt(page, '.dlg')));
-    await page.selectOption('#svPK', 'bt');
-    await page.fill('#svPS', '07:00'); await page.fill('#svPM', '50');
-    await page.click('.dlg [data-a="save"]');
-    ok('a past session is added, and the trades do not move', (await txt(page, '#svBig')) === '20' && (await store(page)).s.length === before + 1);
-    await page.keyboard.press('Escape');
-    await page.click('#svSet'); await page.waitForSelector('.dlg');
-    await page.fill('[data-g="bt"]', '100'); await page.click('.dlg [data-a="save"]');
-    ok('the daily target moves to 100', /of 100 trades/.test(await txt(page, '#svSub')) && /\/ 700$/.test(await txt(page, '#svWk')));
     await c.close();
   }
 
@@ -278,7 +315,7 @@ const SEED = {
     ok('a running session offers Pause beside End session', (await txt(page, '#svPause')) === 'Pause' && (await txt(page, '#svGo')) === 'End session' && await page.$eval('#svBar', (e) => e.classList.contains('is-two')));
     await page.evaluate(() => __adv(20 * 60e3));
     await page.click('#svPause');
-    ok('pausing freezes the clock where it was', (await txt(page, '#svBig')) === '20:00' && /paused/.test(await txt(page, '#svSub')), [await txt(page, '#svBig'), await txt(page, '#svSub')]);
+    ok('pausing freezes the clock where it was', (await txt(page, '#svBig')) === '20:00' && /Paused/.test(await txt(page, '#svSub')), [await txt(page, '#svBig'), await txt(page, '#svSub')]);
     ok('the button becomes Resume, and the ring stops breathing', (await txt(page, '#svPause')) === 'Resume' && await page.$eval('.ring', (e) => e.classList.contains('is-paused') && !e.classList.contains('is-run')));
     await page.evaluate(() => __adv(15 * 60e3));
     await page.reload(); await page.waitForSelector('#svBig');
@@ -319,44 +356,15 @@ const SEED = {
     await o.c.close();
   }
 
-  console.log('\nSVC — live notes');
-  {
-    const { c, page } = await ctx(SEED);
-    ok('no notepad until a live session runs', await page.$eval('#svNotesP', (e) => e.hidden) && await page.$eval('#svTodayP', (e) => !e.hidden));
-    await page.click('.kind[data-k="live"]'); await page.click('#svGo');
-    ok('a live session opens the notepad in place of Today, focused', await page.$eval('#svNotesP', (e) => !e.hidden)
-      && await page.$eval('#svTodayP', (e) => e.hidden) && await page.evaluate(() => document.activeElement.id === 'svNotes'));
-    await page.keyboard.type('Sweep of the high <then> CISD');
-    await page.keyboard.press('Enter'); await page.keyboard.type('Second line');
-    ok('Space in the notes is a space, not a stop', (await store(page)).run !== null);
-    await page.waitForTimeout(400);
-    const NOTE = '10:00  Sweep of the high <then> CISD\n10:00  Second line';
-    ok('every line of the notes starts with the time it was written', (await page.$eval('#svNotes', (e) => e.value)) === NOTE, await page.$eval('#svNotes', (e) => e.value));
-    await page.evaluate(() => __adv(10 * 60e3));
-    await page.reload(); await page.waitForSelector('#svBig');
-    ok('a reload keeps the notes', (await page.$eval('#svNotes', (e) => e.value)) === NOTE);
-    await page.evaluate(() => __adv(50 * 60e3));
-    await page.waitForTimeout(1100);
-    ok('a repaint leaves the field alone', (await page.$eval('#svNotes', (e) => e.value)).endsWith('Second line'));
-    await page.click('#svGo');
-    const s = await store(page), last = s.s[s.s.length - 1];
-    ok('the notes are filed with the session, stamps and all', last.k === 'live' && last.t === NOTE && last.b - last.a === 60 * 60e3, last);
-    ok('Today comes back', await page.$eval('#svTodayP', (e) => !e.hidden));
-    const shown = await page.$eval('.note-r div', (e) => e.textContent);
-    ok('the log shows the notes as text, under the session', shown === NOTE, shown);
-    await c.close();
-  }
-
   console.log('\nSVC — the visuals');
   {
     const { c, page } = await ctx(SEED);
     ok('the year is fifty-three weeks of seven', (await page.$$('#svYr i')).length === 371);
-    ok('two days on target light white (Sunday and Monday)', (await page.$$('#svYr i.l3')).length === 2);
     ok('the days still to come are outlines, not misses', (await page.$$('#svYr i.is-ahead')).length === 4);
     ok('the year says what it counts', /2 days on target · best run 2/.test(await txt(page, '#svYrX')), await txt(page, '#svYrX'));
     ok('Monday is the top row: the first square is a Monday', await page.evaluate(() => /Mon/.test(document.querySelector('#svYr i').dataset.tip)));
     ok('thirty days of pace bars', (await page.$$('#svPc i')).length === 30);
-    ok('the fastest days are white (Sunday, Monday and today all run 3m 00s)', (await page.$$('#svPc i.is-best')).length === 3);
+    ok('the fastest days are white (Sunday, Monday and today all run 2m 24s)', (await page.$$('#svPc i.is-best')).length === 3);
     ok('a day with no backtests is an empty bar, not a slow one', (await page.$$('#svPc i.is-none')).length === 26);
     ok('the ring has no halo before the target', await page.evaluate(() => !document.querySelector('.ring').classList.contains('is-hit')));
     await page.hover('#svYr i.l3');
@@ -374,10 +382,11 @@ const SEED = {
   {
     const { c, page } = await ctx(SEED);
     await page.click('#svRev'); await page.waitForSelector('.dlg.wide');
-    ok('Review opens this week so far', /THIS WEEK\./.test(await txt(page, '.dlg')) && (await txt(page, '.rv-big b')) === '85');
+    ok('Review opens this week so far', /THIS WEEK\./.test(await txt(page, '.dlg')) && (await txt(page, '.rv-big b')) === '105');
+    ok('three figures: days on target, time, pace', (await page.$$('.rv-figs > div')).length === 3);
     ok('seven days of bars', (await page.$$('.rv-days i')).length === 7);
     await page.click('[data-a="prev"]');
-    ok('the arrow steps back a week', (await txt(page, '.rv-big b')) === '40' && /THE WEEK\./.test(await txt(page, '.rv-h')));
+    ok('the arrow steps back a week', (await txt(page, '.rv-big b')) === '50' && /THE WEEK\./.test(await txt(page, '.rv-h')));
     ok('and stops at the first week there is', await page.$eval('[data-a="prev"]', (e) => e.disabled));
     ok('nothing in it is red', await page.evaluate(() => [...document.querySelectorAll('.dlg *')].every((e) => { const m = getComputedStyle(e).color.match(/\d+/g).map(Number); return !(m[0] > 150 && m[1] < 100); })));
     await page.keyboard.press('Escape');
@@ -389,56 +398,45 @@ const SEED = {
     await n.page.reload(); await n.page.waitForSelector('#svBig');
     ok('once', !(await n.page.$('.dlg')));
     await n.c.close();
-    /* 245 trades this week already (Monday 16th, 245 on the counter); today's
-       sitting number takes it past 280 */
-    const w = await ctx({ s: [{ i: 'w', k: 'bt', a: at(16, 8), b: at(16, 10) }], d: { '2026-11-16': { a: 0, b: 245 } } });
-    await w.page.fill('#svB', '285');
+    /* 320 on the counter by Monday, so the week needs 350 and today's
+       sitting number takes it past */
+    const w = await ctx({ t: [{ f: '2026-11-10', n: 50 }], s: [{ i: 'w', k: 'bt', a: at(16, 8), b: at(16, 10) }], d: { '2026-11-16': { a: 0, b: 320 } } });
+    await w.page.fill('#svB', '365');
     ok('nothing happens while a number is half typed', !(await w.page.$('.dlg.wide')));
     await w.page.press('#svB', 'Enter');
     await w.page.waitForSelector('.dlg.wide');
-    ok('crossing 280 opens the week, celebrating', /WEEK DONE\./.test(await txt(w.page, '.rv-h')) && (await w.page.$$('.cf')).length > 20);
+    ok('crossing the week\'s 350 opens it, celebrating', /WEEK DONE\./.test(await txt(w.page, '.rv-h')) && (await w.page.$$('.cf')).length > 20);
     ok('the head glows', await w.page.$eval('.rv-h', (e) => e.classList.contains('is-win')));
     await w.c.close();
   }
 
-  console.log('\nSVC — the 8pm reminder');
-  {
-    const stub = `(() => { window.__notes = []; window.Notification = class { constructor(t, o) { __notes.push(t); } static get permission() { return 'granted'; } static requestPermission() { return Promise.resolve('granted'); } }; })();`;
-    const { c, page } = await ctx(SEED, '2026-11-18T20:05:00', stub);
-    await page.waitForSelector('.toast');
-    ok('at 20:05 it says the New York hour is on', /New York hour/.test(await txt(page, '.toast')));
-    ok('and sends a desktop notification', (await page.evaluate(() => __notes)).length === 1);
-    await page.click('.toast button');
-    ok('Start live starts the live session', (await store(page)).run.k === 'live');
-    await page.reload(); await page.waitForSelector('#svBig');
-    ok('once a day', !(await page.$('.toast')) && (await page.evaluate(() => __notes)).length === 0);
-    await c.close();
-    const done = Object.assign({}, SEED, { s: SEED.s.concat([{ i: 'L', k: 'live', a: at(18, 19), b: at(18, 19, 50) }]) });
-    const d2 = await ctx(done, '2026-11-18T20:05:00', stub);
-    await d2.page.waitForTimeout(300);
-    ok('not once a live session has happened today', !(await d2.page.$('.toast')));
-    await d2.c.close();
-    const d3 = await ctx(SEED, '2026-11-18T16:00:00', stub);
-    await d3.page.waitForTimeout(300);
-    ok('not outside its hour', !(await d3.page.$('.toast')));
-    await d3.c.close();
-  }
-
   console.log('\nSVC — damage and nothing');
   {
-    const bad = { s: [{ i: 'x', k: 'bt', a: 'no', b: 3 }, { i: 'y', k: 'gym', a: 1, b: 2 }, SEED.s[5]], g: { bt: -4 },
+    const bad = { s: [{ i: 'x', k: 'bt', a: 'no', b: 3 }, { i: 'y', k: 'gym', a: 1, b: 2 }, SEED.s[4]],
+      t: [{ f: 'soon', n: 50 }, { f: '2026-11-10', n: -3 }], g: { step: 'lots', every: 0 },
       d: { nonsense: { a: 1 }, '2026-11-18': { a: 'x', b: -5 }, '2026-11-17': { b: 30 }, '2026-11-16': 'text' } };
     const { c, page } = await ctx(bad);
     ok('a damaged session costs itself, not the log', (await page.$$('tr[data-i]')).length === 1);
-    ok('a broken target falls back to 40', /of 40 trades/.test(await txt(page, '#svSub')));
-    await page.click('.kind[data-k="live"]');
+    ok('a broken target history falls back to fifty from today', /of 50 trades/.test(await txt(page, '#svSub')));
+    await page.click('#svSet'); await page.waitForSelector('.dlg');
+    ok('a broken raise falls back to 15 every 14 days', (await page.$eval('[data-g="step"]', (e) => e.value)) === '15' && (await page.$eval('[data-g="every"]', (e) => e.value)) === '14');
+    await page.click('.dlg [data-a="save"]');
     const dk = Object.keys((await store(page)).d);
     ok('a damaged day costs itself: the broken ones are gone, the good one stays', dk.length === 1 && dk[0] === '2026-11-17', dk);
     ok('and today reads zero rather than nonsense', (await txt(page, '#svBig')) === '0');
     await c.close();
     const e = await ctx(null);
-    ok('an empty log says how to start', /Press Start session/.test(await txt(e.page, '#svLog')));
+    ok('an empty log says how to start', /Press Start backtesting/.test(await txt(e.page, '#svLog')));
+    await e.page.click('#svSet'); await e.page.waitForSelector('.dlg');
+    ok('and the target field says fifty', (await e.page.$eval('[data-g="n"]', (x) => x.value)) === '50');
     await e.c.close();
+
+    const legacy = { s: [{ i: 'L', k: 'live', a: at(17, 20), b: at(17, 21), t: '20:02  note' }, SEED.s[4]], d: SEED.d, t: SEED.t };
+    const l = await ctx(legacy);
+    ok('a live session from before is not shown and not counted', (await l.page.$$('tr[data-i]')).length === 1);
+    await l.page.fill('#svB', '1156');
+    ok('but it is not thrown away either', (await store(l.page)).s.length === 2 && (await store(l.page)).s[0].t === '20:02  note');
+    await l.c.close();
   }
 
   ok('nothing leaves the origin', offOrigin.length === 0, offOrigin);
