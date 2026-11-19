@@ -31,10 +31,7 @@ const at = (d, h, m) => new Date(`2026-11-${String(d).padStart(2, '0')}T${String
    Sessions are time. Sunday 15th and Monday 16th: two hours for fifty
    trades each. Tuesday 17th: an hour and a half for thirty. Today,
    Wednesday 18th: an hour for twenty-five. The counter starts the 15th at
-   1000, and every day after starts where the last one ended. m and e are
-   the counter as typed before noon and before six: Sunday and Monday had
-   thirty and fifty-ish by noon, Tuesday fifteen by noon and thirty by
-   six, today twenty-five already at ten o'clock. */
+   1000, and every day after starts where the last one ended. */
 const SEED = {
   t: [{ f: '2026-11-10', n: 50 }],
   s: [
@@ -45,10 +42,10 @@ const SEED = {
     { i: 'f', k: 'bt', a: at(18, 8), b: at(18, 9) },
   ],
   d: {
-    '2026-11-15': { a: 1000, b: 1050, m: 1030, e: 1050 },
-    '2026-11-16': { b: 1100, m: 1075, e: 1100 },
-    '2026-11-17': { b: 1130, m: 1115, e: 1130 },
-    '2026-11-18': { b: 1155, m: 1155, e: 1155 },
+    '2026-11-15': { a: 1000, b: 1050 },
+    '2026-11-16': { b: 1100 },
+    '2026-11-17': { b: 1130 },
+    '2026-11-18': { b: 1155 },
   },
 };
 
@@ -205,59 +202,30 @@ const SEED = {
     await old.c.close();
   }
 
-  console.log('\nSVC — twenty-five before noon, twenty-five before six');
+  console.log('\nSVC — no morning and afternoon timing');
   {
-    const blocks = (page) => page.$$eval('.split > div:not(.sp-w)', (e) => e.map((x) => x.textContent.replace(/\s+/g, ' ').trim()));
     const { c, page } = await ctx(SEED);
-    let b = await blocks(page);
-    ok('at ten: the morning is done, the afternoon has twenty-five to go', b.length === 2 && /Before 12:00\s*25 \/ 25\s*Done/.test(b[0]) && /By 18:00\s*0 \/ 25\s*25 to go/.test(b[1]), b);
-    await page.fill('#svB', '1180');
-    b = await blocks(page);
-    ok('typing 1180 before noon: fifty on the counter, both blocks done', /Done/.test(b[0]) && /25 \/ 25\s*Done/.test(b[1]), b);
-    const r = (await store(page)).d['2026-11-18'];
-    ok('what was typed before noon is both the noon number and the six o\'clock number', r.b === 1180 && r.m === 1180 && r.e === 1180, r);
+    const body = await page.evaluate(() => document.body.innerText);
+    ok('the page asks for the day\'s target and nothing about before noon or by six', !/Before 12|By 18|logged after|Work day|noon|afternoon|morning/i.test(body) && !(await page.$('.split')), body.match(/Before 12|By 18|logged after|Work day|noon|afternoon|morning/i));
+    await page.click('#svSet'); await page.waitForSelector('.dlg');
+    ok('settings has no days at work', !(await page.$('[data-w]')) && !/at work/i.test(await txt(page, '.dlg')));
+    await page.click('.dlg [data-a="x"]');
     await c.close();
 
-    const seed2 = Object.assign({}, SEED, { d: Object.assign({}, SEED.d, { '2026-11-18': { b: 1145, m: 1145, e: 1145 } }) });
-    const p2 = await ctx(seed2, '2026-11-18T14:00:00');
-    b = await blocks(p2.page);
-    ok('at two: fifteen by noon is ten short of twenty-five, no longer on its way', /15 \/ 25\s*10 short/.test(b[0]) && /0 \/ 25\s*25 to go/.test(b[1]), b);
-    await p2.page.fill('#svB', '1165');
-    const r2 = (await store(p2.page)).d['2026-11-18'];
-    ok('typed in the afternoon it moves the six o\'clock number and leaves the noon one', r2.m === 1145 && r2.e === 1165, r2);
-    b = await blocks(p2.page);
-    ok('thirty-five by six: ten of the afternoon\'s twenty-five', /10 short/.test(b[0]) && /10 \/ 25\s*15 to go/.test(b[1]), b);
-    await p2.c.close();
+    const late = await ctx(SEED, '2026-11-21T14:00:00');
+    ok('a Saturday is the same as any day: no work-day note, the day\'s target', !/Work day/.test(await txt(late.page, '#svRows')) && /\/ 50/.test(await txt(late.page, '#svRows')));
+    await late.page.fill('#svB', '1200');
+    const r = (await store(late.page)).d['2026-11-21'];
+    ok('what is typed at two o\'clock is the day\'s number and nothing more', JSON.stringify(Object.keys(r).sort()) === '["b"]' && r.b === 1200, r);
+    await late.c.close();
 
-    const p3 = await ctx(Object.assign({}, seed2, { d: Object.assign({}, seed2.d, { '2026-11-18': { b: 1165, m: 1145, e: 1165 } }) }), '2026-11-18T19:00:00');
-    await p3.page.fill('#svB', '1190');
-    const r3 = (await store(p3.page)).d['2026-11-18'];
-    ok('typed after six it moves neither checkpoint', r3.m === 1145 && r3.e === 1165 && r3.b === 1190, r3);
-    b = await blocks(p3.page);
-    ok('and the afternoon is judged at six: ten of twenty-five, fifteen short', /10 \/ 25\s*15 short/.test(b[1]), b);
-    const late = await p3.page.$('.sp-w') ? await txt(p3.page, '.sp-w') : 'none';
-    ok('what came after is said, not lost', /25 logged after 18:00/.test(late), late);
-    await p3.c.close();
-
-    const w = await ctx(SEED, '2026-11-21T10:00:00');
-    ok('on a Saturday, a work day, there is no split', (await w.page.$$('.split')).length === 0 && /Work day/.test(await txt(w.page, '#svRows')), await txt(w.page, '#svRows'));
-    ok('the day is still the day\'s target, whenever', /\/ 50/.test(await txt(w.page, '#svRows')));
-    await w.c.close();
-
-    const s1 = await ctx(SEED);
-    await s1.page.click('#svSet'); await s1.page.waitForSelector('.dlg');
-    const on = await s1.page.$$eval('[data-w]', (e) => e.filter((x) => x.checked).map((x) => +x.dataset.w).sort());
-    ok('Saturday and Sunday are the days at work until told otherwise', on.join() === '0,6', on);
-    await s1.page.check('[data-w="3"]'); await s1.page.uncheck('[data-w="0"]');
-    await s1.page.click('.dlg [data-a="save"]');
-    ok('Wednesday made a work day takes the split away at once', (await s1.page.$$('.split')).length === 0);
-    ok('and the choice is kept', (await store(s1.page)).work.slice().sort().join() === '3,6', (await store(s1.page)).work);
-    await s1.c.close();
-
-    const odd = await ctx(Object.assign({}, SEED, { t: [{ f: '2026-11-10', n: 65 }] }));
-    const ob = await blocks(odd.page);
-    ok('at sixty-five the halves are thirty-three and thirty-two', /\/ 33/.test(ob[0]) && /\/ 32/.test(ob[1]), ob);
-    await odd.c.close();
+    /* a record from before still reads right: its noon and six o'clock numbers are ignored and dropped */
+    const old = await ctx(Object.assign({}, SEED, { d: Object.assign({}, SEED.d, { '2026-11-18': { b: 1155, m: 1140, e: 1150 } }) }));
+    ok('a day saved with the old checkpoints still counts all of its trades', (await txt(old.page, '#svBig')) === '25');
+    await old.page.fill('#svB', '1156');
+    const od = (await store(old.page)).d['2026-11-18'];
+    ok('and loses only the checkpoints', JSON.stringify(Object.keys(od).sort()) === '["b"]' && od.b === 1156, od);
+    await old.c.close();
   }
 
   console.log('\nSVC — a day you forgot');
@@ -265,12 +233,10 @@ const SEED = {
     const { c, page } = await ctx(SEED);
     await page.click('button[data-day="2026-11-17"]'); await page.waitForSelector('.dlg');
     ok('a day header opens that day\'s counter', /Yesterday/.test(await txt(page, '.dlg h2')) && (await page.$eval('[data-f="b"]', (e) => e.value)) === '1130');
-    ok('with the noon and six o\'clock numbers too', (await page.$eval('[data-f="m"]', (e) => e.value)) === '1115' && (await page.$eval('[data-f="e"]', (e) => e.value)) === '1130');
-    await page.fill('[data-f="m"]', '1120');
+    ok('with just the start and the end: no noon or six o\'clock', (await page.$$('.dlg [data-f]')).length === 2 && !/12:00|18:00/.test(await txt(page, '.dlg')));
     await page.fill('[data-f="b"]', '1135');
     await page.keyboard.press('Enter');
     await page.waitForSelector('.veil', { state: 'detached' });
-    ok('the noon number is saved too', (await store(page)).d['2026-11-17'].m === 1120);
     ok('the day recomputes: 1135 less 1100 is 35', (await store(page)).d['2026-11-17'].b === 1135 && /35 trades/.test(await txt(page, 'button[data-day="2026-11-17"]')), await txt(page, 'button[data-day="2026-11-17"]'));
     ok('and today starts where that day now ends: 1155 less 1135 is 20', (await txt(page, '#svBig')) === '20', await txt(page, '#svBig'));
     await c.close();
