@@ -704,6 +704,8 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .fr-rg-cr { width: 20px; height: 20px; margin: 0 auto 2px; color: var(--rc); fill: var(--rc); stroke: var(--rc); stroke-width: 1.5; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
 #frRings .fr-row { padding: 12px 0; }
+.fr-row.is-off { display: none !important; }
+#frSearch { margin: 4px 0 10px; }
 #frRings .fr-live { color: var(--rc); }
 #frRings .fr-live::before { background: var(--rc); animation-name: fr-live-c; }
 /* on a friend's row it is THEIR colour: --good is the page's, which is yours */
@@ -6134,11 +6136,15 @@ function frPullAll(done) {
   /* everybody on the list, and your own record for the reactions on it */
   var left = FRS.list.length + 1;
   function one() { if (--left === 0) { frSave(); if (done) done(); } }
-  function pull(f) {
+  /* EIGHT AT A TIME: with a long list, asking for every friend at once is a burst the server and the phone both feel. */
+  var queue = [], active = 0;
+  function drain() { while (active < 8 && queue.length) { active++; fetchOne(queue.shift()); } }
+  function pull(f) { queue.push(f); drain(); }
+  function fetchOne(f) {
     frApi('GET', '/v1/lift/' + f.c).then(function (r) {
       if (r.st === 200) { f.n = r.j.n; f.s = r.j.s; f.at = r.j.at; f.rx = Array.isArray(r.j.rx) ? r.j.rx : []; f.gone = false; lfSlayCheck(f); }
       else if (r.st === 404) f.gone = true;
-    }).catch(function () {}).then(one);
+    }).catch(function () {}).then(function () { active--; one(); drain(); });
   }
   frApi('GET', '/v1/lift/' + FRS.code).then(function (r) {
     if (r.st !== 200) return;
@@ -7441,8 +7447,12 @@ function frRings(rows) {
      closest to their own */
   var ls = rows.map(frStand).sort(frCmp);
   var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div><div id="frBoard"></div></div>');
-  var g = $('g', c), drawn = ls.filter(function (x) { return !x.f.gone; }).slice(0, 6), n = drawn.length;
-  var sw = n > 4 ? 8 : 11, step = sw + 3, r0 = 69 - sw / 2;
+  /* THE RING IS A PODIUM, NOT A ROLL CALL. A circle each stops being a picture at a dozen friends and is a blur at two hundred, and a friend who has not trained yet is an empty track that says nothing. So it draws the five furthest ahead this week, and you: the list under it is where everybody is. */
+  var g = $('g', c), live0 = ls.filter(function (x) { return !x.f.gone; }), drawn = live0.filter(function (x) { return x.k > 0; }).slice(0, 5), n;
+  if (!drawn.some(function (x) { return x.f.me; })) { var mine0 = live0.filter(function (x) { return x.f.me; })[0]; if (mine0) drawn = drawn.slice(0, 4).concat([mine0]); }
+  if (!drawn.length) drawn = live0.slice(0, 1);
+  n = drawn.length;
+  var sw = n <= 2 ? 15 : n <= 4 ? 12 : 9, step = sw + 3, r0 = 69 - sw / 2;
   /* TRAINING NOW IS ON THE RING: theirs glows, a light rides its tip
      where the next workout will land, and the middle says who it is. */
   var live = [];
@@ -7534,7 +7544,7 @@ function frRings(rows) {
   ls.forEach(function (x) {
     var f = x.f, st = f.s || {};
     var row = el('<div class="fr-row"><button type="button" class="fr-open"></button><i class="fr-rg-k"></i><div class="fr-t"><b></b><span></span></div><span class="fr-wk lf-num"></span></div>');
-    row.dataset.c = f.c; row.style.setProperty('--rc', frColOf(st));
+    row.dataset.c = f.c; row.dataset.n = f.me ? (FRS.name || 'You') : (f.n || ''); row.style.setProperty('--rc', frColOf(st));
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
     $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend'); lfNameOn($('.fr-t b', row), st);
@@ -7568,8 +7578,31 @@ function frRings(rows) {
     $('.fr-open', row).addEventListener('click', function () { if (f.me) frSheet({ n: FRS.name || 'You', s: st, me: 1 }); else frSheet(f); });
     bd.appendChild(row);
   });
+  /* TEN AT A TIME, YOU ALWAYS. Two hundred rows is a page nobody reads; the top ten is the board, Show more opens twenty-five further, and a search finds anyone by name. Your own row is never hidden. */
+  var rowsAll = $$('.fr-row', bd);
+  if (rowsAll.length > FR_PAGE + 2) {
+    var more = el('<button type="button" class="lf-add" id="frMoreRows"></button>'), srch = el('<input class="lf-field" id="frSearch" type="search" placeholder="Search friends" aria-label="Search friends" autocomplete="off" />');
+    srch.value = frQ;
+    c.insertBefore(srch, bd); c.appendChild(more);
+    var paint = function () {
+      var q = frQ.trim().toLowerCase(), k = 0, hid = 0;
+      rowsAll.forEach(function (r) {
+        var match = !q || (r.dataset.n || '').toLowerCase().indexOf(q) >= 0, vis = match && (q ? true : (k < frShown || r.classList.contains('is-me')));
+        if (match && !q && !r.classList.contains('is-me')) k++;
+        if (match && !vis) hid++;
+        r.classList.toggle('is-off', !vis);
+      });
+      more.hidden = !hid; more.textContent = 'Show more · ' + hid;
+    };
+    srch.addEventListener('input', function () { frQ = srch.value; paint(); });
+    srch.addEventListener('focus', function () { frQFocus = true; }); srch.addEventListener('blur', function () { frQFocus = false; });
+    more.addEventListener('click', function () { frShown += 25; paint(); });
+    paint();
+    if (frQFocus) { srch.focus(); try { srch.setSelectionRange(srch.value.length, srch.value.length); } catch (e) {} }
+  }
   return c;
 }
+var FR_PAGE = 10, frShown = 10, frQ = '', frQFocus = false;
 function frHue(st) { var h = st && st.ac; return lfNeu(h) || lfTheme(h) ? h : typeof h === 'number' && isFinite(h) && h >= 0 && h < 360 ? h : null; }
 function frWoSheet(w, f) {
   /* THE FRIEND'S WORKOUT LOOKS LIKE THE ONE YOU FINISH: the day and the

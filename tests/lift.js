@@ -2665,6 +2665,40 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── A LONG LIST OF FRIENDS: the ring is a podium, the list is ten at a time, and the loading is a few at once ── */
+  {
+    const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    const codes = Array.from({ length: 60 }, (_, i) => 'ZZAAAA' + ABC[i >> 5] + ABC[i & 31]);
+    const list = codes.map((cd, i) => ({ c: cd, n: 'Friend ' + i, s: null, at: 0, gone: false, rx: [] }));
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 4, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }))}); localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify({ on: true, code: 'MEMEMEME', key: 'k', name: 'Me', list, pend: '', rx: [], no: [] }))}); })();`);
+    let inflight = 0, maxIn = 0, asked = 0;
+    await c.route('https://sched.nikorapullin.workers.dev/**', async (r) => {
+      const u = new URL(r.request().url()), mm = u.pathname.match(/^\/v1\/lift\/([A-Z0-9]{8})$/);
+      if (r.request().method() === 'GET' && mm) {
+        asked++; inflight++; maxIn = Math.max(maxIn, inflight); await new Promise((res) => setTimeout(res, 40)); inflight--;
+        const i = codes.indexOf(mm[1]);
+        return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ n: mm[1] === 'MEMEMEME' ? 'Me' : 'Friend ' + i, s: { wk: i >= 0 && i < 12 ? (i % 4) + 1 : 0, goal: 4, d: '', streak: 0, mu: [], bg: [], wl: [] }, rx: [], fo: [] }) });
+      }
+      r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{}' });
+    });
+    const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(400);
+    await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(2600);
+    ok('sixty friends are all asked for, and never more than eight at once', asked >= 60 && maxIn <= 8, { asked, maxIn });
+    ok('the ring draws five rings at most', await page.locator('#frRings .fr-rg-w svg circle.fr-rg-a').count() <= 5 && await page.locator('#frRings .fr-rg-w svg circle.fr-rg-a').count() >= 1);
+    ok('and nobody who has not trained is drawn as an empty track', await page.locator('#frRings .fr-rg-w svg g > circle:not(.fr-rg-a):not(.fr-rg-cm):not(.fr-rg-p):not(.fr-rg-h)').count() <= 5);
+    const vis = () => page.$$eval('#frBoard .fr-row', (r) => r.filter((x) => getComputedStyle(x).display !== 'none').length);
+    ok('the list shows ten, and your own row', await vis() <= 11 && await vis() >= 10, await vis());
+    ok('with a search and a Show more that says how many are hidden', await page.locator('#frSearch').count() === 1 && /Show more · \d+/.test(await page.textContent('#frMoreRows')));
+    await page.click('#frMoreRows'); await page.waitForTimeout(200);
+    ok('Show more opens twenty-five further', await vis() >= 35 && await vis() <= 37, await vis());
+    await page.fill('#frSearch', 'Friend 41'); await page.waitForTimeout(200);
+    ok('a search finds a friend who was hidden, by name', (await page.$$eval('#frBoard .fr-row:not(.is-off) .fr-t b', (b) => b.map((x) => x.textContent))).some((n) => n === 'Friend 41'));
+    await c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
