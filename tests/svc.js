@@ -187,7 +187,7 @@ const SEED = {
     ok('Space starts a session', (await store(page)).run && (await store(page)).run.k === 'live');
     await page.evaluate(() => __adv(30 * 60e3));
     await page.evaluate(() => document.activeElement.blur());
-    await page.keyboard.press('Space');
+    await page.click('#svGo');
     const s = await store(page);
     ok('a live session files without asking', !(await page.$('.dlg')) && s.s[s.s.length - 1].k === 'live' && !s.run);
     ok('live this week moves to 1h 30m', /^1h 30m/.test(await txt(page, '#svLv')), await txt(page, '#svLv'));
@@ -207,6 +207,55 @@ const SEED = {
     await page.fill('[data-g="bt"]', '100'); await page.click('.dlg [data-a="save"]');
     ok('the daily target moves to 100', /of 100 trades/.test(await txt(page, '#svSub')) && /\/ 700$/.test(await txt(page, '#svWk')));
     await c.close();
+  }
+
+  console.log('\nSVC — pause');
+  {
+    const { c, page } = await ctx(SEED);
+    ok('no pause button until a session runs', await page.$eval('#svPause', (e) => e.hidden));
+    await page.click('#svGo');
+    ok('a running session offers Pause beside End session', (await txt(page, '#svPause')) === 'Pause' && (await txt(page, '#svGo')) === 'End session' && await page.$eval('#svBar', (e) => e.classList.contains('is-two')));
+    await page.evaluate(() => __adv(20 * 60e3));
+    await page.click('#svPause');
+    ok('pausing freezes the clock where it was', (await txt(page, '#svBig')) === '20:00' && /paused/.test(await txt(page, '#svSub')), [await txt(page, '#svBig'), await txt(page, '#svSub')]);
+    ok('the button becomes Resume, and the ring stops breathing', (await txt(page, '#svPause')) === 'Resume' && await page.$eval('.ring', (e) => e.classList.contains('is-paused') && !e.classList.contains('is-run')));
+    await page.evaluate(() => __adv(15 * 60e3));
+    await page.reload(); await page.waitForSelector('#svBig');
+    ok('fifteen minutes away and a reload later it is still 20:00 and still paused', (await txt(page, '#svBig')) === '20:00' && (await txt(page, '#svPause')) === 'Resume');
+    await page.click('#svPause');
+    ok('resuming starts it going again', (await txt(page, '#svPause')) === 'Pause' && await page.$eval('.ring', (e) => e.classList.contains('is-run')));
+    await page.evaluate(() => __adv(10 * 60e3));
+    await page.reload(); await page.waitForSelector('#svBig');
+    ok('ten more minutes make thirty on the clock, the fifteen away not counted', (await txt(page, '#svBig')) === '30:00', await txt(page, '#svBig'));
+    await page.click('#svGo');
+    const s = await store(page), last = s.s[s.s.length - 1];
+    ok('filed: forty-five minutes of range, fifteen paused', last.b - last.a === 45 * 60e3 && last.p === 15 * 60e3, last);
+    ok('the log row says thirty minutes, and how long was paused', /30m/.test(await txt(page, `tr[data-i="${last.i}"] .d`)) && /15m paused/.test(await txt(page, `tr[data-i="${last.i}"] .k`)), await txt(page, `tr[data-i="${last.i}"]`));
+    ok('today counts the thirty on the clock, not the forty-five', /1h 30m on the clock/.test(await txt(page, '#svRows')), await txt(page, '#svRows'));
+    await c.close();
+
+    const k = await ctx(SEED);
+    await k.page.keyboard.press('Space');
+    ok('Space starts', (await store(k.page)).run !== null);
+    await k.page.keyboard.press('Space');
+    ok('and while running it pauses, never ends', (await store(k.page)).run !== null && (await store(k.page)).run.pa > 0 && (await store(k.page)).s.length === SEED.s.length);
+    await k.page.keyboard.press('Space');
+    ok('and resumes', (await store(k.page)).run.pa === null);
+    await k.c.close();
+
+    const e = await ctx(SEED);
+    await e.page.click('#svGo');
+    await e.page.evaluate(() => __adv(20 * 60e3));
+    await e.page.click('#svPause');
+    await e.page.evaluate(() => __adv(15 * 60e3));
+    await e.page.click('#svGo');
+    const es = await store(e.page), el = es.s[es.s.length - 1];
+    ok('ended while paused, it ends where the pause began: twenty minutes, nothing paused', el.b - el.a === 20 * 60e3 && !el.p && es.run === null, el);
+    await e.c.close();
+
+    const o = await ctx(Object.assign({}, SEED, { s: SEED.s.map((x) => x.i === 'f' ? Object.assign({}, x, { p: 20 * 60e3 }) : x) }));
+    ok('a session that paused counts its range less the pause: 40m, not 1h', /40m/.test(await txt(o.page, 'tr[data-i="f"] .d')) && /40m on the clock/.test(await txt(o.page, '#svRows')), [await txt(o.page, 'tr[data-i="f"] .d'), await txt(o.page, '#svRows')]);
+    await o.c.close();
   }
 
   console.log('\nSVC — live notes');

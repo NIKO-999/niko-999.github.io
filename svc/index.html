@@ -107,6 +107,14 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .go:hover { background: #e6e6e6; }
 .go.is-on { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
 .go.is-on:hover { background: #111; }
+/* Running, the one button becomes two: pause (or resume) beside end. */
+.gobar { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+.gobar.is-two { grid-template-columns: 1fr 1fr; }
+.go.soft { background: #1a1a1a; color: var(--ink); }
+.go.soft:hover { background: #262626; }
+.ring.is-paused .fl { opacity: .45; }
+.ring.is-paused .ring-big { color: var(--dim); }
+td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 .hint-k { font-size: 12px; color: var(--quiet); }
 
 /* ── today ── */
@@ -292,8 +300,11 @@ tr.has-note td { border-bottom: 0; }
         <button class="kind" data-k="live" aria-pressed="false">Live charts</button>
         <button class="kind" data-k="cnt" aria-pressed="false">Content + journal</button>
       </div>
-      <button class="go" id="svGo">Start session</button>
-      <div class="hint-k">Space starts and stops</div>
+      <div class="gobar" id="svBar">
+        <button class="go soft" id="svPause" hidden>Pause</button>
+        <button class="go" id="svGo">Start session</button>
+      </div>
+      <div class="hint-k" id="svKeys">Space starts a session</div>
     </div>
 
     <div class="card today">
@@ -369,6 +380,9 @@ function load() {
     return x && KINDS[x.k] && isFinite(x.a) && isFinite(x.b) && x.b >= x.a;
   }).map(function (x) {
     var o2 = { i: String(x.i || id()), k: x.k, a: +x.a, b: +x.b, n: x.k === 'bt' ? Math.max(0, Math.round(+x.n || 0)) : 0 };
+    /* time spent paused, written only when there was some, so every
+       session saved before pausing existed reads back as it was */
+    if (isFinite(x.p) && +x.p > 0 && +x.p < o2.b - o2.a) o2.p = Math.round(+x.p);
     if (typeof x.t === 'string' && x.t.trim()) o2.t = x.t.slice(0, 20000);
     return o2;
   }) : [];
@@ -382,7 +396,8 @@ function load() {
   });
   var g = Object.assign({}, GOAL0);
   if (o.g) Object.keys(GOAL0).forEach(function (k) { var v = +o.g[k]; if (v > 0) g[k] = Math.round(v); });
-  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a, t: typeof o.run.t === 'string' ? o.run.t.slice(0, 20000) : '' } : null;
+  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a, t: typeof o.run.t === 'string' ? o.run.t.slice(0, 20000) : '',
+    p: isFinite(o.run.p) && +o.run.p > 0 ? Math.round(+o.run.p) : 0, pa: isFinite(o.run.pa) && +o.run.pa >= +o.run.a ? +o.run.pa : null } : null;
   var rm = o.rem || {};
   var rem = { on: rm.on !== false, at: /^\d\d:\d\d$/.test(rm.at) ? rm.at : '20:00', last: typeof rm.last === 'string' ? rm.last : '' };
   return { s: s, d: d, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt', rem: rem,
@@ -428,10 +443,12 @@ function isoDay(t) { var d = new Date(t); return d.getFullYear() + '-' + pad(d.g
 function isoMs(k) { var p = k.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); }
 function short(t) { return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
 
-/* ── sums ── */
+/* ── sums ──
+   A session is on the clock for its range less the time paused. */
+function len(x) { return x.b - x.a - (x.p || 0); }
 function within(a, b) { return S.s.filter(function (x) { return x.a >= a && x.a < b; }); }
 function sum(list, k, f) { return list.reduce(function (t, x) { return x.k === k ? t + f(x) : t; }, 0); }
-function mins(list, k) { return sum(list, k, function (x) { return (x.b - x.a) / 6e4; }); }
+function mins(list, k) { return sum(list, k, function (x) { return len(x) / 6e4; }); }
 
 /* The counter at the end of the last recorded day before this one. */
 function prevEnd(t) {
@@ -449,7 +466,7 @@ function dayTrades(t) {
   return within(t, t + DAY).reduce(function (n, x) { return n + (x.k === 'bt' ? x.n : 0); }, 0);
 }
 function tradesIn(a, b) { var n = 0; for (var t = dayStart(a); t < b; t = addDays(t, 1)) n += dayTrades(t); return n; }
-function btMs(a, b) { return sum(within(a, b), 'bt', function (x) { return x.b - x.a; }); }
+function btMs(a, b) { return sum(within(a, b), 'bt', len); }
 /* Pace is backtesting time over trades, for the days that have both. */
 function rangePace(a, b) {
   var n = 0, ms = 0;
@@ -460,15 +477,18 @@ function pace() { var d0 = dayStart(Date.now()); return rangePace(addDays(d0, -2
 
 /* ── the ring ── */
 var R = 136, C = 2 * Math.PI * R;
+function el0() { return S.run ? (S.run.pa || Date.now()) - S.run.a - S.run.p : 0; }
 function paintRing() {
   var arc = $('svArc'), big = $('svBig'), sub = $('svSub');
   arc.style.strokeDasharray = C;
   var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), fr = done / S.g.bt;
   if (S.run) {
-    var el = now - S.run.a;
+    /* on the clock: since the start, less every pause, and frozen at the
+       moment of the pause while one is on */
+    var el = (S.run.pa || now) - S.run.a - S.run.p;
     big.textContent = clock(el); big.classList.add('is-clock');
     var goal = S.run.k === 'bt' ? 0 : (S.run.k === 'live' ? S.g.live : S.g.cnt) * 6e4;
-    sub.textContent = KINDS[S.run.k] + ' · since ' + hm(S.run.a);
+    sub.textContent = KINDS[S.run.k] + (S.run.pa ? ' · paused' : ' · since ' + hm(S.run.a));
     /* On a timed session the ring fills toward that session's own target.
        A backtest keeps the day's trades, because trades are the target. */
     if (goal) fr = (mins(within(d0, d0 + DAY), S.run.k) * 6e4 + el) / goal;
@@ -478,9 +498,10 @@ function paintRing() {
   }
   arc.style.strokeDashoffset = C * (1 - Math.min(1, fr));
   var rg = document.querySelector('.ring');
-  rg.classList.toggle('is-run', !!S.run);
+  rg.classList.toggle('is-run', !!S.run && !S.run.pa);
+  rg.classList.toggle('is-paused', !!(S.run && S.run.pa));
   rg.classList.toggle('is-hit', done >= S.g.bt);
-  document.title = S.run ? clock(now - S.run.a) + ' · ' + KINDS[S.run.k] : 'SVC';
+  document.title = S.run ? (S.run.pa ? 'Paused · ' : '') + clock(el0()) + ' · ' + KINDS[S.run.k] : 'SVC';
 }
 
 /* ── the counter ──
@@ -584,15 +605,15 @@ function paintLog() {
   function flush() {
     if (last === null) return;
     var items = list.filter(function (x) { return dayStart(x.a) === last; });
-    var n = dayTrades(last), ms = items.reduce(function (t, x) { return t + x.b - x.a; }, 0);
+    var n = dayTrades(last), ms = items.reduce(function (t, x) { return t + len(x); }, 0);
     html += '<div class="day-h"><span>' + dayName(last) + '</span><button class="link num" data-day="' + isoDay(last) + '" data-tip="Set this day\'s counter">' + (n ? n + ' trades · ' : '') + dur(ms) + '</button></div><table>' + rows + '</table>';
     rows = '';
   }
   list.slice(0, 200).forEach(function (x) {
     var d = dayStart(x.a);
     if (d !== last) { flush(); last = d; }
-    rows += '<tr data-i="' + x.i + '"' + (x.t ? ' class="has-note"' : '') + '><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + '</td>'
-      + '<td class="d num">' + dur(x.b - x.a) + '</td>'
+    rows += '<tr data-i="' + x.i + '"' + (x.t ? ' class="has-note"' : '') + '><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + (x.p ? '<small>' + dur(x.p) + ' paused</small>' : '') + '</td>'
+      + '<td class="d num">' + dur(len(x)) + '</td>'
       + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>'
       + (x.t ? '<tr class="note-r"><td colspan="4"><div>' + esc(x.t) + '</div></td></tr>' : '');
   });
@@ -616,9 +637,15 @@ function paintControls() {
     np.hidden = !live; $('svTodayP').hidden = live;
     if (live) { $('svNotes').value = S.run.t || ''; $('svNotesT').textContent = 'since ' + hm(S.run.a); }
   }
-  var go = $('svGo');
+  var go = $('svGo'), ps = $('svPause'), paused = on && !!S.run.pa;
   go.textContent = on ? 'End session' : 'Start session';
   go.classList.toggle('is-on', on);
+  ps.hidden = !on;
+  ps.textContent = paused ? 'Resume' : 'Pause';
+  /* the action on offer is the white one: resume while paused */
+  ps.classList.toggle('soft', !paused);
+  $('svBar').classList.toggle('is-two', on);
+  $('svKeys').textContent = on ? (paused ? 'Space resumes' : 'Space pauses') : 'Space starts a session';
 }
 
 function paint() {
@@ -738,25 +765,40 @@ function dialogOpen() { return !!document.querySelector('.veil'); }
 
 /* ── start and end ── */
 function start() {
-  S.run = { k: S.kind, a: Date.now(), t: '' };
+  S.run = { k: S.kind, a: Date.now(), t: '', p: 0, pa: null };
   save(); clockOn(); paint();
   if (S.run.k === 'live') { stampFirst(); $('svNotes').focus(); }
 }
 function file(sess) {
   S.s.push(sess); save(); paint();
-  toast(KINDS[sess.k] + ' · ' + dur(sess.b - sess.a), function () {
+  toast(KINDS[sess.k] + ' · ' + dur(len(sess)), function () {
     S.s = S.s.filter(function (x) { return x.i !== sess.i; }); save(); paint();
   });
 }
 function end() {
-  var run = S.run, b = Date.now();
+  var run = S.run, b = run ? (run.pa || Date.now()) : 0;
   if (!run) return;
   S.run = null; clockOn();
+  /* ended while paused, it ends where the pause began: the time away is
+     not part of the session, however long it was */
   var sess = { i: id(), k: run.k, a: run.a, b: b, n: 0 };
+  if (run.p > 0) sess.p = run.p;
   if (run.k === 'live') { var t = $('svNotes').value; if (t.trim()) sess.t = t.slice(0, 20000); }
   file(sess);
 }
 function toggle() { if (S.run) end(); else start(); }
+/* Pause stops the clock without ending anything: the bathroom, a call.
+   What was away is added to `p` on the way back, and the session keeps
+   counting from where it stopped. */
+function pause() {
+  if (!S.run || S.run.pa) return;
+  S.run.pa = Date.now(); save(); paint();
+}
+function resume() {
+  if (!S.run || !S.run.pa) return;
+  S.run.p += Date.now() - S.run.pa; S.run.pa = null; save(); paint();
+}
+function togglePause() { if (S.run && S.run.pa) resume(); else pause(); }
 
 /* ── the week in review ──
    Opens by itself on the first visit of a new week, for the week just
@@ -924,6 +966,7 @@ function settings() {
 
 /* ── wiring ── */
 $('svGo').addEventListener('click', toggle);
+$('svPause').addEventListener('click', togglePause);
 $('svKinds').addEventListener('click', function (e) {
   var b = e.target.closest('.kind'); if (!b || S.run) return;
   S.kind = b.dataset.k; save(); paintControls();
@@ -996,7 +1039,10 @@ document.addEventListener('keydown', function (e) {
   if (dialogOpen() || e.code !== 'Space' || e.repeat) return;
   var t = e.target, tag = t && t.tagName;
   if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
-  e.preventDefault(); toggle();
+  /* running, Space pauses and resumes; ending a session is the button
+     alone, so a stray press can never end one */
+  e.preventDefault();
+  if (S.run) togglePause(); else start();
 });
 /* Another window, or the same app open twice, writes the key: follow it. */
 /* typing is saved on a short timer; closing the window must not lose the last line */
