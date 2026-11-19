@@ -2210,15 +2210,7 @@ const freeze = (at) => `(() => {
     const where = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), cards = [...document.querySelectorAll('.lf-session .lf-ex')], c = cards.find((x) => x.dataset.ex === 'dbcurl'); return bd && c ? { top: Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top), st: Math.round(bd.scrollTop), first: cards[0].dataset.ex } : null; });
     ok('the workout opens on the exercise you were part way through, with its card at the top of the list', where && where.st > 0 && where.top >= 0 && where.top < 80, where);
     await page.evaluate(() => { document.querySelector('.lf-session .lf-sh-bd').scrollTo(0, 0); }); await page.waitForTimeout(300);
-    ok('every card has a target button beside swap and link, and none is the current one yet', await page.locator('.lf-session .lf-ex .lf-curb').count() === 3 && await page.locator('.lf-session .lf-curb[aria-pressed="true"]').count() === 0 && await page.evaluate(() => { const c = document.querySelector('.lf-session .lf-ex'), b = c.querySelector('.lf-curb').getBoundingClientRect(), s = c.querySelector('.lf-swp').getBoundingClientRect(), n = c.querySelector('.lf-ex-n').getBoundingClientRect(); return b.left >= n.right - 1 && b.right <= s.left + 12 && Math.abs((b.top + b.height / 2) - (s.top + s.height / 2)) < 4; }));
-    await page.locator('.lf-session .lf-ex[data-ex="abs"] .lf-curb').evaluate((e) => e.click()); await page.waitForTimeout(1100);
-    const pinned = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), c = document.querySelector('.lf-session .lf-ex[data-ex="abs"]'), b = c.querySelector('.lf-curb'); return { top: Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top), on: b.getAttribute('aria-pressed'), col: getComputedStyle(b).color, acc: getComputedStyle(document.documentElement).getPropertyValue('--log').trim(), others: document.querySelectorAll('.lf-session .lf-curb[aria-pressed="true"]').length }; });
-    ok('pressing it takes you there, lights it in the accent, and it is the only one', pinned.top >= 0 && pinned.top < 80 && pinned.on === 'true' && pinned.others === 1, pinned);
-    await page.reload(); await page.waitForTimeout(1500);
-    const again = await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), c = document.querySelector('.lf-session .lf-ex[data-ex="abs"]'); return { top: Math.round(c.getBoundingClientRect().top - bd.getBoundingClientRect().top), on: c.querySelector('.lf-curb').getAttribute('aria-pressed') }; });
-    ok('the app comes back to the pinned exercise, whatever you were part way through', again.top >= 0 && again.top < 80 && again.on === 'true', again);
-    await page.locator('.lf-session .lf-ex[data-ex="abs"] .lf-curb').evaluate((e) => e.click()); await page.waitForTimeout(300);
-    ok('pressed again it lets go', await page.locator('.lf-session .lf-curb[aria-pressed="true"]').count() === 0);
+    ok('there is no target button on a card any more, and the list goes to where you were', await page.locator('.lf-session .lf-ex .lf-curb').count() === 0);
     await c.close();
   }
   /* ── THE WORKOUT GUIDE: a film of supersets, warm-ups, drop sets, removing a set and swapping ── */
@@ -2227,13 +2219,11 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await page.waitForSelector('.lf-tr-stage', { timeout: 6000 }).catch(() => {});
     const g1 = [await page.locator('.lf-tr-stage').count(), await page.locator('.lf-session').count()];
     ok('the first workout opens the guide once, over the session', g1[0] === 1 && g1[1] === 1, g1);
-    ok('six scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove","Current exercise"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
+    ok('five scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
     await page.click('.lf-tr-segs button:nth-child(2)'); await page.waitForTimeout(3800);
     ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
     await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);
     ok('the drop scene hangs a drop row off the first set', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[1].classList.contains('is-drop'); }));
-    await page.click('.lf-tr-segs button:nth-child(6)'); await page.waitForTimeout(2600);
-    ok('the current-exercise scene lights the target on the second card and slides it to the top', await page.evaluate(() => { const b = document.querySelector('.lf-tr-stage [data-t="b"] .lf-curb'), sl = document.querySelector('.lf-tr-stage .tr-slide'); return b.getAttribute('aria-pressed') === 'true' && /translateY\(-/.test(sl.style.transform); }));
     await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3800);
     ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
@@ -2567,18 +2557,13 @@ const freeze = (at) => `(() => {
     await pg5.goto(URL); await pg5.waitForTimeout(500);
     await pg5.click('#lfPick'); await settle(pg5);
     await top(pg5).locator('#lfFinShare').click(); await settle(pg5);
-    ok('in the app the story has Instagram, Facebook and TikTok buttons beside Share video', await pg5.locator('#lfCardIg').count() === 1 && await pg5.locator('#lfCardFb').count() === 1 && await pg5.locator('#lfCardTt').count() === 1 && await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardSave').count() === 0);
-    ok('and none of them can be pressed until there is a video to send', await pg5.locator('#lfCardIg').isDisabled());
+    ok('in the app the story has one button, Share video, and none for Instagram, Facebook or TikTok', await pg5.locator('#lfCardShare').count() === 1 && await pg5.locator('#lfCardIg, #lfCardFb, #lfCardTt, #lfCardSave').count() === 0);
+    ok('and it cannot be pressed until there is a video to send', await pg5.locator('#lfCardShare').isDisabled());
     await pg5.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
-    await pg5.click('#lfCardIg'); await pg5.waitForTimeout(600);
-    const ig = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1]));
-    ok('Instagram is sent the recorded video, by name of the app', ig.length === 1 && ig[0].kind === 'instagram' && typeof ig[0].data === 'string' && ig[0].data.length > 1000 && /^(mp4|webm)$/.test(ig[0].ext), ig.map((x) => [x.kind, x.ext, (x.data || '').length]));
-    await pg5.click('#lfCardFb'); await pg5.click('#lfCardShare'); await pg5.waitForTimeout(600);
-    const kinds = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind));
-    ok('Facebook and the share sheet each send it too', kinds.join() === 'instagram,facebook,sheet', kinds);
-    await pg5.click('#lfCardTt'); await pg5.waitForTimeout(500);
-    ok('TikTok saves it to Photos first and opens TikTok', (await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1].kind))).slice(-1)[0] === 'tiktok');
-    ok('and says whether it worked', /Could not save|Saved to Photos|Allow Photos|Saved\./.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
+    await pg5.click('#lfCardShare'); await pg5.waitForTimeout(700);
+    const sh = await pg5.evaluate(() => window.__calls.filter((x) => x[0] === 'shareStory').map((x) => x[1]));
+    ok('the phone\'s own share sheet is sent the recorded video', sh.length === 1 && sh[0].kind === 'sheet' && typeof sh[0].data === 'string' && sh[0].data.length > 1000 && /^(mp4|webm)$/.test(sh[0].ext), sh.map((x) => [x.kind, x.ext, (x.data || '').length]));
+    ok('and when the sheet does not open it says so instead of doing nothing', /Could not open the share sheet/.test(await pg5.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await c5.close();
   }
 
@@ -2591,7 +2576,9 @@ const freeze = (at) => `(() => {
     await a.c.close();
     const b = await ctx({ unit: 'kg', wo: [W('c1', '2026-10-20', null, 10), W('c2', '2026-10-28', null, 11)] });
     const pct = (await b.page.textContent('#lfWeek .lf-pct')).trim();
-    ok('the reps are measured against the last time that workout was done', pct === '+10% vs last Push', pct);
+    ok('the reps are measured against the last time that workout was done', pct === '+10%' && (await b.page.getAttribute('#lfWeek .lf-pct', 'data-vs')) === 'Push', pct);
+    await b.page.click('#lfWeek'); await settle(b.page);
+    ok('and pressing it says which workout it was measured against', /vs last Push/.test(await top(b.page).locator('.lf-pct').textContent()), await top(b.page).locator('.lf-pct').textContent());
     await b.c.close();
     const g = await ctx({ unit: 'kg' });
     await g.page.click('#lfGo'); await settle(g.page);

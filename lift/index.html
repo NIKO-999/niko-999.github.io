@@ -243,6 +243,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-set input.is-cap { animation: lf-capn .35s; }
 @keyframes lf-capn { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .lf-pct { font-size: 11px; font-weight: 600; color: var(--good); }
+.lf-pct small { display: block; font-size: 11px; font-weight: 500; color: var(--dim); text-align: right; }
 /* goal hit: the screen goes dark, the ring closes, the sky lights up */
 .lf-gol { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; overflow: hidden; cursor: pointer;
   background: radial-gradient(120% 80% at 50% 45%, color-mix(in srgb, var(--log) 22%, #000 78%), rgba(0,0,0,.94) 70%); animation: lf-ghin .35s var(--ease) backwards; }
@@ -546,10 +547,6 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-grip:active { cursor: grabbing; color: var(--ink); }
 .lf-ex.is-lift { position: relative; z-index: 6; box-shadow: 0 18px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.14); transition: none; }
 .lf-ex.is-shift { transition: transform .18s ease; }
-.lf-curb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; flex: none; }
-.lf-curb::before { content: ''; position: absolute; inset: -6px -3px; }
-.lf-curb svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.lf-curb[aria-pressed="true"] { color: var(--log); background: color-mix(in srgb, var(--log) 18%, transparent); }
 .lf-swp { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; margin-right: -8px; }
 .lf-swp svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .lf-from { display: block; margin: 0 0 6px; min-height: 32px; text-align: left; font-size: 12px; font-weight: 600; color: var(--today-ink); }
@@ -2435,8 +2432,7 @@ var TOUR = [
   ['Warm-up', '+ Warm-up puts a lighter set above your first. It is not counted as a set and does not start the rest timer.', 5600],
   ['Drop set', '+ Drop set goes right after a set. Lower the weight and keep going straight away.', 6000],
   ['Remove a set', 'Swipe a set to the left to take it out. Warm-ups and drop sets go the same way.', 5000],
-  ['Swap or remove', 'The arrows swap it for a different exercise. The cross takes it out of the workout.', 5400],
-  ['Current exercise', 'Tap the target on an exercise to make it your current one. The app opens straight to it, and keeps coming back to it until you pick another.', 6200]
+  ['Swap or remove', 'The arrows swap it for a different exercise. The cross takes it out of the workout.', 5400]
 ];
 var TR_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>';
 var TR_SWAP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg>';
@@ -2446,7 +2442,7 @@ function trRow(kind, n, prev, w, r, done) {
   return '<div class="lf-set' + (kind === 'wu' ? ' is-wu' : kind === 'dr' ? ' is-drop' : '') + (done ? ' is-done' : '') + '" data-k="' + (kind || 's') + '">' + lead + '<span class="lf-prev lf-num">' + prev + '</span><input readonly tabindex="-1" value="' + w + '" /><input readonly tabindex="-1" value="' + r + '" /><span class="lf-chk"><span>' + IC.check + '</span></span></div>';
 }
 function trCard(id, name, rows, foot) {
-  return '<div class="lf-ex" data-t="' + id + '"><div class="lf-ex-hd"><button type="button" class="lf-ex-n" tabindex="-1">' + name + '</button><button type="button" class="lf-curb" tabindex="-1" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.200" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button><button type="button" class="lf-swp" tabindex="-1">' + TR_SWAP + '</button><button type="button" class="lf-ssb" tabindex="-1">' + TR_LINK + '</button><button type="button" class="lf-x" tabindex="-1">' + IC.x + '</button></div>'
+  return '<div class="lf-ex" data-t="' + id + '"><div class="lf-ex-hd"><button type="button" class="lf-ex-n" tabindex="-1">' + name + '</button><button type="button" class="lf-swp" tabindex="-1">' + TR_SWAP + '</button><button type="button" class="lf-ssb" tabindex="-1">' + TR_LINK + '</button><button type="button" class="lf-x" tabindex="-1">' + IC.x + '</button></div>'
     + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-set is-hd"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div><div class="tr-rows">' + rows + '</div>'
     + (foot ? '<div class="lf-ex-ft"><button type="button" tabindex="-1">+ Add set</button><button type="button" class="lf-drop-add" tabindex="-1">+ Drop set</button><button type="button" class="lf-wu-add" tabindex="-1">+ Warm-up</button></div>' : '') + '</div>';
 }
@@ -2500,12 +2496,9 @@ function lfTour() {
       T(1500, function () { r2.classList.add('is-sw'); r2.style.transform = 'translateX(-130px)'; r2.style.setProperty('--sw', 1); aim('.lf-set[data-k="s"]:nth-child(2) input', -90); });
       T(2500, function () { f.classList.remove('is-tap'); r2.style.opacity = 0; });
       T(3000, function () { r2.style.height = r2.offsetHeight + 'px'; void r2.offsetHeight; r2.style.transition = 'height .35s ease, margin .35s'; r2.style.height = '0px'; r2.style.minHeight = '0px'; var n3 = $('.lf-sn', rows3[2]); if (n3) n3.textContent = '2'; });
-    } else if (i === 4) {
+    } else {
       press('.lf-swp', 500, function () { var n = q('.lf-ex-n'); n.style.opacity = 0; T(260, function () { n.textContent = 'Leg press'; n.style.opacity = 1; }); });
       press('.lf-x', 2800, function () { A.style.opacity = 0; A.style.transform = 'scale(.94)'; });
-    } else {
-      press('[data-t="b"] .lf-curb', 900, function () { var k = $('.lf-curb', B); k.setAttribute('aria-pressed', 'true'); var sl = q('.tr-slide'); sl.style.transform = 'translateY(' + (-(A.offsetHeight + 10)) + 'px)'; });
-      press('[data-t="b"] .lf-chk', 3700, function () { tick($('.lf-set[data-k="s"]', B)); });
     }
     T(TOUR[i][2], function () { if (reduced) return; play(i >= TOUR.length - 1 ? i : i + 1); });
   }
@@ -3146,7 +3139,7 @@ function lfWeekCard(inSheet) {
   $('.lf-big', c).innerHTML = tot + '<small>reps</small>';
   /* AGAINST THE LAST TIME YOU DID THAT WORKOUT, not against last week: a week is a different number of sessions each time, and Pull against Legs says nothing. */
   var lw = woSorted().filter(function (w) { return w.d <= t; }).pop(), pw = lw && woSorted().filter(function (w) { return w.d < lw.d && w.n === lw.n; }).pop();
-  if (pw && woReps(pw) > 0 && woReps(lw) > 0) { var p = Math.round((woReps(lw) - woReps(pw)) / woReps(pw) * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '% vs last ' + lw.n; $('.lf-pct', c).dataset.vs = lw.n; if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
+  if (pw && woReps(pw) > 0 && woReps(lw) > 0) { var p = Math.round((woReps(lw) - woReps(pw)) / woReps(pw) * 100); $('.lf-pct', c).textContent = (p >= 0 ? '+' : '') + p + '%'; if (inSheet) { var sm = el('<small></small>'); sm.textContent = 'vs last ' + lw.n; $('.lf-pct', c).appendChild(sm); } $('.lf-pct', c).dataset.vs = lw.n; $('.lf-pct', c).setAttribute('aria-label', (p >= 0 ? '+' : '') + p + '% against the last ' + lw.n); if (p < 0) $('.lf-pct', c).style.color = 'var(--dim)'; }
   var max = Math.max.apply(null, reps.map(function (x) { return x.r; }).concat([1]));
   var bars = $('.lf-bars', c);
   reps.forEach(function (x, i) {
@@ -3559,7 +3552,7 @@ function lfPaintSession() {
     var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
     var aim = lfAim(e);
-    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-curb" aria-label="Make this the current exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.200" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-ssb" aria-label="Superset with the next exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
+    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-ssb" aria-label="Superset with the next exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
       + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><button type="button" class="lf-aim"></button>'
       + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
     card.dataset.ex = e.id;
@@ -3580,10 +3573,6 @@ function lfPaintSession() {
       card.insertBefore(sl, $('.lf-tg', card));
     }
     $('.lf-ex-n', card).textContent = e.n;
-    /* THE CURRENT EXERCISE IS YOURS TO PICK. The target on a card pins it: the list goes there now, the app comes back to it, and it stays the one until you pin another or take the pin off. It wears the accent while it is. */
-    var curB = $('.lf-curb', card), isCur = act.cur === e.id;
-    curB.setAttribute('aria-pressed', isCur ? 'true' : 'false'); curB.setAttribute('aria-label', isCur ? 'Current exercise. Press to let go' : 'Make this the current exercise');
-    curB.addEventListener('click', function () { act.cur = act.cur === e.id ? '' : e.id; lfCurExId = ''; lfSaveAct(); lfCurGo = act.cur ? 1 : 0; lfPaintSession(); });
     /* the bar starts where it was before this repaint and slides to now */
     var pbK = ei + ':' + e.id, pbNow = e.sets.length ? e.sets.filter(function (q) { return q.ok; }).length / e.sets.length * 100 : 0, pbI = $('.lf-ex-pb i', card);
     pbI.style.width = (pbK in lfPbWas ? lfPbWas[pbK] : pbNow) + '%'; lfPbWas[pbK] = pbNow;
@@ -4214,25 +4203,25 @@ function lfShareCardSheet(sp, name) {
   lfCardDraw(sp, 0, cv);
   var foot = [], blob = null, mime = lfCardMime(), ext = /mp4/.test(mime) ? 'mp4' : 'webm', url = '', rec = null, raf = 0, dead = false;
   var mk = function (id, txt, cls) { var q = el('<button type="button" class="lf-btn ' + (cls || '') + '" id="' + id + '" disabled></button>'); q.textContent = txt; return q; };
-  var ig = LF_WGT && LF_WGT.shareStory ? mk('lfCardIg', 'Instagram story', 'is-log') : null;
-  var fb = LF_WGT && LF_WGT.shareStory ? mk('lfCardFb', 'Facebook story') : null;
-  var tt = LF_WGT && LF_WGT.shareStory ? mk('lfCardTt', 'TikTok') : null;
-  /* ONE general button, Share video: the phone's own share sheet has Save Video in it, so a Save button of its own did nothing the sheet does not do better */
-  var gen = mk('lfCardShare', 'Share video', ig ? '' : 'is-log');
-  [ig, fb, tt, gen].forEach(function (q) { if (q) foot.push(q); });
+  /* ONE button, Share video: the phone's own share sheet has Save Video, Instagram, Facebook and TikTok in it, so none of them needs a button of its own */
+  var gen = mk('lfCardShare', 'Share video', 'is-log');
+  foot.push(gen);
   var enable = function () { foot.forEach(function (q) { q.disabled = false; }); };
   var file = function () { try { return new File([blob], name + '.' + ext, { type: mime.split(';')[0] }); } catch (e) { return null; } };
   var saveIt = function () { if (!blob) return; var a = document.createElement('a'); a.href = url; a.download = name + '.' + ext; document.body.appendChild(a); a.click(); a.remove(); };
   var toB64 = function (bl) { return new Promise(function (res) { var r = new FileReader(); r.onload = function () { res(String(r.result).split(',')[1] || ''); }; r.readAsDataURL(bl); }); };
   var native = function (kind) { if (!blob) return Promise.resolve(null); return toB64(blob).then(function (d) { return LF_WGT.shareStory({ kind: kind, data: d, ext: ext, appId: LF_FB_APP_ID }); }).catch(function () { return null; }); };
-  if (ig) ig.addEventListener('click', function () { native('instagram'); });
-  if (fb) fb.addEventListener('click', function () { native('facebook'); });
-  if (tt) tt.addEventListener('click', function () { native('tiktok').then(function (r) { lfToast(r && r.ok ? (r.opened ? 'Saved. Choose it in TikTok' : 'Saved to Photos. Open TikTok to post it') : r && r.denied ? 'Allow Photos in Settings to post' : 'Could not save'); }); });
+  /* THE WEB SHEET FIRST, THE NATIVE ONE IF IT CANNOT: sending ten seconds of video across the app's bridge as text can fail without a word, so the page's own file share goes first and the bridge is the way round it. Whatever fails says so, because a press that does nothing reads as a button that is broken. */
+  var fail = function () { lfToast('Could not open the share sheet'); };
+  var viaNative = function () {
+    if (!(LF_WGT && LF_WGT.shareStory)) { saveIt(); return; }
+    native('sheet').then(function (r) { if (!r || !r.via) fail(); });
+  };
   gen.addEventListener('click', function () {
     if (!blob) return;
-    if (LF_WGT && LF_WGT.shareStory) { native('sheet'); return; }
     var f = file();
-    if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function () {}); else saveIt();
+    if (f && navigator.canShare && navigator.canShare({ files: [f] })) navigator.share({ files: [f], title: 'Workout' }).catch(function (e) { if (e && e.name === 'AbortError') return; viaNative(); });
+    else viaNative();
   });
   /* THE VIDEO TAKES ITS TIME: 7.6 seconds for the figures to count up and the lines to come in, then 2.6 held, so what is shared is a little over ten seconds. At five it was gone before you had read it. */
   var DUR = 7600, HOLD = 2600, t0 = 0, chunks = [];
@@ -5814,7 +5803,7 @@ var FRK = 'lift.fr.v1';
 var FR_MAX = 500;
 var FR_ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 /* THE HOST: whoever turns friends on has the app's maker on their list from the first minute, and shows up on the maker's list too. It is only a friend like any other: it can be removed from the list, and a removal is kept. */
-var LF_HOST = '';
+var LF_HOST = '4ADG5X5C';
 function frLoad() {
   var d = { on: false, code: '', key: '', name: '', list: [], pend: '', rx: [], no: [] };
   try {
