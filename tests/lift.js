@@ -2672,7 +2672,7 @@ const freeze = (at) => `(() => {
     const list = codes.map((cd, i) => ({ c: cd, n: 'Friend ' + i, s: null, at: 0, gone: false, rx: [] }));
     const c = await browser.newContext(PHONE);
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
-    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 4, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }))}); localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify({ on: true, code: 'MEMEMEME', key: 'k', name: 'Me', list, pend: '', rx: [], no: [] }))}); })();`);
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 4, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }))}); localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify({ on: true, code: 'MEMEMEME', key: '0123456789abcdef0123456789abcdef', name: 'Me', list, pend: '', rx: [], no: [] }))}); })();`);
     let inflight = 0, maxIn = 0, asked = 0;
     await c.route('https://sched.nikorapullin.workers.dev/**', async (r) => {
       const u = new URL(r.request().url()), mm = u.pathname.match(/^\/v1\/lift\/([A-Z0-9]{8})$/);
