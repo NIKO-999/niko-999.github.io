@@ -80,6 +80,9 @@ button { cursor: pointer; background: none; border: 0; }
 .timer-card { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .ring { position: relative; width: 280px; height: 280px; }
 .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+/* the halo reaches past the drawing: an svg clips what it holds to its
+   own box, which drew the glow as a square. Let it out. */
+.ring svg { overflow: visible; }
 .ring circle { fill: none; stroke-width: 14; }
 .ring .tr { stroke: var(--track); }
 .ring .fl { stroke: var(--ink); stroke-linecap: round; transition: stroke-dashoffset .5s ease, filter .6s ease, opacity .3s; }
@@ -129,13 +132,24 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .fig span { color: var(--quiet); font-size: 12px; }
 
 /* ── week, target, month, streak ── */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin-top: var(--gap); align-items: stretch; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); margin-top: var(--gap); align-items: stretch; }
 .stat { display: flex; flex-direction: column; gap: 10px; }
 .stat-h { display: flex; justify-content: space-between; align-items: center; margin: -8px -10px -6px 0; }
 .stat-v { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
 .stat-v small { font-size: 14px; font-weight: 400; color: var(--quiet); letter-spacing: 0; }
 .stat .bar { margin-top: auto; }
 .stat-x { color: var(--dim); font-size: 12px; }
+/* a card that opens something is a button wearing the card's clothes */
+.stat-b { position: relative; text-align: left; width: 100%; font: inherit; color: inherit; cursor: pointer; transition: background .2s, border-color .2s; }
+.stat-b:hover { background: #0e0e0e; border-color: #2a2a2a; }
+.stat-b:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
+.chev { position: absolute; top: 22px; right: 26px; color: var(--quiet); font-size: 18px; line-height: 1; }
+.stat-b:hover .chev { color: var(--ink); }
+.ex { margin-top: 18px; }
+.ex-r { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-top: 1px solid var(--edge); }
+.ex-r span { color: var(--dim); }
+.ex-r b { font-size: 18px; font-weight: 700; }
+.ex-r small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 .dots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: auto; }
 .dots .dw { font-size: 10px; color: var(--quiet); text-align: center; }
 .dot { height: 16px; border-radius: 5px; background: var(--track); }
@@ -297,10 +311,9 @@ td.x { width: 56px; text-align: right; }
   </section>
 
   <section class="stats">
-    <div class="card stat"><div class="stat-h"><span class="lbl">This week</span><button class="link" id="svRev">Review</button></div><div class="stat-v num" id="svWk"></div><div class="stat-x" id="svWkX"></div><div class="bar"><i id="svWkB"></i></div></div>
     <div class="card stat"><span class="lbl">Target</span><div class="stat-v num" id="svTg"></div><div class="stat-x" id="svTgX"></div><div class="bar"><i id="svTgB"></i></div></div>
-    <div class="card stat"><span class="lbl">This month</span><div class="stat-v num" id="svMo"></div><div class="stat-x" id="svMoX"></div><div class="bar"><i id="svMoB"></i></div></div>
     <div class="card stat"><span class="lbl">Streak</span><div class="stat-v num" id="svSt"></div><div class="stat-x" id="svStX"></div><div class="dots" id="svDots"></div></div>
+    <button class="card stat stat-b" id="svEx" aria-label="Expectancy: what to expect at your pace. Open the detail"><span class="lbl">Expectancy</span><span class="chev" aria-hidden="true">›</span><div class="stat-v num" id="svExV"></div><div class="stat-x" id="svExX"></div><div class="bar"><i id="svExB"></i></div></button>
   </section>
 
   <section class="card pace-c">
@@ -559,23 +572,31 @@ function paintToday() {
 
 /* ── week, target, month, streak ── */
 function bar(id, f) { $(id).style.width = Math.round(Math.min(1, f) * 100) + '%'; }
+/* ── what to expect ──
+   Not a goal and not a grade: your own rate carried forward. The rate is
+   the trades a day over the days you have actually been at it, the last
+   fortnight at most, so a week that began on a Thursday is read as a
+   Thursday and not as a week short of three hundred. Today is expected
+   to finish at your rate, or where it already is if that is higher, and
+   every day still to come at the rate. It is a projection of the
+   volume you are doing. It says nothing about how the trades went: the
+   app counts them and does not record their results. */
+function expect() {
+  var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), first = firstDay();
+  var start = Math.max(first, addDays(d0, -14)), days = Math.round((d0 - start) / DAY);
+  var rate = days >= 1 ? tradesIn(start, d0) / days : done, rr = Math.round(rate);
+  var today = Math.max(done, rr), w0 = weekStart(now), m0 = monthStart(now);
+  var wkSo = tradesIn(w0, d0 + DAY), moSo = tradesIn(m0, d0 + DAY);
+  var wkLeft = 6 - ((new Date(now).getDay() + 6) % 7), moLeft = daysInMonth(now) - new Date(now).getDate();
+  return { has: tradesIn(first, d0 + DAY) > 0, rate: rate, rr: rr, days: days, done: done, today: today, wkSo: wkSo, moSo: moSo,
+    week: wkSo - done + today + rr * wkLeft, month: moSo - done + today + rr * moLeft };
+}
 function paintStats() {
-  var now = Date.now(), w0 = weekStart(now), m0 = monthStart(now), d0 = dayStart(now);
-  var wkT = tradesIn(w0, addDays(w0, 7)), wkGoal = goalIn(w0, addDays(w0, 7));
-  $('svWk').innerHTML = fmt(wkT) + ' <small>/ ' + fmt(wkGoal) + '</small>';
-  $('svWkX').textContent = wkT >= wkGoal ? 'Week done' : fmt(wkGoal - wkT) + ' to go';
-  bar('svWkB', wkT / wkGoal);
-
+  var now = Date.now(), d0 = dayStart(now);
   var nx = nextRaise();
   $('svTg').innerHTML = goal(d0) + ' <small>a day</small>';
   $('svTgX').textContent = nx ? nx.n + ' from ' + short(isoMs(nx.f)) + ' · ' + nx.days + (nx.days === 1 ? ' day' : ' days') : 'No raise set';
   bar('svTgB', nx ? nx.since / S.g.every : 0);
-
-  var dim = daysInMonth(now), moT = tradesIn(m0, addDays(m0, dim)), moGoal = goalIn(m0, addDays(m0, dim));
-  $('svMo').innerHTML = fmt(moT) + ' <small>/ ' + fmt(moGoal) + '</small>';
-  var expect = goalIn(m0, d0 + DAY);
-  $('svMoX').textContent = moT >= expect ? fmt(moT - expect) + ' ahead of pace' : fmt(expect - moT) + ' behind pace';
-  bar('svMoB', moT / moGoal);
 
   /* A day counts when that day's target was reached. The streak may end
      yesterday: today is not over, so not having hit it yet is not a
@@ -595,6 +616,14 @@ function paintStats() {
   }
   $('svDots').innerHTML = html;
   $('svStX').textContent = 'Best run ' + best;
+
+  var x = expect();
+  if (!x.has) { $('svExV').textContent = '–'; $('svExX').textContent = 'Log a day to see it'; bar('svExB', 0); }
+  else {
+    $('svExV').innerHTML = x.rr + ' <small>a day</small>';
+    $('svExX').textContent = fmt(x.week) + ' this week · ' + fmt(x.month) + ' this month';
+    bar('svExB', x.rate / goal(d0));
+  }
 }
 /* The first day anything was recorded, by session or by counter. */
 function firstDay() {
@@ -891,6 +920,24 @@ function crossed(w0, before) {
   if (before < g && after >= g && S.cel !== isoDay(w0)) { S.cel = isoDay(w0); save(); setTimeout(function () { review(w0, true); }, 300); }
 }
 
+/* ── expectancy, opened ── */
+function expectancy() {
+  var x = expect(), g = goal(dayStart(Date.now()));
+  var row = function (name, big, small) { return '<div class="ex-r"><span>' + name + '</span><b class="num">' + big + (small ? '<small>' + small + '</small>' : '') + '</b></div>'; };
+  var over = x.days >= 1 ? (x.days === 1 ? 'the last day' : 'the last ' + x.days + ' days') : 'today so far';
+  dialog('<h2>Expectancy</h2><p>' + (x.has ? 'What to expect at your own pace: ' + x.rr + ' a day over ' + over + '.' : 'Log a day and it works out what to expect.') + '</p>'
+    + (x.has ? '<div class="ex">'
+      + row('Today finishes at', fmt(x.today), 'you have ' + x.done)
+      + row('This week', fmt(x.week), x.wkSo + ' so far')
+      + row('This month', fmt(x.month), x.moSo + ' so far')
+      + row('Against ' + g + ' a day', x.rr >= g ? '✓' : fmt(g - x.rr), x.rr >= g ? 'at or above it' : 'a day short')
+      + '</div>' : '')
+    + '<div class="acts"><button class="btn" data-a="rv">Weekly review</button><button class="btn pri" data-a="x">Close</button></div>', function (d, close) {
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    d.querySelector('[data-a="rv"]').addEventListener('click', function () { close(); review(weekStart(Date.now()), false); });
+  });
+}
+
 /* ── the target and backup ──
    Changing the target here starts a new fortnight from today: it is
    written into the history from this day on, and every day before it
@@ -943,7 +990,7 @@ $('svGo').addEventListener('click', toggle);
 $('svPause').addEventListener('click', togglePause);
 $('svAdd').addEventListener('click', addPast);
 $('svSet').addEventListener('click', settings);
-$('svRev').addEventListener('click', function () { review(weekStart(Date.now()), false); });
+$('svEx').addEventListener('click', expectancy);
 
 /* The counter is saved as it is typed, so a closed window loses nothing,
    and the week is only judged when you leave the field: a number half

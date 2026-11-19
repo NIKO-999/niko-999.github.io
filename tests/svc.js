@@ -92,9 +92,7 @@ const SEED = {
     const rows = await txt(page, '#svRows');
     ok('today is backtesting and nothing else', /Backtesting/.test(rows) && !/Live|Content|journal/i.test(rows), rows);
     ok('25 to go on the day', /25 to go/.test(rows), rows);
-    ok('the week reads 105 of 350', /^105\s*\/ 350$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
-    /* twenty-three November days at fifty, then the raise on the 24th takes the last seven to sixty-five */
-    ok('the month knows the raise is coming: 23 days of 50 and 7 of 65', /^155\s*\/ 1,605$/.test(await txt(page, '#svMo')), await txt(page, '#svMo'));
+    ok('there is no week or month to chase: just the target, the streak and what to expect', await page.evaluate(() => [...document.querySelectorAll('.stat .lbl')].map((e) => e.textContent.trim()).join() === 'Target,Streak,Expectancy' && !/This week|This month/.test(document.body.innerText)));
     /* 6h 30m of backtesting over 155 trades is 2m 31s a trade; fifty take 2h 6m, sixty-five 2h 44m */
     ok('pace is time over trades', /30 days2m 31s/.test(await txt(page, '#svPaceF')), await txt(page, '#svPaceF'));
     ok('what fifty take, and what the next target would take', /50 trades take2h 6m/.test(await txt(page, '.pace')) && /65 trades would take2h 44m/.test(await txt(page, '.pace')), await txt(page, '.pace'));
@@ -108,7 +106,7 @@ const SEED = {
       const a = document.querySelector('.timer-card').getBoundingClientRect(), b = document.querySelector('.today').getBoundingClientRect();
       return Math.abs(a.top - b.top) < 1 && Math.abs(a.height - b.height) < 1;
     }));
-    ok('the four stat cards are one height', await page.evaluate(() => new Set([...document.querySelectorAll('.stat')].map((e) => Math.round(e.getBoundingClientRect().height))).size === 1));
+    ok('the three stat cards are one height', await page.evaluate(() => new Set([...document.querySelectorAll('.stat')].map((e) => Math.round(e.getBoundingClientRect().height))).size === 1));
     ok('nothing runs off the side', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
     ok('and everything that is not backtesting is gone from the page', await page.evaluate(() => {
       const t = document.body.innerText;
@@ -129,7 +127,6 @@ const SEED = {
     await page.fill('#svA', '1125');
     ok('typing a start overrides the carried one: 1180 less 1125', (await txt(page, '#svBig')) === '55');
     ok('the field keeps the digits you typed through the repaint', (await page.$eval('#svA', (e) => e.value)) === '1125');
-    ok('the week follows the counter: Monday 50, Tuesday 30, today 55', /^135\s*\/ 350$/.test(await txt(page, '#svWk')), await txt(page, '#svWk'));
     await page.fill('#svB', '');
     ok('clearing where it sits clears the day', (await txt(page, '#svBig')) === '0');
     await page.fill('#svA', '');
@@ -344,10 +341,77 @@ const SEED = {
     await c.close();
   }
 
+  console.log('\nSVC — expectancy');
+  {
+    const { c, page } = await ctx(SEED);
+    /* Sunday, Monday and Tuesday are the three full days: 50 + 50 + 30 is 43 a day */
+    ok('the card says the rate, and what that makes of the week and the month', /^43\s*a day$/.test(await txt(page, '#svExV')) && /295 this week · 689 this month/.test(await txt(page, '#svExX')), [await txt(page, '#svExV'), await txt(page, '#svExX')]);
+    ok('and the bar is the rate against the target: 43 of 50', Math.abs(parseFloat(await page.$eval('#svExB', (e) => e.style.width)) - 86) <= 1, await page.$eval('#svExB', (e) => e.style.width));
+    ok('the three cards start their labels on one line, and are one height', await page.evaluate(() => { const l = [...document.querySelectorAll('.stat > .lbl')].map((e) => Math.round(e.getBoundingClientRect().top)); return new Set(l).size === 1 && l.length === 3; }), await page.evaluate(() => [...document.querySelectorAll('.stat > .lbl')].map((e) => Math.round(e.getBoundingClientRect().top))));
+    ok('it is a button, named for what it opens', await page.$eval('#svEx', (e) => e.tagName === 'BUTTON' && /Expectancy/.test(e.getAttribute('aria-label'))));
+    await page.click('#svEx'); await page.waitForSelector('.dlg');
+    const d = await txt(page, '.dlg');
+    ok('pressing it opens the detail, in plain words', /Expectancy/.test(d) && /43 a day over the last 3 days/.test(d), d);
+    ok('today is expected to finish at the rate, from the 25 it has', /Today finishes at43you have 25/.test(d), d);
+    ok('the week: 80 already, today to 43, four days at 43 more: 295', /This week295105 so far/.test(d), d);
+    ok('the month: 689 from 155 so far', /This month689155 so far/.test(d), d);
+    ok('and how far that is from the target, as a plain number', /Against 50 a day7a day short/.test(d), d);
+    ok('it leaves a way to the weekly review, and a way out', (await page.$$('.dlg [data-a="rv"], .dlg [data-a="x"]')).length === 2);
+    await page.click('[data-a="x"]');
+    ok('Close puts it away', !(await page.$('.dlg')));
+    await c.close();
+
+    const none = await ctx({ s: [], d: {} });
+    ok('with nothing logged it says so rather than inventing a rate', (await txt(none.page, '#svExV')) === '–' && /Log a day/.test(await txt(none.page, '#svExX')));
+    await none.page.click('#svEx'); await none.page.waitForSelector('.dlg');
+    ok('and the detail asks for a day', /Log a day/.test(await txt(none.page, '.dlg')) && !(await none.page.$('.ex')));
+    await none.c.close();
+
+    /* a week that began on a Thursday is read as a Thursday: one day at 40 is 40 a day */
+    const thu = await ctx({ t: [{ f: '2026-11-19', n: 50 }], s: [{ i: 'x', k: 'bt', a: at(19, 9), b: at(19, 10) }], d: { '2026-11-19': { a: 2000, b: 2040 } } }, '2026-11-20T10:00:00');
+    ok('started on a Thursday, read on the Friday: 40 a day, not a week short', /^40\s*a day$/.test(await txt(thu.page, '#svExV')), await txt(thu.page, '#svExV'));
+    ok('the rest of the week is Friday at 40 and the weekend at 40: 40 + 3 x 40 = 160', /160 this week/.test(await txt(thu.page, '#svExX')), await txt(thu.page, '#svExX'));
+    await thu.c.close();
+
+    /* today ahead of its own rate stays where it is */
+    const ahead = await ctx(Object.assign({}, SEED, { d: Object.assign({}, SEED.d, { '2026-11-18': { b: 1190 } }) }));
+    await ahead.page.click('#svEx'); await ahead.page.waitForSelector('.dlg');
+    const ad = await txt(ahead.page, '.dlg');
+    ok('a day already past the rate is expected to finish where it is', /Today finishes at60you have 60/.test(ad), ad);
+    await ahead.c.close();
+  }
+
+  console.log('\nSVC — the ring\'s glow is not boxed in');
+  {
+    const { c, page } = await ctx(SEED);
+    await page.fill('#svB', '1180');
+    await page.press('#svB', 'Enter');
+    await page.waitForFunction(() => document.querySelector('.ring').classList.contains('is-hit'));
+    await page.waitForTimeout(1100);
+    const box = await page.$eval('.ring svg', (e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+    const pad = 24;
+    const shot = await page.screenshot({ clip: { x: box.x - pad, y: box.y - pad, width: box.w + pad * 2, height: box.h + pad * 2 } });
+    const L = await page.evaluate(async ({ b64, pts }) => {
+      const img = new Image(); img.src = 'data:image/png;base64,' + b64; await img.decode();
+      const cv = document.createElement('canvas'); cv.width = img.width; cv.height = img.height;
+      const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0);
+      return pts.map((p) => { const d = cx.getImageData(Math.round(p[0]), Math.round(p[1]), 1, 1).data; return (d[0] + d[1] + d[2]) / 3; });
+    }, { b64: shot.toString('base64'), pts: [
+      [pad + box.w - 2, pad + box.h / 2], [pad + box.w + 2, pad + box.h / 2],
+      [pad + box.w / 2, pad + 2], [pad + box.w / 2, pad - 2],
+    ] });
+    /* inside the drawing's own box and just outside it should be one continuous falloff, not a lit square and then black */
+    ok('the glow carries on past the edge of the drawing on the right', L[1] > 14 && (L[1] - 10) >= 0.4 * (L[0] - 10), L);
+    ok('and over the top', L[3] > 14 && (L[3] - 10) >= 0.4 * (L[2] - 10), L);
+    ok('nothing about the ring clips: its drawing lets its glow out', await page.$eval('.ring svg', (e) => getComputedStyle(e).overflow === 'visible'));
+    await c.close();
+  }
+
   console.log('\nSVC — the week in review');
   {
     const { c, page } = await ctx(SEED);
-    await page.click('#svRev'); await page.waitForSelector('.dlg.wide');
+    await page.click('#svEx'); await page.waitForSelector('.dlg');
+    await page.click('[data-a="rv"]'); await page.waitForSelector('.dlg.wide');
     ok('Review opens this week so far', /THIS WEEK\./.test(await txt(page, '.dlg')) && (await txt(page, '.rv-big b')) === '105');
     ok('three figures: days on target, time, pace', (await page.$$('.rv-figs > div')).length === 3);
     ok('seven days of bars', (await page.$$('.rv-days i')).length === 7);
@@ -374,6 +438,12 @@ const SEED = {
     ok('crossing the week\'s 350 opens it, celebrating', /WEEK DONE\./.test(await txt(w.page, '.rv-h')) && (await w.page.$$('.cf')).length > 20);
     ok('the head glows', await w.page.$eval('.rv-h', (e) => e.classList.contains('is-win')));
     await w.c.close();
+    /* a week that holds a raise is judged on the days as they will be: Monday at 50, then six at 65 */
+    const rs = await ctx(Object.assign({}, SEED, { rev: '2026-11-16' }), '2026-11-23T10:00:00');
+    await rs.page.click('#svEx'); await rs.page.waitForSelector('.dlg');
+    await rs.page.click('[data-a="rv"]'); await rs.page.waitForSelector('.dlg.wide');
+    ok('the week of the raise asks for 440: 50, then six days of 65', /trades of 440/.test(await txt(rs.page, '.rv-big')), await txt(rs.page, '.rv-big'));
+    await rs.c.close();
   }
 
   console.log('\nSVC — damage and nothing');
