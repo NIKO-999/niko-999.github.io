@@ -198,7 +198,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, UIImagePickerContro
     @objc func caps(_ call: CAPPluginCall) {
         let health = (Bundle.main.object(forInfoDictionaryKey: "LiftCaps") as? Bool) ?? false
         let group = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: groupId) != nil
-        call.resolve(["health": health, "group": group])
+        let version = (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String) ?? ""
+        call.resolve(["health": health, "group": group, "version": version])
     }
 
     @objc func setSnapshot(_ call: CAPPluginCall) {

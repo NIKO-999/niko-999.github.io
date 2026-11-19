@@ -37,7 +37,7 @@ const freeze = (at) => `(() => {
      visit only, so this does it each time one appears. The one check
      about folding uses newCtx and starts them shut. */
   const newCtx = browser.newContext.bind(browser);
-  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); if (!('tour' in o)) { o.tour = true; v = JSON.stringify(o); } } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfFocus', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
+  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); if (!('tour' in o)) { o.tour = true; v = JSON.stringify(o); } } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript('window.__lfInline = 1;'); await c.addInitScript(`new MutationObserver(() => { if (window.__keepCol) return; const d = document.getElementById('lfColDone'); if (d) d.click(); }).observe(document, { childList: true, subtree: true });`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
@@ -65,7 +65,7 @@ const freeze = (at) => `(() => {
   const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1') || 'null'));
   const settle = (page) => page.waitForTimeout(420);
   /* Customise is a fold, shut until pressed: open it before a row inside it is */
-  const cuOpen = async (page) => { if (await page.getAttribute('#lfCuF h3 > button', 'aria-expanded') !== 'true') { await page.click('#lfCuF h3 > button'); await page.waitForTimeout(300); } };
+  const cuOpen = async () => {};
   const top = (page) => page.locator('.lf-sheet').last();
 
   /* ── a first open ── */
@@ -1021,7 +1021,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
     ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 247 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 247/.test(await page.textContent('#lfBadges .lf-hd')));
+    ok('and counts them', /4 of 247/.test(await page.textContent('#lfBadgesRow')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
@@ -1050,28 +1050,26 @@ const freeze = (at) => `(() => {
     ok('its weekly targets put quads and calves first', (await store(page)).focus.slice(0, 2).map((f) => f.m).sort().join() === 'Calves,Quads');
     await c.close();
   }
-  /* You folds: settings and badges are shut until opened, and remember */
+  /* You is a plain list: nothing on it folds, and each row opens a screen of its own */
   {
     const c = await newCtx(PHONE);
-    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[]}'); })();`);
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"tour":true}'); })();`);
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    const st = async () => page.evaluate(() => ['lfSet', 'lfBadges', 'lfFocus'].map((id) => { const b = document.querySelector('#' + id + ' h3 > button'); return b && b.getAttribute('aria-expanded') + ':' + document.getElementById(b.getAttribute('aria-controls')).hidden; }).join());
-    ok('settings, badges and focus are shut by default, each a button inside its heading', await st() === 'false:true,false:true,false:true');
-    ok('and a shut badge shelf builds no badges', await page.locator('#lfBadges .lf-coin').count() === 0 && /of 247/.test(await page.textContent('#lfBadges h3')));
-    await page.click('#lfSet h3 > button'); await page.click('#lfBadges h3 > button'); await page.click('#lfFocus h3 > button'); await settle(page);
-    ok('pressing the heading opens it', await st() === 'true:false,true:false,true:false' && await page.locator('#lfFocus .lf-li').count() > 0 && await page.locator('#lfUnit').isVisible() && await page.locator('#lfBadges .lf-coin').count() === 247);
+    ok('nothing on You folds open and shut', await page.locator('#lfYou .lf-fold, #lfYou button[aria-expanded]').count() === 0);
+    ok('it is weight, goals and one list of five rows', await page.locator('#lfYou #lfBw').count() === 1 && await page.locator('#lfTargets').count() === 1 && (await page.locator('#lfMenu .lf-rowl b').allTextContents()).join() === 'Muscle targets,Appearance,Badges,Monthly medals,Settings');
+    ok('a shelf builds nothing until its row is pressed', await page.locator('.lf-coin').count() === 0 && /of 247/.test(await page.textContent('#lfBadges')));
+    await page.click('#lfBadges'); await settle(page);
+    ok('pressing a row opens its screen', await page.locator('.lf-sheet #lfBadgesBody .lf-coin').count() === 247);
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.click('#lfSet'); await settle(page);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
-    ok('a save redraws the page and keeps what you opened', await st() === 'true:false,true:false,true:false');
+    ok('a press on that screen shows its new state at once', await page.getAttribute('#lfUnit [data-u="lb"]', 'aria-pressed') === 'true' && await page.getAttribute('#lfUnit [data-u="kg"]', 'aria-pressed') === 'false');
     await page.click('#lfUnit [data-u="kg"]'); await settle(page);
-    await page.click('.lf-bar [data-v="home"]'); await settle(page); await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('leaving the tab shuts them again', await st() === 'false:true,false:true,false:true');
-    await page.click('#lfSet h3 > button'); await settle(page);
-    await page.reload(); await page.waitForTimeout(300); await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('and so does closing the app', await st() === 'false:true,false:true,false:true' && !(await page.evaluate(() => localStorage.getItem('lift.fold.v1'))));
+    await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfTgEdit'); await settle(page);
-    ok('Edit targets on Home opens the focus list it goes to', await page.getAttribute('#lfFocus h3 > button', 'aria-expanded') === 'true');
+    ok('Edit targets on Home opens the muscle targets', await page.locator('.lf-sheet #lfFocus .lf-li').count() > 0);
     await c.close();
   }
   /* the trophy case and the monthly medals */
@@ -1083,7 +1081,6 @@ const freeze = (at) => `(() => {
     }
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    await page.click('#lfMedals h3 > button'); await settle(page);
     const med = await page.$$eval('#lfMedals .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
     ok('every week of a month on goal wins its medal, on the day the last week gets there', med.join() === 'October 2026:Perfect month,September 2026:Perfect month', med);
     ok('a record that already had its month counts it as seen, not news', (await store(page)).bseen.m202609 === 1);
@@ -1099,7 +1096,6 @@ const freeze = (at) => `(() => {
     }
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    await page.click('#lfMedals h3 > button'); await settle(page);
     const mm = await page.$$eval('#lfMedals .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent + ':' + (/is-t4/.test(e.querySelector('.lf-coin').className) ? 4 : /is-t3/.test(e.querySelector('.lf-coin').className) ? 3 : 0)));
     ok('a month with a session over the goal every week is an exotic medal, and the biggest month yet, with three to compare, is a mythic one', mm.join() === 'October 2026:Record month:4,September 2026:Above the goal:3,August 2026:Above the goal:3', mm);
     await c.close();
@@ -1309,15 +1305,19 @@ const freeze = (at) => `(() => {
     const B = await phone({ unit: 'kg', goal: 3, wo: [wo('2026-10-12', [{ w: 60, r: 10 }])] }, '#add=' + codeA);
     ok('a link opens on Friends and the code leaves the bar', await B.page.locator('#lfFr:not([hidden])').count() === 1 && !(await B.page.evaluate(() => location.hash)));
     ok('and says who sent it before anything is turned on', await B.page.locator('.fr-pend').count() === 1 && m.size === 1);
-    await B.page.fill('#frName', 'Sam'); await B.page.click('#frOn'); await B.page.waitForTimeout(700);
+    await B.page.evaluate(() => { window.__keepCol = 1; });
+    await B.page.fill('#frName', 'Sam'); await B.page.click('#frOn'); await B.page.waitForTimeout(900);
+    ok('turning friends on brings up the colour wheel, so nobody stays on the starting colour', await B.page.locator('.lf-sheet #lfWheel').count() === 1 && await B.page.locator('#lfColDone').count() === 1);
+    await B.page.click('#lfColDone'); await B.page.waitForTimeout(500); await B.page.evaluate(() => { window.__keepCol = 0; });
     await B.page.waitForFunction(() => document.querySelectorAll('#frBoard .fr-row').length === 2, null, { timeout: 4000 }).catch(() => {});
     const names = await B.page.$$eval('#frBoard .fr-row .fr-t b', (b) => b.map((x) => x.textContent));
     ok('turning on adds whoever sent the link, ranked by workouts', names.join() === 'Niko,Sam', names);
     ok('your code is not on the tab any more', await B.page.locator('#lfFr .fr-code').count() === 0);
-    await B.page.click('.lf-bar [data-v="you"]'); await settle(B.page);
-    const codeB = (await B.page.textContent('#lfSet .fr-code')).trim();
-    ok('it is in settings, with share', codeB.length === 8 && await B.page.locator('#lfSet #frShare').count() === 1);
-    await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
+    ok('and it is not in Settings either', await B.page.locator('#lfSet .fr-code').count() === 0);
+    await B.page.click('#frAdd'); await settle(B.page);
+    const codeB = (await B.page.textContent('.lf-sheet .fr-code')).trim();
+    ok('it is at the top of the add-a-friend sheet, with share', codeB.length === 8 && await B.page.locator('.lf-sheet #frShare').count() === 1);
+    await B.page.evaluate(() => { const x = [...document.querySelectorAll('.lf-sheet .lf-x')].pop(); if (x) x.click(); }); await settle(B.page);
 
     ok('adding someone puts you on their list too: the server holds your code for their phone', JSON.parse(m.get('liftf:' + codeA) || '[]').some((x) => x.f === codeB && x.n === 'Sam'));
     await A.page.click('#frAdd'); await A.page.waitForTimeout(400);
@@ -1416,7 +1416,8 @@ const freeze = (at) => `(() => {
     await A.page.click('.lf-toast button'); await A.page.waitForTimeout(150);
     ok('and Undo puts them back', await A.page.locator('#frBoard .fr-row').count() === 2);
 
-    await B.page.click('.lf-bar [data-v="you"]'); await settle(B.page);
+    await B.page.click('.lf-bar [data-v="fr"]'); await settle(B.page);
+    await B.page.click('#frAdd'); await settle(B.page);
     await B.page.click('#frMore'); await settle(B.page);
     ok('name and turning off live behind settings', await top(B.page).locator('#frNewName').count() === 1);
     await top(B.page).locator('#frOffBtn').click(); await settle(B.page);
@@ -1542,7 +1543,6 @@ const freeze = (at) => `(() => {
     const wo = []; for (let i = 0; i < 50; i++) { const d = new Date(2026, 5, 1 + i, 9, 0); wo.push({ id: 'n' + i, d: d.toISOString().slice(0, 10), s: d.getTime(), e: d.getTime() + 3600e3, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 60, r: 8 }] }] }); }
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
     await settle(page);
     ok('the luxury colours are gone, and the neutrals have no fold of their own', await page.locator('#lfLux, #lfLuxT, #lfNeuT, .lf-lux-b').count() === 0);
     /* the neutrals are a ring inside the hues: press the fourth segment */
@@ -1555,7 +1555,6 @@ const freeze = (at) => `(() => {
     const light = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('and it is a lighter shade on the dark page, a deeper one on the light page', dark === '#636366' && light === '#2c2c2e', [dark, light]);
     await page.evaluate(() => document.querySelector('#lfMode [data-m="dark"]').click()); await settle(page);
-    if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
     await settle(page);
     ok('ten earned colours, and no owner one on a phone that is not the owner\'s', await page.locator('#lfThemes .lf-th').count() === 10 && await page.locator('#lfThemes .lf-th[data-h="1299"]').count() === 0);
     ok('one not yet earned is locked and says which badge opens it', await page.locator('#lfThemes .lf-th.is-lock[data-h="1205"]').count() === 1 && /Earn 100 workouts/i.test(await page.textContent('#lfThemes .lf-th[data-h="1205"]')));
@@ -1576,7 +1575,6 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [] });
     await page.evaluate(() => localStorage.setItem('lift.owner.v1', '2026-11-09')); await page.reload(); await page.waitForTimeout(400);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    if (await page.getAttribute('#lfTheme .lf-fh button', 'aria-expanded') !== 'true') await page.click('#lfTheme .lf-fh button');
     await settle(page);
     ok('the owner\'s phone has Molten, one of one, first', await page.locator('#lfThemes .lf-th').first().getAttribute('data-h') === '1299' && /Molten/.test(await page.textContent('#lfThemes .lf-th.is-own')));
     await page.evaluate(() => document.querySelector('#lfThemes .lf-th[data-h="1299"]').click()); await settle(page);
@@ -1875,13 +1873,13 @@ const freeze = (at) => `(() => {
   /* ── THEME: light and dark, and the accent on a wheel ── */
   {
     const c = await newCtx(PHONE);
+    await c.addInitScript('window.__lfInline = 1;');
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
     await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"bseen":{"v2":1,"v3":1}}'); })();`);
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('theme is its own fold, shut, saying cream', await page.getAttribute('#lfTheme h3 > button', 'aria-expanded') === 'false' && /Cream/.test(await page.textContent('#lfTheme h3')));
+    ok('appearance is a row, saying cream', /Cream/.test(await page.textContent('#lfThemeRow')));
     ok('and appearance is not in settings any more', await page.locator('#lfSet #lfMode').count() === 0);
-    await page.click('#lfTheme h3 > button'); await settle(page);
     ok('it holds appearance and the wheel', await page.locator('#lfTheme #lfMode').isVisible() && await page.locator('#lfWheel').isVisible());
     const tok = () => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log').trim());
     ok('cream to begin with', (await tok()).toLowerCase() === '#e1d4c2', await tok());
@@ -1891,7 +1889,7 @@ const freeze = (at) => `(() => {
     await page.mouse.move(b.x + b.width / 2, b.y + b.height - 12); await page.mouse.down(); await page.mouse.up(); await settle(page);
     const cy = await tok();
     ok('a press on the ring sets the accent from that hue', cy !== '#e1d4c2' && await page.evaluate(() => localStorage.getItem('lift.accent.v1')) === '180', [cy, await page.evaluate(() => localStorage.getItem('lift.accent.v1'))]);
-    ok('and the fold names it', /Cyan/.test(await page.textContent('#lfTheme h3')));
+    ok('and the row names it', /Cyan/.test(await page.textContent('#lfThemeRow')));
     ok('the greens that say done follow it, a filling bar stays white', await page.evaluate(() => { const r = getComputedStyle(document.documentElement); return r.getPropertyValue('--good').trim() === r.getPropertyValue('--today-ink').trim(); }));
     ok('the ink on a fill is worked out to read on it', await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--on-log').trim()) !== '');
     await page.focus('#lfWheel'); await page.keyboard.press('ArrowRight');
@@ -1899,7 +1897,6 @@ const freeze = (at) => `(() => {
     await page.reload(); await page.waitForTimeout(300);
     ok('it is kept across a reload', (await tok()) === (await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--today').trim())) && (await tok()) !== '#e1d4c2');
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    await page.click('#lfTheme h3 > button'); await settle(page);
     await page.click('#lfTheme #lfMode [data-m="light"]'); await settle(page);
     ok('light and dark live here now', await page.evaluate(() => document.documentElement.dataset.mode) === 'light');
     await page.click('#lfAccReset'); await settle(page);
@@ -2441,11 +2438,10 @@ const freeze = (at) => `(() => {
   {
     const o = await ctx({ unit: 'kg', goal: 3, ti: 'rookie' }, '2026-10-30T18:00:00');
     await o.page.click('.lf-bar [data-v="you"]'); await settle(o.page);
-    ok('You has a Customise section of its own, ahead of Settings', await o.page.locator('#lfYou #lfCustom').count() === 1 && await o.page.evaluate(() => { const a = document.querySelector('#lfCustom'), b = document.querySelector('#lfSet'); return !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
-    ok('Customise is a fold, shut until pressed, and its header says the title you wear', await o.page.getAttribute('#lfCuF h3 > button', 'aria-expanded') === 'false' && /Rookie/.test(await o.page.textContent('#lfCuF h3')));
-    await o.page.click('#lfCuF h3 > button'); await settle(o.page);
+    ok('You has one Appearance section, ahead of Settings', await o.page.locator('#lfYou #lfCustom').count() === 1 && await o.page.evaluate(() => { const a = document.querySelector('#lfCustom'), b = document.querySelector('#lfSet'); return !!(a && b && (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)); }));
+    ok('Appearance is a row, and it says the colour you are on', /Cream/.test(await o.page.textContent('#lfThemeRow')));
     ok('it holds your title, flair and the badges you show, and shows them as they will be seen', await o.page.locator('#lfCustom .rk-set').count() >= 3 && await o.page.locator('#lfCustom #lfCuPv b').count() === 1);
-    ok('the theme is right under it', await o.page.locator('#lfCustom #lfTheme').count() === 1);
+    ok('the colour, the mode and the earned colours are on the same screen as the title and flair', await o.page.locator('#lfCustom #lfWheel').count() === 1 && await o.page.locator('#lfCustom #lfMode').count() === 1 && await o.page.locator('#lfCustom #lfThemes').count() === 1);
     ok('and Settings no longer carries those rows', await o.page.locator('#lfSet .rk-set').count() === 0);
     await o.page.click('#lfCustom .rk-set[data-k="ti"]'); await o.page.waitForTimeout(600);
     ok('a title can still be none', await o.page.locator('.lf-sheet .rk-o[data-id="none"]').count() === 1);
@@ -2603,10 +2599,9 @@ const freeze = (at) => `(() => {
   {
     const { c, page } = await ctx({ unit: 'kg', bw: [{ d: '2026-10-29', kg: 80 }] });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    const open = await page.getAttribute('#lfTargets h3 > button', 'aria-expanded');
-    ok('Goals is open when you arrive', open === 'true');
-    const ys = await page.evaluate(() => ['lfTargets', 'lfCuF'].map((id) => document.getElementById(id).getBoundingClientRect().top));
-    ok('and sits above Customise', ys[0] < ys[1], ys);
+    ok('Goals is on the page, not behind a fold', await page.locator('#lfTargets #lfGoal').isVisible());
+    const ys = await page.evaluate(() => ['lfTargets', 'lfTheme'].map((id) => document.getElementById(id).getBoundingClientRect().top));
+    ok('and sits above Appearance', ys[0] < ys[1], ys);
     await page.locator('#lfTargets #lfGoal button').nth(2).click(); await settle(page);
     ok('the weekly goal is set from it', (await store(page)).goal === 3);
     await page.fill('#lfGoalBw', '75'); await page.press('#lfGoalBw', 'Tab'); await settle(page);
@@ -2614,6 +2609,40 @@ const freeze = (at) => `(() => {
     ok('and says how far there is to go', /5(\.0)? kg to lose/.test(await page.textContent('#lfGoalBwNote')), await page.textContent('#lfGoalBwNote'));
     ok('Settings no longer holds the weekly goal', await page.locator('#lfSet #lfGoal').count() === 0);
     await c.close();
+  }
+
+  /* ── AN OUT-OF-DATE APP IS ASKED TO UPDATE, and nothing else works until it has ── */
+  {
+    const seed = JSON.stringify(JSON.stringify({ unit: 'kg', tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }));
+    const open = async (ver, min, url, native = true) => {
+      const c = await newCtx(PHONE);
+      await c.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {} if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${seed});`);
+      if (native) await c.addInitScript(`window.__minAsked = 0; window.Capacitor = { isNativePlatform: () => true, Plugins: { LiftWidgets: new Proxy({ addListener: () => Promise.resolve({ remove() {} }), caps: () => Promise.resolve({ health: false, group: false, version: '${ver}' }) }, { get: (t, k) => t[k] || (() => Promise.resolve({})) }) } };`);
+      let asked = 0;
+      await c.route('https://niko-999.github.io/lift/min.json*', (r) => { asked++; r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ min, url }) }); });
+      const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(900);
+      return { c, page, asked: () => asked };
+    };
+    const old = await open('1.2', '1.3', 'https://apps.apple.com/app/id123');
+    ok('an app below the minimum version shows the update screen', await old.page.locator('#lfForce').count() === 1);
+    ok('which covers everything: a press at the middle of the screen reaches it, not the app', await old.page.evaluate(() => { const e = document.elementFromPoint(innerWidth / 2, innerHeight / 2); return !!(e && e.closest('#lfForce')); }));
+    ok('and has one way on, the App Store', await old.page.locator('#lfForce a').count() === 1 && await old.page.getAttribute('#lfForceGo', 'href') === 'https://apps.apple.com/app/id123');
+    await old.c.close();
+    const cur = await open('1.3', '1.3', '');
+    ok('an app at the minimum is left alone', cur.asked() >= 1 && await cur.page.locator('#lfForce').count() === 0);
+    await cur.c.close();
+    const nw = await open('1.4', '1.3', '');
+    ok('and so is one above it', await nw.page.locator('#lfForce').count() === 0);
+    await nw.c.close();
+    const bad = await open('1.2', '1.3', 'https://evil.example/');
+    ok('a link that is not the App Store is not followed: the app\'s own address is used', await bad.page.locator('#lfForce').count() === 1 && (await bad.page.getAttribute('#lfForceGo', 'href')) === 'https://apps.apple.com/app/id6833453418');
+    const none = await open('1.2', '1.3', '');
+    ok('and with none in the file the button still goes to the App Store', (await none.page.getAttribute('#lfForceGo', 'href')) === 'https://apps.apple.com/app/id6833453418');
+    await none.c.close();
+    await bad.c.close();
+    const web = await open('', '9.9', '', false);
+    ok('the web copy is never asked', web.asked() === 0 && await web.page.locator('#lfForce').count() === 0);
+    await web.c.close();
   }
 
   await browser.close();
