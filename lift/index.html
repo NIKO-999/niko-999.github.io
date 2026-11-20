@@ -846,6 +846,14 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-tr-f { position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.45); border: 2px solid rgba(255,255,255,.9); box-shadow: 0 4px 14px rgba(0,0,0,.45); transition: transform .6s cubic-bezier(.4, 0, .2, 1), scale .2s, background .2s; z-index: 3; }
 .lf-tr-f.is-tap { scale: .72; background: rgba(255,255,255,.9); }
 .tr-slide { transition: transform .8s cubic-bezier(.3, .8, .3, 1); }
+.tr-sh { position: absolute; left: 0; right: 0; bottom: 0; background: var(--card2, var(--card)); border: 1px solid var(--hair, rgba(255,255,255,.08)); border-radius: 18px 18px 0 0; padding: 14px; transform: translateY(105%); transition: transform .45s cubic-bezier(.3, .8, .3, 1); }
+.tr-sh.is-up { transform: none; }
+.tr-sh .tr-ta { min-height: 92px; border-radius: 12px; background: var(--card); padding: 10px 12px; font-size: 15px; line-height: 1.45; color: var(--ink); white-space: pre-line; margin-bottom: 10px; }
+.tr-sh .lf-flab { margin-top: 0; }
+.tr-toast { position: absolute; left: 50%; bottom: 8px; transform: translate(-50%, 14px); opacity: 0; transition: opacity .3s, transform .3s; background: var(--ink); color: var(--on-ink, var(--paper)); border-radius: 999px; padding: 9px 16px; font-size: 14px; font-weight: 600; }
+.tr-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
+.tr-rest { display: flex; align-items: center; gap: 10px; margin-top: 8px; opacity: 0; transition: opacity .4s; }
+.tr-rest.is-up { opacity: 1; }
 .lf-tr-in { animation: lf-tr-in .45s ease-out; }
 @keyframes lf-tr-in { from { opacity: 0; transform: translateY(-10px); } }
 .lf-tr-segs { display: flex; gap: 6px; margin: 0 0 8px; }
@@ -2032,7 +2040,7 @@ var DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 var MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ═══════════ STORE ═══════════ */
-function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, prog: 'ul', focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, rl: false, tour: false, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
+function lfDefault() { return { v: 1, unit: 'kg', goal: 4, ex: [], rt: [], wo: [], bw: [], bwGoal: null, pick: null, prog: 'ul', focus: lfFocusDefault(), ck: 'walk', rc: {}, rd: {}, ra: true, rl: false, tour: false, setup: false, dl: {}, dg: { st: 15000, kc: 0, pr: 0, wa: 3000 } }; }
 function num(v) { var n = +v; return isFinite(n) && n >= 0 ? n : null; }
 
 /* A damaged record is REPAIRED, never thrown away: a bad set costs the
@@ -2044,7 +2052,7 @@ function lfClean(o) {
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
-  d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true;
+  d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true; d.setup = o.setup === true;
   /* PROGRAMS ADDED by link or code (pg) and built-in ones put away (hp). A damaged program costs itself, never the record. */
   if (Array.isArray(o.pg)) { var pgl = lfCleanPgs(o.pg); if (pgl.length) d.pg = pgl; }
   if (Array.isArray(o.hp)) { var hpl = o.hp.filter(function (k, i, a) { return BUILTIN_PROGS.indexOf(k) >= 0 && a.indexOf(k) === i; }); if (hpl.length) d.hp = hpl; }
@@ -2519,6 +2527,76 @@ function lfTour() {
   sh = lfSheet({ title: 'How a workout works', body: body, foot: [back, next], onClose: function () { clear(); } });
   play(0);
   return sh;
+}
+
+/* HOW TO PUT YOUR PROGRAMME IN. A first open has nothing in it, and a screen of someone else's routines tells a stranger nothing about how to get theirs there. Four short scenes, the real cards, a finger doing the pressing: add it, check it, pick it on Today, log it. It plays once by itself on a first open and is always one press away in Settings and under Your routines. */
+var SETUP = [
+  ['Add your routine', 'Open Exercises and tap Read a routine. Paste your programme, or add a photo or a PDF of it. Or tap New routine and build one by hand.', 8200],
+  ['Check it and save', 'Each line is read as an exercise with its sets and reps. Fix anything it missed, then save.', 6400],
+  ['Pick it on Today', 'Your routine shows up on the Today card. Tap the name to choose it, then press Start.', 7000],
+  ['Log your sets', 'Tick each set as you finish it. The rest timer starts by itself.', 5600]
+];
+function lfSetupTour() {
+  var at = 0, timers = [], stage, f, segs, cap, back, next, reduced = false, sh;
+  try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  var body = el('<div><div class="lf-tr-segs" role="tablist"></div><div class="lf-tr-stage" inert aria-hidden="true"></div><div class="lf-tr-cap" aria-live="polite"><b></b><p></p></div></div>');
+  segs = $('.lf-tr-segs', body); stage = $('.lf-tr-stage', body); cap = $('.lf-tr-cap', body);
+  SETUP.forEach(function (t, i) { var b = el('<button type="button" role="tab"></button>'); b.setAttribute('aria-label', t[0]); b.addEventListener('click', function () { play(i); }); segs.appendChild(b); });
+  back = el('<button type="button" class="lf-btn">Back</button>'); next = el('<button type="button" class="lf-btn is-log">Next</button>');
+  back.addEventListener('click', function () { play(Math.max(0, at - 1)); });
+  next.addEventListener('click', function () { if (at >= SETUP.length - 1) sh.close(); else play(at + 1); });
+  function clear() { timers.forEach(clearTimeout); timers = []; }
+  function T(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function q(sel) { return $(sel, stage); }
+  function aim(sel, dx) { var n = q(sel); if (!n) return; var a = stage.getBoundingClientRect(), r = n.getBoundingClientRect(); f.style.transform = 'translate(' + (r.left - a.left + r.width / 2 - 17 + (dx || 0)) + 'px,' + (r.top - a.top + r.height / 2 - 6) + 'px)'; }
+  function press(sel, ms, fn) { T(ms, function () { aim(sel); }); T(ms + 650, function () { f.classList.add('is-tap'); }); T(ms + 760, function () { if (fn) fn(); }); T(ms + 930, function () { f.classList.remove('is-tap'); }); }
+  function typeIn(node, lines, ms, step) { lines.forEach(function (ln, k) { T(ms + k * step, function () { node.textContent = lines.slice(0, k + 1).join('\n'); }); }); }
+  var PLAY = '<span class="lf-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>';
+  function rtCard(rows) { return '<div class="lf-cap lf-gh">Your routines</div><div class="lf-card" style="padding:4px 16px"><div class="lf-list" id="trRts">' + rows + '<button type="button" class="lf-li" id="trNew" tabindex="-1"><div class="lf-li-t"><b>New routine</b></div>' + IC.plus + '</button><button type="button" class="lf-li" id="trRead" tabindex="-1"><div class="lf-li-t"><b>Read a routine</b></div>' + IC.plus + '</button></div></div>'; }
+  function play(i) {
+    clear(); at = i; stage.textContent = '';
+    $$('button', segs).forEach(function (b, j) { b.classList.toggle('is-done', j < i); b.classList.toggle('is-on', false); b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
+    var on = $$('button', segs)[i]; on.style.setProperty('--d', SETUP[i][2] + 'ms'); void on.offsetWidth; on.classList.add('is-on');
+    $('b', cap).textContent = SETUP[i][0]; $('p', cap).textContent = SETUP[i][1];
+    back.disabled = i === 0; next.textContent = i === SETUP.length - 1 ? 'Done' : 'Next';
+    var html = '';
+    if (i === 0) html = rtCard('') + '<div class="tr-sh" id="trSh"><span class="lf-flab">Or paste the text</span><div class="tr-ta" id="trTa"></div><button type="button" class="lf-btn is-ink is-full" id="trGo" tabindex="-1">Read it</button></div>';
+    else if (i === 1) html = '<div class="lf-cap lf-gh">Check it</div><input class="lf-field" value="Push day" readonly tabindex="-1" />'
+      + '<div class="lf-list" style="margin-top:6px">' + [['Bench press', '4 × 8'], ['Incline dumbbell press', '3 × 10'], ['Cable flyes', '3 × 12'], ['Overhead press', '3 × 10']].map(function (r) { return '<div class="lf-li"><div class="lf-li-t"><b>' + r[0] + '</b></div><span class="lf-li-r lf-num">' + r[1] + '</span></div>'; }).join('') + '</div>'
+      + '<button type="button" class="lf-btn is-ink is-full" id="trSave" tabindex="-1" style="margin-top:10px">Save routines</button><div class="tr-toast" id="trToast">Saved 1 routine</div>';
+    else if (i === 2) html = '<div class="lf-card lf-today"><div class="lf-lab">Today</div><div><button type="button" class="lf-title-box" id="trPick" tabindex="-1">Upper body</button></div><div class="lf-sub" id="trSub">Chest, shoulders and triceps</div><button type="button" class="lf-go" id="trStart" tabindex="-1">' + PLAY + '<span>Start</span></button></div>'
+      + '<div class="tr-sh" id="trSh"><div class="lf-list"><button type="button" class="lf-li" tabindex="-1"><div class="lf-li-t"><b>Rest day</b><span>Take today off on purpose</span></div></button><button type="button" class="lf-li" id="trPushRow" tabindex="-1"><div class="lf-li-t"><b>Push day</b><span>4 exercises</span></div></button><button type="button" class="lf-li" tabindex="-1"><div class="lf-li-t"><b>Empty workout</b><span>Add exercises as you go</span></div></button></div></div>';
+    else html = trCard('a', 'Bench press', trRow('', 1, '60×8', '60', '8') + trRow('', 2, '60×8', '60', '8') + trRow('', 3, '60×7', '60', '8'), 1) + '<div class="tr-rest" id="trRest"><span class="lf-chip">Resting</span><span class="lf-num">1:30</span></div>';
+    stage.innerHTML = html; f = el('<i class="lf-tr-f" aria-hidden="true"></i>'); stage.appendChild(f);
+    f.style.transition = 'none'; f.style.transform = 'translate(' + (stage.clientWidth / 2 - 17) + 'px,' + (stage.clientHeight + 10) + 'px)'; void f.offsetWidth; f.style.transition = '';
+    if (i === 0) {
+      press('#trRead', 600, function () { q('#trSh').classList.add('is-up'); });
+      T(1900, function () { aim('#trTa'); });
+      typeIn(q('#trTa'), ['Push day', 'Bench press 4x8', 'Incline dumbbell press 3x10', 'Cable flyes 3x12', 'Overhead press 3x10'], 2000, 650);
+      press('#trGo', 5400, function () { q('#trSh').classList.remove('is-up'); });
+    } else if (i === 1) {
+      T(500, function () { aim('.lf-li:nth-child(2)'); });
+      press('#trSave', 1800, function () { q('#trToast').classList.add('is-up'); });
+      T(4200, function () { q('#trToast').classList.remove('is-up'); });
+    } else if (i === 2) {
+      press('#trPick', 600, function () { q('#trSh').classList.add('is-up'); });
+      press('#trPushRow', 2300, function () { q('#trSh').classList.remove('is-up'); q('#trPick').textContent = 'Push day'; q('#trSub').textContent = 'Bench, incline press, flyes and overhead press'; });
+      press('#trStart', 4300, function () { q('#trStart').classList.add('is-live'); });
+    } else {
+      press('.lf-set[data-k="s"] .lf-chk', 700, function () { tick(q('.lf-set[data-k="s"]')); q('#trRest').classList.add('is-up'); });
+      press('.lf-set[data-k="s"]:nth-child(2) .lf-chk', 3000, function () { tick(q('.lf-set[data-k="s"]:nth-child(2)')); });
+    }
+    T(SETUP[i][2], function () { if (reduced) return; play(i >= SETUP.length - 1 ? i : i + 1); });
+  }
+  function tick(row) { if (row) row.classList.add('is-done', 'is-pop'); }
+  sh = lfSheet({ title: 'Set up your routine', body: body, foot: [back, next], onClose: function () { clear(); } });
+  play(0);
+  return sh;
+}
+/* once, by itself, on a first open: no workouts, no routines, never seen */
+function lfSetupFirst() {
+  if (S.setup || S.tour || S.wo.length || S.rt.length) return;
+  setTimeout(function () { if (S.setup || stack.length || document.querySelector('.lf-cv, #lfForce')) return; S.setup = true; lfSave(); lfSetupTour(); }, 1300);
 }
 
 var toastT = null;
@@ -5146,6 +5224,7 @@ function lfRenderLib() {
     li.addEventListener('click', function () { lfRoutineForm(r); });
     $('.lf-list', rc).appendChild(li);
   });
+  if (!S.rt.length) { var hw = el('<button type="button" class="lf-li" id="lfSetupLink"><div class="lf-li-t"><b>How to add your routine</b><span>A short guide</span></div>' + IC.chev + '</button>'); hw.addEventListener('click', lfSetupTour); $('.lf-list', rc).appendChild(hw); }
   var nr = el('<button type="button" class="lf-li" id="lfNewRt"><div class="lf-li-t"><b>New routine</b></div>' + IC.plus + '</button>');
   nr.addEventListener('click', function () { lfRoutineForm(null); });
   $('.lf-list', rc).appendChild(nr);
@@ -5438,8 +5517,10 @@ function lfRenderYou() {
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest on lock screen</span><div class="lf-seg" id="lfRl"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest and reaction alerts</span><button type="button" class="lf-btn is-full" id="lfPush"></button>'
+    + '<span class="lf-flab">Add your routine</span><button type="button" class="lf-btn is-full" id="lfSetupBtn">How to put your programme in</button>'
     + '<span class="lf-flab">Workout guide</span><button type="button" class="lf-btn is-full" id="lfTourBtn">Supersets, warm-ups, drop sets and more</button>'
     + '</div>');
+  $('#lfSetupBtn', c).addEventListener('click', function () { lfSetupTour(); });
   $('#lfTourBtn', c).addEventListener('click', function () { lfTour(); });
   /* ON SHOWS AS ON, and the same press turns it off. */
   $('#lfPush', c).textContent = LPU ? 'On · turn off' : 'Turn on';
@@ -10471,6 +10552,7 @@ if (S.bseen && !S.bseen.v4) { var BS4 = { early: 1, owl: 1, long: 1, ton10: 1, r
 if (S.bseen && !S.bseen.v3) { lfMedals().forEach(function (x) { if (x.d) S.bseen[x.b.id] = 1; }); S.bseen.v3 = 1; lfSave(); }
 lfRender();
 lfProgLink();
+lfSetupFirst();
 addEventListener('hashchange', lfProgLink);
 /* An open counts for the board, a beat after the first paint. */
 if (FRS.on) setTimeout(frPush, 1500);

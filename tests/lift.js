@@ -2706,6 +2706,30 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── THE SETUP GUIDE: how to put your programme in, once by itself on a first open and always one press away ── */
+  {
+    const seed = (extra) => `(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(Object.assign({ unit: 'kg', goal: 3, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }, extra)))}); })();`;
+    const c = await browser.newContext(PHONE); await c.addInitScript(freeze('2026-10-30T18:00:00')); await c.addInitScript(seed({ tour: false }));
+    const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(2400);
+    ok('a first open with nothing in it plays the guide by itself', await page.locator('.lf-tr-stage').count() === 1 && /Add your routine/.test(await page.textContent('.lf-tr-cap')));
+    ok('it is four scenes', await page.locator('.lf-tr-segs button').count() === 4);
+    await page.click('.lf-btn.is-log'); await page.waitForTimeout(200); ok('Next moves to the second scene', /Check it and save/.test(await page.textContent('.lf-tr-cap')));
+    await page.click('.lf-btn.is-log'); await page.click('.lf-btn.is-log'); await page.waitForTimeout(200); ok('and the last scene is logging a set', /Log your sets/.test(await page.textContent('.lf-tr-cap')));
+    ok('and it is marked seen', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.v1'))).setup === true);
+    await page.reload(); await page.waitForTimeout(2400);
+    ok('it does not play again', await page.locator('.lf-tr-stage').count() === 0);
+    await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
+    ok('with no routines, Exercises offers how to add one', await page.locator('#lfSetupLink').count() === 1);
+    await page.click('#lfSetupLink'); await page.waitForTimeout(500);
+    ok('and it opens the same guide', await page.locator('.lf-tr-stage').count() === 1 && /Add your routine/.test(await page.textContent('.lf-tr-cap')));
+    await c.close();
+    const c2 = await browser.newContext(PHONE); await c2.addInitScript(freeze('2026-10-30T18:00:00')); await c2.addInitScript(seed({ tour: true }));
+    const p2 = await c2.newPage(); p2.on('pageerror', (e) => errors.push(String(e))); await p2.goto(URL); await p2.waitForTimeout(2400);
+    ok('someone who has already used the app is not shown it', await p2.locator('.lf-tr-stage').count() === 0);
+    await c2.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
