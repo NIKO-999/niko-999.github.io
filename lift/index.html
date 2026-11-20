@@ -705,9 +705,6 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
 #frRings .fr-row { padding: 12px 0; }
 .fr-row.is-off { display: none !important; }
-.fr-dup { display: inline-flex; align-items: center; gap: 8px; margin-left: 9px; vertical-align: middle; font-size: 12px; font-weight: 500; letter-spacing: .08em; line-height: 1; }
-.fr-dup i { display: inline-block; width: 14px; height: 1px; background: var(--rc); box-shadow: 0 0 5px var(--rc), 0 0 2px var(--rc); }
-.fr-dup u { text-decoration: none; color: color-mix(in srgb, var(--rc) 75%, var(--ink)); text-shadow: 0 0 8px color-mix(in srgb, var(--rc) 65%, transparent); }
 #frSearch { margin: 4px 0 10px; }
 #frRings .fr-live { color: var(--rc); }
 #frRings .fr-live::before { background: var(--rc); animation-name: fr-live-c; }
@@ -7543,8 +7540,7 @@ function frRings(rows) {
   /* the arcs move to where they stand on the next frame, so the move is drawn */
   requestAnimationFrame(function () { requestAnimationFrame(function () { $$('.fr-rg-a', c).forEach(function (a) { a.setAttribute('stroke-dasharray', a.dataset.to + ' 999'); }); }); });
   if (grew.length && !arrive) buzz(10);
-  var bd = $('#frBoard', c), nameCount = {};
-  ls.forEach(function (x) { var nm = (x.f.me ? (FRS.name || 'You') : (x.f.n || '')).trim().toLowerCase(); if (nm) nameCount[nm] = (nameCount[nm] || 0) + 1; });
+  var bd = $('#frBoard', c);
   ls.forEach(function (x) {
     var f = x.f, st = f.s || {};
     var row = el('<div class="fr-row"><button type="button" class="fr-open"></button><i class="fr-rg-k"></i><div class="fr-t"><b></b><span></span></div><span class="fr-wk lf-num"></span></div>');
@@ -7552,12 +7548,7 @@ function frRings(rows) {
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
     $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend'); lfNameOn($('.fr-t b', row), st);
-    /* TWO FRIENDS WITH ONE NAME ARE TOLD APART: after the name, a thin line in their own colour with a glow, and the last two characters of their code, which are theirs alone on this list. Only drawn when the name is shared, so a list of different names carries nothing extra. */
-    if (!f.me && !f.gone && (f.n || '') && nameCount[String(f.n).trim().toLowerCase()] > 1) {
-      var dup = el('<span class="fr-dup" aria-hidden="true"><i></i><u></u></span>'); $('u', dup).textContent = String(f.c).slice(-2);
-      $('.fr-t b', row).appendChild(dup); row.setAttribute('data-dup', '1');
-    }
-    var sub = $('.fr-t > span', row);
+    var sub = $('.fr-t span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
     else if (frLive(st)) {
       row.classList.add('is-live');
