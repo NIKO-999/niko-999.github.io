@@ -2699,7 +2699,7 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
-  /* ── TWO FRIENDS WITH ONE NAME are told apart by a glowing line and the last two characters of their code ── */
+  /* ── RANK: every row carries its position on the board, so the ring can stay at five ── */
   {
     const codes = ['TWNAAAAA', 'TWNBBBBB', 'SLCCCCCC'], nm = { TWNAAAAA: 'Kai', TWNBBBBB: 'kai', SLCCCCCC: 'Jade' };
     const list = codes.map((cd) => ({ c: cd, n: nm[cd], s: null, at: 0, gone: false, rx: [] }));
@@ -2714,10 +2714,10 @@ const freeze = (at) => `(() => {
     const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(URL); await page.waitForTimeout(400);
     await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
-    const tags = await page.$$eval('#frBoard .fr-dup u', (u) => u.map((x) => x.textContent));
-    ok('two friends sharing a name (any capitals) each carry their own two-character tag', tags.length === 2 && tags.includes('AA') && tags.includes('BB'), tags);
-    ok('a friend with a name of their own carries none', await page.locator('#frBoard .fr-row[data-c="SLCCCCCC"]').count() === 1 && await page.locator('#frBoard .fr-row[data-c="SLCCCCCC"] .fr-dup').count() === 0);
-    ok('the marker is a thin line, and the status text still sits under the name', await page.$eval('#frBoard .fr-dup i', (i) => i.getBoundingClientRect().height <= 1.5 && getComputedStyle(i).boxShadow !== 'none') && /\S/.test(await page.textContent('#frBoard .fr-row[data-c="TWNAAAAA"] .fr-t > span')));
+    const rks = await page.$$eval('#frBoard .fr-row:not(.is-gone) .fr-rk u', (u) => u.map((x) => x.textContent));
+    ok('every friend is placed by position, one to the last, whatever they are called', rks.length === 4 && rks.join(',') === '1,2,3,4', rks);
+    ok('the rank is a thin glowing line and a number in their own colour, ahead of the name', await page.$eval('#frBoard .fr-rk i', (i) => i.getBoundingClientRect().height <= 1.5 && getComputedStyle(i).boxShadow !== 'none') && await page.$eval('#frBoard .fr-rk u', (u) => getComputedStyle(u).textShadow !== 'none'));
+    ok('and the status text still sits under the name', /\S/.test(await page.textContent('#frBoard .fr-row[data-c="TWNAAAAA"] .fr-t > span')));
     await c.close();
   }
 
