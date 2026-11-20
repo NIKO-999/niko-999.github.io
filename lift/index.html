@@ -3743,12 +3743,12 @@ function lfPaintSession() {
       var q = e.sets[li]; q.ds = q.ds || [];
       if (q.ds.length >= 6) return;
       var base = q.ds.length ? q.ds[q.ds.length - 1].w : q.w, bw = +base > 0 ? capW(Math.round(+base * .8 / 2.5) * 2.5) : '';
-      q.ds.push({ w: bw, r: '', ok: 0 }); lfSaveAct(); lfPaintSession();
+      q.ds.push({ w: bw, r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); lfTick();
     });
     /* a warm-up goes in above the first set, starting from the last one's weight */
     bs[2].disabled = (e.wu || []).length >= 10;
-    bs[2].addEventListener('click', function () { e.wu = e.wu || []; var l = e.wu[e.wu.length - 1]; e.wu.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
-    bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); });
+    bs[2].addEventListener('click', function () { e.wu = e.wu || []; var l = e.wu[e.wu.length - 1]; e.wu.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); lfTick(); });
+    bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); lfTick(); });
     card.appendChild(ft);
     list.appendChild(card);
   });
