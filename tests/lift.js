@@ -2256,11 +2256,11 @@ const freeze = (at) => `(() => {
   {
     const o = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page);
-    await o.page.click('#lfReadRt'); await settle(o.page);
+    await o.page.click('#lfNewRt'); await settle(o.page); await top(o.page).locator('#lfRtRead').click(); await settle(o.page);
     await top(o.page).locator('#lfPlnT').fill('Push Day\nExercise Sets Reps\nFlat DB Press 3 8-10\nSquat - 5 sets of 5'); await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
     const tbl = await top(o.page).locator('.lf-li b').allTextContents(), tblN = await top(o.page).locator('input[aria-label="Routine name"]').evaluateAll((x) => x.map((e) => e.value));
     ok('a table header is not a day, a Flat DB press is the dumbbell bench and a bare Squat is the barbell squat', tblN.join() === 'Push Day' && /dumbbell bench/i.test(tbl[0]) && /^barbell squat$/i.test(tbl[1]), [tblN, tbl]);
-    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfReadRt'); await settle(o.page);
+    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewRt'); await settle(o.page); await top(o.page).locator('#lfRtRead').click(); await settle(o.page);
     ok('Read a routine opens with a place to paste', await top(o.page).locator('#lfPlnT').count() === 1);
     ok('and offers no photo or PDF button on the web, where nothing can read one', await top(o.page).locator('.lf-pln-src button').count() === 0);
     await top(o.page).locator('#lfPlnT').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
@@ -2412,7 +2412,7 @@ const freeze = (at) => `(() => {
     await pg6.click('.lf-bar [data-v="you"]'); await settle(pg6);
     ok('Health is offered once the build says it has the capability', await pg6.locator('#lfHealth').count() === 1);
     await pg6.click('.lf-bar [data-v="lib"]'); await settle(pg6);
-    await pg6.click('#lfReadRt'); await settle(pg6);
+    await pg6.click('#lfNewRt'); await settle(pg6); await top(pg6).locator('#lfRtRead').click(); await settle(pg6);
     ok('Read a routine offers a photo and a PDF as well as pasted text', await top(pg6).locator('.lf-pln-src button').count() === 2, await top(pg6).locator('.lf-pln-src button').allTextContents());
     await pg6.locator('.lf-pln-src button').first().click(); await pg6.waitForTimeout(300);
     ok('and pressing one asks the phone to read it', await pg6.evaluate(() => window.__calls.filter((x) => x[0] === 'readPlan').length) === 1);
