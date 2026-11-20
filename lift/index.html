@@ -7716,7 +7716,7 @@ function lfRenderFr() {
   root.appendChild(frRings(rows));
   /* NO REACTIONS CARD on the tab: a friend's 🔥 is told by notification
      and sits beside the workout on your own page, where it belongs. */
-  if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Add a friend with the plus, or share your code from Settings.</div>'));
+  if (!FRS.list.length) root.appendChild(el('<div class="lf-card lf-empty" id="frNone"><b>Nobody yet</b>Tap the plus to add a friend. Your own code is in there too, ready to share.</div>'));
   /* Arriving at the tab fetches; drawing it only draws. A paint that
      fetched would repaint inside its own fetch, which is a loop. */
   if (frArrive) {
