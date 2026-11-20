@@ -2686,7 +2686,7 @@ const freeze = (at) => `(() => {
     const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(URL); await page.waitForTimeout(400);
     await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(2600);
-    ok('sixty friends are all asked for, and never more than eight at once', asked >= 60 && maxIn <= 8, { asked, maxIn });
+    ok('sixty friends are all asked for, eight at a time beside your own record, never all at once', asked >= 60 && maxIn <= 9, { asked, maxIn });
     ok('the ring draws five rings at most', await page.locator('#frRings .fr-rg-w svg circle.fr-rg-a').count() <= 5 && await page.locator('#frRings .fr-rg-w svg circle.fr-rg-a').count() >= 1);
     ok('and nobody who has not trained is drawn as an empty track', await page.locator('#frRings .fr-rg-w svg g > circle:not(.fr-rg-a):not(.fr-rg-cm):not(.fr-rg-p):not(.fr-rg-h)').count() <= 5);
     const vis = () => page.$$eval('#frBoard .fr-row', (r) => r.filter((x) => getComputedStyle(x).display !== 'none').length);

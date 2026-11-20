@@ -7448,7 +7448,7 @@ function frRings(rows) {
   var ls = rows.map(frStand).sort(frCmp);
   var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div><div id="frBoard"></div></div>');
   /* THE RING IS A PODIUM, NOT A ROLL CALL. A circle each stops being a picture at a dozen friends and is a blur at two hundred, and a friend who has not trained yet is an empty track that says nothing. So it draws the five furthest ahead this week, and you: the list under it is where everybody is. */
-  var g = $('g', c), live0 = ls.filter(function (x) { return !x.f.gone; }), drawn = live0.filter(function (x) { return x.k > 0; }).slice(0, 5), n;
+  var g = $('g', c), live0 = ls.filter(function (x) { return !x.f.gone; }), drawn = live0.filter(function (x) { return x.k > 0 || frLive(x.f.s); }).slice(0, 5), n;
   if (!drawn.some(function (x) { return x.f.me; })) { var mine0 = live0.filter(function (x) { return x.f.me; })[0]; if (mine0) drawn = drawn.slice(0, 4).concat([mine0]); }
   if (!drawn.length) drawn = live0.slice(0, 1);
   n = drawn.length;
