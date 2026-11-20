@@ -9398,12 +9398,15 @@ function bdSlab(b, n) {
     var ws = txt.split('').map(function (c) { return x.measureText(c).width; }), tw = ws.reduce(function (a, c) { return a + c; }, 0) + gap * (txt.length - 1), cx = (cw - tw) / 2;
     [[0, 1.6 * s * 2, hl], [0, 0, fill]].forEach(function (L) { var xx = cx; x.fillStyle = L[2]; txt.split('').forEach(function (c, k) { x.fillText(c, xx + L[0], cy + L[1]); xx += ws[k] + gap; }); });
   }
-  /* the colour map */
-  var col = cvs(), cx0 = col.getContext('2d'), gr = cx0.createLinearGradient(0, 0, cw * .6, ch);
-  gr.addColorStop(0, lock ? '#2a2b2f' : '#2a2b30'); gr.addColorStop(.5, '#1b1c20'); gr.addColorStop(1, '#131417'); cx0.fillStyle = gr; cx0.fillRect(0, 0, cw, ch);
-  scratches(cx0, 'c'); grain(cx0, 9);
-  /* the rim: a dark channel, and a faint raised line inside it */
-  cx0.save(); path(cx0, cw * .042); cx0.lineWidth = 9 * s * 1.4; cx0.strokeStyle = 'rgba(0,0,0,.55)'; cx0.stroke(); path(cx0, cw * .062); cx0.lineWidth = 3 * s * 1.4; cx0.strokeStyle = 'rgba(255,255,255,.10)'; cx0.stroke(); cx0.restore();
+  /* the plate itself, painted for either face */
+  function base(x) {
+    var gr = x.createLinearGradient(0, 0, cw * .6, ch);
+    gr.addColorStop(0, '#2a2b30'); gr.addColorStop(.5, '#1b1c20'); gr.addColorStop(1, '#131417'); x.fillStyle = gr; x.fillRect(0, 0, cw, ch);
+    scratches(x, 'c'); grain(x, 9);
+    /* the rim: a dark channel, and a faint raised line inside it */
+    x.save(); path(x, cw * .042); x.lineWidth = 9 * s * 1.4; x.strokeStyle = 'rgba(0,0,0,.55)'; x.stroke(); path(x, cw * .062); x.lineWidth = 3 * s * 1.4; x.strokeStyle = 'rgba(255,255,255,.10)'; x.stroke(); x.restore();
+  }
+  var col = cvs(), cx0 = col.getContext('2d'); base(cx0);
   press(cx0, HEAD, ch * .19, ch * (hrs ? .07 : .085), ch * .018, 'rgba(4,4,5,.97)', 'rgba(255,255,255,.14)');
   press(cx0, 'LIFT', ch * .875, ch * .03, ch * .01, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.4)');
   /* roughness (green) and metal (blue): scuffs are shinier than the plate */
@@ -9431,9 +9434,7 @@ function bdSlab(b, n) {
   g.add(new T.Mesh(body, [new T.MeshBasicMaterial({ visible: false }), side]));
   var fg = plateGeo(HW - .002, HH - .002), f = new T.Mesh(fg, metal); f.position.z = zf + .001; g.add(f);
   /* the back: the same plate, a different engraving */
-  var bcol = cvs(), bq = bcol.getContext('2d'); bq.fillStyle = '#1b1c20'; bq.fillRect(0, 0, cw, ch); bq.drawImage(col, 0, 0);
-  bq.fillStyle = '#1b1c20'; bq.fillRect(cw * .12, ch * .3, cw * .76, ch * .42);
-  scratches(bq, 'c');
+  var bcol = cvs(), bq = bcol.getContext('2d'); base(bq);
   bq.textAlign = 'center'; bq.textBaseline = 'middle';
   [[HEAD + ' ' + num, ch * .44, ch * .06, '900'], [lock ? 'NOT YET EARNED' : 'EARNED ON', ch * .53, ch * .028, '700'], [lock ? '' : String(b.at || '').toUpperCase(), ch * .575, ch * .034, '800']].forEach(function (L) {
     if (!L[0]) return; bq.font = L[3] + ' ' + L[2] + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif'; bq.fillStyle = 'rgba(255,255,255,.11)'; bq.fillText(L[0], cw / 2, L[1] + 2 * s * 2); bq.fillStyle = 'rgba(8,8,10,.9)'; bq.fillText(L[0], cw / 2, L[1]);
