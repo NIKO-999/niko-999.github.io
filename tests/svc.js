@@ -572,6 +572,12 @@ const SEED = {
     const lo = await ctx(SEED);
     await lo.page.click('#svBd'); await lo.page.waitForSelector('.bd-dlg');
     ok('a locked coin never wears a tier light', await lo.page.evaluate(() => [...document.querySelectorAll('.bd-g [data-b] .bdc')].filter((e) => e.querySelector('img').classList.contains('is-off')).every((e) => !/bd-t\d/.test(e.className))));
+    ok('the case offers Unlock all while coins are locked', /^Unlock all$/.test(await txt(lo.page, '#bdAll')));
+    await lo.page.click('#bdAll'); await lo.page.waitForSelector('.bd-dlg');
+    ok('pressing it earns every badge and shows them lit, in the card and the case', (await txt(lo.page, '#svBdN')) === '25 of 25' && await lo.page.evaluate(() => document.querySelectorAll('.bd-g img.is-off').length === 0));
+    ok('and it then offers to lock the rest again', /^Lock the rest again$/.test(await txt(lo.page, '#bdAll')));
+    await lo.page.click('#bdAll'); await lo.page.waitForSelector('.bd-dlg');
+    ok('which puts it back to what the record really earns', (await txt(lo.page, '#svBdN')) === '2 of 25' && (await lo.page.$$('.unl')).length === 0, await txt(lo.page, '#svBdN'));
     await lo.c.close();
   }
 

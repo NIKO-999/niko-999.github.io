@@ -1308,6 +1308,7 @@ function bdLoad(cb) {
   document.head.appendChild(sc);
 }
 function bdCase() {
+  var all = BADGES.every(function (b) { return S.bg[b.id]; });
   var groups = [['start', 'The beginning'], ['best', 'Streaks'], ['total', 'Volume'], ['day', 'Best day'], ['hits', 'Consistency'], ['sess', 'Sessions'], ['hours', 'Time']], grid = '';
   groups.forEach(function (g) {
     grid += '<div class="lbl bd-gh">' + g[1] + '</div>';
@@ -1319,9 +1320,17 @@ function bdCase() {
   });
   dialog('<div class="bd-h" style="margin:0"><h2>Badges</h2><span class="hint-k num">' + BADGES.filter(function (b) { return S.bg[b.id]; }).length + ' of ' + BADGES.length + '</span></div>'
     + '<div class="bd-g">' + grid + '</div>'
-    + '<div class="acts"><button class="btn pri" data-a="x">Close</button></div>', function (d, close) {
+    + '<div class="acts"><button class="btn" id="bdAll">' + (all ? 'Lock the rest again' : 'Unlock all') + '</button><button class="btn pri" data-a="x">Close</button></div>', function (d, close) {
     d.classList.add('bd-dlg');
     d.querySelector('[data-a="x"]').addEventListener('click', close);
+    /* FOR NOW: a way to see every coin without earning it. Unlocking writes
+       the same record earning does, so the card, the case and the viewer
+       all agree; locking again throws it away and lets the record decide. */
+    d.querySelector('#bdAll').addEventListener('click', function () {
+      if (all) S.bg = null;
+      else { S.bg = S.bg || {}; BADGES.forEach(function (b) { if (!S.bg[b.id]) S.bg[b.id] = b.m === 'start' ? isoDay(firstDay()) : isoDay(Date.now()); }); }
+      save(); bdCheck(); bdSeen = ''; bdPaintCard(); close(); bdCase();
+    });
     d.querySelector('.bd-g').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) bdView(b.dataset.b); });
   });
 }
