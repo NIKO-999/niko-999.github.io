@@ -1143,6 +1143,7 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv { position: fixed; inset: 0; z-index: 70; display: grid; grid-template-rows: auto 1fr auto; background: var(--bg); opacity: 0; transition: opacity .22s;
   padding: calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 24px); }
 .lf-cv.is-up { opacity: 1; }
+.lf-bconf { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 80; pointer-events: none; }
 .lf-cvb { position: fixed; inset: 0; z-index: 69; background: var(--bg); opacity: 0; transition: opacity .22s; pointer-events: none; }
 .lf-cvb.is-up { opacity: 1; }
 .lf-cv-x { justify-self: end; width: 44px; height: 44px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; }
@@ -7374,6 +7375,37 @@ function lfConfetti(x, y, col) {
   document.body.appendChild(bu);
   setTimeout(function () { bu.remove(); }, 1700);
 }
+/* OPENING A BADGE THROWS CONFETTI IN THE BADGE'S OWN COLOUR: its accent, white and black. The accent is the finish's glow for an exotic or a mythic, lava orange for the owner's, gold for a day streak, red for hours, and the kind's colour for everything else. */
+function lfBadgeAccent(x) {
+  var b = x.b;
+  if (b.t === 5) return '#ff5a1f';
+  if (b.fx && BD_FXGL[b.fx]) return BD_FXGL[b.fx];
+  if (/^d\d+$/.test(b.id)) return '#f0c75a';
+  if (/^hr\d+$/.test(b.id)) return '#e8352e';
+  return b.c || (BD_KIND[b.k] && BD_KIND[b.k].c) || '#f0c75a';
+}
+function lfBadgeConfetti(x, host) {
+  var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; if (calm) return;
+  var acc = lfBadgeAccent(x), cols = [acc, acc, acc, '#ffffff', '#ffffff', '#15151a'], cv = el('<canvas class="lf-bconf" aria-hidden="true"></canvas>'), dpr = Math.min(2, window.devicePixelRatio || 1), W = window.innerWidth, H = window.innerHeight;
+  cv.width = W * dpr; cv.height = H * dpr; cv.dataset.cols = [acc, '#ffffff', '#15151a'].join(','); document.body.appendChild(cv);
+  var c = cv.getContext('2d'), st = $('.lf-cv-stage', host), r0 = st ? st.getBoundingClientRect() : { left: W / 2, top: H / 2, width: 0, height: 0 }, ox = r0.left + r0.width / 2, oy = r0.top + r0.height * .45, P = [], t0 = performance.now(), last = t0;
+  /* two bursts, the second a beat behind, so it opens and then keeps coming */
+  function burst(n, sp) { for (var i = 0; i < n; i++) { var a = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.25, v = sp * (.45 + Math.random() * .75); P.push({ x: ox + (Math.random() - .5) * 40, y: oy + (Math.random() - .5) * 30, vx: Math.cos(a) * v, vy: Math.sin(a) * v, w: 5 + Math.random() * 7, h: 3 + Math.random() * 5, r: Math.random() * 6.28, vr: (Math.random() - .5) * 12, ph: Math.random() * 6.28, col: cols[(Math.random() * cols.length) | 0], life: 2.6 + Math.random() * 1.4, age: 0, tilt: Math.random() * 6.28 }); } }
+  burst(110, 760); setTimeout(function () { burst(60, 560); }, 180);
+  (function loop(now) {
+    var dt = Math.min(.04, (now - last) / 1000); last = now;
+    if (!host.isConnected && now - t0 > 400) { cv.remove(); return; }
+    c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
+    var alive = 0;
+    P.forEach(function (p) {
+      p.age += dt; if (p.age > p.life) return; alive++;
+      p.vy += 900 * dt; p.vx *= Math.pow(.18, dt); p.vy *= Math.pow(.3, dt * .6); p.x += p.vx * dt + Math.sin(p.age * 3 + p.ph) * 18 * dt; p.y += p.vy * dt; p.r += p.vr * dt;
+      var a = Math.max(0, Math.min(1, (p.life - p.age) / .7)), sc = Math.cos(p.r * 1.4 + p.tilt);
+      c.save(); c.globalAlpha = a; c.translate(p.x, p.y); c.rotate(p.tilt); c.scale(1, sc); c.fillStyle = p.col; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); c.strokeStyle = 'rgba(128,128,128,.45)'; c.lineWidth = .8; c.strokeRect(-p.w / 2, -p.h / 2, p.w, p.h); c.restore();
+    });
+    if (alive) requestAnimationFrame(loop); else cv.remove();
+  })(t0);
+}
 /* a banner from the top, once: the week done, two of you in sync */
 function lfBanner(icon, title, sub, col) {
   var bn = el('<div class="lf-wkdone" role="status"><span class="lf-wkd-ic"></span><div><b></b><span class="lf-wkd-s"></span></div></div>');
@@ -9948,6 +9980,7 @@ function lfCoinView(x, earnedNow) {
   var vb = el('<div class="lf-cvb" aria-hidden="true"></div>'); document.body.appendChild(vb);
   document.body.appendChild(v); document.body.classList.add('lf-lock');
   requestAnimationFrame(function () { v.classList.add('is-up'); vb.classList.add('is-up'); });
+  if (x.d) setTimeout(function () { if (v.isConnected) lfBadgeConfetti(x, v); }, 260);
   var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
   if (x.d && BD_SCENE[x.b.id]) stage.classList.add('is-scene');
