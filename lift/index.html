@@ -705,11 +705,9 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
 #frRings .fr-row { padding: 12px 0; }
 .fr-row.is-off { display: none !important; }
-.fr-t { position: relative; }
-.fr-row[data-rk] .fr-t { padding-left: 50px; }
-.fr-rk { position: absolute; left: 0; top: 4px; width: 42px; display: flex; align-items: center; justify-content: flex-end; gap: 7px; font-style: normal; font-size: 12px; font-weight: 400; letter-spacing: .04em; line-height: 1; }
-.fr-rk u { text-decoration: none; color: color-mix(in srgb, var(--rc) 80%, var(--ink)); text-shadow: 0 0 8px color-mix(in srgb, var(--rc) 70%, transparent); font-variant-numeric: tabular-nums; }
-.fr-rk i { display: inline-block; flex: none; width: 12px; height: 1px; background: var(--rc); box-shadow: 0 0 5px var(--rc), 0 0 2px var(--rc); }
+.fr-rk { display: inline-flex; align-items: center; gap: 7px; margin-right: 9px; vertical-align: middle; font-size: 12px; font-weight: 400; letter-spacing: .04em; line-height: 1; }
+.fr-rk u { text-decoration: none; min-width: 1.4em; text-align: right; color: color-mix(in srgb, var(--rc) 80%, var(--ink)); text-shadow: 0 0 8px color-mix(in srgb, var(--rc) 70%, transparent); font-variant-numeric: tabular-nums; }
+.fr-rk i { display: inline-block; width: 12px; height: 1px; background: var(--rc); box-shadow: 0 0 5px var(--rc), 0 0 2px var(--rc); }
 #frSearch { margin: 4px 0 10px; }
 #frRings .fr-live { color: var(--rc); }
 #frRings .fr-live::before { background: var(--rc); animation-name: fr-live-c; }
@@ -7556,8 +7554,8 @@ function frRings(rows) {
     /* RANK, NOT RINGS: the ring draws the top five, so everyone else is placed by their position on the board: a thin glowing number in their own colour, then a dash, then the name. */
     if (!f.gone) {
       rk++;
-      var rkEl = el('<em class="fr-rk" aria-hidden="true"><u></u><i></i></em>'); $('u', rkEl).textContent = rk;
-      $('.fr-t', row).insertBefore(rkEl, $('.fr-t', row).firstChild); row.dataset.rk = rk; row.setAttribute('aria-label', '#' + rk + ' ' + row.dataset.n);
+      var rkEl = el('<span class="fr-rk" aria-hidden="true"><u></u><i></i></span>'); $('u', rkEl).textContent = rk;
+      $('.fr-t b', row).insertBefore(rkEl, $('.fr-t b', row).firstChild); row.dataset.rk = rk; row.setAttribute('aria-label', '#' + rk + ' ' + row.dataset.n);
     }
     var sub = $('.fr-t > span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
