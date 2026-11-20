@@ -3,7 +3,7 @@
    NETWORK FIRST: the network is always asked first and the cache only
    answers when it cannot be reached, so with a signal this is the app
    with no service worker at all. Same origin and GET only. */
-var CACHE = 'svc-v11';
+var CACHE = 'svc-v12';
 var SHELL = ['./', 'index.html', 'three.min.js', 'manifest.json', 'icon.svg', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', function (e) {
   self.skipWaiting();
