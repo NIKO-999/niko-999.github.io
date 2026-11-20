@@ -2675,7 +2675,7 @@ const freeze = (at) => `(() => {
     await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 4, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }))}); localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify({ on: true, code: 'MEMEMEME', key: '0123456789abcdef0123456789abcdef', name: 'Me', list, pend: '', rx: [], no: [] }))}); })();`);
     let inflight = 0, maxIn = 0, asked = 0;
     await c.route('https://sched.nikorapullin.workers.dev/**', async (r) => {
-      const u = new URL(r.request().url()), mm = u.pathname.match(/^\/v1\/lift\/([A-Z0-9]{8})$/);
+      const u = new globalThis.URL(r.request().url()), mm = u.pathname.match(/^\/v1\/lift\/([A-Z0-9]{8})$/);
       if (r.request().method() === 'GET' && mm) {
         asked++; inflight++; maxIn = Math.max(maxIn, inflight); await new Promise((res) => setTimeout(res, 40)); inflight--;
         const i = codes.indexOf(mm[1]);
