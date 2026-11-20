@@ -2699,6 +2699,28 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── TWO FRIENDS WITH ONE NAME are told apart by a glowing line and the last two characters of their code ── */
+  {
+    const codes = ['TWNAAAAA', 'TWNBBBBB', 'SLCCCCCC'], nm = { TWNAAAAA: 'Kai', TWNBBBBB: 'kai', SLCCCCCC: 'Jade' };
+    const list = codes.map((cd) => ({ c: cd, n: nm[cd], s: null, at: 0, gone: false, rx: [] }));
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 4, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [] }))}); localStorage.setItem('lift.fr.v1', ${JSON.stringify(JSON.stringify({ on: true, code: 'MEMEMEME', key: '0123456789abcdef0123456789abcdef', name: 'Me', list, pend: '', rx: [], no: [] }))}); })();`);
+    await c.route('https://sched.nikorapullin.workers.dev/**', async (r) => {
+      const u = new globalThis.URL(r.request().url()), mm = u.pathname.match(/^\/v1\/lift\/([A-Z0-9]{8})$/);
+      if (r.request().method() === 'GET' && mm) return r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ n: nm[mm[1]] || 'Me', s: { wk: 1, goal: 4, d: '', streak: 0, mu: [], bg: [], wl: [], ac: 200 }, rx: [], fo: [] }) });
+      r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: '{}' });
+    });
+    const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(400);
+    await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
+    const tags = await page.$$eval('#frBoard .fr-dup u', (u) => u.map((x) => x.textContent));
+    ok('two friends sharing a name (any capitals) each carry their own two-character tag', tags.length === 2 && tags.includes('AA') && tags.includes('BB'), tags);
+    ok('a friend with a name of their own carries none', await page.locator('#frBoard .fr-row[data-c="SLCCCCCC"]').count() === 1 && await page.locator('#frBoard .fr-row[data-c="SLCCCCCC"] .fr-dup').count() === 0);
+    ok('the marker is a thin line, and the status text still sits under the name', await page.$eval('#frBoard .fr-dup i', (i) => i.getBoundingClientRect().height <= 1.5 && getComputedStyle(i).boxShadow !== 'none') && /\S/.test(await page.textContent('#frBoard .fr-row[data-c="TWNAAAAA"] .fr-t > span')));
+    await c.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
