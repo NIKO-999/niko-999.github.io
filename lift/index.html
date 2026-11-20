@@ -162,8 +162,18 @@ body.lf-v-home .lf-glow { opacity: 1; }
 
 /* ── today ── */
 .lf-today { padding: 16px; }
-.lf-nu-l { display: flex; gap: 8px; margin-top: 10px; }
-.lf-nu-l button { flex: 1; min-height: 44px; border-radius: 12px; background: var(--card2, rgba(255,255,255,.06)); color: var(--dim); font-size: 14px; font-weight: 600; }
+.lf-fold-h { margin: 0; font: inherit; }
+.lf-fold-b { display: flex; width: 100%; align-items: center; gap: 8px; min-height: 44px; padding: 0 2px; background: none; border: 0; color: inherit; text-align: left; }
+.lf-fold-b .lf-cap { flex: 1; margin: 0; }
+.lf-fold-b svg { width: 18px; height: 18px; flex: none; opacity: .6; transform: rotate(90deg); transition: transform .2s; }
+.lf-fold-b[aria-expanded="true"] svg { transform: rotate(-90deg); }
+.lf-card > .lf-list[hidden] { display: none; }
+#lfLibBody > div, #lfLibBody > input, #lfLibBody > button { margin-bottom: 8px; }
+#lfLibBody { padding-top: 6px; }
+.lf-gf { display: flex; width: 100%; align-items: center; gap: 8px; min-height: 44px; padding: 4px 0; background: none; border: 0; color: inherit; text-align: left; }
+.lf-gf .lf-cap { flex: 1; padding: 0 !important; }
+.lf-gf svg { width: 16px; height: 16px; flex: none; opacity: .6; transform: rotate(90deg); transition: transform .2s; }
+.lf-gf[aria-expanded="true"] svg { transform: rotate(-90deg); }
 /* the first card lets the home glow through it, so the colour reads from the top of the screen down */
 #lfHome .lf-today { background: color-mix(in srgb, var(--card) 45%, transparent); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
 .lf-done { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--done-bg); color: var(--good); font-size: 13px; font-weight: 600; }
@@ -1556,7 +1566,55 @@ var EXERCISES = [
   ['hackcalf', 'Linear hack calf raises', 'Calves'],
   ['jm', 'JM press', 'Triceps', 1], ['kelso', 'Kelso shrugs', 'Back'], ['lowrow', 'Low rows (upper back)', 'Back', 1],
   ['mpreacher', 'Machine preacher curls', 'Biceps'], ['btbcurl', 'Behind-the-back EZ-bar curls', 'Biceps'], ['fconc', 'Forearm concentration curls', 'Biceps'],
-  ['dbraise1', 'One-arm dumbbell lateral raises', 'Shoulders']
+  ['dbraise1', 'One-arm dumbbell lateral raises', 'Shoulders'],
+  /* the common ones that were missing */
+  ['dbdecl', 'Decline dumbbell press', 'Chest', 1], ['landpress', 'Landmine press', 'Shoulders', 1], ['svend', 'Svend press', 'Chest'],
+  ['cabpress', 'Cable chest press', 'Chest', 1], ['icfly', 'Incline cable flyes', 'Chest'], ['incpush', 'Incline push-ups', 'Chest', 0, 'bw'],
+  ['decpush', 'Decline push-ups', 'Chest', 0, 'bw'], ['diampush', 'Diamond push-ups', 'Triceps', 0, 'bw'], ['sqpress', 'Dumbbell squeeze press', 'Chest'],
+  ['bnchdip', 'Bench dips', 'Triceps', 0, 'bw'], ['chestdip', 'Chest dips', 'Chest', 1, 'bw'], ['pendlay', 'Pendlay rows', 'Back', 1],
+  ['meadows', 'Meadows rows', 'Back'], ['invrow', 'Inverted rows', 'Back', 0, 'bw'], ['trapdl', 'Trap bar deadlift', 'Hamstrings', 1],
+  ['sumodl', 'Sumo deadlift', 'Glutes', 1], ['nupull', 'Neutral-grip pull-ups', 'Back', 1, 'bw'], ['wgpull', 'Wide-grip pull-ups', 'Back', 1, 'bw'],
+  ['landrow', 'Landmine rows', 'Back', 1], ['pullthru', 'Cable pull-throughs', 'Glutes'],
+  ['deadhang', 'Dead hang', 'Back', 0, 'bw'], ['cfront', 'Cable front raises', 'Shoulders'], ['plateraise', 'Plate raises', 'Shoulders'],
+  ['pushpress', 'Push press', 'Shoulders', 1], ['zpress', 'Z press', 'Shoulders', 1], ['leanlat', 'Leaning lateral raises', 'Shoulders'],
+  ['dbohp', 'Standing dumbbell shoulder press', 'Shoulders', 1], ['pikepush', 'Pike push-ups', 'Shoulders', 0, 'bw'], ['caboh', 'Cable overhead curls', 'Biceps'],
+  ['zottman', 'Zottman curls', 'Biceps'], ['xbody', 'Cross-body hammer curls', 'Biceps'], ['dragcurl', 'Drag curls', 'Biceps'],
+  ['inccable', 'Incline cable curls', 'Biceps'], ['tate', 'Tate press', 'Triceps'], ['revpd', 'Reverse-grip pushdowns', 'Triceps'],
+  ['cabkick', 'Cable triceps kickbacks', 'Triceps'], ['saohext', 'Single-arm overhead cable extensions', 'Triceps'], ['sumosq', 'Sumo squat', 'Quads', 1],
+  ['boxsq', 'Box squat', 'Quads', 1], ['pausesq', 'Pause squat', 'Quads', 1], ['zerch', 'Zercher squat', 'Quads', 1],
+  ['dbsplit', 'Dumbbell split squats', 'Quads', 1], ['smsplit', 'Smith machine split squats', 'Quads', 1], ['latlunge', 'Lateral lunges', 'Glutes', 1],
+  ['curtsy', 'Curtsy lunges', 'Glutes', 1], ['cossack', 'Cossack squats', 'Glutes', 0, 'bw'], ['jumpsq', 'Jump squats', 'Quads', 0, 'bw'],
+  ['boxjump', 'Box jumps', 'Quads', 0, 'bw'], ['wallsit', 'Wall sit', 'Quads', 0, 'bw'], ['slcurl', 'Single-leg lying curls', 'Hamstrings'],
+  ['dbthrust', 'Dumbbell hip thrusts', 'Glutes', 1], ['frogpump', 'Frog pumps', 'Glutes', 0, 'bw'], ['widepress', 'Wide-stance leg press', 'Glutes', 1],
+  ['revhack', 'Reverse hack squat', 'Glutes', 1], ['slcalf', 'Single-leg calf raises', 'Calves', 0, 'bw'], ['plank', 'Plank', 'Abs', 0, 'bw'],
+  ['sideplank', 'Side plank', 'Abs', 0, 'bw'], ['hollow', 'Hollow hold', 'Abs', 0, 'bw'], ['bicycle', 'Bicycle crunches', 'Abs', 0, 'bw'],
+  ['mtnclimb', 'Mountain climbers', 'Abs', 0, 'bw'], ['vups', 'V-ups', 'Abs', 0, 'bw'], ['situp', 'Sit-ups', 'Abs', 0, 'bw'],
+  ['cabside', 'Cable side bends', 'Abs'], ['dbside', 'Dumbbell side bends', 'Abs'], ['flutter', 'Flutter kicks', 'Abs', 0, 'bw'],
+  ['dragon', 'Dragon flags', 'Abs', 0, 'bw'], ['lsit', 'L-sit', 'Abs', 0, 'bw'], ['windshield', 'Hanging windshield wipers', 'Abs', 0, 'bw'],
+  ['cabtwist', 'Cable twists', 'Abs'], ['birddog', 'Bird dogs', 'Lower back', 0, 'bw'], ['toetouch', 'Toe touches', 'Abs', 0, 'bw'],
+  ['kbswing', 'Kettlebell swings', 'Glutes', 1], ['burpee', 'Burpees', 'Quads', 0, 'bw'], ['tgu', 'Turkish get-ups', 'Shoulders', 1],
+  ['kbgoblet', 'Kettlebell goblet squat', 'Quads', 1],
+  /* machine and dumbbell variations */
+  ['decmach', 'Decline machine press', 'Chest', 1], ['mfly', 'Machine chest flyes', 'Chest'], ['mplpress', 'Plate-loaded chest press', 'Chest', 1],
+  ['mincrow', 'Incline machine rows', 'Back', 1], ['plrow', 'Plate-loaded rows', 'Back', 1], ['mpullover', 'Machine pullovers', 'Back'],
+  ['mshrug', 'Machine shrugs', 'Back'], ['mpulldown2', 'Plate-loaded pulldowns', 'Back', 1], ['mrdelt', 'Machine rear delt flyes', 'Shoulders'],
+  ['mplshp', 'Plate-loaded shoulder press', 'Shoulders', 1], ['mcurl', 'Machine biceps curls', 'Biceps'], ['mtriext', 'Machine triceps extensions', 'Triceps'],
+  ['mbackext', 'Machine back extensions', 'Lower back'], ['mtwist', 'Machine torso rotations', 'Abs'], ['mhipthrust', 'Machine hip thrusts', 'Glutes', 1],
+  ['mlegcurlst', 'Machine standing leg curls', 'Hamstrings'], ['mcalfpress', 'Machine calf press', 'Calves'], ['mplsq', 'Plate-loaded squat machine', 'Quads', 1],
+  ['mplhack', 'Plate-loaded hack squat', 'Quads', 1], ['mplleg', 'Plate-loaded leg press', 'Quads', 1], ['msmithinc', 'Machine incline fly', 'Chest'],
+  ['mgluteham', 'Machine glute-ham raise', 'Hamstrings'], ['mabcrunch', 'Machine ab crunches', 'Abs'],
+  ['mforearm', 'Machine forearm curls', 'Biceps'], ['mdelt', 'Machine delt raises', 'Shoulders'],
+  ['dblunge', 'Dumbbell walking lunges', 'Quads', 1], ['dbrlunge', 'Dumbbell reverse lunges', 'Glutes', 1], ['dbstepup', 'Dumbbell step-ups', 'Quads', 1],
+  ['dbbss', 'Dumbbell Bulgarian split squats', 'Glutes', 1], ['dbsumo', 'Dumbbell sumo squats', 'Quads', 1], ['dbsldl', 'Dumbbell stiff-leg deadlifts', 'Hamstrings', 1],
+  ['dbsldlr', 'Dumbbell single-leg Romanian deadlifts', 'Hamstrings', 1], ['dbglutebr', 'Dumbbell glute bridges', 'Glutes', 1], ['dbfront', 'Dumbbell front squats', 'Quads', 1],
+  ['dbbor', 'Dumbbell bent-over rows', 'Back', 1], ['dbfloor', 'Dumbbell floor press', 'Chest', 1], ['dbincrow', 'Incline dumbbell rows', 'Back', 1],
+  ['dbrevfly', 'Dumbbell reverse flyes', 'Shoulders'], ['dbfront2', 'Dumbbell front raises', 'Shoulders'], ['dbseatlat', 'Seated dumbbell lateral raises', 'Shoulders'],
+  ['dbupright', 'Dumbbell upright rows', 'Shoulders'], ['dbcuban', 'Dumbbell Cuban press', 'Shoulders'], ['dbiy', 'Incline dumbbell Y raises', 'Shoulders'],
+  ['dbpreach', 'Dumbbell preacher curls', 'Biceps'], ['dbinchammer', 'Incline hammer curls', 'Biceps'], ['dbrevcurl', 'Dumbbell reverse curls', 'Biceps'],
+  ['dbseatcurl', 'Seated dumbbell curls', 'Biceps'], ['dbskull', 'Dumbbell skull crushers', 'Triceps'], ['dbwrist', 'Dumbbell wrist curls', 'Biceps'],
+  ['dbsuper', 'Dumbbell thrusters', 'Quads', 1], ['dbclean', 'Dumbbell clean and press', 'Shoulders', 1], ['dbsnatch', 'Dumbbell snatch', 'Shoulders', 1],
+  ['dbcarry', 'Dumbbell farmer carry', 'Core', 1], ['dbsldb', 'Single-leg dumbbell hip thrusts', 'Glutes', 1], ['dbcalfsl', 'Single-leg dumbbell calf raises', 'Calves'],
+  ['dbtrapraise', 'Dumbbell prone trap raises', 'Back'], ['dbcrunch', 'Weighted crunches', 'Abs'], ['dbdeadlift', 'Dumbbell deadlifts', 'Hamstrings', 1]
 ].map(function (a) { return { id: a[0], n: a[1], m: a[2], c: a[3] ? 1 : 0, t: a[4] || 'w' }; });
 
 /* PUSH, PULL, LEGS — and Core for what is neither. Worked out from the
@@ -2281,8 +2339,10 @@ lfProgSync();
 var act = lfLoadAct();
 
 /* ═══════════ READING THE RECORD ═══════════ */
-function allEx() { return EXERCISES.concat(S.ex); }
-function exById(id) { var a = allEx(); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
+/* COPIES, RETIRED. Seated shoulder press and a bare Triceps extensions were each the same movement as a named one (machine or dumbbell; overhead or pushdown), so they come off the lists. They still READ, because a routine or a logged day may name them, and nothing is thrown away. */
+var RETIRED = { seatshp: 1, triext: 1 };
+function allEx() { return EXERCISES.filter(function (e) { return !RETIRED[e.id]; }).concat(S.ex); }
+function exById(id) { var a = EXERCISES.concat(S.ex); for (var i = 0; i < a.length; i++) if (a[i].id === id) return a[i]; return null; }
 function exName(id, fallback) { var e = exById(id); return e ? e.n : (fallback || 'Exercise'); }
 function allRt() { return lfProg().days.concat(S.rt); }
 /* every program's days, so a day of the split you are not running still opens */
@@ -2756,11 +2816,9 @@ function lfTagsOf(kinds) { return lfTags().filter(function (x) { return kinds.in
 function lfCreateCard() {
   var c = el('<div class="lf-card lf-today is-new" id="lfNewUser"><div class="lf-lab">Today</div><div class="lf-title-box" style="cursor:default">Create routine</div>'
     + '<div class="lf-sub">Paste in the programme you already follow, or build one by hand. It shows up here, ready to start.</div>'
-    + '<button type="button" class="lf-go" id="lfCreateRt"><span>Create routine</span></button>'
-    + '<div class="lf-nu-l"><button type="button" id="lfEmptyWo">Empty workout</button><button type="button" id="lfSplitGo">Use a ready-made split</button></div></div>');
+    + '<button type="button" class="lf-go" id="lfCreateRt"><span>Create routine</span></button></div>');
+  /* ONE WAY ON, ON PURPOSE: no empty workout and no ready-made split beside it. Making your own routine is the first thing a new person does, so there is nothing else to be confused by. */
   $('#lfCreateRt', c).addEventListener('click', function () { lfRoutineForm(null); });
-  $('#lfEmptyWo', c).addEventListener('click', function () { lfStart(null); });
-  $('#lfSplitGo', c).addEventListener('click', function () { S.fresh = false; lfSave(); lfRender(); });
   return c;
 }
 function lfTodayCard() {
@@ -5205,7 +5263,7 @@ function lfProgManage() {
 }
 
 /* THE LIBRARY OPENS ON ONE GROUP, not on two hundred and fifty exercises; the suite's in-place mode keeps it on All so its checks can reach any exercise */
-var libQ = '', libG = window.__lfInline ? 'all' : 'push';
+var libQ = '', libG = window.__lfInline ? 'all' : 'push', libOpen = !!window.__lfInline, libGAll = !!window.__lfInline, libGO = {};
 function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
@@ -5256,23 +5314,27 @@ function lfRenderLib() {
     $('.lf-list', rc).appendChild(li);
   });
   if (!S.rt.length) { var hw = el('<button type="button" class="lf-li" id="lfSetupLink"><div class="lf-li-t"><b>How to add your routine</b><span>A short guide</span></div>' + IC.chev + '</button>'); hw.addEventListener('click', lfSetupTour); $('.lf-list', rc).appendChild(hw); }
-  if (newU) { var sg = el('<button type="button" class="lf-li" id="lfSplitLink"><div class="lf-li-t"><b>Use a ready-made split</b><span>Upper / lower, push pull legs and more</span></div>' + IC.chev + '</button>'); sg.addEventListener('click', function () { S.fresh = false; lfSave(); lfRender(); }); $('.lf-list', rc).appendChild(sg); }
   root.appendChild(rc);
   /* the library */
-  var hd = el('<div class="lf-hd lf-gh"><span class="lf-cap">All exercises</span></div>');
-  root.appendChild(hd);
+  /* ALL EXERCISES FOLDS. Two hundred and forty names under every other control on the screen was the whole of what made it feel like a wall. It is shut until you open it, and each muscle inside it folds as well; a search opens everything it finds. */
   var all = allEx();
-  var fw = el('<div></div>'); fw.appendChild(lfPplSeg(libG, function (g) { libG = g; paintLib(); })); root.appendChild(fw);
+  var hd = el('<h3 class="lf-fold-h lf-gh"><button type="button" class="lf-fold-b" id="lfLibFold" aria-controls="lfLibBody"><span class="lf-cap">All exercises</span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3>');
+  $('.lf-num', hd).textContent = all.length;
+  var lb = el('<div id="lfLibBody"></div>');
+  function foldLib() { $('#lfLibFold', hd).setAttribute('aria-expanded', libOpen ? 'true' : 'false'); lb.hidden = !libOpen; }
+  $('#lfLibFold', hd).addEventListener('click', function () { libOpen = !libOpen; foldLib(); });
+  root.appendChild(hd); root.appendChild(lb); foldLib();
+  var fw = el('<div></div>'); fw.appendChild(lfPplSeg(libG, function (g) { libG = g; paintLib(); })); lb.appendChild(fw);
   if (all.length > 6) {
     var q = el('<input class="lf-field" type="search" placeholder="Search" aria-label="Search exercises" autocomplete="off" />');
     q.value = libQ;
     q.addEventListener('input', function () { libQ = q.value; paintLib(); });
-    root.appendChild(q);
+    lb.appendChild(q);
   }
-  var box = el('<div id="lfLibList"></div>'); root.appendChild(box);
+  var box = el('<div id="lfLibList"></div>'); lb.appendChild(box);
   var mk = el('<button type="button" class="lf-add" id="lfNewEx">' + IC.plus + 'Create exercise</button>');
   mk.addEventListener('click', function () { lfExForm(null); });
-  root.appendChild(mk);
+  lb.appendChild(mk);
   function paintLib() {
     box.textContent = '';
     var t = libQ.trim().toLowerCase();
@@ -5280,9 +5342,13 @@ function lfRenderLib() {
     if (!all.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No exercises yet</b>Create your own here, or they arrive with the full list.</div>')); return; }
     if (!shown.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No match</b>Try another word, or create it.</div>')); return; }
     lfGrouped(shown).forEach(function (G) {
-      var c = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-cap" style="padding:12px 0 2px"></div><div class="lf-list"></div></div>');
+      var c = el('<div class="lf-card" style="padding:4px 16px"><button type="button" class="lf-gf"><span class="lf-cap"></span>' + IC.chev + '</button><div class="lf-list"></div></div>');
       c.dataset.g = G.g;
       $('.lf-cap', c).textContent = G.n + ' · ' + G.es.length;
+      var gopen = !!t || libGAll || !!libGO[G.g], gf = $('.lf-gf', c), gl = $('.lf-list', c);
+      function foldG() { gf.setAttribute('aria-expanded', gopen ? 'true' : 'false'); gl.hidden = !gopen; }
+      gf.addEventListener('click', function () { gopen = !gopen; libGO[G.g] = gopen; foldG(); });
+      foldG();
       G.es.forEach(function (e) {
         var h = historyFor(e.id), last = h[h.length - 1];
         var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
