@@ -2730,6 +2730,29 @@ const freeze = (at) => `(() => {
     await c2.close();
   }
 
+  /* ── A FIRST INSTALL STARTS EMPTY: Today says Create routine, and no one else's programme is there ── */
+  {
+    const c = await browser.newContext(PHONE); await c.addInitScript(freeze('2026-10-30T18:00:00')); await c.addInitScript('window.__lfInline = 1;');
+    const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(2400); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
+    ok('a phone with no record has no programme on Today: it says Create routine', await page.locator('#lfNewUser').count() === 1 && /Create routine/.test(await page.textContent('#lfNewUser .lf-title-box')) && await page.locator('#lfGo').count() === 0, await page.textContent('#lfHome').then((t) => t.slice(0, 80)));
+    await page.click('#lfCreateRt'); await page.waitForTimeout(500);
+    ok('and Create routine opens the new routine form, with the reader inside it', await page.locator('#lfRtRead').count() === 1 && await page.locator('#lfRtN').count() === 1);
+    await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+    await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
+    ok('Exercises shows no built-in split, only New routine at the top and a way to a ready-made one', await page.locator('#lfSplit').count() === 0 && await page.locator('#lfProg').count() === 0 && await page.locator('#lfNewRt').count() === 1 && await page.locator('#lfSplitLink').count() === 1);
+    await page.click('#lfSplitLink'); await page.waitForTimeout(500);
+    ok('a ready-made split brings the programme back, and the split shows', await page.locator('#lfSplit').count() === 1 && await page.locator('#lfNewRt').count() === 1);
+    await page.click('.lf-bar [data-v="home"]'); await page.waitForTimeout(400);
+    ok('and Today is then that programme\'s day', await page.locator('#lfNewUser').count() === 0 && await page.locator('#lfGo').count() === 1);
+    await c.close();
+    const c2 = await browser.newContext(PHONE); await c2.addInitScript(freeze('2026-10-30T18:00:00')); await c2.addInitScript('window.__lfInline = 1;');
+    await c2.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, fresh: true, tour: true, setup: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [], rt: [{ id: 'r1', n: 'Push day', sp: '', ex: ['bench'], tg: {} }, { id: 'r2', n: 'Pull day', sp: '', ex: ['row'], tg: {} }] }))}); })();`);
+    const p2 = await c2.newPage(); p2.on('pageerror', (e) => errors.push(String(e))); await p2.goto(URL); await p2.waitForTimeout(900);
+    ok('with a routine of your own and no programme, Today is your routine', await p2.locator('#lfNewUser').count() === 0 && /Push day/.test(await p2.textContent('#lfPick')), await p2.textContent('#lfHome').then((t) => t.slice(0, 60)));
+    await c2.close();
+  }
+
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);

@@ -162,6 +162,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 
 /* ── today ── */
 .lf-today { padding: 16px; }
+.lf-nu-l { display: flex; gap: 8px; margin-top: 10px; }
+.lf-nu-l button { flex: 1; min-height: 44px; border-radius: 12px; background: var(--card2, rgba(255,255,255,.06)); color: var(--dim); font-size: 14px; font-weight: 600; }
 /* the first card lets the home glow through it, so the colour reads from the top of the screen down */
 #lfHome .lf-today { background: color-mix(in srgb, var(--card) 45%, transparent); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06); }
 .lf-done { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 12px; border-radius: 999px; background: var(--done-bg); color: var(--good); font-size: 13px; font-weight: 600; }
@@ -2052,7 +2054,7 @@ function lfClean(o) {
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
-  d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true; d.setup = o.setup === true;
+  d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true; d.setup = o.setup === true; d.fresh = o.fresh === true;
   /* PROGRAMS ADDED by link or code (pg) and built-in ones put away (hp). A damaged program costs itself, never the record. */
   if (Array.isArray(o.pg)) { var pgl = lfCleanPgs(o.pg); if (pgl.length) d.pg = pgl; }
   if (Array.isArray(o.hp)) { var hpl = o.hp.filter(function (k, i, a) { return BUILTIN_PROGS.indexOf(k) >= 0 && a.indexOf(k) === i; }); if (hpl.length) d.hp = hpl; }
@@ -2195,6 +2197,8 @@ function lfLoad() {
   var raw = null;
   try { raw = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
   var s = lfClean(raw);
+  /* A FIRST INSTALL STARTS EMPTY: no one else's programme on Today, only the way to make your own. Only a phone with no record at all is fresh; every record that exists already is left as it was. */
+  if (!raw) s.fresh = true;
   /* Written back, so a repair is a fact about the record rather than
      something redone on every open and lost on the next write. */
   if (raw) try { localStorage.setItem(KEY, JSON.stringify(s)); } catch (e) {}
@@ -2533,7 +2537,7 @@ function lfTour() {
 var SETUP = [
   ['Add your routine', 'Open Exercises and tap New routine. Choose Read it from a photo, PDF or text and paste your programme, or build it by hand.', 9000],
   ['Check it and save', 'Each line is read as an exercise with its sets and reps. Fix anything it missed, then save.', 6400],
-  ['Pick it on Today', 'Your routine shows up on the Today card. Tap the name to choose it, then press Start.', 7000],
+  ['Start it from Today', 'Your routine shows up on the Today card, ready to go. Press Start.', 6000],
   ['Log your sets', 'Tick each set as you finish it. The rest timer starts by itself.', 5600]
 ];
 function lfSetupTour() {
@@ -2564,8 +2568,7 @@ function lfSetupTour() {
     else if (i === 1) html = '<div class="lf-cap lf-gh">Check it</div><input class="lf-field" value="Push day" readonly tabindex="-1" />'
       + '<div class="lf-list" style="margin-top:6px">' + [['Bench press', '4 × 8'], ['Incline dumbbell press', '3 × 10'], ['Cable flyes', '3 × 12'], ['Overhead press', '3 × 10']].map(function (r) { return '<div class="lf-li"><div class="lf-li-t"><b>' + r[0] + '</b></div><span class="lf-li-r lf-num">' + r[1] + '</span></div>'; }).join('') + '</div>'
       + '<button type="button" class="lf-btn is-ink is-full" id="trSave" tabindex="-1" style="margin-top:10px">Save routines</button><div class="tr-toast" id="trToast">Saved 1 routine</div>';
-    else if (i === 2) html = '<div class="lf-card lf-today"><div class="lf-lab">Today</div><div><button type="button" class="lf-title-box" id="trPick" tabindex="-1">Upper body</button></div><div class="lf-sub" id="trSub">Chest, shoulders and triceps</div><button type="button" class="lf-go" id="trStart" tabindex="-1">' + PLAY + '<span>Start</span></button></div>'
-      + '<div class="tr-sh" id="trSh"><div class="lf-list"><button type="button" class="lf-li" tabindex="-1"><div class="lf-li-t"><b>Rest day</b><span>Take today off on purpose</span></div></button><button type="button" class="lf-li" id="trPushRow" tabindex="-1"><div class="lf-li-t"><b>Push day</b><span>4 exercises</span></div></button><button type="button" class="lf-li" tabindex="-1"><div class="lf-li-t"><b>Empty workout</b><span>Add exercises as you go</span></div></button></div></div>';
+    else if (i === 2) html = '<div class="lf-card lf-today"><div class="lf-lab">Today</div><div><button type="button" class="lf-title-box" id="trPick" tabindex="-1">Push day</button></div><div class="lf-sub">Bench press, incline dumbbell press, cable flyes</div><button type="button" class="lf-go" id="trStart" tabindex="-1">' + PLAY + '<span>Start</span></button></div>';
     else html = trCard('a', 'Bench press', trRow('', 1, '60×8', '60', '8') + trRow('', 2, '60×8', '60', '8') + trRow('', 3, '60×7', '60', '8'), 1) + '<div class="tr-rest" id="trRest"><span class="lf-chip">Resting</span><span class="lf-num">1:30</span></div>';
     stage.innerHTML = html; f = el('<i class="lf-tr-f" aria-hidden="true"></i>'); stage.appendChild(f);
     f.style.transition = 'none'; f.style.transform = 'translate(' + (stage.clientWidth / 2 - 17) + 'px,' + (stage.clientHeight + 10) + 'px)'; void f.offsetWidth; f.style.transition = '';
@@ -2579,9 +2582,7 @@ function lfSetupTour() {
       press('#trSave', 1800, function () { q('#trToast').classList.add('is-up'); });
       T(4200, function () { q('#trToast').classList.remove('is-up'); });
     } else if (i === 2) {
-      press('#trPick', 600, function () { q('#trSh').classList.add('is-up'); });
-      press('#trPushRow', 2300, function () { q('#trSh').classList.remove('is-up'); q('#trPick').textContent = 'Push day'; q('#trSub').textContent = 'Bench, incline press, flyes and overhead press'; });
-      press('#trStart', 4300, function () { q('#trStart').classList.add('is-live'); });
+      press('#trStart', 1200, function () { q('#trStart').classList.add('is-live'); });
     } else {
       press('.lf-set[data-k="s"] .lf-chk', 700, function () { tick(q('.lf-set[data-k="s"]')); q('#trRest').classList.add('is-up'); });
       press('.lf-set[data-k="s"]:nth-child(2) .lf-chk', 3000, function () { tick(q('.lf-set[data-k="s"]:nth-child(2)')); });
@@ -2648,9 +2649,18 @@ function buzz(ms) {
 }
 
 /* ═══════════ HOME ═══════════ */
+/* NEW: nothing yet, and no programme chosen. Today says Create routine until there is something to start. */
+function lfNew() { return !!S.fresh && !S.rt.length && !S.wo.length; }
 function lfToday() {
   var t = today();
   if (S.pick && S.pick.d === ymd(t) && rtById(S.pick.id)) return rtById(S.pick.id);
+  /* ON YOUR OWN ROUTINES, no built-in programme: the next one is the one after the routine you last trained, round your own list. */
+  if (S.fresh) {
+    if (!S.rt.length) return null;
+    var ws0 = woSorted(), tk0 = ymd(t);
+    for (var j0 = ws0.length - 1; j0 >= 0; j0--) { if (ws0[j0].d > tk0) continue; for (var q0 = 0; q0 < S.rt.length; q0++) if (S.rt[q0].id === ws0[j0].rt) return S.rt[(q0 + 1) % S.rt.length]; }
+    return S.rt[0];
+  }
   var P = lfProg().days;
   /* THE NEXT ONE FOLLOWS THE PROGRAM, not the calendar: whatever day of the week it is, today is the day after the one you last trained. Only with nothing of this program to go on does the weekday decide. */
   var ws = woSorted(), tk = ymd(t);
@@ -2743,7 +2753,18 @@ var TAG_IC = {
    days. */
 function lfTag(x) { var g = el('<span class="lf-tag">' + TAG_IC[x[0]] + '<span></span></span>'); g.dataset.k = x[0]; $('span', g).textContent = x[1]; return g; }
 function lfTagsOf(kinds) { return lfTags().filter(function (x) { return kinds.indexOf(x[0]) >= 0; }); }
+function lfCreateCard() {
+  var c = el('<div class="lf-card lf-today is-new" id="lfNewUser"><div class="lf-lab">Today</div><div class="lf-title-box" style="cursor:default">Create routine</div>'
+    + '<div class="lf-sub">Paste in the programme you already follow, or build one by hand. It shows up here, ready to start.</div>'
+    + '<button type="button" class="lf-go" id="lfCreateRt"><span>Create routine</span></button>'
+    + '<div class="lf-nu-l"><button type="button" id="lfEmptyWo">Empty workout</button><button type="button" id="lfSplitGo">Use a ready-made split</button></div></div>');
+  $('#lfCreateRt', c).addEventListener('click', function () { lfRoutineForm(null); });
+  $('#lfEmptyWo', c).addEventListener('click', function () { lfStart(null); });
+  $('#lfSplitGo', c).addEventListener('click', function () { S.fresh = false; lfSave(); lfRender(); });
+  return c;
+}
 function lfTodayCard() {
+  if (!act && lfNew()) return lfCreateCard();
   var rt = lfToday();
   /* TRAINED TODAY, the card is that workout and nothing replaces it: not
      a rest day, not a choice, not another session. To change it, delete
@@ -5036,6 +5057,7 @@ function lfProgSync() {
 }
 /* turn a program on: the weekly targets follow only when they are still the old program's own */
 function lfProgSwitch(k) {
+  S.fresh = false;
   var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
   var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
   if (JSON.stringify(S.focus) === sig(lfProgDef(S.prog))) S.focus = lfFocusOf(lfProgDef(k));
@@ -5191,8 +5213,9 @@ function lfRenderLib() {
   var nr = el('<button type="button" class="lf-add" id="lfNewRt">' + IC.plus + 'New routine</button>');
   nr.addEventListener('click', function () { lfRoutineForm(null); });
   root.appendChild(nr);
+  var newU = lfNew();
   /* the split, Monday first */
-  root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
+  if (!newU) root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
      to the new plan's — but only when they are still the old plan's own,
      so targets you set yourself are never overwritten. */
@@ -5210,7 +5233,7 @@ function lfRenderLib() {
     });
     pg.appendChild(bt);
   });
-  root.appendChild(pg);
+  if (!newU) root.appendChild(pg);
   var pc = el('<div class="lf-card" style="padding:4px 16px" id="lfSplit"><div class="lf-list"></div></div>');
   [1, 2, 3, 4, 5, 6, 0].forEach(function (w) {
     var r = lfProg().days.filter(function (x) { return x.dow === w; })[0];
@@ -5221,8 +5244,8 @@ function lfRenderLib() {
     li.addEventListener('click', function () { lfDaySpec(r); });
     $('.lf-list', pc).appendChild(li);
   });
-  root.appendChild(pc);
-  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); root.appendChild(pmg);
+  if (!newU) root.appendChild(pc);
+  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
   /* routines */
   root.appendChild(el('<div class="lf-cap lf-gh">Your routines</div>'));
   var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
@@ -5233,6 +5256,7 @@ function lfRenderLib() {
     $('.lf-list', rc).appendChild(li);
   });
   if (!S.rt.length) { var hw = el('<button type="button" class="lf-li" id="lfSetupLink"><div class="lf-li-t"><b>How to add your routine</b><span>A short guide</span></div>' + IC.chev + '</button>'); hw.addEventListener('click', lfSetupTour); $('.lf-list', rc).appendChild(hw); }
+  if (newU) { var sg = el('<button type="button" class="lf-li" id="lfSplitLink"><div class="lf-li-t"><b>Use a ready-made split</b><span>Upper / lower, push pull legs and more</span></div>' + IC.chev + '</button>'); sg.addEventListener('click', function () { S.fresh = false; lfSave(); lfRender(); }); $('.lf-list', rc).appendChild(sg); }
   root.appendChild(rc);
   /* the library */
   var hd = el('<div class="lf-hd lf-gh"><span class="lf-cap">All exercises</span></div>');
