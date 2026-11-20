@@ -9997,7 +9997,12 @@ function lfCoinView(x, earnedNow) {
     (function loop() {
       raf = requestAnimationFrame(loop);
       /* it settles a little off square, the way a held award does, so the light is on the metal at rest too */
-      if (!drag) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; ry += vy; rx += vx; rx += (.12 - rx) * .06; }
+      /* EVERY BADGE KEEPS TURNING: let go and it eases to a slow spin that never stops, so the light crosses the metal all the time. Reduced motion keeps the old rest: settle a little off square. */
+      if (!drag) {
+        if (calm) { vy *= .955; vx *= .9; if (Math.abs(vy) < .02) ry += (Math.round(ry / Math.PI) * Math.PI + .26 - ry) * .08; }
+        else { vy += (.0075 - vy) * .035; vx *= .9; }
+        ry += vy; rx += vx; rx += (.12 - rx) * .06;
+      }
       var sw = calm || drag ? 0 : Math.sin((performance.now() - t0) / 1000 * .9) * .05;
       aw.rotation.set(rx + sw * .4, ry + sw, 0);
       if (aw.userData.cr) aw.userData.cr(performance.now() / 1000);

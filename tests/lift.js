@@ -1033,6 +1033,12 @@ const freeze = (at) => `(() => {
     await page.waitForTimeout(1500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
       && await page.locator('.lf-cv-stage canvas, .lf-cv-stage.is-flat').count() >= 1);
+    /* EVERY BADGE KEEPS TURNING: long after the opening spin has settled the picture is still moving */
+    if (await page.locator('.lf-cv-stage canvas').count()) {
+      await page.waitForTimeout(3500);
+      const shot1 = await page.locator('.lf-cv-stage').screenshot(); await page.waitForTimeout(1400); const shot2 = await page.locator('.lf-cv-stage').screenshot();
+      ok('a badge left alone keeps turning on its own, long after it has settled', !shot1.equals(shot2));
+    }
     await page.keyboard.press('Escape'); await page.waitForSelector('.lf-cv', { state: 'detached', timeout: 5000 }).catch(() => {});
     ok('and is gone when it closes, not hidden', await page.locator('.lf-cv').count() === 0);
     ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');
