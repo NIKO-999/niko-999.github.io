@@ -158,28 +158,42 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .bd-row img.is-off, .bd-g img.is-off { filter: grayscale(1) brightness(.55); }
 .bd-x { margin-left: auto; text-align: right; color: var(--dim); font-size: 12px; max-width: 300px; }
 .bd-x b { display: block; color: var(--ink); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-.dlg.bd-dlg { max-height: calc(100vh - 32px); overflow-y: auto; width: 900px; max-width: calc(100vw - 48px); padding: 32px 36px; }
-.dlg.bd-dlg .bd-wrap { display: grid; grid-template-columns: 340px 1fr; gap: 32px; margin-top: 18px; align-items: start; }
-.bd-hero { position: sticky; top: 0; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
-.bd-stage { position: relative; width: 340px; height: 340px; touch-action: none; cursor: grab; }
-.bd-stage:active { cursor: grabbing; }
-.bd-stage { isolation: isolate; }
-.bd-stage canvas, .bd-stage img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.bd-stage img { border-radius: 50%; object-fit: contain; }
-.bd-name { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; margin-top: 6px; }
-.bd-line { color: var(--dim); font-size: 13px; }
-.bd-st { color: var(--dim); font-size: 12px; min-height: 18px; }
-.bd-hero .bar { width: 240px; margin-top: 4px; }
-.bd-flip { margin-top: 6px; height: 36px; padding: 0 16px; border-radius: 10px; background: #1a1a1a; font-weight: 700; font-size: 13px; }
-.bd-flip:hover { background: #242424; }
-.bd-g { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px 4px; }
-.bd-g button { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 4px; border-radius: 14px; color: var(--dim); font-size: 11px; line-height: 1.2; text-align: center; }
-.bd-g button:hover { background: #111; }
-.bd-g button[aria-pressed="true"] { background: #141414; box-shadow: inset 0 0 0 1px #2e2e2e; color: var(--ink); }
+.dlg.bd-dlg { max-height: calc(100vh - 32px); overflow-y: auto; width: 760px; max-width: calc(100vw - 48px); padding: 32px 36px; }
+.bd-g { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px 6px; margin-top: 14px; }
+.bd-g button { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 2px; border-radius: 14px; color: var(--dim); font-size: 11px; line-height: 1.2; text-align: center; }
+.bd-g button:hover { background: #111; color: var(--ink); }
 .bd-g button:focus-visible { outline: 2px solid var(--dim); outline-offset: 1px; }
-.bd-g img { width: 58px; height: 58px; }
+.bd-g img { width: 64px; height: 64px; }
 .bd-gh { grid-column: 1 / -1; margin-top: 6px; }
 .bd-gh:first-child { margin-top: 0; }
+/* a coin on its own */
+.veil:has(.bd-view) { background: rgba(0,0,0,.97); }
+.dlg.bd-view { width: auto; max-width: none; background: transparent; border: 0; padding: 0; overflow: visible; }
+.bd-vw { display: flex; align-items: center; gap: 28px; }
+.bd-mid { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; width: 460px; }
+.bd-nv { width: 52px; height: 52px; border-radius: 50%; background: #141414; font-size: 26px; line-height: 1; color: var(--dim); flex: none; }
+.bd-nv:hover { background: #222; color: var(--ink); }
+.bd-stage { position: relative; width: 440px; height: 440px; touch-action: none; cursor: grab; isolation: isolate; }
+.bd-stage:active { cursor: grabbing; }
+.bd-stage canvas, .bd-stage img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.bd-stage img { border-radius: 50%; object-fit: contain; }
+.bd-view .bd-stage::before { content: ''; position: absolute; inset: 2%; border-radius: 50%; z-index: -1; opacity: 1; background: radial-gradient(closest-side, rgba(227,173,52,.34), rgba(227,173,52,.1) 62%, transparent 80%); animation: sv-breathe-c 3.4s ease-in-out infinite alternate; }
+.bd-view .bd-stage.bd-t3::before { background: radial-gradient(closest-side, rgba(255,200,90,.55), rgba(227,173,52,.18) 62%, transparent 82%); }
+.bd-view .bd-stage.bd-t4::before { inset: -14%; animation: none; background: conic-gradient(from 0deg, rgba(255,214,120,0), rgba(255,214,120,.6), rgba(255,214,120,0) 14%, rgba(255,214,120,.45) 30%, rgba(255,214,120,0) 44%, rgba(255,214,120,.6) 60%, rgba(255,214,120,0) 74%, rgba(255,214,120,.45) 88%, rgba(255,214,120,0));
+  -webkit-mask: radial-gradient(closest-side, #000 40%, transparent 74%); mask: radial-gradient(closest-side, #000 40%, transparent 74%); animation: sv-spin-c 14s linear infinite; }
+.bd-view .bd-stage.is-off::before { background: radial-gradient(closest-side, rgba(255,255,255,.07), transparent 75%); animation: none; }
+/* sparkle: the finest wear a scatter of lights that come and go */
+.bd-sp { display: none; position: absolute; inset: -6%; pointer-events: none; z-index: 2; }
+.bd-stage.bd-t4 .bd-sp { display: block; }
+.bd-sp::before, .bd-sp::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(#fff, rgba(255,230,150,.6) 40%, transparent 70%); opacity: 0; animation: sv-twk 2.6s ease-in-out infinite; }
+.bd-sp::before { left: 18%; top: 22%; } .bd-sp::after { right: 16%; bottom: 26%; animation-delay: 1.3s; }
+@keyframes sv-twk { 0%, 100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1.4); } }
+@media (prefers-reduced-motion: reduce) { .bd-sp::before, .bd-sp::after, .bd-view .bd-stage::before { animation: none; } }
+.bd-name { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin-top: 10px; }
+.bd-line { color: var(--dim); font-size: 14px; }
+.bd-st { color: var(--dim); font-size: 13px; min-height: 18px; }
+.bd-mid .bar { width: 260px; margin-top: 4px; }
+.bd-mid .acts { width: 100%; max-width: 320px; margin-top: 14px; }
 .unl { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 14px; background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 18px; padding: 10px 22px 10px 10px; text-align: left; box-shadow: 0 10px 40px rgba(0,0,0,.6), 0 0 40px rgba(227,173,52,.18); animation: sv-unl .5s cubic-bezier(.2,.8,.2,1) both; }
 .unl img { width: 60px; height: 60px; border-radius: 50%; }
 .unl { overflow: visible; }
@@ -417,6 +431,7 @@ var FIRST = 50, STEP = 15, EVERY = 14;
    Earned is written once, with its date, and stays: editing a day later
    cannot take a badge back. */
 var BADGES = [
+  { id: 'day1', n: 'DAY ONE', line: 'YOU STARTED', e: 'star', g: 'violet', m: 'start', need: 1, t: 4, fx: 'prism', big: '1', unit: 'DAY' },
   { id: 's3', n: 'THE SPARK', line: '3 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 3, t: 1, big: '3', unit: 'DAYS' },
   { id: 's7', n: 'THE DISCIPLE', line: '7 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 7, t: 2, big: '7', unit: 'DAYS' },
   { id: 's14', n: 'THE FORTNIGHT', line: '14 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 14, t: 2, big: '14', unit: 'DAYS' },
@@ -442,7 +457,7 @@ var BADGES = [
   { id: 'u100', n: 'THE HUNDRED HOURS', line: '100 HOURS BACKTESTING', e: 'clock', g: 'green', m: 'hours', need: 100, t: 3, fx: 'aurora', big: '100', unit: 'HOURS' },
   { id: 'u250', n: 'THE LONG GAME', line: '250 HOURS BACKTESTING', e: 'clock', g: 'green', m: 'hours', need: 250, t: 4, fx: 'obsidian', big: '250', unit: 'HOURS' }
 ];
-var BADGE_UNIT = { best: 'days in a row', total: 'backtests', day: 'in your best day', hits: 'days at target', sess: 'sessions', hours: 'hours of backtesting' };
+var BADGE_UNIT = { start: 'started', best: 'days in a row', total: 'backtests', day: 'in your best day', hits: 'days at target', sess: 'sessions', hours: 'hours of backtesting' };
 var $ = function (id) { return document.getElementById(id); };
 
 /* ── store ──
@@ -865,7 +880,12 @@ function dialog(html, onOpen, cls) {
   v.className = 'veil';
   v.innerHTML = '<div class="dlg' + (cls ? ' ' + cls : '') + '" role="dialog" aria-modal="true">' + html + '</div>';
   function close() { v.remove(); document.removeEventListener('keydown', esc, true); }
-  function esc(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } }
+  function esc(e) {
+    if (e.key !== 'Escape') return;
+    /* with one dialog over another, Escape takes only the top one */
+    var all = document.querySelectorAll('.veil'); if (all[all.length - 1] !== v) return;
+    e.preventDefault(); e.stopPropagation(); close();
+  }
   v.addEventListener('mousedown', function (e) { if (e.target === v) close(); });
   document.addEventListener('keydown', esc, true);
   document.body.appendChild(v);
@@ -954,6 +974,12 @@ var BD_EMB = {
   bolt: function (g) {
     g.beginPath(); g.moveTo(.22, -1); g.lineTo(-.62, .12); g.lineTo(-.08, .12); g.lineTo(-.28, 1); g.lineTo(.68, -.22); g.lineTo(.1, -.22); g.closePath();
   },
+  star: function (g) {
+    var k, a, rr;
+    g.beginPath();
+    for (k = 0; k < 10; k++) { a = -Math.PI / 2 + k * Math.PI / 5; rr = k % 2 ? .42 : 1; g[k ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr + .06); }
+    g.closePath();
+  },
   clock: function (g) {
     g.beginPath(); g.arc(0, 0, 1, 0, 6.2832); g.arc(0, 0, .74, 0, 6.2832, true);
     g.rect(-.07, -.58, .14, .62); g.rect(-.07, -.07, .5, .14);
@@ -1024,8 +1050,22 @@ function bdObsidian(g, rng) {
   bdSheen(g);
 }
 
+/* PRISM: the rarest finish. A holographic foil that throws the whole
+   spectrum across the inlay and glints as the coin turns. */
+function bdPrism(g, rng) {
+  var i, x, y, gr = g.createLinearGradient(-1.1, -1.1, 1.1, 1.1);
+  g.fillStyle = '#0d0d16'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  ['#ff3d7f', '#ff9a3d', '#fff23d', '#3dff9a', '#3dc8ff', '#7a5cff', '#ff3dd4', '#ff3d7f'].forEach(function (c, k, a) { gr.addColorStop(k / (a.length - 1), c); });
+  g.globalAlpha = .85; g.fillStyle = gr; g.fillRect(-1.1, -1.1, 2.2, 2.2); g.globalAlpha = 1;
+  g.lineWidth = .05;
+  for (i = -14; i < 14; i++) { g.strokeStyle = i % 2 ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.2)'; g.beginPath(); g.moveTo(-1.2 + i * .11, -1.2); g.lineTo(1.2 + i * .11, 1.2); g.stroke(); }
+  for (i = 0; i < 160; i++) { x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1; g.fillStyle = 'rgba(255,255,255,' + (.4 + rng() * .6) + ')'; g.beginPath(); g.arc(x, y, .004 + rng() * .012, 0, 6.2832); g.fill(); }
+  bdSheen(g);
+}
+
 /* the marble in the inlay: dark body, bright veins, glowing pockets, a glassy sheen */
 function bdLava(g, group, S, rng, fx) {
+  if (fx === 'prism') return bdPrism(g, rng);
   if (fx === 'galaxy') return bdGalaxy(g, rng);
   if (fx === 'aurora') return bdAurora(g, rng);
   if (fx === 'obsidian') return bdObsidian(g, rng);
@@ -1214,14 +1254,14 @@ function bdStats() {
     if (n > 0 && n >= goal(t)) { run++; hits++; if (run > best) best = run; } else run = 0;
   }
   var all = within(0, Infinity);
-  return { best: best, total: total, day: day, hits: hits, sess: all.length, hours: Math.floor(all.reduce(function (n, x) { return n + len(x); }, 0) / 36e5) };
+  return { start: all.length || Object.keys(S.d).length ? 1 : 0, best: best, total: total, day: day, hits: hits, sess: all.length, hours: Math.floor(all.reduce(function (n, x) { return n + len(x); }, 0) / 36e5) };
 }
 var bdSeen = '';
 function bdCheck() {
   var st = bdStats(), quiet = false, fresh = [], today = isoDay(Date.now());
   if (!S.bg) { S.bg = {}; quiet = true; }
   BADGES.forEach(function (b) {
-    if (st[b.m] >= b.need && !S.bg[b.id]) { S.bg[b.id] = today; fresh.push(b); }
+    if (st[b.m] >= b.need && !S.bg[b.id]) { S.bg[b.id] = b.m === 'start' ? isoDay(firstDay()) : today; fresh.push(b); }
   });
   if (fresh.length || quiet) save();
   if (fresh.length && !quiet) bdAnnounce(fresh);
@@ -1256,7 +1296,7 @@ function bdAnnounce(list) {
   var b = list[0], u = document.createElement('button');
   u.className = 'unl'; u.setAttribute('role', 'status');
   u.classList.add('bd-t' + b.t); u.innerHTML = bdImg(b, true, 60) + '<div><div class="lbl">Badge unlocked</div><b>' + esc(b.n) + '</b><span>' + esc(b.line) + (list.length > 1 ? ' · and ' + (list.length - 1) + ' more' : '') + '</span></div>';
-  u.addEventListener('click', function () { u.remove(); bdCase(b.id); });
+  u.addEventListener('click', function () { u.remove(); bdView(b.id); });
   document.body.appendChild(u);
   if (b.t >= 3) burst(u);
   setTimeout(function () { u.remove(); }, 9000);
@@ -1267,78 +1307,88 @@ function bdLoad(cb) {
   sc.onload = function () { cb(!!window.THREE); }; sc.onerror = function () { cb(false); };
   document.head.appendChild(sc);
 }
-function bdCase(pick) {
-  var st = bdStats(), sel = BADGES.some(function (b) { return b.id === pick; }) ? pick : (BADGES.filter(function (b) { return S.bg[b.id]; }).pop() || BADGES[0]).id;
-  var groups = [['best', 'Streaks'], ['total', 'Volume'], ['day', 'Best day'], ['hits', 'Consistency'], ['sess', 'Sessions'], ['hours', 'Time']], grid = '';
+function bdCase() {
+  var groups = [['start', 'The beginning'], ['best', 'Streaks'], ['total', 'Volume'], ['day', 'Best day'], ['hits', 'Consistency'], ['sess', 'Sessions'], ['hours', 'Time']], grid = '';
   groups.forEach(function (g) {
     grid += '<div class="lbl bd-gh">' + g[1] + '</div>';
     BADGES.forEach(function (b) {
       if (b.m !== g[0]) return;
       var on = !!S.bg[b.id];
-      grid += '<button data-b="' + b.id + '" aria-pressed="false" aria-label="' + esc(b.n) + ', ' + (on ? 'earned' : 'locked') + '">' + bdImg(b, on, 58) + esc(b.n.replace(/^THE /, '')) + '</button>';
+      grid += '<button data-b="' + b.id + '" aria-label="' + esc(b.n) + ', ' + (on ? 'earned' : 'locked') + '">' + bdImg(b, on, 64) + esc(b.n.replace(/^THE /, '')) + '</button>';
     });
   });
   dialog('<div class="bd-h" style="margin:0"><h2>Badges</h2><span class="hint-k num">' + BADGES.filter(function (b) { return S.bg[b.id]; }).length + ' of ' + BADGES.length + '</span></div>'
-    + '<div class="bd-wrap"><div class="bd-hero"><div class="bd-stage" id="bdStage"></div><div class="bd-name" id="bdName"></div><div class="bd-line" id="bdLine"></div><div class="bd-st num" id="bdSt"></div><div class="bar" id="bdBar"><i></i></div><button class="bd-flip" id="bdFlip">Turn it over</button></div>'
-    + '<div class="bd-g">' + grid + '</div></div>'
+    + '<div class="bd-g">' + grid + '</div>'
     + '<div class="acts"><button class="btn pri" data-a="x">Close</button></div>', function (d, close) {
     d.classList.add('bd-dlg');
     d.querySelector('[data-a="x"]').addEventListener('click', close);
-    var stage = d.querySelector('#bdStage'), cur = null, T = null, gl = null, coin = null, yaw = 0, pitch = 0, vy = 0, vp = 0, drag = null, flipTo = null, t0 = performance.now(), want = 0;
+    d.querySelector('.bd-g').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) bdView(b.dataset.b); });
+  });
+}
+/* ONE COIN, ALONE. Pressing a coin takes everything else away: it is lit
+   from behind, turns on its own, and can be taken in the hand. The glow is
+   its tier's, and a locked coin has none. */
+function bdView(id) {
+  var st = bdStats(), at = Math.max(0, BADGES.map(function (b) { return b.id; }).indexOf(id));
+  dialog('<div class="bd-vw"><button class="bd-nv" data-d="-1" aria-label="Previous badge">‹</button><div class="bd-mid"><div class="bd-stage" id="bdStage"><i class="bd-sp" aria-hidden="true"></i></div>'
+    + '<div class="bd-name" id="bdName"></div><div class="bd-line" id="bdLine"></div><div class="bd-st num" id="bdSt"></div><div class="bar" id="bdBar"><i></i></div>'
+    + '<div class="acts"><button class="btn" id="bdSpin">Hold still</button><button class="btn pri" data-a="x">Close</button></div></div><button class="bd-nv" data-d="1" aria-label="Next badge">›</button></div>', function (d, close) {
+    d.classList.add('bd-view');
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    var stage = d.querySelector('#bdStage'), cur = null, T = null, gl = null, coin = null, yaw = 0, pitch = 0, vy = 0, vp = 0, drag = null, still = false, t0 = performance.now(), want = 0;
     var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function show(id) {
-      cur = BADGES.filter(function (b) { return b.id === id; })[0]; sel = id;
-      var on = !!S.bg[id], seq = ++want;
-      d.querySelectorAll('[data-b]').forEach(function (e) { e.setAttribute('aria-pressed', e.dataset.b === id ? 'true' : 'false'); });
-      stage.className = 'bd-stage' + (on ? ' bd-t' + cur.t : '');
+    function show(n) {
+      at = (n + BADGES.length) % BADGES.length; cur = BADGES[at];
+      var on = !!S.bg[cur.id], seq = ++want;
+      stage.className = 'bd-stage' + (on ? ' bd-t' + cur.t : ' is-off');
       d.querySelector('#bdName').textContent = cur.n;
       d.querySelector('#bdLine').textContent = cur.line;
-      d.querySelector('#bdSt').textContent = on ? 'Earned ' + bdDate(S.bg[id]) : fmt(Math.min(st[cur.m], cur.need)) + ' of ' + fmt(cur.need) + ' ' + BADGE_UNIT[cur.m];
+      d.querySelector('#bdSt').textContent = on ? 'Earned ' + bdDate(S.bg[cur.id]) : cur.m === 'start' ? 'Log a day or a session to begin' : fmt(Math.min(st[cur.m], cur.need)) + ' of ' + fmt(cur.need) + ' ' + BADGE_UNIT[cur.m];
       d.querySelector('#bdBar').hidden = on; d.querySelector('#bdBar i').style.width = Math.round(bdProg(cur, st) * 100) + '%';
-      var date = on ? 'EARNED ' + bdDate(S.bg[id]) : 'NOT YET EARNED';
-      var flat = new Image(); flat.alt = cur.n + (on ? ', earned' : ', locked'); flat.src = bdFlat(cur, !on, 512, date).toDataURL('image/png');
+      var date = on ? 'EARNED ' + bdDate(S.bg[cur.id]) : 'NOT YET EARNED';
       if (coin && gl) { gl.scene.remove(coin); coin.userData.dispose(); coin = null; }
-      if (!gl) { stage.innerHTML = ''; stage.appendChild(flat); }
+      if (!gl) {
+        var flat = new Image(); flat.alt = cur.n + (on ? ', earned' : ', locked'); flat.src = bdFlat(cur, !on, 512, date).toDataURL('image/png');
+        var old = stage.querySelector('img'); if (old) old.remove(); stage.appendChild(flat);
+      }
       if (T) setTimeout(function () {
         if (seq !== want || !stage.isConnected) return;
-        if (!gl) { var cv = document.createElement('canvas'); try { gl = bdStage(T, cv, 340, 340); stage.innerHTML = ''; stage.appendChild(cv); } catch (e) { gl = null; T = null; return; } loop(); }
-        coin = bdBuild(T, cur, !on, 1024, date); yaw = 0; pitch = 0; vy = 0; flipTo = null; t0 = performance.now(); gl.scene.add(coin);
+        if (!gl) { var cv = document.createElement('canvas'); try { gl = bdStage(T, cv, 440, 440); var im = stage.querySelector('img'); if (im) im.remove(); stage.appendChild(cv); } catch (e) { gl = null; T = null; return; } loop(); }
+        coin = bdBuild(T, cur, !on, 1024, date); yaw = 0; pitch = 0; vy = 0; t0 = performance.now(); gl.scene.add(coin);
       }, 30);
     }
     function loop() {
       if (!stage.isConnected) { if (coin) coin.userData.dispose(); if (gl) gl.dispose(); gl = null; return; }
       if (coin) {
         var tt = (performance.now() - t0) / 1000;
-        if (drag) { /* the hand has it */ }
-        else {
-          if (flipTo !== null) { yaw += (flipTo - yaw) * .12; if (Math.abs(flipTo - yaw) < .002) { yaw = flipTo; flipTo = null; } }
-          else { yaw += vy; vy *= .94; }
-          pitch += vp; vp *= .94; pitch += (0 - pitch) * .03;
+        if (!drag) {
+          if (still) { var k = Math.round(yaw / (Math.PI * 2)) * Math.PI * 2; yaw += (k - yaw) * .2 + vy; vy *= .85; if (Math.abs(k - yaw) < .003 && Math.abs(vy) < .001) { yaw = k; vy = 0; } }
+          else { yaw += vy + (calm ? 0 : .011); vy *= .95; }
+          pitch += vp; vp *= .94; pitch += (0 - pitch) * .04;
         }
-        var sway = calm || drag || flipTo !== null || Math.abs(vy) > .002 ? 0 : Math.sin(tt * .9) * .28;
-        coin.rotation.y = yaw + sway; coin.rotation.x = pitch + (calm ? 0 : Math.sin(tt * .7) * .04);
+        coin.rotation.y = yaw; coin.rotation.x = pitch + (calm || still ? 0 : Math.sin(tt * .7) * .05);
         gl.render();
       }
       requestAnimationFrame(loop);
     }
-    stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY }; flipTo = null; vy = 0; vp = 0; try { stage.setPointerCapture(e.pointerId); } catch (x) {} });
+    stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX }; vy = 0; try { stage.setPointerCapture(e.pointerId); } catch (x) {} });
     stage.addEventListener('pointermove', function (e) {
       if (!drag) return;
-      var dx = e.clientX - drag.x, dy = e.clientY - drag.y; drag.x = e.clientX; drag.y = e.clientY;
-      yaw += dx * .012; pitch = Math.max(-.7, Math.min(.7, pitch + dy * .008)); vy = dx * .0035; vp = 0;
+      var dx = e.clientX - drag.x; drag.x = e.clientX; yaw += dx * .012; vy = dx * .004;
+      if (e.movementY) pitch = Math.max(-.7, Math.min(.7, pitch + e.movementY * .006));
     });
     var up = function () { drag = null; };
     stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
-    d.querySelector('#bdFlip').addEventListener('click', function () {
-      var k = Math.round(yaw / Math.PI); flipTo = (k + 1) * Math.PI; vy = 0;
-      if (!coin) { /* flat image fallback: nothing to turn */ }
+    d.querySelector('#bdSpin').addEventListener('click', function () { still = !still; this.textContent = still ? 'Spin' : 'Hold still'; });
+    d.querySelectorAll('.bd-nv').forEach(function (b) { b.addEventListener('click', function () { show(at + (+b.dataset.d)); }); });
+    document.addEventListener('keydown', function key(e) {
+      if (!stage.isConnected) { document.removeEventListener('keydown', key); return; }
+      if (e.key === 'ArrowRight') show(at + 1); else if (e.key === 'ArrowLeft') show(at - 1);
     });
-    d.querySelector('.bd-g').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) show(b.dataset.b); });
-    show(sel);
-    bdLoad(function (ok) { if (!ok || !stage.isConnected) return; var cv = document.createElement('canvas'), probe; try { probe = cv.getContext('webgl2') || cv.getContext('webgl'); } catch (x) { probe = null; } if (!probe) return; T = window.THREE; show(sel); });
+    show(at);
+    bdLoad(function (ok) { if (!ok || !stage.isConnected) return; var cv = document.createElement('canvas'), probe; try { probe = cv.getContext('webgl2') || cv.getContext('webgl'); } catch (x) { probe = null; } if (!probe) return; T = window.THREE; show(at); });
   });
 }
-
 /* ── start, pause and end ── */
 function start() {
   S.run = { a: Date.now(), p: 0, pa: null };
