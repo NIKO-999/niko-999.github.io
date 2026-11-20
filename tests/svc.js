@@ -446,6 +446,81 @@ const SEED = {
     await rs.c.close();
   }
 
+  console.log('\nSVC — badges');
+  {
+    /* six days at fifty before today: a best run of six and three hundred trades */
+    const days = {}; let v = 1000;
+    for (let d = 12; d <= 17; d++) { days['2026-11-' + d] = { a: v, b: v + 50 }; v += 50; }
+    const BG = { t: [{ f: '2026-11-10', n: 50 }], s: [], d: days };
+    const reqs = [];
+    const b = await ctx(BG);
+    b.page.on('request', (r) => { if (/three\.min\.js/.test(r.url())) reqs.push(r.url()); });
+    const bt = (sel) => b.page.$eval(sel, (e) => e.textContent).catch(() => '');
+    ok('a first look grants what the record already earns, and says nothing about it', (await b.page.$$('.unl')).length === 0);
+    ok('three days in a row and 250 backtests are already on the wall', /^2 of 16$/.test(await txt(b.page, '#svBdN')), await txt(b.page, '#svBdN'));
+    const st0 = await store(b.page);
+    ok('earned is written with its date', st0.bg && st0.bg.s3 === '2026-11-18' && st0.bg.v250 === '2026-11-18' && Object.keys(st0.bg).length === 2, st0.bg);
+    ok('the card says what is next and how far off', /Next: THE DISCIPLE/.test(await txt(b.page, '#svBdRow')) && /6 of 7 days in a row/.test(await txt(b.page, '#svBdRow')), await txt(b.page, '#svBdRow'));
+    ok('three.js is not fetched until a coin is looked at', reqs.length === 0, reqs);
+
+    await b.page.fill('#svB', '1350');
+    await b.page.waitForSelector('.unl', { timeout: 4000 }).catch(() => {});
+    ok('crossing a line announces the badge', /Badge unlocked/.test(await bt('.unl')) && /THE DISCIPLE/.test(await bt('.unl')), await bt('.unl'));
+    ok('and the card counts it', (await txt(b.page, '#svBdN')) === '3 of 16', await txt(b.page, '#svBdN'));
+    ok('it is a banner and not a dialog, so Space and the counter still work', !(await b.page.$('.veil')));
+    ok('the date is stored once', (await store(b.page)).bg.s7 === '2026-11-18');
+
+    await b.page.click('.unl'); await b.page.waitForSelector('.bd-dlg');
+    ok('pressing the banner opens the case on that badge', (await txt(b.page, '#bdName')) === 'THE DISCIPLE' && /Earned 18 NOV 2026/.test(await txt(b.page, '#bdSt')), [await txt(b.page, '#bdName'), await txt(b.page, '#bdSt')]);
+    ok('sixteen coins, each named for a screen reader as earned or locked', await b.page.evaluate(() => { const bs = [...document.querySelectorAll('.bd-g [data-b]')]; return bs.length === 16 && bs.every((e) => /, (earned|locked)$/.test(e.getAttribute('aria-label'))) && document.querySelectorAll('.bd-g [aria-label$=", earned"]').length === 3; }));
+    ok('the chosen one is the one marked pressed', await b.page.$eval('[data-b="s7"]', (e) => e.getAttribute('aria-pressed') === 'true'));
+    await b.page.click('[data-b="s14"]');
+    ok('a locked coin says how far off it is, with a bar', /7 of 14 days in a row/.test(await txt(b.page, '#bdSt')) && await b.page.$eval('#bdBar', (e) => !e.hidden && parseFloat(e.firstChild.style.width) === 50), await txt(b.page, '#bdSt'));
+    await b.page.click('[data-b="v250"]');
+    ok('an earned one has no bar, and the date it was earned', /Earned/.test(await txt(b.page, '#bdSt')) && await b.page.$eval('#bdBar', (e) => e.hidden));
+    await b.page.waitForFunction(() => document.querySelector('#bdStage canvas') || document.querySelector('#bdStage img'), null, { timeout: 8000 });
+    await b.page.waitForTimeout(2500);
+    const hero = await b.page.evaluate(() => {
+      const cv = document.querySelector('#bdStage canvas'), im = document.querySelector('#bdStage img');
+      if (!cv) return { kind: im ? 'flat' : 'none' };
+      const c2 = document.createElement('canvas'); c2.width = cv.width; c2.height = cv.height; const g = c2.getContext('2d'); g.drawImage(cv, 0, 0);
+      const d = g.getImageData(0, 0, c2.width, c2.height).data; let gold = 0, solid = 0;
+      for (let i = 0; i < d.length; i += 4) { if (d[i + 3] > 200) { solid++; if (d[i] > 80 && d[i + 1] > d[i + 2] * 1.3 && d[i] > d[i + 2] * 1.8) gold++; } }
+      return { kind: 'gl', solid, gold, share: gold / Math.max(1, solid) };
+    });
+    console.log('    (the hero drew as ' + hero.kind + ')');
+    ok('the coin is drawn: gold on a canvas, or a flat picture where there is no WebGL', hero.kind === 'flat' || (hero.kind === 'gl' && hero.solid > 20000 && hero.share > .4), hero);
+    ok('and only now was three.js asked for, from the same place', hero.kind === 'flat' || reqs.length === 1, reqs);
+    if (hero.kind === 'gl') {
+      const box = await b.page.$eval('#bdStage', (e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+      const grab = () => b.page.$eval('#bdStage canvas', (cv) => { const c2 = document.createElement('canvas'); c2.width = cv.width; c2.height = cv.height; c2.getContext('2d').drawImage(cv, 0, 0); return c2.toDataURL(); });
+      const before = await grab();
+      await b.page.mouse.move(box.x + box.w / 2, box.y + box.h / 2); await b.page.mouse.down(); await b.page.mouse.move(box.x + box.w / 2 + 120, box.y + box.h / 2 + 30, { steps: 8 }); await b.page.mouse.up();
+      await b.page.waitForTimeout(400);
+      ok('dragging it turns it in the hand', (await grab()) !== before);
+    }
+    await b.page.click('#bdFlip');
+    ok('and it can be turned over', await b.page.$eval('#bdFlip', (e) => /Turn it over/.test(e.textContent)));
+    await b.page.keyboard.press('Escape');
+    ok('Escape puts the case away', !(await b.page.$('.veil')));
+
+    await b.page.fill('#svB', '1320');
+    ok('an earned badge is not taken back by a lower day', (await store(b.page)).bg.s7 === '2026-11-18' && (await txt(b.page, '#svBdN')) === '3 of 16');
+    await b.c.close();
+
+    const dmg = await ctx(Object.assign({}, SEED, { bg: { zz: '2026-01-01', s3: 'nope' } }));
+    ok('a damaged record costs the bad entries and nothing else', (await txt(dmg.page, '#svBdN')) === '0 of 16' && (await dmg.page.$$('.unl')).length === 0);
+    await dmg.c.close();
+
+    const day = await ctx(SEED);
+    /* today starts where yesterday ended, at 1130 */
+    await day.page.fill('#svB', '1230');
+    await day.page.waitForSelector('.unl', { timeout: 4000 }).catch(() => {});
+    const ut = await day.page.$eval('.unl', (e) => e.textContent).catch(() => '');
+    ok('a hundred in a day earns 65, 75 and 100 together, announced as one', /THE CLIMBER/.test(ut) && /and 2 more/.test(ut) && (await txt(day.page, '#svBdN')) === '3 of 16', [ut, await txt(day.page, '#svBdN')]);
+    await day.c.close();
+  }
+
   console.log('\nSVC — damage and nothing');
   {
     const bad = { s: [{ i: 'x', k: 'bt', a: 'no', b: 3 }, { i: 'y', k: 'gym', a: 1, b: 2 }, SEED.s[4]],
