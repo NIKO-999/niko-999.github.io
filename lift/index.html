@@ -9271,7 +9271,7 @@ function bdDrop(g) {
   if (!g) return;
   g.traverse(function (o) {
     if (o.geometry) o.geometry.dispose();
-    [].concat(o.material || []).forEach(function (m) { ['map', 'metalnessMap', 'roughnessMap', 'bdNorm', 'clearcoatMap', 'alphaMap'].forEach(function (k) { if (m[k]) m[k].dispose(); }); m.dispose(); });
+    [].concat(o.material || []).forEach(function (m) { ['map', 'metalnessMap', 'roughnessMap', 'bdNorm', 'normalMap', 'clearcoatMap', 'alphaMap'].forEach(function (k) { if (m[k]) m[k].dispose(); }); m.dispose(); });
   });
 }
 /* a face as rings from the centre to the bdOutline, so the back can dish inwards */
@@ -9369,6 +9369,110 @@ function bdCreator(b, n, pre) {
   g.userData.cr(1.3);
   return g;
 }
+/* THE SLAB: the day-streak badge, copied from a different school of badge. Not an enamelled medal but a dark scratched plate: a tall pill of gunmetal with a recessed rim, DAY pressed into it in black, and the number in glowing gold standing proud of it, stacked in layers so it has a thickness as the plate turns. Nothing is a picture of a badge: the plate has a scuffed normal map and its own roughness, the number is a stack of gold planes in front of a bloom, and a light moves across it every few seconds. */
+function bdIsSlab(b) { return /^d\d+$/.test(b.id || ''); }
+function bdSlab(b, n) {
+  var T = BD3, g = new T.Group(), hi = n > 500, HW = .7, HH = 1.02, DEP = .09, BV = .02, lock = !!b.lock;
+  var ch = Math.max(384, Math.min(1024, n * 1.25 | 0)), cw = Math.round(ch * HW / HH), s = ch / 1024;
+  var num = String(b.id).slice(1);
+  function stad(hw, hh) { var sh = new T.Shape(), r = hw; sh.moveTo(-hw, -(hh - r)); sh.lineTo(-hw, hh - r); sh.absarc(0, hh - r, r, Math.PI, 0, true); sh.lineTo(hw, -(hh - r)); sh.absarc(0, -(hh - r), r, 0, Math.PI, true); return sh; }
+  function plateGeo(hw, hh) { var gg = new T.ShapeGeometry(stad(hw, hh), 48), pa = gg.attributes.position, uv = gg.attributes.uv; for (var i = 0; i < pa.count; i++) uv.setXY(i, (pa.getX(i) + HW) / (2 * HW), (pa.getY(i) + HH) / (2 * HH)); return gg; }
+  function cvs() { var c = document.createElement('canvas'); c.width = cw; c.height = ch; return c; }
+  /* the pill as a path in canvas pixels, inset by e */
+  function path(x, e) { var w = cw - 2 * e, r = w / 2, X = e, Y = e, H = ch - 2 * e; x.beginPath(); x.moveTo(X, Y + r); x.arc(X + r, Y + r, r, Math.PI, 0); x.lineTo(X + w, Y + H - r); x.arc(X + r, Y + H - r, r, 0, Math.PI); x.closePath(); }
+  /* the scratches are drawn once and laid on all three maps, so the shine, the grain and the bump agree */
+  var SC = [], NS = hi ? 420 : 220;
+  for (var i = 0; i < NS; i++) { var a = (bdR(i * 3.1) - .5) * (i % 4 ? 2.6 : .5) + (i % 7 === 0 ? 1.57 : .35); SC.push({ x: bdR(i * 5.7) * cw, y: bdR(i * 9.3 + 2) * ch, l: (20 + bdR(i * 2.9 + 5) * 230) * s, a: a, w: (.5 + bdR(i * 4.3 + 1) * 1.3) * Math.max(.6, s * 1.6), k: bdR(i * 7.1 + 3) });
+  }
+  function scratches(x, mode) {
+    SC.forEach(function (c) {
+      x.beginPath(); x.moveTo(c.x, c.y); x.lineTo(c.x + Math.cos(c.a) * c.l, c.y + Math.sin(c.a) * c.l); x.lineWidth = c.w;
+      x.strokeStyle = mode === 'c' ? (c.k > .78 ? 'rgba(0,0,0,.2)' : 'rgba(255,255,255,' + (.015 + c.k * .06) + ')') : mode === 'h' ? (c.k > .5 ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.16)') : 'rgba(0,0,0,.55)';
+      x.stroke();
+    });
+  }
+  function grain(x, amt) { var im = x.getImageData(0, 0, cw, ch), d = im.data; for (var p = 0; p < d.length; p += 4) { var q = (bdNoise(p * .37) - .5) * amt; d[p] += q; d[p + 1] += q; d[p + 2] += q; } x.putImageData(im, 0, 0); }
+  /* DAY, one letter at a time because a canvas cannot space them everywhere, and the bottom mark: both pressed into the plate */
+  function press(x, txt, cy, px, gap, fill, hl) {
+    x.font = '900 ' + px + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif'; x.textAlign = 'left'; x.textBaseline = 'middle';
+    var ws = txt.split('').map(function (c) { return x.measureText(c).width; }), tw = ws.reduce(function (a, c) { return a + c; }, 0) + gap * (txt.length - 1), cx = (cw - tw) / 2;
+    [[0, 1.6 * s * 2, hl], [0, 0, fill]].forEach(function (L) { var xx = cx; x.fillStyle = L[2]; txt.split('').forEach(function (c, k) { x.fillText(c, xx + L[0], cy + L[1]); xx += ws[k] + gap; }); });
+  }
+  /* the colour map */
+  var col = cvs(), cx0 = col.getContext('2d'), gr = cx0.createLinearGradient(0, 0, cw * .6, ch);
+  gr.addColorStop(0, lock ? '#2a2b2f' : '#2a2b30'); gr.addColorStop(.5, '#1b1c20'); gr.addColorStop(1, '#131417'); cx0.fillStyle = gr; cx0.fillRect(0, 0, cw, ch);
+  scratches(cx0, 'c'); grain(cx0, 9);
+  /* the rim: a dark channel, and a faint raised line inside it */
+  cx0.save(); path(cx0, cw * .042); cx0.lineWidth = 9 * s * 1.4; cx0.strokeStyle = 'rgba(0,0,0,.55)'; cx0.stroke(); path(cx0, cw * .062); cx0.lineWidth = 3 * s * 1.4; cx0.strokeStyle = 'rgba(255,255,255,.10)'; cx0.stroke(); cx0.restore();
+  press(cx0, 'DAY', ch * .19, ch * .085, ch * .018, 'rgba(4,4,5,.97)', 'rgba(255,255,255,.14)');
+  press(cx0, 'LIFT', ch * .875, ch * .03, ch * .01, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.4)');
+  /* roughness (green) and metal (blue): scuffs are shinier than the plate */
+  var orm = cvs(), ox = orm.getContext('2d'); ox.fillStyle = 'rgb(255,150,170)'; ox.fillRect(0, 0, cw, ch);
+  SC.forEach(function (c) { ox.beginPath(); ox.moveTo(c.x, c.y); ox.lineTo(c.x + Math.cos(c.a) * c.l, c.y + Math.sin(c.a) * c.l); ox.lineWidth = c.w * 1.4; ox.strokeStyle = 'rgba(255,' + (70 + c.k * 40 | 0) + ',215,.9)'; ox.stroke(); });
+  ox.save(); path(ox, cw * .042); ox.lineWidth = 9 * s * 1.4; ox.strokeStyle = 'rgb(255,70,230)'; ox.stroke(); ox.restore();
+  /* the bump: scratches, the rim's channel, the lettering sunk */
+  var ht = cvs(), hx = ht.getContext('2d'); hx.fillStyle = 'rgb(128,128,128)'; hx.fillRect(0, 0, cw, ch); scratches(hx, 'h');
+  hx.save(); path(hx, cw * .042); hx.lineWidth = 9 * s * 1.4; hx.strokeStyle = 'rgb(40,40,40)'; hx.stroke(); path(hx, cw * .062); hx.lineWidth = 3 * s * 1.4; hx.strokeStyle = 'rgb(190,190,190)'; hx.stroke(); hx.restore();
+  press(hx, 'DAY', ch * .19, ch * .085, ch * .018, 'rgb(70,70,70)', 'rgb(128,128,128)');
+  var hd = hx.getImageData(0, 0, cw, ch).data, nm = cvs(), nx = nm.getContext('2d'), NI = nx.createImageData(cw, ch), nd = NI.data;
+  function H(x, y) { x = x < 0 ? 0 : x >= cw ? cw - 1 : x; y = y < 0 ? 0 : y >= ch ? ch - 1 : y; return hd[(y * cw + x) * 4] / 255; }
+  for (var y = 0; y < ch; y++) for (var x = 0; x < cw; x++) {
+    var gx = -(H(x + 1, y) - H(x - 1, y)) * 2.2, gy = (H(x, y + 1) - H(x, y - 1)) * 2.2, L = Math.sqrt(gx * gx + gy * gy + 1), q = (y * cw + x) * 4;
+    nd[q] = (gx / L * .5 + .5) * 255; nd[q + 1] = (gy / L * .5 + .5) * 255; nd[q + 2] = (1 / L * .5 + .5) * 255; nd[q + 3] = 255;
+  }
+  nx.putImageData(NI, 0, 0);
+  function tex(c, srgb) { var t = new T.CanvasTexture(c); t.anisotropy = 8; if (srgb) t.encoding = T.sRGBEncoding; return t; }
+  var metal = new T.MeshPhysicalMaterial({ color: 0xffffff, map: tex(col, true), metalness: 1, roughness: 1, metalnessMap: tex(orm), roughnessMap: tex(orm), normalMap: tex(nm), envMapIntensity: .9 });
+  /* the body, and the plate that dishes a hair into it */
+  var body = new T.ExtrudeGeometry(stad(HW, HH), { depth: DEP, bevelEnabled: true, bevelThickness: BV, bevelSize: BV, bevelSegments: hi ? 6 : 3, curveSegments: hi ? 48 : 24 });
+  body.computeBoundingBox(); body.translate(0, 0, -(body.boundingBox.max.z + body.boundingBox.min.z) / 2); body.computeBoundingBox();
+  var zf = body.boundingBox.max.z;
+  var side = new T.MeshPhysicalMaterial({ color: lock ? 0x2c2d31 : 0x1d1e22, metalness: 1, roughness: .42, envMapIntensity: .75 });
+  g.add(new T.Mesh(body, [new T.MeshBasicMaterial({ visible: false }), side]));
+  var fg = plateGeo(HW - .002, HH - .002), f = new T.Mesh(fg, metal); f.position.z = zf + .001; g.add(f);
+  /* the back: the same plate, a different engraving */
+  var bcol = cvs(), bq = bcol.getContext('2d'); bq.fillStyle = '#1b1c20'; bq.fillRect(0, 0, cw, ch); bq.drawImage(col, 0, 0);
+  bq.fillStyle = '#1b1c20'; bq.fillRect(cw * .12, ch * .3, cw * .76, ch * .42);
+  scratches(bq, 'c');
+  bq.textAlign = 'center'; bq.textBaseline = 'middle';
+  [['DAY ' + num, ch * .44, ch * .06, '900'], [lock ? 'NOT YET EARNED' : 'EARNED ON', ch * .53, ch * .028, '700'], [lock ? '' : String(b.at || '').toUpperCase(), ch * .575, ch * .034, '800']].forEach(function (L) {
+    if (!L[0]) return; bq.font = L[3] + ' ' + L[2] + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif'; bq.fillStyle = 'rgba(255,255,255,.11)'; bq.fillText(L[0], cw / 2, L[1] + 2 * s * 2); bq.fillStyle = 'rgba(8,8,10,.9)'; bq.fillText(L[0], cw / 2, L[1]);
+  });
+  var bk = new T.Mesh(plateGeo(HW - .002, HH - .002), new T.MeshPhysicalMaterial({ color: 0xffffff, map: tex(bcol, true), metalness: 1, roughness: 1, metalnessMap: tex(orm), roughnessMap: tex(orm), normalMap: tex(nm), envMapIntensity: .9 }));
+  bk.rotation.y = Math.PI; bk.position.z = -zf - .001; g.add(bk);
+  /* THE NUMBER: a stack of planes, dark amber at the back to bright gold in front, so it has a thickness that opens as the plate turns, and a bloom behind it */
+  var px = ch * .6; function numCv(fill, blur) {
+    var c = cvs(), x = c.getContext('2d'); x.textAlign = 'center'; x.textBaseline = 'alphabetic'; x.font = '900 ' + px + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif';
+    var w = x.measureText(num).width; if (w > cw * .7) { px = px * cw * .7 / w; x.font = '900 ' + px + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif'; }
+    var by = ch * .54 + px * .36;
+    if (blur) { x.shadowColor = fill; x.shadowBlur = blur; x.shadowOffsetX = 6000; x.fillStyle = fill; x.fillText(num, cw / 2 - 6000, by); x.fillText(num, cw / 2 - 6000, by); return c; }
+    x.fillStyle = fill; x.strokeStyle = typeof fill === 'string' ? fill : '#e0a02c'; x.lineWidth = ch * .012; x.lineJoin = 'round'; x.strokeText(num, cw / 2, by); x.fillText(num, cw / 2, by); return c;
+  }
+  var tg = cvs().getContext('2d').createLinearGradient(0, ch * .3, 0, ch * .78);
+  if (lock) { tg.addColorStop(0, '#6d7077'); tg.addColorStop(1, '#3b3d42'); } else { tg.addColorStop(0, '#fffbe0'); tg.addColorStop(.3, '#ffe590'); tg.addColorStop(.62, '#e9a736'); tg.addColorStop(1, '#a8610a'); }
+  var layers = [], LN = 5;
+  for (var li = 0; li < LN; li++) {
+    var top = li === LN - 1, c = top ? numCv(tg) : numCv(lock ? 'rgb(' + (46 + li * 5) + ',' + (48 + li * 5) + ',' + (54 + li * 5) + ')' : 'rgb(' + (88 + li * 18) + ',' + (50 + li * 10) + ',6)');
+    var pl = new T.Mesh(new T.PlaneGeometry(2 * HW, 2 * HH), new T.MeshBasicMaterial({ map: tex(c, true), transparent: true, depthWrite: false, toneMapped: false }));
+    pl.position.z = zf + .006 + li * .0075; pl.renderOrder = 5 + li; g.add(pl); layers.push(pl);
+  }
+  var glow = null, lt = null;
+  if (!lock) {
+    var gm = new T.MeshBasicMaterial({ map: tex(numCv('#ffb23a', hi ? 70 : 40), true), transparent: true, opacity: .8, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
+    glow = new T.Mesh(new T.PlaneGeometry(2 * HW, 2 * HH), gm); glow.position.z = zf + .004; glow.renderOrder = 4; g.add(glow);
+    lt = new T.PointLight(0xffa83a, 1.1, 3); lt.position.set(0, -.02, zf + .45); g.add(lt);
+    /* a light that crosses the plate every few seconds */
+    var gl = bdGlintTex(), sw = new T.Mesh(plateGeo(HW - .004, HH - .004), new T.MeshBasicMaterial({ map: gl, transparent: true, opacity: .55, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false })); sw.position.z = zf + .05; sw.renderOrder = 12; g.add(sw);
+    g.userData.cr = function (t) {
+      var ph = (t % 5.4) / 5.4; gl.offset.set(2 - ph * 3.6, 0);
+      glow.material.opacity = .62 + Math.sin(t * 1.5) * .22; lt.intensity = 1 + Math.sin(t * 1.5) * .35;
+      /* the gold breathes: the layers behind slide a hair against the front */
+      for (var k = 0; k < LN - 1; k++) layers[k].position.x = Math.sin(t * .6) * .0015 * (LN - k);
+    };
+    g.userData.cr(1.2);
+  }
+  return g;
+}
 /* SCENE BADGES: an object in a world, no medal. Each is a thing you would
    hold (an anvil, a trident, an ice axe, an hourglass, a gem, a compass)
    standing in the weather it belongs to, which is painted behind it and
@@ -9441,6 +9545,7 @@ function bdMoveFace(g, flat, zf, mp, b) {
 function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
+  if (bdIsSlab(b)) return bdSlab(b, n);
   if (b.id === 'slayer' && !b.lock) return bdSword(b, n, pre);
   var g = new BD3.Group(), trim = bdTrimOf(b), mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
@@ -9637,6 +9742,7 @@ function bdBuildLive(x) {
   var b = bdSpec(x), trim = bdTrimOf(b), f, bk;
   bdPre[k] = bdThree().then(function (T) {
     if (!T) return null;
+    if (bdIsSlab(b)) return bdFrame().then(function () { var g = bdMake(b, 'silver', BD_LIVE); g.userData.k = k; return g; });
     return bdFrame().then(function () { bdSetFace(BD_LIVE); f = bdFront(b, trim); return bdFrame(); })
       .then(function () { bdSetFace(BD_LIVE); bk = bdBack(b, trim); return bdFrame(); })
       .then(function () { var g = bdMake(b, 'silver', BD_LIVE, { f: f, b: bk }); g.userData.k = k; return g; });
