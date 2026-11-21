@@ -1988,6 +1988,7 @@ const freeze = (at) => `(() => {
     await o.page.click('#lfMoShare'); await settle(o.page);
     ok('the card is a 1080 by 1920 story that plays, with one Share video button, and no still picture', await o.page.locator('.lf-card-pv img').count() === 0 && await o.page.locator('.lf-card-st').count() === 1 && await o.page.evaluate(() => window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920) && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 0 && /Share video/.test(await o.page.locator('#lfCardShare').textContent()));
     /* THE BUTTON IS NOT READY, AND SAYS SO: it was bright blue for the ten seconds the video takes and ignored every press, which reads as a broken button */
+    ok('the story starts blank and builds on the canvas you are looking at: the finished card is never drawn first, and nothing is drawn off screen', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'), q = sc.slice(sc.indexOf('function lfShareCardSheet'), sc.indexOf("var sh = lfSheet({ title: 'Share'")); const early = q.slice(0, q.indexOf('var begin = function')); return /lfCardDraw\(sp, 0, cv\)/.test(early) && !/lfCardDraw\(sp, 1, cv\)/.test(early) && !/left:-9999px/.test(q) && /cv\.captureStream\(30\)/.test(q); })());
     const prep = await o.page.evaluate(() => { const b = document.querySelector('#lfCardShare'), cs = getComputedStyle(b); return { dim: +cs.opacity, pe: cs.pointerEvents, busy: b.getAttribute('aria-busy'), disabled: b.disabled, bar: !!b.querySelector('i') }; });
     ok('until the video exists the Share video button is dim, busy and inert', prep.disabled && prep.dim < 0.9 && prep.pe === 'none' && prep.busy === 'true' && prep.bar, prep);
     await o.page.waitForTimeout(1500);
@@ -1996,7 +1997,7 @@ const freeze = (at) => `(() => {
     await o.page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
     ok('pressing it says what is going on instead of nothing', /Making your video/.test(await o.page.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await o.page.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
-    ok('it records itself as it plays, and what it recorded is a video that plays once in place of the canvas', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
+    ok('it records itself as it plays, and what it recorded is the recording of that one canvas, which stays on the finished card: no video swapped in', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 0 && await o.page.locator('.lf-card-st canvas').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
     const rdy = await o.page.evaluate(() => { const b = document.querySelector('#lfCardShare'), cs = getComputedStyle(b); return { dim: +cs.opacity, busy: b.getAttribute('aria-busy'), bar: !!b.querySelector('i') }; });
     ok('once it exists the button is full strength and the bar is gone', rdy.dim === 1 && rdy.busy === null && !rdy.bar, rdy);
     /* a throw in the page's own share used to be swallowed by the event handler: now it goes the long way round, and shows */
@@ -2526,7 +2527,7 @@ const freeze = (at) => `(() => {
     await o.page.click('#lfWsShare'); await o.page.waitForTimeout(1200);
     const wkl = await o.page.evaluate(() => (window.lfCardLast && window.lfCardLast.lines) || []);
     ok('on the week\'s story each session says when it started, not how long it was', wkl.length > 0 && wkl.every((l) => /\d{1,2}:\d\d (am|pm)/.test(l[1]) && !/\d+\s*(min|h)\b/.test(l[1].replace(/\d{1,2}:\d\d (am|pm)/g, ''))), JSON.stringify(wkl.slice(0, 2)));
-    ok('and the story plays in order: the date, then the ring and figures, then the seven days, then the workouts', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'); return /if \(wk && anim\) P = cl\(\(P - \.12\) \/ \.88\)/.test(sc) && /eo\(\(P - \(\.36 \+ di \* \.04\)\) \/ \.1\)/.test(sc) && /eo\(\(P - \(\.66 \+ wi \* \.035\)\) \/ \.1\)/.test(sc); })());
+    ok('the week moves as a single workout does: title, ring and figure, totals, then the seven days, then the sessions', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'); return !/if \(wk && anim\) P = /.test(sc) && /eo\(\(P - \(\.42 \+ di \* \.02\)\) \/ \.1\)/.test(sc) && /fade\(wk \? \.3 : \.45, \.12\)/.test(sc) && /eo\(\(P - \(\.66 \+ wi \* \.035\)\) \/ \.1\)/.test(sc); })());
     await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(400);
     await o.c.close();
     const q = await ctx({ unit: 'kg', goal: 7, wkSum: '2000-01-01', rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
