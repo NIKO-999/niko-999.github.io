@@ -1620,6 +1620,20 @@ const freeze = (at) => `(() => {
     ok('only an earned colour colours a name: yours and Ally\'s, not Sam\'s wheel blue', nm.Niko === true && nm.Ally === true && nm.Sam === false, JSON.stringify(nm));
     const open = async (who) => { const i = await page.locator('#frBoard .fr-row').evaluateAll((els, n) => els.findIndex((e) => e.querySelector('.fr-t b').textContent === n), who); await page.locator('#frBoard .fr-row').nth(i).locator('.fr-open').click({ force: true }); await page.waitForTimeout(900); };
     const sheet = () => page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), cs = getComputedStyle(s); return { g: cs.getPropertyValue('--log-g').trim(), t: cs.getPropertyValue('--log-t').trim(), attr: s.hasAttribute('data-acc-g'), nameG: s.querySelector('.fr-ban-t b').classList.contains('lf-ng') }; });
+    /* THEIR PROGRAM: a fold at the top of a friend's page, shut, that opens on their days and adds the program to yours */
+    await page.evaluate(() => { const f = JSON.parse(localStorage.getItem('lift.fr.v1')); f.list[0].s.pg = { n: 'Sam split', d: [[1, 'Upper', 'Chest', [['bench', 4, 6, 10], ['row', 3, 8, 12]], []], [3, 'Lower', '', [['squat', 4, 5, 8]], []]], c: [] }; localStorage.setItem('lift.fr.v1', JSON.stringify(f)); });
+    await page.reload(); await page.waitForTimeout(500); await page.click('.lf-bar [data-v="fr"]'); await page.waitForTimeout(1800);
+    await open('Sam');
+    const pgf = await page.evaluate(() => { const c = document.querySelector('#frPg'), b = document.querySelector('#frPgFold'), bn = document.querySelector('.fr-ban'); return c && b ? { open: b.getAttribute('aria-expanded'), hid: document.querySelector('#frPgBody').hidden, below: c.getBoundingClientRect().top >= bn.getBoundingClientRect().bottom - 1, rows: document.querySelectorAll('#frPgBody .lf-li').length, h3: !!b.closest('h3') } : null; });
+    ok('a friend with a program shows it as a shut fold under their name, a button inside a heading', pgf && pgf.open === 'false' && pgf.hid && pgf.below && pgf.h3, JSON.stringify(pgf));
+    await page.click('#frPgFold'); await page.waitForTimeout(150);
+    ok('it opens on their days and Add to my programs', await page.evaluate(() => !document.querySelector('#frPgBody').hidden && document.querySelectorAll('#frPgBody .lf-li').length === 2 && /Add to my programs/.test(document.querySelector('#frPgAdd').textContent)));
+    await page.click('#frPgAdd'); await page.waitForTimeout(500);
+    ok('Add opens the same name-and-days preview a pasted program gets, named for theirs', await page.locator('#lfPgN').inputValue() === 'Sam split' && await page.locator('#lfPgAdd').count() === 1);
+    await page.click('#lfPgAdd'); await page.waitForTimeout(600);
+    ok('and adding it makes it one of your programs', (await page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')))).pg.some((q) => q.n === 'Sam split' && q.d.length === 2));
+    await page.keyboard.press('Escape'); await page.waitForTimeout(400); await page.click('.lf-bar [data-v="fr"]').catch(() => {}); await page.waitForTimeout(600);
+    ok('your own profile, and a friend with no program, show no such fold', await page.evaluate(() => !document.querySelector('#frPg')));
     await open('Sam'); const sam = await sheet(); await page.keyboard.press('Escape'); await page.waitForTimeout(600);
     ok('Sam\'s page is Sam\'s blue while you wear Molten: a flat colour, no gradient, not yours', !/gradient/.test(sam.g) && !/gradient/.test(sam.t) && !sam.attr && !sam.nameG && sam.g !== await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--log-g').trim()), JSON.stringify(sam));
     await open('Ally'); const ally = await sheet(); await page.keyboard.press('Escape'); await page.waitForTimeout(600);
