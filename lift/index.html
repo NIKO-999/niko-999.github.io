@@ -5266,11 +5266,13 @@ function lfProgAdd(pk, name) {
   pk.c.forEach(function (e) { if (!exById(e.id)) S.ex.push(e); });
   S.pg = (S.pg || []).concat([p]); lfProgSync();
   var was = lfProgSwitch(id);
+  /* A NEW PERSON STARTS WITHOUT PROGRAMMES: the seven that come with the app are put away the moment their first split exists, and come back from Manage programs if they want one. */
+  if (wasNew) S.hp = BUILTIN_PROGS.slice();
   if (wasNew) S.focus = lfFocusOf(PROGRAMS[id].focus && PROGRAMS[id].focus.length ? PROGRAMS[id].focus : FOCUS_DEFAULT);
   lfSave(); lfRender();
   if (wasNew) setTimeout(lfTargetsAsk, 450);
   lfToast(p.n + ' added and on', function () {
-    S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick;
+    S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; if (wasNew) delete S.hp;
     S.pg = (S.pg || []).filter(function (q) { return q.id !== id; }); if (!S.pg.length) delete S.pg; lfProgSync(); lfSave(); lfRender();
   });
 }

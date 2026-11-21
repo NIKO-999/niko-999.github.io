@@ -2798,6 +2798,11 @@ const freeze = (at) => `(() => {
     ok('making the first split asks what your targets are, worked out from it', await page.locator('#lfTgKeep').count() === 1 && /sets a week/.test(await page.textContent('.lf-sheet.is-up')));
     await page.click('#lfTgKeep'); await page.waitForTimeout(500);
     ok('and then the week\'s sets are there', await page.locator('#lfLegs').count() === 1);
+    await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
+    ok('a new person starts without programmes: the strip holds only the split they made', await page.locator('#lfProg button').count() === 1 && /My week/.test(await page.textContent('#lfProg')));
+    await page.click('#lfProgMg'); await page.waitForTimeout(500);
+    ok('and the ones that come with the app wait under Manage programs', /Upper \/ lower/.test(await page.textContent('.lf-sheet.is-up')));
+    await page.keyboard.press('Escape'); await page.waitForTimeout(400);
     await c.close();
     const c2 = await browser.newContext(PHONE); await c2.addInitScript(freeze('2026-10-30T18:00:00')); await c2.addInitScript('window.__lfInline = 1;');
     await c2.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, fresh: true, tour: true, setup: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [], rt: [{ id: 'r1', n: 'Push day', sp: '', ex: ['bench'], tg: {} }, { id: 'r2', n: 'Pull day', sp: '', ex: ['row'], tg: {} }] }))}); })();`);
