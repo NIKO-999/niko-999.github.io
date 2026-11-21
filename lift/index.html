@@ -2744,7 +2744,8 @@ function lfRenderHome() {
   root.appendChild(lfTodayCard());
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
-  root.appendChild(lfLegCard());
+  /* NO SETS UNTIL THERE IS A SPLIT: a first install has nothing to count against, so the weekly targets only appear once the first split is made */
+  if (!lfNew()) root.appendChild(lfLegCard());
   var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard()); setTimeout(lfWeekDone, 0);
   root.appendChild(r);
   var lw = lfLastWeekBtn(); if (lw) root.appendChild(lw);
@@ -3334,7 +3335,7 @@ function lfBwCard() {
   var c = el('<button type="button" class="lf-card lf-tap" id="lfBw"><div class="lf-hd"><span class="lf-lab">Body weight</span>' + IC.chev + '</div><div class="lf-bw"><div><div class="lf-big lf-num"></div><div class="lf-lab"></div></div><div class="lf-spark"></div></div></button>');
   $('.lf-big', c).innerHTML = last ? esc(fmtW(last.kg)) + '<small>' + S.unit + '</small>' : '—';
   $('.lf-bw .lf-lab', c).textContent = !last ? 'Tap to log your weight'
-    : S.bwGoal ? (Math.abs(last.kg - S.bwGoal) < .05 ? 'At your goal' : 'Goal · ' + fmtW(Math.abs(S.bwGoal - last.kg)) + ' ' + S.unit + ' to go') : 'Logged ' + fmtDay(last.d);
+    : 'Logged ' + fmtDay(last.d);
   var pts = S.bw.slice(-30);
   if (pts.length > 1) {
     var mn = Math.min.apply(null, pts.map(function (p) { return p.kg; })), mx = Math.max.apply(null, pts.map(function (p) { return p.kg; })), rg = mx - mn || 1;
@@ -3347,9 +3348,8 @@ function lfBwCard() {
 
 function lfBwSheet() {
   var last = S.bw[S.bw.length - 1];
-  var b = el('<div><label class="lf-flab" for="lfBwIn">Today, in ' + S.unit + '</label><input class="lf-field lf-num" id="lfBwIn" inputmode="decimal" autocomplete="off" /><label class="lf-flab" for="lfBwGoal">Goal, in ' + S.unit + ' (optional)</label><input class="lf-field lf-num" id="lfBwGoal" inputmode="decimal" autocomplete="off" /><div class="lf-list lf-sec" id="lfBwList"></div></div>');
+  var b = el('<div><label class="lf-flab" for="lfBwIn">Today, in ' + S.unit + '</label><input class="lf-field lf-num" id="lfBwIn" inputmode="decimal" autocomplete="off" /><div class="lf-list lf-sec" id="lfBwList"></div></div>');
   if (last) $('#lfBwIn', b).placeholder = fmtW(last.kg);
-  if (S.bwGoal) $('#lfBwGoal', b).value = fmtW(S.bwGoal);
   S.bw.slice(-8).reverse().forEach(function (p) {
     var li = el('<div class="lf-li"><div class="lf-li-t"><b></b></div><span class="lf-li-r lf-num"></span></div>');
     $('b', li).textContent = fmtDay(p.d); $('.lf-li-r', li).textContent = fmtW(p.kg) + ' ' + S.unit; $('#lfBwList', b).appendChild(li);
@@ -3357,8 +3357,7 @@ function lfBwSheet() {
   var save = el('<button type="button" class="lf-btn is-log is-full">Log weight</button>');
   var s = lfSheet({ title: 'Body weight', body: b, foot: [save] });
   save.addEventListener('click', function () {
-    var v = num(parseFloat($('#lfBwIn', b).value)), g = $('#lfBwGoal', b).value.trim();
-    S.bwGoal = g ? (num(parseFloat(g)) ? fromDisp(parseFloat(g)) : S.bwGoal) : null;
+    var v = num(parseFloat($('#lfBwIn', b).value));
     if (v) {
       var d = ymd(today()), kg = fromDisp(v);
       S.bw = S.bw.filter(function (p) { return p.d !== d; }); S.bw.push({ d: d, kg: kg });
@@ -5230,13 +5229,27 @@ function lfProgUnpack(text) {
   if (!chk.length) return null;
   return { n: chk[0].n, d: chk[0].d, c: Object.keys(cu).map(function (q) { return cu[q]; }), dropped: dropped };
 }
+/* THE FIRST SPLIT ASKS WHAT YOUR TARGETS ARE. They are already worked out from the sets the week holds, so the answer is usually Keep these. */
+function lfTargetsAsk() {
+  var b = el('<div><p class="lf-lab" style="margin:0 0 8px">Worked out from the sets in your split. Change any of them, or keep these.</p><div class="lf-list"></div></div>');
+  lfTargets().forEach(function (t) {
+    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b></div><span class="lf-li-r lf-num"></span></div>');
+    $('b', li).textContent = t[0]; $('.lf-li-r', li).textContent = lfRange(t[1], t[2]) + ' sets a week'; $('.lf-list', b).appendChild(li);
+  });
+  var keep = el('<button type="button" class="lf-btn is-ink is-full" id="lfTgKeep">Keep these</button>'), chg = el('<button type="button" class="lf-btn is-full" id="lfTgChange" style="margin-top:10px">Change them</button>');
+  var sh = lfSheet({ title: 'What are your targets?', body: b, foot: [chg, keep] });
+  keep.addEventListener('click', function () { sh.close(true); });
+  chg.addEventListener('click', function () { sh.close(true); lfGo('you'); lfRender(); var r = $('#lfRowFocusRow') || $('#lfRowFocus'); if (r) r.click(); });
+}
 function lfProgAdd(pk, name) {
-  var id; do { id = 'u' + Math.random().toString(36).slice(2, 8); } while (PROGRAMS[id]);
+  var wasNew = lfNew(), id; do { id = 'u' + Math.random().toString(36).slice(2, 8); } while (PROGRAMS[id]);
   var p = { id: id, n: (name || pk.n).trim().slice(0, 30) || 'Program', d: pk.d.map(function (d) { return { id: id + '-' + d.w, w: d.w, n: d.n, sp: d.sp, x: d.x, ss: d.ss }; }) };
   pk.c.forEach(function (e) { if (!exById(e.id)) S.ex.push(e); });
   S.pg = (S.pg || []).concat([p]); lfProgSync();
   var was = lfProgSwitch(id);
+  if (wasNew) S.focus = lfFocusOf(PROGRAMS[id].focus && PROGRAMS[id].focus.length ? PROGRAMS[id].focus : FOCUS_DEFAULT);
   lfSave(); lfRender();
+  if (wasNew) setTimeout(lfTargetsAsk, 450);
   lfToast(p.n + ' added and on', function () {
     S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick;
     S.pg = (S.pg || []).filter(function (q) { return q.id !== id; }); if (!S.pg.length) delete S.pg; lfProgSync(); lfSave(); lfRender();
@@ -5659,13 +5672,8 @@ function lfRenderYou() {
   var root = $('#lfYou'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">You</h2>'));
   root.appendChild(lfBwCard());
-  /* GOALS: what you are aiming at, in one place, open when you arrive. The workouts a week and the body weight you are heading for. */
-  var gb = el('<div><span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div>'
-    + '<label class="lf-flab" for="lfGoalBw">Body weight, in ' + S.unit + '</label><input class="lf-field lf-num" id="lfGoalBw" inputmode="decimal" autocomplete="off" placeholder="Not set" /><div class="lf-sub" id="lfGoalBwNote"></div></div>');
-  var gin = $('#lfGoalBw', gb), gnote = $('#lfGoalBwNote', gb), lb = S.bw[S.bw.length - 1];
-  if (S.bwGoal) gin.value = fmtW(S.bwGoal);
-  gnote.textContent = !S.bwGoal ? (lb ? 'Now ' + fmtW(lb.kg) + ' ' + S.unit : 'Log your weight to see how far you are') : !lb ? 'Log your weight to see how far you are' : Math.abs(lb.kg - S.bwGoal) < .05 ? 'You are at your goal' : fmtW(Math.abs(S.bwGoal - lb.kg)) + ' ' + S.unit + ' to ' + (S.bwGoal < lb.kg ? 'lose' : 'gain') + ' from ' + fmtW(lb.kg);
-  gin.addEventListener('change', function () { var v = gin.value.trim(); S.bwGoal = v && num(parseFloat(v)) ? fromDisp(parseFloat(v)) : null; lfSave(); lfRender(); });
+  /* GOALS: what you are aiming at, in one place, open when you arrive. The workouts a week. */
+  var gb = el('<div><span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div></div>');
   var c = el('<div><span class="lf-flab">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
     + '<span class="lf-flab">Rest alert</span><div class="lf-seg" id="lfRa"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
     + '<span class="lf-flab">Rest on lock screen</span><div class="lf-seg" id="lfRl"><button type="button" data-a="1">On</button><button type="button" data-a="0">Off</button></div>'
@@ -9636,6 +9644,325 @@ function bdCreator(b, n, pre) {
   return g;
 }
 /* THE SLAB: the day-streak badge, copied from a different school of badge. Not an enamelled medal but a dark scratched plate: a tall pill of gunmetal with a recessed rim, DAY pressed into it in black, and the number in glowing gold standing proud of it, stacked in layers so it has a thickness as the plate turns. Nothing is a picture of a badge: the plate has a scuffed normal map and its own roughness, the number is a stack of gold planes in front of a bloom, and a light moves across it every few seconds. */
+/* ── the month coins, from SVC ── */
+function cnRng(seed) { var a = seed >>> 0; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function cnHash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+/* what a mode draws with: colour, height, or finish */
+function cnPen(mode) {
+  return function (c, h, r) {
+    if (mode === 'c') return c;
+    if (mode === 'h') { var v = Math.round(Math.max(0, Math.min(1, h)) * 255); return 'rgb(' + v + ',' + v + ',' + v + ')'; }
+    return 'rgb(0,' + Math.round(r[0] * 255) + ',' + Math.round(r[1] * 255) + ')';
+  };
+}
+var CN_TURN = { f: -Math.PI / 2, b: -Math.PI / 2 }, CN_FLIP = 1;
+var CN_PAL = {
+  gold: { base: '#cf951f', hi: '#f6cf62', lo: '#8f5d0f', line: '#6a4208', text: '#eab742', rough: .3, metal: 1 },
+  dark: { base: '#34363c', hi: '#5a5d66', lo: '#1c1d21', line: '#121316', text: '#454851', rough: .5, metal: .9 }
+};
+/* the inlay: a base, the veins running through it, and a hot colour */
+var CN_LAVA = {
+  red: ['#3a050b', '#ff3b24', '#ff9a3c'],
+  blue: ['#06143a', '#2f7bff', '#9fd0ff'],
+  green: ['#04281b', '#10c47a', '#a9ffd8'],
+  violet: ['#1d0838', '#a15bff', '#e0c4ff']
+};
+
+function cnRing(g, r1, r2, C) { g.beginPath(); g.arc(C, C, r2, 0, 6.2832); g.arc(C, C, r1, 0, 6.2832, true); g.fill('evenodd'); }
+function cnArcText(g, text, C, r, mid, size, bottom, fill, stroke, lw) {
+  g.font = '700 ' + size + 'px Georgia, "Times New Roman", "DejaVu Serif", serif';
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  var sp = size * .12, ws = [], tot = 0, i;
+  for (i = 0; i < text.length; i++) { ws.push(g.measureText(text[i]).width + sp); tot += ws[i]; }
+  var ang = tot / r, a = bottom ? mid + ang / 2 : mid - ang / 2;
+  for (i = 0; i < text.length; i++) {
+    var w = ws[i] / r;
+    a += bottom ? -w / 2 : w / 2;
+    g.save(); g.translate(C + r * Math.cos(a), C + r * Math.sin(a)); g.rotate(bottom ? a - Math.PI / 2 : a + Math.PI / 2);
+    if (stroke) { g.lineWidth = lw; g.strokeStyle = stroke; g.strokeText(text[i], 0, 0); }
+    g.fillStyle = fill; g.fillText(text[i], 0, 0);
+    g.restore();
+    a += bottom ? -w / 2 : w / 2;
+  }
+}
+/* the widest an arc of lettering may be, so a long name shrinks to fit */
+function cnFit(g, text, r, size, maxAng) {
+  g.font = '700 ' + size + 'px Georgia, "Times New Roman", "DejaVu Serif", serif';
+  var tot = 0; for (var i = 0; i < text.length; i++) tot += g.measureText(text[i]).width + size * .12;
+  return tot / r > maxAng ? size * maxAng * r / tot : size;
+}
+
+/* emblems, in a box from -1 to 1 */
+var CN_EMB = {
+  flame: function (g) {
+    g.beginPath(); g.moveTo(0, 1);
+    g.bezierCurveTo(-.56, 1, -.92, .64, -.86, .12);
+    g.bezierCurveTo(-.82, -.22, -.52, -.36, -.46, -.74);
+    g.bezierCurveTo(-.26, -.54, -.16, -.34, -.2, -.1);
+    g.bezierCurveTo(-.04, -.36, .06, -.72, .1, -1);
+    g.bezierCurveTo(.3, -.7, .78, -.3, .82, .22);
+    g.bezierCurveTo(.86, .66, .52, 1, 0, 1);
+    g.closePath();
+    g.moveTo(0, .78);
+    g.bezierCurveTo(-.3, .78, -.46, .54, -.4, .3);
+    g.bezierCurveTo(-.32, .08, -.12, .02, -.06, -.2);
+    g.bezierCurveTo(.12, .04, .42, .24, .38, .54);
+    g.bezierCurveTo(.34, .74, .18, .78, 0, .78);
+    g.closePath();
+  },
+  bars: function (g) {
+    var bar = function (x, w, h) { g.moveTo(x, 1); g.lineTo(x, 1 - h + w / 2); g.arc(x + w / 2, 1 - h + w / 2, w / 2, Math.PI, 0); g.lineTo(x + w, 1); g.closePath(); };
+    g.beginPath(); bar(-.9, .5, .9); bar(-.25, .5, 1.45); bar(.4, .5, 2); g.rect(-1, .92, 1.9, .08);
+  },
+  bolt: function (g) {
+    g.beginPath(); g.moveTo(.22, -1); g.lineTo(-.62, .12); g.lineTo(-.08, .12); g.lineTo(-.28, 1); g.lineTo(.68, -.22); g.lineTo(.1, -.22); g.closePath();
+  },
+  star: function (g) {
+    var k, a, rr;
+    g.beginPath();
+    for (k = 0; k < 10; k++) { a = -Math.PI / 2 + k * Math.PI / 5; rr = k % 2 ? .42 : 1; g[k ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr + .06); }
+    g.closePath();
+  },
+  clock: function (g) {
+    g.beginPath(); g.arc(0, 0, 1, 0, 6.2832); g.arc(0, 0, .74, 0, 6.2832, true);
+    g.rect(-.07, -.58, .14, .62); g.rect(-.07, -.07, .5, .14);
+    g.rect(-.07, -.07, .14, .14);
+  },
+  target: function (g) {
+    g.beginPath(); g.arc(0, 0, 1, 0, 6.2832); g.arc(0, 0, .76, 0, 6.2832, true);
+    g.moveTo(.5, 0); g.arc(0, 0, .5, 0, 6.2832); g.arc(0, 0, .26, 0, 6.2832, true);
+  },
+  crown: function (g) {
+    g.beginPath(); g.moveTo(-1, .72); g.lineTo(-1, -.52); g.lineTo(-.5, .02); g.lineTo(0, -.9); g.lineTo(.5, .02); g.lineTo(1, -.52); g.lineTo(1, .72); g.closePath();
+    g.rect(-1, .82, 2, .18);
+  },
+  chevrons: function (g) {
+    var cv = function (y) { g.moveTo(-.9, y + .3); g.lineTo(0, y - .6); g.lineTo(.9, y + .3); g.lineTo(.9, y + .62); g.lineTo(0, y - .28); g.lineTo(-.9, y + .62); g.closePath(); };
+    g.beginPath(); cv(-.42); cv(.34);
+  }
+};
+
+/* THE HARDER, THE FINER. A coin's inlay climbs with how long it takes to
+   win. Marble is the plain one. Galaxy, aurora and obsidian are the three
+   finishes the long ones wear, and the longest of all also carry a light
+   turning behind them. Gold stays gold: the metal never says a tier. */
+function cnSheen(g) {
+  var sh = g.createLinearGradient(-1, -1, .9, .9); sh.addColorStop(0, '#ffffff55'); sh.addColorStop(.35, '#ffffff10'); sh.addColorStop(.5, '#0000'); sh.addColorStop(1, '#00000066');
+  g.fillStyle = sh; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+}
+function cnGalaxy(g, rng) {
+  var i, x, y, gr;
+  g.fillStyle = '#04051a'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  [['#5b2bd8', -.4, -.3, .9], ['#0b8fb8', .5, .4, .8], ['#b02a9a', .1, -.6, .6]].forEach(function (n) {
+    gr = g.createRadialGradient(n[1], n[2], 0, n[1], n[2], n[3]); gr.addColorStop(0, n[0] + 'bb'); gr.addColorStop(1, '#0000'); g.fillStyle = gr; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  });
+  for (i = 0; i < 220; i++) { x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1; g.fillStyle = 'rgba(255,255,255,' + (.35 + rng() * .65) + ')'; g.beginPath(); g.arc(x, y, .004 + rng() * rng() * .014, 0, 6.2832); g.fill(); }
+  for (i = 0; i < 5; i++) { x = rng() * 1.6 - .8; y = rng() * 1.6 - .8; g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = .006; g.beginPath(); g.moveTo(x - .06, y); g.lineTo(x + .06, y); g.moveTo(x, y - .06); g.lineTo(x, y + .06); g.stroke(); }
+  cnSheen(g);
+}
+function cnAurora(g, rng) {
+  var i, k, y0;
+  g.fillStyle = '#031a1c'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  [['#19e6a0', .5], ['#38c8ff', .35], ['#9a6bff', .25]].forEach(function (c, n) {
+    for (i = 0; i < 3; i++) {
+      y0 = -.7 + n * .45 + i * .22 + rng() * .1;
+      [[.34, .1], [.2, .2], [.08, .6]].forEach(function (w) {
+        g.beginPath(); g.moveTo(-1.2, y0);
+        for (k = 1; k <= 8; k++) g.lineTo(-1.2 + k * .3, y0 + Math.sin(k * .9 + n * 2 + i) * .22 + Math.cos(k * 1.7 + i) * .08);
+        g.strokeStyle = c[0] + Math.round(w[1] * c[1] * 255).toString(16).padStart(2, '0'); g.lineWidth = w[0]; g.stroke();
+      });
+    }
+  });
+  cnSheen(g);
+}
+function cnObsidian(g, rng) {
+  var i, k, x, y;
+  g.fillStyle = '#060608'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  var gl = g.createLinearGradient(-1, -1, 1, 1); gl.addColorStop(0, '#2a2c38'); gl.addColorStop(.3, '#0a0a0e'); gl.addColorStop(.62, '#15161e'); gl.addColorStop(1, '#050506');
+  g.fillStyle = gl; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  g.lineCap = 'round';
+  for (i = 0; i < 9; i++) {
+    x = rng() * 2 - 1; y = rng() * 2 - 1; g.beginPath(); g.moveTo(x, y);
+    for (k = 0; k < 5; k++) { x += (rng() - .5) * .6; y += (rng() - .5) * .6; g.lineTo(x, y); }
+    g.strokeStyle = 'rgba(240,190,70,.95)'; g.lineWidth = .006 + rng() * .01; g.stroke();
+    g.strokeStyle = 'rgba(240,190,70,.22)'; g.lineWidth = .04; g.stroke();
+  }
+  var st = g.createLinearGradient(-.9, -.2, .2, .9); st.addColorStop(0, '#fff0'); st.addColorStop(.5, '#ffffff30'); st.addColorStop(1, '#fff0');
+  g.fillStyle = st; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  cnSheen(g);
+}
+
+/* PRISM: the rarest finish. A holographic foil that throws the whole
+   spectrum across the inlay and glints as the coin turns. */
+function cnPrism(g, rng) {
+  var i, x, y, gr = g.createLinearGradient(-1.1, -1.1, 1.1, 1.1);
+  g.fillStyle = '#0d0d16'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  ['#ff3d7f', '#ff9a3d', '#fff23d', '#3dff9a', '#3dc8ff', '#7a5cff', '#ff3dd4', '#ff3d7f'].forEach(function (c, k, a) { gr.addColorStop(k / (a.length - 1), c); });
+  g.globalAlpha = .85; g.fillStyle = gr; g.fillRect(-1.1, -1.1, 2.2, 2.2); g.globalAlpha = 1;
+  g.lineWidth = .05;
+  for (i = -14; i < 14; i++) { g.strokeStyle = i % 2 ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.2)'; g.beginPath(); g.moveTo(-1.2 + i * .11, -1.2); g.lineTo(1.2 + i * .11, 1.2); g.stroke(); }
+  for (i = 0; i < 160; i++) { x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1; g.fillStyle = 'rgba(255,255,255,' + (.4 + rng() * .6) + ')'; g.beginPath(); g.arc(x, y, .004 + rng() * .012, 0, 6.2832); g.fill(); }
+  cnSheen(g);
+}
+
+/* the marble in the inlay: dark body, bright veins, glowing pockets, a glassy sheen */
+function cnLava(g, group, S, rng, fx) {
+  if (fx === 'prism') return cnPrism(g, rng);
+  if (fx === 'galaxy') return cnGalaxy(g, rng);
+  if (fx === 'aurora') return cnAurora(g, rng);
+  if (fx === 'obsidian') return cnObsidian(g, rng);
+  var L = CN_LAVA[group] || CN_LAVA.red, i, x, y;
+  g.fillStyle = L[0]; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  var hot = g.createRadialGradient(.1, .2, .05, 0, 0, 1.2); hot.addColorStop(0, L[1] + '66'); hot.addColorStop(1, '#0000');
+  g.fillStyle = hot; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  g.lineCap = 'round';
+  for (i = 0; i < 46; i++) {
+    x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1;
+    g.beginPath(); g.moveTo(x, y);
+    for (var k = 0; k < 4; k++) g.quadraticCurveTo(x + (rng() - .5) * .8, y + (rng() - .5) * .8, x += (rng() - .5) * .7, y += (rng() - .5) * .7);
+    g.strokeStyle = (i % 5 === 0 ? L[2] : L[1]) + (i % 3 ? '88' : 'cc'); g.lineWidth = .006 + rng() * .02; g.stroke();
+  }
+  for (i = 0; i < 9; i++) {
+    var pk = g.createRadialGradient(0, 0, 0, 0, 0, .18), px = rng() * 1.6 - .8, py = rng() * 1.6 - .8;
+    g.save(); g.translate(px, py); pk.addColorStop(0, L[2] + 'aa'); pk.addColorStop(1, '#0000'); g.fillStyle = pk; g.fillRect(-.2, -.2, .4, .4); g.restore();
+  }
+  var sh = g.createLinearGradient(-1, -1, .9, .9); sh.addColorStop(0, '#ffffff55'); sh.addColorStop(.35, '#ffffff10'); sh.addColorStop(.5, '#0000'); sh.addColorStop(1, '#00000066');
+  g.fillStyle = sh; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+}
+
+/* one pass over the front of a coin: mode is colour, height or finish */
+function cnFacePaint(g, mode, S, b, locked, dateText, back) {
+  var V = cnPen(mode), pal = locked ? CN_PAL.dark : CN_PAL.gold, C = S / 2, R = S / 2, rng = cnRng(cnHash(b.id + (back ? 'b' : 'f'))), i, a;
+  var RM = function (k) { return [pal.rough * (k || 1), pal.metal]; };
+  g.save(); g.translate(C, C); g.rotate(CN_TURN[back ? 'b' : 'f']); if (back) g.scale(CN_FLIP, 1); g.translate(-C, -C);
+  /* the ground */
+  if (mode === 'c') {
+    var gr = g.createRadialGradient(C * .8, C * .7, R * .08, C, C, R);
+    gr.addColorStop(0, pal.hi); gr.addColorStop(.5, pal.base); gr.addColorStop(1, pal.lo); g.fillStyle = gr;
+  } else g.fillStyle = V(pal.base, .5, RM());
+  g.fillRect(0, 0, S, S);
+  /* the rim, and the groove inside it */
+  g.fillStyle = V(pal.hi, .9, RM(.7)); cnRing(g, R * .93, R, C);
+  g.fillStyle = V(pal.lo, .28, RM(1.2)); cnRing(g, R * .905, R * .93, C);
+  /* the border of small flowers */
+  for (i = 0; i < 90; i++) {
+    a = i / 90 * 6.2832; var bx = C + Math.cos(a) * R * .87, by = C + Math.sin(a) * R * .87;
+    g.fillStyle = V(pal.hi, .8, RM(.8)); g.beginPath(); g.arc(bx, by, R * .017, 0, 6.2832); g.fill();
+    g.fillStyle = V(pal.lo, .32, RM(1.2)); g.beginPath(); g.arc(bx, by, R * .0065, 0, 6.2832); g.fill();
+    if (i % 3 === 0) { g.fillStyle = V(pal.hi, .86, RM(.7)); for (var p = 0; p < 5; p++) { var pa = p / 5 * 6.2832; g.beginPath(); g.arc(bx + Math.cos(pa) * R * .03, by + Math.sin(pa) * R * .03, R * .008, 0, 6.2832); g.fill(); } }
+  }
+  g.fillStyle = V(pal.hi, .85, RM(.8)); cnRing(g, R * .815, R * .83, C);
+  /* the lettering */
+  var txtFill = mode === 'c' ? pal.text : V(pal.text, .86, RM(.6)), txtLine = mode === 'c' ? pal.line : V(pal.lo, .22, RM(1));
+  var rIn = R * .65, size = R * .165;
+  if (!back) {
+    var s1 = cnFit(g, b.n, rIn + size * .72, size, 2.55), s2 = cnFit(g, b.line, rIn + size * .72, size, 2.55);
+    cnArcText(g, b.n, C, rIn, -Math.PI / 2, s1, false, txtFill, txtLine, R * .006);
+    cnArcText(g, b.line, C, rIn + size * .72, Math.PI / 2, s2, true, txtFill, txtLine, R * .006);
+  } else {
+    cnArcText(g, 'STRUCTURE · VOLUME', C, rIn, -Math.PI / 2, cnFit(g, 'STRUCTURE · VOLUME', rIn + size * .72, size * .8, 2.5), false, txtFill, txtLine, R * .006);
+    cnArcText(g, dateText, C, rIn + size * .72, Math.PI / 2, cnFit(g, dateText, rIn + size * .72, size * .8, 2.5), true, txtFill, txtLine, R * .006);
+  }
+  /* the field: sunk, and ruled */
+  g.fillStyle = V(pal.base, .42, RM(1.05)); cnRing(g, 0, R * .55, C);
+  g.save(); g.beginPath(); g.arc(C, C, R * .545, 0, 6.2832); g.clip();
+  g.fillStyle = V(pal.lo, mode === 'h' ? .55 : .5, RM(1.2)); g.globalAlpha = mode === 'c' ? .34 : 1;
+  for (var y = C - R * .56; y < C + R * .56; y += S / 150) g.fillRect(C - R, y, R * 2, S / 600 + 1);
+  g.restore();
+  g.fillStyle = V(pal.hi, .88, RM(.7)); cnRing(g, R * .55, R * .568, C);
+  /* the middle */
+  if (!back) {
+    var em = CN_EMB[b.e] || CN_EMB.flame, E = R * .4;
+    g.save(); g.translate(C, C); g.scale(E, E);
+    em(g);
+    g.lineJoin = 'round'; g.lineWidth = b.thumb ? .17 : .09;
+    g.strokeStyle = V(pal.hi, .9, RM(.6)); g.stroke();
+    if (locked) { g.fillStyle = V('#15161a', .34, [.55, .6]); g.fill('evenodd'); }
+    else if (mode === 'c') { g.save(); g.clip('evenodd'); cnLava(g, b.g, S, rng, b.fx); if (b.thumb) { g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(-1.1, -1.1, 2.2, 2.2); } g.restore(); }
+    else { g.fillStyle = V('#000', .3, [.07, .2]); g.fill('evenodd'); }
+    g.restore();
+  } else {
+    var num = b.big, fs = R * (num.length > 4 ? .33 : num.length > 3 ? .4 : .5);
+    g.font = '700 ' + fs + 'px Georgia, "Times New Roman", "DejaVu Serif", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = R * .01; g.strokeStyle = txtLine; if (mode === 'c' || mode === 'h') g.strokeText(num, C, C - R * .03);
+    g.fillStyle = txtFill; g.fillText(num, C, C - R * .03);
+    g.font = '700 ' + R * .09 + 'px Georgia, "Times New Roman", "DejaVu Serif", serif';
+    g.fillStyle = txtFill; g.fillText(b.unit, C, C + R * .3);
+  }
+  /* wear: scratches, speckle, uneven finish */
+  var w = locked ? .45 : 1;
+  if (mode === 'c') {
+    g.lineWidth = 1;
+    for (i = 0; i < 160; i++) { var sx = rng() * S, sy = rng() * S, sa = rng() * 6.28, sl = 14 + rng() * 70; g.strokeStyle = rng() < .5 ? 'rgba(255,230,160,.09)' : 'rgba(60,30,0,.1)'; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(sa) * sl, sy + Math.sin(sa) * sl); g.stroke(); }
+    for (i = 0; i < 2600; i++) { g.fillStyle = rng() < .5 ? 'rgba(255,225,150,.07)' : 'rgba(50,25,0,.08)'; g.fillRect(rng() * S, rng() * S, 1 + rng() * 2, 1 + rng() * 2); }
+    for (i = 0; i < 40; i++) { var wg = g.createRadialGradient(0, 0, 0, 0, 0, 30 + rng() * 60); wg.addColorStop(0, 'rgba(120,70,0,' + (.1 * w) + ')'); wg.addColorStop(1, 'rgba(120,70,0,0)'); g.save(); g.translate(rng() * S, rng() * S); g.fillStyle = wg; g.fillRect(-100, -100, 200, 200); g.restore(); }
+  } else if (mode === 'r') {
+    g.globalAlpha = .16;
+    for (i = 0; i < 360; i++) { g.fillStyle = V('#000', .5, [.2 + rng() * .45, 1]); g.beginPath(); g.arc(rng() * S, rng() * S, 4 + rng() * 22, 0, 6.2832); g.fill(); }
+    g.globalAlpha = 1;
+  } else {
+    for (i = 0; i < 3000; i++) { g.fillStyle = 'rgba(' + (rng() < .5 ? '255,255,255' : '0,0,0') + ',.05)'; g.fillRect(rng() * S, rng() * S, 1 + rng() * 2, 1 + rng() * 2); }
+  }
+  g.restore();
+}
+function cnEdgePaint(g, mode, W, H, locked) {
+  var V = cnPen(mode), pal = locked ? CN_PAL.dark : CN_PAL.gold, N = 200, sw = W / N, k;
+  g.fillStyle = V(pal.base, .5, [pal.rough * 1.1, pal.metal]); g.fillRect(0, 0, W, H);
+  for (k = 0; k < N; k++) {
+    var gr = g.createLinearGradient(k * sw, 0, (k + 1) * sw, 0);
+    if (mode === 'h') { gr.addColorStop(0, '#222'); gr.addColorStop(.5, '#fff'); gr.addColorStop(1, '#222'); }
+    else if (mode === 'c') { gr.addColorStop(0, pal.lo); gr.addColorStop(.5, pal.hi); gr.addColorStop(1, pal.lo); }
+    else { gr.addColorStop(0, 'rgb(0,100,255)'); gr.addColorStop(.5, 'rgb(0,60,255)'); gr.addColorStop(1, 'rgb(0,100,255)'); }
+    g.fillStyle = gr; g.fillRect(k * sw, 0, sw + .5, H);
+  }
+}
+function cnCanvas(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+/* relief to a normal map: the slope of the height, read off the grey */
+function cnNormal(hc, strength) {
+  var w = hc.width, h = hc.height, src = hc.getContext('2d').getImageData(0, 0, w, h).data, out = cnCanvas(w, h), og = out.getContext('2d'), id = og.createImageData(w, h), d = id.data;
+  for (var y = 0; y < h; y++) {
+    var yu = y > 0 ? y - 1 : y, yd = y < h - 1 ? y + 1 : y;
+    for (var x = 0; x < w; x++) {
+      var xl = x > 0 ? x - 1 : x, xr = x < w - 1 ? x + 1 : x;
+      var dx = (src[(y * w + xr) * 4] - src[(y * w + xl) * 4]) / 255 * strength, dy = (src[(yd * w + x) * 4] - src[(yu * w + x) * 4]) / 255 * strength;
+      var nx = -dx, ny = dy, nz = 1, l = Math.sqrt(nx * nx + ny * ny + nz * nz), o = (y * w + x) * 4;
+      d[o] = (nx / l * .5 + .5) * 255; d[o + 1] = (ny / l * .5 + .5) * 255; d[o + 2] = (nz / l * .5 + .5) * 255; d[o + 3] = 255;
+    }
+  }
+  og.putImageData(id, 0, 0); return out;
+}
+/* the three maps for one face or the edge */
+function cnMaps(paint, w, h, strength) {
+  var c = cnCanvas(w, h), hh = cnCanvas(w, h), r = cnCanvas(w, h);
+  paint(c.getContext('2d'), 'c'); paint(hh.getContext('2d'), 'h'); paint(r.getContext('2d'), 'r');
+  return { c: c, n: cnNormal(hh, strength), r: r };
+}
+
+/* A MONTH IS A COIN. The five month badges are the SVC coins: gold struck from three canvases, the colour, the relief and the finish, so the lettering and the ruled field catch the light as it turns, with a reeded edge and a rim either side. The inlay climbs with the months: marble, aurora, galaxy, obsidian, and prism for two years. */
+var CN_MO = {
+  mo3: { n: 'STEADY', line: '12+ WORKOUTS A MONTH', e: 'bars', g: 'green', fx: '', big: '3', unit: 'MONTHS' },
+  mo6: { n: 'RELENTLESS', line: '12+ WORKOUTS A MONTH', e: 'bolt', g: 'blue', fx: 'aurora', big: '6', unit: 'MONTHS' },
+  mo12: { n: 'YEAR OF IRON', line: '12+ WORKOUTS A MONTH', e: 'star', g: 'red', fx: 'galaxy', big: '12', unit: 'MONTHS' },
+  mo18: { n: 'IRON HABIT', line: '12+ WORKOUTS A MONTH', e: 'flame', g: 'violet', fx: 'obsidian', big: '18', unit: 'MONTHS' },
+  mo24: { n: 'TWO YEARS OF IRON', line: '12+ WORKOUTS A MONTH', e: 'crown', g: 'violet', fx: 'prism', big: '24', unit: 'MONTHS' }
+};
+function bdIsCoin(b) { return !!CN_MO[(b && b.id) || '']; }
+function bdCoin(b, n) {
+  var T = BD3, g = new T.Group(), lock = !!b.lock, S = Math.max(512, Math.min(1024, (n || 768) * 1.25 | 0));
+  var spec = Object.assign({ id: b.id }, CN_MO[b.id]), dt = lock ? '' : String(b.at || '').toUpperCase();
+  var tex = function (cv, srgb) { var t = new T.CanvasTexture(cv); if (srgb) t.encoding = T.sRGBEncoding; t.anisotropy = 8; return t; };
+  var mk = function (m) { return new T.MeshStandardMaterial({ map: tex(m.c, true), normalMap: tex(m.n, false), roughnessMap: tex(m.r, false), metalnessMap: tex(m.r, false), roughness: 1, metalness: 1, envMapIntensity: 1.25 }); };
+  var front = cnMaps(function (c, m) { cnFacePaint(c, m, S, spec, lock, dt, false); }, S, S, 3.2);
+  var back = cnMaps(function (c, m) { cnFacePaint(c, m, S, spec, lock, dt, true); }, S, S, 3.2);
+  var edge = cnMaps(function (c, m) { cnEdgePaint(c, m, 2048, 64, lock); }, 2048, 64, 2.2);
+  var coin = new T.Mesh(new T.CylinderGeometry(1, 1, .17, 160, 1, false), [mk(edge), mk(front), mk(back)]); coin.rotation.x = Math.PI / 2; g.add(coin);
+  var rimMat = new T.MeshStandardMaterial({ color: lock ? 0x3a3c43 : 0xe3ad34, metalness: 1, roughness: .24, envMapIntensity: 1.3 }), rimGeo = new T.TorusGeometry(.965, .03, 14, 160);
+  [-1, 1].forEach(function (s) { var rim = new T.Mesh(rimGeo, rimMat); rim.position.z = s * .085; g.add(rim); });
+  return g;
+}
+
 function bdIsSlab(b) { return /^(d|hr)\d+$/.test(b.id || ''); }
 function bdSlab(b, n) {
   var T = BD3, g = new T.Group(), hi = n > 500, HW = .7, HH = 1.02, DEP = .09, BV = .02, lock = !!b.lock;
@@ -9813,6 +10140,7 @@ function bdMake(b, m, n, pre) {
   if (BD_SCENE[b.id] && !b.lock) return bdScene(b, n, BD_SCENE[b.id]);
   if (b.id === 'creator' && !b.lock) return bdCreator(b, n, pre);
   if (bdIsSlab(b)) return bdSlab(b, n);
+  if (bdIsCoin(b)) return bdCoin(b, n);
   if (b.id === 'slayer' && !b.lock) return bdSword(b, n, pre);
   var g = new BD3.Group(), trim = bdTrimOf(b), mp = pre || bdMaps(b, trim, n), lock = !!b.lock;
   var shp = new BD3.Shape(); bdOutline(shp, b.sh);
@@ -10009,7 +10337,7 @@ function bdBuildLive(x) {
   var b = bdSpec(x), trim = bdTrimOf(b), f, bk;
   bdPre[k] = bdThree().then(function (T) {
     if (!T) return null;
-    if (bdIsSlab(b)) return bdFrame().then(function () { var g = bdMake(b, 'silver', BD_LIVE); g.userData.k = k; return g; });
+    if (bdIsSlab(b) || bdIsCoin(b)) return bdFrame().then(function () { var g = bdMake(b, 'silver', BD_LIVE); g.userData.k = k; return g; });
     return bdFrame().then(function () { bdSetFace(BD_LIVE); f = bdFront(b, trim); return bdFrame(); })
       .then(function () { bdSetFace(BD_LIVE); bk = bdBack(b, trim); return bdFrame(); })
       .then(function () { var g = bdMake(b, 'silver', BD_LIVE, { f: f, b: bk }); g.userData.k = k; return g; });
@@ -10051,7 +10379,7 @@ var bdQ = [], bdBusy = false, bd3 = null;
    so a shelf of eighty took seconds to fill on every visit. They are kept
    in IndexedDB, keyed by what they show and by BD_VER — change the coin
    art and bump BD_VER, or every phone keeps the old pictures. */
-var BD_VER = 'd23', bdDbP = null;
+var BD_VER = 'd24', bdDbP = null;
 function bdDb() {
   if (bdDbP) return bdDbP;
   bdDbP = new Promise(function (res) {
@@ -10068,7 +10396,7 @@ function bdKey(x) { return x.b.id + (x.b.id === 'dontmiss' ? ':tm4' : '') + (x.d
 var BD_STATIC = /*BD_STATIC*/["abs10","abs100","abs200","abs400","abs50","allmus","allmus2","allmus3","allmus4","arm100","arm200","arm400","arm50","arm800","atlas","back","bk100","bk200","bk400","bk50","bk800","cardio100","cardio200","cardio25","cardio400","cardio50","cdh10","cdh25","cdh50","cdh75","cdwk","century","chest100","chest200","chest400","chest50","chest800","colossus","d10","d100","d105","d110","d115","d120","d125","d130","d135","d140","d145","d15","d150","d155","d160","d165","d170","d175","d180","d185","d190","d195","d20","d200","d25","d30","d35","d40","d45","d5","d50","d55","d60","d65","d70","d75","d80","d85","d90","d95","dawn","dec31","dontmiss","drakefire","ds1","ds2","ds3","dsm","dsx","duo1","duo10","duo100","duo200","duo50","early","early25","early50","early75","eclipse","ex100","ex15","ex80","explore","first","forge","friday13","fullbody","goal","hr100","hr1000","hr25","hr250","hr500","incl10","inclhr","ironwk","koipond","landslide","lead1","lead10","lead25","lead3","lead52","leap","leg100","leg200","leg400","leg50","leg800","leviathan","long","lungs","mo12","mo18","mo24","mo3","mo6","mon20","moonrise","newyear","night","onfire","ouroboros","owl","owl25","owl50","owl75","pack","phoenix","photo","plate200","plate210","plate3","plate4","post100","post200","post400","post50","post800","pr","pr10","pr100","pr25","pr3","pr50","quad","rep1k","rep2k","rep300","rp100k","rp10k","rp250k","rp500k","rp50k","run21","run30","run60","sands","sets10k","sets20k","sets2k","sets30","sets40","sets500","sets5k","setwk100","seven","sh100","sh200","sh400","sh50","sh800","sig100","sig200","sig25","sig400","sig50","squad","ss1","ss2","ss3","ssm","ssx","st12","st26","st4","st52","stair10","stairhr","stormc","summit","tgt1","tgt12","tgt26","tgt4","tgtall","ton10","ton15","ton20","ton25","trio","twice","unbeat","v100k","v10m","v1m","v500k","v5m","vein","wave","wayf","week","winter","wkend","wkvol","wo10","wo100","wo250","wo365","wo50","wo500","wu1","wu2","wu3","wum","wux","year","zero","zodiac"]/*END*/, bdStaticSet = null;
 function bdStaticUrl(x) {
   if (!bdStaticSet) { bdStaticSet = {}; BD_STATIC.forEach(function (k) { bdStaticSet[k] = 1; }); }
-  if (!bdStaticSet[x.b.id] || x.b.k === 'month' || x.b.gl) return '';
+  if (!bdStaticSet[x.b.id] || x.b.k === 'month' || x.b.gl || bdIsCoin(x.b)) return '';
   return 'bd/' + x.b.id + (x.d ? '' : '-l') + '.webp?v=' + BD_VER;
 }
 function bdStill(x, img) {

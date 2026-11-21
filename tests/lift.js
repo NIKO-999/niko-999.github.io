@@ -2634,9 +2634,10 @@ const freeze = (at) => `(() => {
     ok('and sits above Appearance', ys[0] < ys[1], ys);
     await page.locator('#lfTargets #lfGoal button').nth(2).click(); await settle(page);
     ok('the weekly goal is set from it', (await store(page)).goal === 3);
-    await page.fill('#lfGoalBw', '75'); await page.press('#lfGoalBw', 'Tab'); await settle(page);
-    ok('the body weight goal is set from it', (await store(page)).bwGoal === 75);
-    ok('and says how far there is to go', /5(\.0)? kg to lose/.test(await page.textContent('#lfGoalBwNote')), await page.textContent('#lfGoalBwNote'));
+    ok('there is no body weight goal: weight is logged, not chased', await page.locator('#lfGoalBw, #lfGoalBwNote').count() === 0);
+    await page.click('#lfBw'); await settle(page);
+    ok('and the weight sheet has no goal field either', await page.locator('#lfBwGoal').count() === 0 && await page.locator('#lfBwIn').count() === 1);
+    await page.keyboard.press('Escape'); await settle(page);
     ok('Settings no longer holds the weekly goal', await page.locator('#lfSet #lfGoal').count() === 0);
     await c.close();
   }
@@ -2755,12 +2756,19 @@ const freeze = (at) => `(() => {
     await page.goto(URL); await page.waitForTimeout(2400); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
     ok('Create split is the only thing on that card: no empty workout, no ready-made split', await page.locator('#lfNewUser button').count() === 1 && await page.locator('#lfEmptyWo, #lfSplitGo').count() === 0);
     ok('a phone with no record has no programme on Today: it says Create split', await page.locator('#lfNewUser').count() === 1 && /Create split/.test(await page.textContent('#lfNewUser .lf-title-box')) && await page.locator('#lfGo').count() === 0, await page.textContent('#lfHome').then((t) => t.slice(0, 80)));
-    await page.click('#lfCreateSplit'); await page.waitForTimeout(500);
-    ok('and Create split opens the new split form, with the reader inside it', await page.locator('#lfSpRead').count() === 1 && await page.locator('#lfSpN').count() === 1);
-    await page.keyboard.press('Escape'); await page.waitForTimeout(400);
+    ok('and no weekly sets are drawn until there is a split', await page.locator('#lfLegs').count() === 0);
     await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
     ok('Exercises shows no built-in split, only New split at the top', await page.locator('#lfSplit').count() === 0 && await page.locator('#lfProg').count() === 0 && await page.locator('#lfNewSplit').count() === 1);
     ok('and there is no way round it: no ready-made split link here either', await page.locator('#lfSplitLink').count() === 0);
+    await page.click('.lf-bar [data-v="home"]'); await page.waitForTimeout(300);
+    await page.click('#lfCreateSplit'); await page.waitForTimeout(500);
+    ok('and Create split opens the new split form, with the reader inside it', await page.locator('#lfSpRead').count() === 1 && await page.locator('#lfSpN').count() === 1);
+    await page.click('#lfSpRead'); await page.waitForTimeout(400);
+    await page.fill('#lfPlnT', 'Monday - Push\nBench press 4x8\nOverhead press 3x10\nTuesday - Pull\nBarbell row 4x8\nPull-ups 3x8'); await page.click('#lfPlnGo'); await page.waitForTimeout(500);
+    await page.fill('#lfSpN', 'My week'); await page.click('#lfSpSave'); await page.waitForTimeout(1200);
+    ok('making the first split asks what your targets are, worked out from it', await page.locator('#lfTgKeep').count() === 1 && /sets a week/.test(await page.textContent('.lf-sheet.is-up')));
+    await page.click('#lfTgKeep'); await page.waitForTimeout(500);
+    ok('and then the week\'s sets are there', await page.locator('#lfLegs').count() === 1);
     await c.close();
     const c2 = await browser.newContext(PHONE); await c2.addInitScript(freeze('2026-10-30T18:00:00')); await c2.addInitScript('window.__lfInline = 1;');
     await c2.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, fresh: true, tour: true, setup: true, wkSum: '9999-12-31', wkDone: '9999-12-31', mseen: RK_SEEN, wo: [], rt: [{ id: 'r1', n: 'Push day', sp: '', ex: ['bench'], tg: {} }, { id: 'r2', n: 'Pull day', sp: '', ex: ['row'], tg: {} }] }))}); })();`);
@@ -2787,6 +2795,20 @@ const freeze = (at) => `(() => {
     ok('no two exercises on the list share a name', new Set(all).size === all.length, String(all.length));
     ok('the list is a long one now, with machine and dumbbell variations in it', all.length > 280 && all.some((n) => /^machine /.test(n)) && all.some((n) => /^dumbbell /.test(n)) && all.some((n) => /plate-loaded/.test(n)), String(all.length));
     ok('and the retired copies are gone from it', !all.includes('seated shoulder press') && !all.includes('triceps extensions'));
+    await c.close();
+  }
+
+  /* ── A MONTH IS A COIN: the five month badges are the SVC coin, drawn live, never a pre-made picture of the old medal ── */
+  {
+    const wo = []; for (let m = 0; m < 3; m++) for (let k = 1; k <= 13; k++) { const d = new Date(2026, 9 - m, k); wo.push({ id: 'm' + m + '_' + k, d: d.toISOString().slice(0, 10), s: d.getTime() + 36e5 * 9, e: d.getTime() + 36e5 * 10, n: 'Q', x: [{ id: 'squat', n: 'Barbell squat', sets: [{ w: 100, r: 5, ok: 1 }] }] }); }
+    wo.sort((a, z) => (a.d < z.d ? -1 : 1));
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
+    const co = page.locator('#lfBadges .lf-bdi', { hasText: 'Steady' }).first().locator('.lf-coin');
+    ok('Steady, three months, is on the shelf', await co.count() === 1);
+    await co.scrollIntoViewIfNeeded(); await page.waitForFunction(() => { const i = [...document.querySelectorAll('#lfBadges .lf-bdi')].find((x) => /Steady/.test(x.textContent)); const im = i && i.querySelector('.lf-coin img'); return im && im.getAttribute('src'); }, null, { timeout: 60000 }).catch(() => {});
+    const src = await co.locator('img').getAttribute('src');
+    ok('its picture is drawn on the phone, not the old pre-made medal', !!src && !/^bd\//.test(src), String(src).slice(0, 40));
     await c.close();
   }
 
