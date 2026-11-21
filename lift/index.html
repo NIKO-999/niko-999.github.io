@@ -6075,7 +6075,9 @@ function lfForceUpdate(url) {
   if (document.getElementById('lfForce')) return;
   var o = el('<div class="lf-force" id="lfForce" role="alertdialog" aria-modal="true" aria-labelledby="lfForceT"><div class="lf-force-c"><b id="lfForceT">Update Lift</b><p>This version is out of date. Update to keep going.</p><a class="lf-btn is-log is-full" id="lfForceGo" rel="noopener">Update from the App Store</a></div></div>');
   var a = $('#lfForceGo', o); /* the link comes from the file if it is the App Store, and from the app's own address otherwise: never a link anyone else can set */
-  a.href = /^https:\/\/apps\.apple\.com\//.test(url || '') ? url : LF_APP_URL;
+  a.href = /^https:\/\/apps\.apple\.com\//.test(url || '') ? url : LF_APP_LIVE ? LF_APP_URL : 'itms-beta://';
+  /* UNTIL THE APP STORE PAGE IS LIVE the update is in TestFlight, so the button opens that app and says so; the day the page is live, LF_APP_LIVE flips and it is the App Store again */
+  if (!LF_APP_LIVE && !/^https:\/\/apps\.apple\.com\//.test(url || '')) a.textContent = 'Open TestFlight to update';
   document.body.appendChild(o); document.body.style.overflow = 'hidden';
 }
 function lfVersionCheck() {

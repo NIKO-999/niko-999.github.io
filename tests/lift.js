@@ -2688,6 +2688,9 @@ const freeze = (at) => `(() => {
     ok('which covers everything: a press at the middle of the screen reaches it, not the app', await old.page.evaluate(() => { const e = document.elementFromPoint(innerWidth / 2, innerHeight / 2); return !!(e && e.closest('#lfForce')); }));
     ok('and has one way on, the App Store', await old.page.locator('#lfForce a').count() === 1 && await old.page.getAttribute('#lfForceGo', 'href') === 'https://apps.apple.com/app/id123');
     await old.c.close();
+    const tf = await open('1.4', '1.5', '');
+    ok('before the App Store page is live the one button opens TestFlight and says so', await tf.page.getAttribute('#lfForceGo', 'href') === 'itms-beta://' && /TestFlight/.test(await tf.page.textContent('#lfForceGo')));
+    await tf.c.close();
     const cur = await open('1.3', '1.3', '');
     ok('an app at the minimum is left alone', cur.asked() >= 1 && await cur.page.locator('#lfForce').count() === 0);
     await cur.c.close();
