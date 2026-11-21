@@ -2423,6 +2423,11 @@ const freeze = (at) => `(() => {
     await t.page.reload(); await settle(t.page);
     ok('it survives a reload and is still the program on', (await store(t.page)).prog === st.prog && (await store(t.page)).pg.length === 1);
     await t.page.click('.lf-bar [data-v="lib"]'); await settle(t.page); await t.page.click('#lfProgMg'); await settle(t.page);
+    /* A PROGRAM YOU MADE CAN BE RENAMED; one that comes with the app cannot */
+    ok('a program you added has Rename, and the ones that come with the app do not', await t.page.locator('.lf-sheet [data-p="' + st.prog + '"] [data-a="rename"]').count() === 1 && await t.page.locator('.lf-sheet [data-p="ul"] [data-a="rename"]').count() === 0);
+    await t.page.locator('.lf-sheet [data-p="' + st.prog + '"] [data-a="rename"]').click(); await settle(t.page);
+    await t.page.locator('#lfPgRn').fill('Renamed split'); await t.page.locator('#lfPgRnGo').click(); await settle(t.page);
+    ok('renaming keeps the days and changes the name on the strip and in the record', (await store(t.page)).pg[0].n === 'Renamed split' && (await store(t.page)).pg[0].d.length === 6 && (await t.page.evaluate(() => [...document.querySelectorAll('#lfProg button')].map((x) => x.textContent))).includes('Renamed split'));
     await t.page.locator('.lf-sheet [data-p="' + st.prog + '"] [data-a="rm"]').click(); await settle(t.page);
     ok('a program you added is removed for good, with Undo, and another is turned on', !(await store(t.page)).pg && (await store(t.page)).prog === 'ul');
     await t.page.locator('.lf-toast button').last().click().catch(() => {}); await settle(t.page);

@@ -5385,6 +5385,20 @@ function lfProgManage() {
     $('b', c).textContent = p.n + (S.prog === k ? ' · on' : '');
     $('span', c).textContent = days.length + ' day' + (days.length === 1 ? '' : 's') + (p.mine ? ' · added' : '');
     $('[data-a="share"]', c).addEventListener('click', function () { lfProgShare(k); });
+    /* A PROGRAM YOU MADE CAN BE RENAMED; the ones that come with the app keep their names */
+    if (p.mine) {
+      var rn = el('<button type="button" class="lf-btn" data-a="rename" style="flex:1">Rename</button>'); $('[data-a="rm"]', c).parentNode.insertBefore(rn, $('[data-a="rm"]', c));
+      rn.addEventListener('click', function () {
+        var fb = el('<div><label class="lf-flab" for="lfPgRn" style="margin-top:0">Name</label><input class="lf-field" id="lfPgRn" maxlength="30" autocomplete="off" /></div>');
+        $('#lfPgRn', fb).value = p.n;
+        var sv = el('<button type="button" class="lf-btn is-ink is-full" id="lfPgRnGo">Save name</button>'), s3 = lfSheet({ title: 'Rename program', body: fb, foot: [sv] });
+        sv.addEventListener('click', function () {
+          var nn = $('#lfPgRn', fb).value.trim().slice(0, 30); if (!nn) return;
+          var q = (S.pg || []).filter(function (z) { return z.id === k; })[0]; if (!q) return;
+          q.n = nn; lfProgSync(); lfSave(); lfRender(); s3.close(true); again();
+        });
+      });
+    }
     var rm = $('[data-a="rm"]', c); rm.disabled = vis.length < 2;
     rm.addEventListener('click', function () { lfProgRemove(k); again(); });
     b.appendChild(c);
