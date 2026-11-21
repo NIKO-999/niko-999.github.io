@@ -2513,7 +2513,7 @@ const freeze = (at) => `(() => {
     await o.page.click('#lfWsShare'); await o.page.waitForTimeout(1200);
     const wkl = await o.page.evaluate(() => (window.lfCardLast && window.lfCardLast.lines) || []);
     ok('on the week\'s story each session says when it started, not how long it was', wkl.length > 0 && wkl.every((l) => /\d{1,2}:\d\d (am|pm)/.test(l[1]) && !/\d+\s*(min|h)\b/.test(l[1].replace(/\d{1,2}:\d\d (am|pm)/g, ''))), JSON.stringify(wkl.slice(0, 2)));
-    ok('and the seven days come in before the ring, the figures and the workouts', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'); return /var P0 = P; if \(wk && anim\) P = cl\(\(P - \.22\) \/ \.78\)/.test(sc) && /eo\(\(P0 - \(\.02 \+ di \* \.03\)\) \/ \.08\)/.test(sc); })());
+    ok('and the story plays in order: the date, then the ring and figures, then the seven days, then the workouts', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'); return /if \(wk && anim\) P = cl\(\(P - \.12\) \/ \.88\)/.test(sc) && /eo\(\(P - \(\.36 \+ di \* \.04\)\) \/ \.1\)/.test(sc) && /eo\(\(P - \(\.66 \+ wi \* \.035\)\) \/ \.1\)/.test(sc); })());
     await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(400);
     await o.c.close();
     const q = await ctx({ unit: 'kg', goal: 7, wkSum: '2000-01-01', rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');

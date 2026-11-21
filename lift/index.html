@@ -4266,8 +4266,8 @@ function lfCardDraw(sp, prog, into) {
   y += cp ? 82 : 96;
   var tpx = cp ? 76 : 104, tl = wrap(sp.title, tpx, 800, W - 180).slice(0, 2); tl.forEach(function (l) { T(l, tpx, 800, '#ffffff', y); y += tpx + 8; }); y -= tpx + 8;
   y += cp ? 54 : 64; if (!wk) T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += wk ? 52 : cp ? 150 : 200;
-  /* THE DAYS COME FIRST, then the ring and the figures, and the workouts last: everything but the seven days is timed on a clock that starts a little after them */
-  var P0 = P; if (wk && anim) P = cl((P - .22) / .78);
+  /* THE WEEK'S STORY PLAYS IN ORDER: blank, then the date, then the ring and the figures, then the seven days, and the workouts last. Everything under the date runs on a clock that starts a beat after it. */
+  if (wk && anim) P = cl((P - .12) / .88);
   if (wk) {
     /* THE WEEK'S GOAL AS ITS RING, in the review's own look: the ring filled to how much of the goal the week closed, the count inside it */
     /* THE REVIEW'S OWN RING, drawn to the same proportions as the one on the screen: a 120 box, a 52 radius, a 12 stroke, a rounded arc with its glow, and when the goal is hit a wide soft light round it */
@@ -4289,7 +4289,7 @@ function lfCardDraw(sp, prog, into) {
     y += 32; var dw = 96, dg = (W - 180 - dw * 7) / 6;
     for (var di = 0; di < 7; di++) {
       var dx = 90 + di * (dw + dg), st = sp.days[di];
-      x.globalAlpha = anim ? eo((P0 - (.02 + di * .03)) / .08) : 1;
+      x.globalAlpha = anim ? eo((P - (.36 + di * .04)) / .1) : 1;
       if (st === 1) { x.shadowColor = A(.55); x.shadowBlur = 26; x.fillStyle = A(1); rr(dx, y, dw, 84, 26); x.fill(); x.shadowBlur = 0; }
       else if (st === 2) { x.strokeStyle = 'rgba(255,255,255,.22)'; x.lineWidth = 3; rr(dx + 1.5, y + 1.5, dw - 3, 81, 25); x.stroke(); }
       else { x.fillStyle = 'rgba(255,255,255,.08)'; rr(dx, y, dw, 84, 26); x.fill(); }
