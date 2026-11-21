@@ -37,7 +37,7 @@ const freeze = (at) => `(() => {
      visit only, so this does it each time one appears. The one check
      about folding uses newCtx and starts them shut. */
   const newCtx = browser.newContext.bind(browser);
-  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`(() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); if (!('tour' in o)) { o.tour = true; v = JSON.stringify(o); } } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript('window.__lfInline = 1;'); await c.addInitScript(`new MutationObserver(() => { if (window.__keepCol) return; const d = document.getElementById('lfColDone'); if (d) d.click(); }).observe(document, { childList: true, subtree: true });`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
+  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`window.__lfPrMin = 1; (() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); if (!('tour' in o)) { o.tour = true; v = JSON.stringify(o); } } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript('window.__lfInline = 1;'); await c.addInitScript(`new MutationObserver(() => { if (window.__keepCol) return; const d = document.getElementById('lfColDone'); if (d) d.click(); }).observe(document, { childList: true, subtree: true });`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
@@ -317,7 +317,7 @@ const freeze = (at) => `(() => {
 
   /* ── progressive overload ── a second session needs today free, so the
      first is moved back a day for it and put back after */
-  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo[0].d = '2026-10-29'; /* PRs count from two weeks after the first workout: an old one makes these real */ s.wo.unshift({ id: 'old', d: '2026-10-01', s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 40, r: 8 }] }] }); localStorage.setItem('lift.v1', JSON.stringify(s)); });
+  await page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); s.wo[0].d = '2026-10-29'; /* A lift sets records once three earlier days have it logged: three old ones make these real */ ['2026-10-05', '2026-10-03'].forEach((od, oi) => s.wo.unshift({ id: 'oldx' + oi, d: od, s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 40, r: 8 }] }] })); s.wo.unshift({ id: 'old', d: '2026-10-01', s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 40, r: 8 }] }] }); localStorage.setItem('lift.v1', JSON.stringify(s)); });
   await page.reload(); await page.waitForTimeout(400);
   await page.click('#lfGo'); await settle(page);
   ok('a second time, an exercise comes in with last time\'s set count', (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelectorAll('.lf-set:not(.is-hd)').length))).join() === '2,1');
@@ -1544,11 +1544,24 @@ const freeze = (at) => `(() => {
       { id: 'r1', d: '2026-10-27', s: 3, e: 4, n: 'Legs', x: [{ id: 'legext', n: 'Leg extensions', sets: [st(50, 10)] }] },
       { id: 'r2', d: '2026-10-29', s: 5, e: 6, n: 'Legs', x: [{ id: 'legext', n: 'Leg extensions', sets: [st(60, 10)] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00');
+    /* this block tests the real rule: no override */
+    await page.addInitScript(() => { delete window.__lfPrMin; }); await page.reload(); await page.waitForTimeout(500);
     const s = await store(page);
     ok('a stored set past what a set can be is brought back to the limit', JSON.stringify(s.wo.find((w) => w.id === 'r0').x[0].sets[1]) === '{"w":500,"r":50}');
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const bm = Object.fromEntries(await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
-    ok('heavier inside the first two weeks is not a PR yet', bm['First PR'] === 'Locked', bm['First PR']);
+    ok('a lift logged on only one earlier day sets no record yet', bm['First PR'] === 'Locked', bm['First PR']);
+    /* THREE EARLIER DAYS: the fourth is the first that can set a record */
+    for (const [days, want, label] of [[2, 'Locked', 'two earlier days: still no record'], [3, 'unlocked', 'three earlier days: a heavier day is a record']]) {
+      const ws = []; for (let i = 0; i < days; i++) ws.push({ id: 'p' + i, d: '2026-10-0' + (i + 1), s: 1, e: 2, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(50, 8)] }] });
+      ws.push({ id: 'pz', d: '2026-10-20', s: 3, e: 4, n: 'Upper', x: [{ id: 'bench', n: 'Barbell bench press', sets: [st(60, 8)] }] });
+      const q = await ctx({ unit: 'kg', goal: 3, wo: ws }, '2026-10-30T18:00:00');
+      await q.page.addInitScript(() => { delete window.__lfPrMin; }); await q.page.reload(); await q.page.waitForTimeout(500);
+      await q.page.click('.lf-bar [data-v="you"]'); await settle(q.page);
+      const bq = Object.fromEntries(await q.page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => [e.querySelector('b').textContent, e.querySelector('span').textContent])));
+      ok(label, want === 'Locked' ? bq['First PR'] === 'Locked' : bq['First PR'] !== 'Locked' && !!bq['First PR'], bq['First PR']);
+      await q.c.close();
+    }
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfGo'); await settle(page);
     const w0 = page.locator('.lf-session .lf-set:not(.is-hd)').first().locator('input');

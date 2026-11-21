@@ -2383,7 +2383,7 @@ function lfPrN(id, d) {
   }
   var days = prMemo.m[id] || [], n = 0; for (var i = 0; i < days.length && days[i] < d; i++) n++; return n;
 }
-function lfPrOk(d, w, best, from, id) { return w <= best * 1.5 + 10 + 1e-9 && lfPrN(id, d) >= PR_MIN; }
+function lfPrOk(d, w, best, from, id) { return w <= best * 1.5 + 10 + 1e-9 && lfPrN(id, d) >= (window.__lfPrMin !== undefined ? window.__lfPrMin : PR_MIN); }
 function fmtW(kg) { var v = Math.round(toDisp(kg) * 10) / 10; return String(v); }
 /* A SET'S weight: nought is your body weight, and says so. "0 × 12" on a
    sit-up reads as a set that lifted nothing; "BW × 12" is what it was. */
