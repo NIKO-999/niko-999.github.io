@@ -167,10 +167,11 @@ const freeze = (at) => `(() => {
   ok('the filter narrows to one group', legsOnly.join() === 'legs', legsOnly);
   await page.locator('.lf-ppl button', { hasText: 'All' }).click();
 
-  await page.click('#lfNewRt'); await settle(page);
-  await page.fill('#lfRtN', 'Push'); await page.fill('#lfRtS', 'Push, Pull, Legs');
+  await page.click('#lfNewSplit'); await settle(page);
+  await page.fill('#lfSpN', 'Push'); await page.click('#lfSpAddDay'); await settle(page);
+  await top(page).locator('.lf-sp-w').selectOption('5'); await top(page).locator('.lf-sp-n').fill('Push');
   for (const n of ['Bench press', 'Overhead press']) {
-    await top(page).locator('.lf-add').click(); await settle(page);
+    await top(page).locator('.lf-sp-ax').click(); await settle(page);
     if (n === 'Bench press') {
       const caps = await top(page).locator('.lf-pick-h').allTextContents();
       ok('the picker is grouped Push, Pull, Legs, Core', caps.join() === 'Push,Pull,Legs,Core', caps);
@@ -181,16 +182,14 @@ const freeze = (at) => `(() => {
     }
     await top(page).locator('.lf-li', { has: page.locator('b', { hasText: new RegExp('^' + n + '$') }) }).click(); await settle(page);
   }
-  await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
+  await top(page).locator('#lfSpSave').click(); await settle(page);
   s = await store(page);
-  ok('a routine holds its exercises in order', s.rt.length === 1 && s.rt[0].n === 'Push' && s.rt[0].ex.join() === s.ex.map((e) => e.id).join(), s.rt);
+  ok('a split is the whole week in one, its day holding the exercises in order', s.pg.length === 1 && s.pg[0].n === 'Push' && s.pg[0].d.length === 1 && s.pg[0].d[0].w === 5 && s.pg[0].d[0].x.map((e) => e[0]).join() === s.ex.map((e) => e.id).join() && s.rt.length === 0, s.pg);
+  ok('and it is on', s.prog === s.pg[0].id);
 
   /* ── the workout comes up from the bottom ── */
   await page.click('.lf-bar [data-v="home"]');
-  await page.click('#lfPick'); await settle(page);
-  await top(page).locator('.lf-li', { hasText: 'Push, Pull, Legs' }).click(); await settle(page);
-  ok('picking a routine makes it today, for today', (await store(page)).pick.d === '2026-10-30');
-  ok('today is the routine', (await page.textContent('#lfPick')).trim() === 'Push' && /Push, Pull, Legs/.test(await page.textContent('.lf-sub')));
+  ok('today is the split\'s Friday', (await page.textContent('#lfPick')).trim() === 'Push');
   ok('and says two exercises', /2 exercises/.test(await page.textContent('.lf-chips')));
   /* sampled every frame from inside the page, so a loaded machine cannot make the first look come late */
   await page.evaluate(() => { window.__rise = []; const f = () => { const s = document.querySelector('.lf-session'); if (s) window.__rise.push(s.getBoundingClientRect().top); if (window.__rise.length < 400 && !(window.__rise.length > 12 && window.__rise.slice(-12).every((v) => Math.abs(v - window.__rise[window.__rise.length - 1]) < .5) && window.__rise[window.__rise.length - 1] < 60)) requestAnimationFrame(f); }; requestAnimationFrame(f); });
@@ -2252,31 +2251,36 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
-  /* ── READ A ROUTINE: text, a photo or a PDF becomes routines; here it is the pasted text, which is the same path the phone's reading ends in ── */
+  /* ── READ A SPLIT: text, a photo or a PDF becomes one split; here it is the pasted text, which is the same path the phone's reading ends in ── */
   {
     const o = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page);
-    await o.page.click('#lfNewRt'); await settle(o.page); await top(o.page).locator('#lfRtRead').click(); await settle(o.page);
+    await o.page.click('#lfNewSplit'); await settle(o.page); await top(o.page).locator('#lfSpRead').click(); await settle(o.page);
     await top(o.page).locator('#lfPlnT').fill('Push Day\nExercise Sets Reps\nFlat DB Press 3 8-10\nSquat - 5 sets of 5'); await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
-    const tbl = await top(o.page).locator('.lf-li b').allTextContents(), tblN = await top(o.page).locator('input[aria-label="Routine name"]').evaluateAll((x) => x.map((e) => e.value));
+    const tbl = await top(o.page).locator('.lf-li b').allTextContents(), tblN = await top(o.page).locator('.lf-sp-n').evaluateAll((x) => x.map((e) => e.value));
     ok('a table header is not a day, a Flat DB press is the dumbbell bench and a bare Squat is the barbell squat', tblN.join() === 'Push Day' && /dumbbell bench/i.test(tbl[0]) && /^barbell squat$/i.test(tbl[1]), [tblN, tbl]);
-    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewRt'); await settle(o.page); await top(o.page).locator('#lfRtRead').click(); await settle(o.page);
-    ok('Read a routine opens with a place to paste', await top(o.page).locator('#lfPlnT').count() === 1);
+    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page); await top(o.page).locator('#lfSpRead').click(); await settle(o.page);
+    ok('Read a split opens with a place to paste', await top(o.page).locator('#lfPlnT').count() === 1);
     ok('and offers no photo or PDF button on the web, where nothing can read one', await top(o.page).locator('.lf-pln-src button').count() === 0);
     await top(o.page).locator('#lfPlnT').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
     await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
-    const inputs = await top(o.page).locator('input[aria-label="Routine name"]').evaluateAll((x) => x.map((e) => e.value));
+    const inputs = await top(o.page).locator('.lf-sp-n').evaluateAll((x) => x.map((e) => e.value));
     ok('it finds the two days', inputs.join() === 'PUSH DAY,PULL DAY', inputs);
-    const rows = await top(o.page).locator('.lf-li b').allTextContents();
+    const days = await top(o.page).locator('.lf-sp-w').evaluateAll((x) => x.map((e) => e.value));
+    ok('and puts them on Monday and Tuesday, one week', days.join() === '1,2', days);
+    const rows = await top(o.page).locator('.lf-sp-day .lf-li b').allTextContents();
     ok('each line is matched to the library', rows.length === 6 && /bench/i.test(rows[0]) && /overhead|press/i.test(rows[1]) && /pull/i.test(rows[3]), rows);
-    ok('and a line it cannot place says so and waits for a choice', rows[5] === 'Made up lift' && /Not matched/.test(await top(o.page).locator('.lf-li').nth(5).textContent()));
-    ok('the sets and reps are kept', /4 × 8–10/.test(await top(o.page).locator('.lf-li').first().textContent()));
-    await top(o.page).locator('#lfPlnSave').click(); await settle(o.page);
+    ok('and a line it cannot place says so and waits for a choice', rows[5] === 'Made up lift' && /Not matched/.test(await top(o.page).locator('.lf-sp-day .lf-li').nth(5).textContent()));
+    ok('the sets and reps are kept', /4 × 8–10/.test(await top(o.page).locator('.lf-sp-day .lf-li').first().textContent()));
+    await top(o.page).locator('#lfSpSave').click(); await settle(o.page);
+    ok('saving without a name asks for one', /Name your split/.test(await o.page.textContent('.lf-toast')));
+    await top(o.page).locator('#lfSpN').fill('My week'); await top(o.page).locator('#lfSpSave').click(); await settle(o.page);
     const st = await store(o.page);
-    ok('saving makes a routine a day, and leaves out what was not matched', st.rt.length === 2 && st.rt[0].n === 'PUSH DAY' && st.rt[1].ex.length === 2, st.rt);
-    ok('with its targets', st.rt[0].tg && st.rt[0].tg[st.rt[0].ex[0]].join() === '4,8,10', st.rt[0]);
+    ok('saving makes ONE split with both days, and leaves out what was not matched', st.rt.length === 0 && st.pg.length === 1 && st.pg[0].n === 'My week' && st.pg[0].d.length === 2 && st.pg[0].d[1].x.length === 2, st.pg);
+    ok('with its targets', st.pg[0].d[0].x[0].slice(1).join() === '4,8,10', st.pg[0]);
+    ok('and it is on, in the strip beside the others', st.prog === st.pg[0].id && (await o.page.locator('#lfProg button').count()) === 8);
     await o.page.reload(); await settle(o.page);
-    ok('and they survive a reload, targets and all', (await store(o.page)).rt[0].tg[st.rt[0].ex[0]].join() === '4,8,10');
+    ok('and it survives a reload, targets and all', (await store(o.page)).pg[0].d[0].x[0].slice(1).join() === '4,8,10');
     await o.c.close();
   }
 
@@ -2412,8 +2416,8 @@ const freeze = (at) => `(() => {
     await pg6.click('.lf-bar [data-v="you"]'); await settle(pg6);
     ok('Health is offered once the build says it has the capability', await pg6.locator('#lfHealth').count() === 1);
     await pg6.click('.lf-bar [data-v="lib"]'); await settle(pg6);
-    await pg6.click('#lfNewRt'); await settle(pg6); await top(pg6).locator('#lfRtRead').click(); await settle(pg6);
-    ok('Read a routine offers a photo and a PDF as well as pasted text', await top(pg6).locator('.lf-pln-src button').count() === 2, await top(pg6).locator('.lf-pln-src button').allTextContents());
+    await pg6.click('#lfNewSplit'); await settle(pg6); await top(pg6).locator('#lfSpRead').click(); await settle(pg6);
+    ok('Read a split offers a photo and a PDF as well as pasted text', await top(pg6).locator('.lf-pln-src button').count() === 2, await top(pg6).locator('.lf-pln-src button').allTextContents());
     await pg6.locator('.lf-pln-src button').first().click(); await pg6.waitForTimeout(300);
     ok('and pressing one asks the phone to read it', await pg6.evaluate(() => window.__calls.filter((x) => x[0] === 'readPlan').length) === 1);
     ok('and backing out of the picker says nothing', !/Nothing readable/.test(await pg6.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
@@ -2712,7 +2716,7 @@ const freeze = (at) => `(() => {
     const c = await browser.newContext(PHONE); await c.addInitScript(freeze('2026-10-30T18:00:00')); await c.addInitScript(seed({ tour: false }));
     const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(URL); await page.waitForTimeout(2400);
-    ok('a first open with nothing in it plays the guide by itself', await page.locator('.lf-tr-stage').count() === 1 && /Add your routine/.test(await page.textContent('.lf-tr-cap')));
+    ok('a first open with nothing in it plays the guide by itself', await page.locator('.lf-tr-stage').count() === 1 && /Add your split/.test(await page.textContent('.lf-tr-cap')));
     ok('it is four scenes', await page.locator('.lf-tr-segs button').count() === 4);
     await page.click('.lf-btn.is-log'); await page.waitForTimeout(200); ok('Next moves to the second scene', /Check it and save/.test(await page.textContent('.lf-tr-cap')));
     await page.click('.lf-btn.is-log'); await page.click('.lf-btn.is-log'); await page.waitForTimeout(200); ok('and the last scene is logging a set', /Log your sets/.test(await page.textContent('.lf-tr-cap')));
@@ -2722,7 +2726,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
     ok('with no routines, Exercises offers how to add one', await page.locator('#lfSetupLink').count() === 1);
     await page.click('#lfSetupLink'); await page.waitForTimeout(500);
-    ok('and it opens the same guide', await page.locator('.lf-tr-stage').count() === 1 && /Add your routine/.test(await page.textContent('.lf-tr-cap')));
+    ok('and it opens the same guide', await page.locator('.lf-tr-stage').count() === 1 && /Add your split/.test(await page.textContent('.lf-tr-cap')));
     await c.close();
     const c2 = await browser.newContext(PHONE); await c2.addInitScript(freeze('2026-10-30T18:00:00')); await c2.addInitScript(seed({ tour: true }));
     const p2 = await c2.newPage(); p2.on('pageerror', (e) => errors.push(String(e))); await p2.goto(URL); await p2.waitForTimeout(2400);
@@ -2735,13 +2739,13 @@ const freeze = (at) => `(() => {
     const c = await browser.newContext(PHONE); await c.addInitScript(freeze('2026-10-30T18:00:00')); await c.addInitScript('window.__lfInline = 1;');
     const page = await c.newPage(); page.on('pageerror', (e) => errors.push(String(e)));
     await page.goto(URL); await page.waitForTimeout(2400); await page.keyboard.press('Escape'); await page.waitForTimeout(500);
-    ok('Create routine is the only thing on that card: no empty workout, no ready-made split', await page.locator('#lfNewUser button').count() === 1 && await page.locator('#lfEmptyWo, #lfSplitGo').count() === 0);
-    ok('a phone with no record has no programme on Today: it says Create routine', await page.locator('#lfNewUser').count() === 1 && /Create routine/.test(await page.textContent('#lfNewUser .lf-title-box')) && await page.locator('#lfGo').count() === 0, await page.textContent('#lfHome').then((t) => t.slice(0, 80)));
-    await page.click('#lfCreateRt'); await page.waitForTimeout(500);
-    ok('and Create routine opens the new routine form, with the reader inside it', await page.locator('#lfRtRead').count() === 1 && await page.locator('#lfRtN').count() === 1);
+    ok('Create split is the only thing on that card: no empty workout, no ready-made split', await page.locator('#lfNewUser button').count() === 1 && await page.locator('#lfEmptyWo, #lfSplitGo').count() === 0);
+    ok('a phone with no record has no programme on Today: it says Create split', await page.locator('#lfNewUser').count() === 1 && /Create split/.test(await page.textContent('#lfNewUser .lf-title-box')) && await page.locator('#lfGo').count() === 0, await page.textContent('#lfHome').then((t) => t.slice(0, 80)));
+    await page.click('#lfCreateSplit'); await page.waitForTimeout(500);
+    ok('and Create split opens the new split form, with the reader inside it', await page.locator('#lfSpRead').count() === 1 && await page.locator('#lfSpN').count() === 1);
     await page.keyboard.press('Escape'); await page.waitForTimeout(400);
     await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
-    ok('Exercises shows no built-in split, only New routine at the top', await page.locator('#lfSplit').count() === 0 && await page.locator('#lfProg').count() === 0 && await page.locator('#lfNewRt').count() === 1);
+    ok('Exercises shows no built-in split, only New split at the top', await page.locator('#lfSplit').count() === 0 && await page.locator('#lfProg').count() === 0 && await page.locator('#lfNewSplit').count() === 1);
     ok('and there is no way round it: no ready-made split link here either', await page.locator('#lfSplitLink').count() === 0);
     await c.close();
     const c2 = await browser.newContext(PHONE); await c2.addInitScript(freeze('2026-10-30T18:00:00')); await c2.addInitScript('window.__lfInline = 1;');

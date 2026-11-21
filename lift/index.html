@@ -162,6 +162,11 @@ body.lf-v-home .lf-glow { opacity: 1; }
 
 /* ── today ── */
 .lf-today { padding: 16px; }
+.lf-sp-day { margin-top: 12px; padding: 10px 12px; border-radius: 14px; background: var(--card2, rgba(255,255,255,.05)); }
+.lf-sp-h { display: flex; gap: 8px; align-items: center; }
+.lf-sp-h .lf-sp-w { flex: none; width: 84px; margin: 0; }
+.lf-sp-h .lf-sp-n { flex: 1; min-width: 0; margin: 0; }
+.lf-sp-day .lf-list { margin: 6px 0; }
 .lf-fold-h { margin: 0; font: inherit; }
 .lf-fold-b { display: flex; width: 100%; align-items: center; gap: 8px; min-height: 44px; padding: 0 2px; background: none; border: 0; color: inherit; text-align: left; }
 .lf-fold-b .lf-cap { flex: 1; margin: 0; }
@@ -2595,9 +2600,9 @@ function lfTour() {
 
 /* HOW TO PUT YOUR PROGRAMME IN. A first open has nothing in it, and a screen of someone else's routines tells a stranger nothing about how to get theirs there. Four short scenes, the real cards, a finger doing the pressing: add it, check it, pick it on Today, log it. It plays once by itself on a first open and is always one press away in Settings and under Your routines. */
 var SETUP = [
-  ['Add your routine', 'Open Exercises and tap New routine. Choose Read it from a photo, PDF or text and paste your programme, or build it by hand.', 9000],
-  ['Check it and save', 'Each line is read as an exercise with its sets and reps. Fix anything it missed, then save.', 6400],
-  ['Start it from Today', 'Your routine shows up on the Today card, ready to go. Press Start.', 6000],
+  ['Add your split', 'Open Exercises and tap New split. Choose Read it from a photo, PDF or text and paste your whole week, or build it by hand.', 9000],
+  ['Check it and save', 'Each day is read with its exercises, sets and reps. Fix anything it missed, name the split, then save.', 6400],
+  ['Start it from Today', 'Your split is on and today\'s day shows on the Today card, ready to go. Press Start.', 6000],
   ['Log your sets', 'Tick each set as you finish it. The rest timer starts by itself.', 5600]
 ];
 function lfSetupTour() {
@@ -2814,11 +2819,11 @@ var TAG_IC = {
 function lfTag(x) { var g = el('<span class="lf-tag">' + TAG_IC[x[0]] + '<span></span></span>'); g.dataset.k = x[0]; $('span', g).textContent = x[1]; return g; }
 function lfTagsOf(kinds) { return lfTags().filter(function (x) { return kinds.indexOf(x[0]) >= 0; }); }
 function lfCreateCard() {
-  var c = el('<div class="lf-card lf-today is-new" id="lfNewUser"><div class="lf-lab">Today</div><div class="lf-title-box" style="cursor:default">Create routine</div>'
-    + '<div class="lf-sub">Paste in the programme you already follow, or build one by hand. It shows up here, ready to start.</div>'
-    + '<button type="button" class="lf-go" id="lfCreateRt"><span>Create routine</span></button></div>');
-  /* ONE WAY ON, ON PURPOSE: no empty workout and no ready-made split beside it. Making your own routine is the first thing a new person does, so there is nothing else to be confused by. */
-  $('#lfCreateRt', c).addEventListener('click', function () { lfRoutineForm(null); });
+  var c = el('<div class="lf-card lf-today is-new" id="lfNewUser"><div class="lf-lab">Today</div><div class="lf-title-box" style="cursor:default">Create split</div>'
+    + '<div class="lf-sub">Paste in the programme you already follow, or build one by hand. The whole week comes in as one split, ready to start.</div>'
+    + '<button type="button" class="lf-go" id="lfCreateSplit"><span>Create split</span></button></div>');
+  /* ONE WAY ON, ON PURPOSE: no empty workout and no ready-made split beside it. Making your own split is the first thing a new person does, so there is nothing else to be confused by. */
+  $('#lfCreateSplit', c).addEventListener('click', function () { lfSplitForm(null); });
   return c;
 }
 function lfTodayCard() {
@@ -4936,10 +4941,12 @@ function planParse(text) {
   });
   return days.filter(function (d) { return d.ex.length; });
 }
-function lfPlanSheet() {
+var spDraft = '';
+function lfPlanSheet(nm) {
+  spDraft = nm || '';
   var b = el('<div><div class="lf-pln-src"></div><label class="lf-flab" for="lfPlnT">Or paste the text</label><textarea class="lf-field" id="lfPlnT" rows="5" placeholder="Push&#10;Bench press 4x8&#10;Overhead press 3x10" style="resize:none"></textarea></div>');
   var go = el('<button type="button" class="lf-btn is-ink is-full" id="lfPlnGo">Read it</button>');
-  var s = lfSheet({ title: 'Read a routine', body: b, foot: [go] });
+  var s = lfSheet({ title: 'Read a split', body: b, foot: [go] });
   var src = $('.lf-pln-src', b);
   if (LF_WGT && LF_WGT.readPlan) {
     [['photo', 'Photo or screenshot'], ['file', 'PDF or file']].forEach(function (k) {
@@ -4962,41 +4969,63 @@ function lfPlanGo(from, text) {
   if (!days.length) { lfToast('No exercises found. Lines like "Bench press 4x8" work best'); return; }
   from.close(true); lfPlanPreview(days);
 }
+/* A SPLIT IS A WHOLE WEEK IN ONE. Reading a programme from a photo, a PDF or pasted text, or building one by hand, ends in the same place: one split, named, with a weekday on every day, added to the strip beside the ones that come with the app. It is never a pile of separate routines. */
 function lfPlanPreview(days) {
-  var b = el('<div></div>');
+  lfSplitForm(days.map(function (d, i) { return { w: [1, 2, 3, 4, 5, 6, 0][i % 7], n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, sets: x.sets, lo: x.lo, hi: x.hi }; }) }; }), spDraft);
+}
+function lfSplitForm(days, name) {
+  days = days || [];
+  var b = el('<div><label class="lf-flab" for="lfSpN">Name</label><input class="lf-field" id="lfSpN" maxlength="30" placeholder="My split" autocomplete="off" /><div id="lfSpDays"></div><button type="button" class="lf-add" id="lfSpAddDay">' + IC.plus + 'Add a day</button></div>');
+  $('#lfSpN', b).value = name || '';
+  if (!days.length) {
+    var rd = el('<button type="button" class="lf-btn is-full" id="lfSpRead" style="margin-bottom:6px">Read it from a photo, PDF or text</button>');
+    rd.addEventListener('click', function () { var nm = $('#lfSpN', b).value; s.close(true); lfPlanSheet(nm); });
+    b.insertBefore(rd, b.firstChild);
+  }
+  function freeDow() { var used = days.map(function (d) { return d.w; }); var o = [1, 2, 3, 4, 5, 6, 0].filter(function (w) { return used.indexOf(w) < 0; }); return o.length ? o[0] : null; }
   function paint() {
-    b.textContent = '';
+    var host = $('#lfSpDays', b); host.textContent = '';
     days.forEach(function (d, di) {
-      var h = el('<input class="lf-field" maxlength="40" aria-label="Routine name" style="margin-top:10px" />'); h.value = d.n;
-      h.addEventListener('input', function () { d.n = h.value; });
-      b.appendChild(h);
-      var l = el('<div class="lf-list"></div>');
+      var box = el('<div class="lf-sp-day"><div class="lf-sp-h"><select class="lf-field lf-sp-w" aria-label="Weekday"></select><input class="lf-field lf-sp-n" maxlength="40" aria-label="Day name" placeholder="Push" autocomplete="off" /><button type="button" class="lf-x lf-sp-rm" aria-label="Remove day">' + IC.x + '</button></div><div class="lf-list"></div><button type="button" class="lf-add lf-sp-ax">' + IC.plus + 'Add exercise</button></div>');
+      var sel = $('.lf-sp-w', box);
+      [1, 2, 3, 4, 5, 6, 0].forEach(function (w) { var o = el('<option></option>'); o.value = w; o.textContent = DOW_LONG[w].slice(0, 3); if (w === d.w) o.selected = true; sel.appendChild(o); });
+      sel.addEventListener('change', function () { d.w = +sel.value; });
+      $('.lf-sp-n', box).value = d.n || ''; $('.lf-sp-n', box).addEventListener('input', function (e) { d.n = e.target.value; });
+      $('.lf-sp-rm', box).addEventListener('click', function () { days.splice(di, 1); paint(); });
+      var l = $('.lf-list', box);
       d.ex.forEach(function (x, xi) {
         var li = el('<div class="lf-li"><button type="button" class="lf-li-t" style="text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit"><b></b><span></span></button><span class="lf-li-r lf-num"></span><button type="button" class="lf-x" aria-label="Remove">' + IC.x + '</button></div>');
         $('b', li).textContent = x.id ? exName(x.id) : x.raw;
-        $('span', li).textContent = x.id ? (exName(x.id).toLowerCase() === x.raw.toLowerCase() ? '' : 'Read as "' + x.raw + '"') : 'Not matched · press to choose';
+        $('span', li).textContent = x.id ? (x.raw && exName(x.id).toLowerCase() !== x.raw.toLowerCase() ? 'Read as "' + x.raw + '"' : '') : 'Not matched · press to choose';
         if (!x.id) $('b', li).style.color = 'var(--bad)';
         $('.lf-li-r', li).textContent = x.sets + ' × ' + lfRange(x.lo, x.hi);
         $('.lf-li-t', li).addEventListener('click', function () { lfPicker(function (id) { x.id = id; paint(); }); });
-        $('.lf-x', li).addEventListener('click', function () { d.ex.splice(xi, 1); if (!d.ex.length) days.splice(di, 1); paint(); });
+        $('.lf-x', li).addEventListener('click', function () { d.ex.splice(xi, 1); paint(); });
         l.appendChild(li);
       });
-      b.appendChild(l);
+      $('.lf-sp-ax', box).addEventListener('click', function () { lfPicker(function (id) { d.ex.push({ id: id, raw: '', sets: 3, lo: 8, hi: 12 }); paint(); }); });
+      host.appendChild(box);
     });
+    var ad = $('#lfSpAddDay', b); ad.hidden = days.length >= 7;
   }
   paint();
-  var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfPlnSave">Save routines</button>');
-  var s = lfSheet({ title: 'Check it', body: b, foot: [save] });
+  $('#lfSpAddDay', b).addEventListener('click', function () { var w = freeDow(); if (w === null) return; days.push({ w: w, n: '', ex: [] }); paint(); });
+  var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfSpSave">Save split</button>');
+  var s = lfSheet({ title: 'New split', body: b, foot: [save] });
   save.addEventListener('click', function () {
-    var n = 0;
+    var nm = $('#lfSpN', b).value.trim();
+    if (!nm) { $('#lfSpN', b).focus(); lfToast('Name your split'); return; }
+    var used = {}, out = [];
     days.forEach(function (d) {
-      var ex = d.ex.filter(function (x) { return x.id; }); if (!ex.length) return;
-      var rt = { id: lfId(), n: (d.n || 'Routine').trim().slice(0, 40) || 'Routine', sp: '', ex: [], tg: {} };
-      ex.forEach(function (x) { if (rt.ex.indexOf(x.id) < 0) { rt.ex.push(x.id); rt.tg[x.id] = [x.sets, x.lo, x.hi]; } });
-      S.rt.push(rt); n++;
+      var x = d.ex.filter(function (e) { return e.id; }); if (!x.length) return;
+      var w = d.w; if (used[w]) { var f = [1, 2, 3, 4, 5, 6, 0].filter(function (q) { return !used[q]; })[0]; if (f === undefined) return; w = f; }
+      used[w] = 1;
+      var seen = {}, rows = [];
+      x.forEach(function (e) { if (!seen[e.id]) { seen[e.id] = 1; rows.push([e.id, e.sets, e.lo, e.hi]); } });
+      out.push({ w: w, n: (d.n || '').trim().slice(0, 40) || DOW_LONG[w], sp: '', x: rows, ss: [] });
     });
-    if (!n) { lfToast('Choose at least one exercise'); return; }
-    lfSave(); s.close(true); lfRender(); lfToast('Saved ' + n + (n === 1 ? ' routine' : ' routines'));
+    if (!out.length) { lfToast('Add a day with at least one exercise'); return; }
+    s.close(true); lfProgAdd({ n: nm, d: out, c: [], dropped: 0 }, nm);
   });
 }
 
@@ -5267,9 +5296,9 @@ var libQ = '', libG = window.__lfInline ? 'all' : 'push', libOpen = !!window.__l
 function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
-  /* NEW ROUTINE IS THE FIRST THING ON THE SCREEN. Reading one from a photo, a PDF or pasted text is not a second control: it is the first thing inside this one. */
-  var nr = el('<button type="button" class="lf-add" id="lfNewRt">' + IC.plus + 'New routine</button>');
-  nr.addEventListener('click', function () { lfRoutineForm(null); });
+  /* NEW SPLIT IS THE FIRST THING ON THE SCREEN. Reading one from a photo, a PDF or pasted text is not a second control: it is the first thing inside this one. */
+  var nr = el('<button type="button" class="lf-add" id="lfNewSplit">' + IC.plus + 'New split</button>');
+  nr.addEventListener('click', function () { lfSplitForm(null); });
   root.appendChild(nr);
   var newU = lfNew();
   /* the split, Monday first */
@@ -5298,23 +5327,24 @@ function lfRenderLib() {
     if (!r) return;
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
     $('b', li).textContent = DOW_LONG[r.dow].slice(0, 3) + ' · ' + r.n;
-    $('span', li).textContent = r.choice ? r.sp : r.sp + ' · ' + r.ex.length + ' exercises';
+    $('span', li).textContent = r.choice ? r.sp : (r.sp ? r.sp + ' · ' : '') + r.ex.length + (r.ex.length === 1 ? ' exercise' : ' exercises');
     li.addEventListener('click', function () { lfDaySpec(r); });
     $('.lf-list', pc).appendChild(li);
   });
   if (!newU) root.appendChild(pc);
   var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
   /* routines */
-  root.appendChild(el('<div class="lf-cap lf-gh">Your routines</div>'));
+  /* SPLITS ARE THE ONLY THING YOU ADD. Routines written before this stay and still edit from here, but the section is only drawn while there are some. */
   var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
+  if (S.rt.length) root.appendChild(el('<div class="lf-cap lf-gh">Your routines</div>'));
   S.rt.forEach(function (r) {
     var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div>' + IC.chev + '</button>');
     $('b', li).textContent = r.n; $('span', li).textContent = (r.sp ? r.sp + ' · ' : '') + r.ex.length + ' exercise' + (r.ex.length === 1 ? '' : 's');
     li.addEventListener('click', function () { lfRoutineForm(r); });
     $('.lf-list', rc).appendChild(li);
   });
-  if (!S.rt.length) { var hw = el('<button type="button" class="lf-li" id="lfSetupLink"><div class="lf-li-t"><b>How to add your routine</b><span>A short guide</span></div>' + IC.chev + '</button>'); hw.addEventListener('click', lfSetupTour); $('.lf-list', rc).appendChild(hw); }
-  root.appendChild(rc);
+  if (!S.rt.length && !(S.pg || []).length) { var hw = el('<button type="button" class="lf-li" id="lfSetupLink"><div class="lf-li-t"><b>How to add your split</b><span>A short guide</span></div>' + IC.chev + '</button>'); hw.addEventListener('click', lfSetupTour); var hc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>'); $('.lf-list', hc).appendChild(hw); root.appendChild(hc); }
+  if (S.rt.length) root.appendChild(rc);
   /* the library */
   /* ALL EXERCISES FOLDS. Two hundred and forty names under every other control on the screen was the whole of what made it feel like a wall. It is shut until you open it, and each muscle inside it folds as well; a search opens everything it finds. */
   var all = allEx();
