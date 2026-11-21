@@ -186,10 +186,16 @@ const freeze = (at) => `(() => {
   s = await store(page);
   ok('a split is the whole week in one, its day holding the exercises in order', s.pg.length === 1 && s.pg[0].n === 'Push' && s.pg[0].d.length === 1 && s.pg[0].d[0].w === 5 && s.pg[0].d[0].x.map((e) => e[0]).join() === s.ex.map((e) => e.id).join() && s.rt.length === 0, s.pg);
   ok('and it is on', s.prog === s.pg[0].id);
+  /* what follows is about a day started from a routine of your own, which people who had them before still have: turn the split just made into one */
+  await page.evaluate(() => { const v = JSON.parse(localStorage.getItem('lift.v1')); const ids = v.pg[0].d[0].x.map((e) => e[0]); v.rt = [{ id: 'r1', n: 'Push', sp: 'Push, Pull, Legs', ex: ids }]; delete v.pg; v.prog = 'ul'; localStorage.setItem('lift.v1', JSON.stringify(v)); });
+  await page.reload(); await page.waitForTimeout(500); s = await store(page);
 
   /* ── the workout comes up from the bottom ── */
   await page.click('.lf-bar [data-v="home"]');
-  ok('today is the split\'s Friday', (await page.textContent('#lfPick')).trim() === 'Push');
+  await page.click('#lfPick'); await settle(page);
+  await top(page).locator('.lf-li', { hasText: 'Push, Pull, Legs' }).click(); await settle(page);
+  ok('picking a routine makes it today, for today', (await store(page)).pick.d === '2026-10-30');
+  ok('today is the routine', (await page.textContent('#lfPick')).trim() === 'Push' && /Push, Pull, Legs/.test(await page.textContent('.lf-sub')));
   ok('and says two exercises', /2 exercises/.test(await page.textContent('.lf-chips')));
   /* sampled every frame from inside the page, so a loaded machine cannot make the first look come late */
   await page.evaluate(() => { window.__rise = []; const f = () => { const s = document.querySelector('.lf-session'); if (s) window.__rise.push(s.getBoundingClientRect().top); if (window.__rise.length < 400 && !(window.__rise.length > 12 && window.__rise.slice(-12).every((v) => Math.abs(v - window.__rise[window.__rise.length - 1]) < .5) && window.__rise[window.__rise.length - 1] < 60)) requestAnimationFrame(f); }; requestAnimationFrame(f); });
@@ -1886,7 +1892,7 @@ const freeze = (at) => `(() => {
     const c = await newCtx(PHONE);
     await c.addInitScript('window.__lfInline = 1;');
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
-    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"bseen":{"v2":1,"v3":1}}'); })();`);
+    await c.addInitScript(`(() => { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', '{"unit":"kg","wo":[],"tour":true,"bseen":{"v2":1,"v3":1}}'); })();`);
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('appearance is a row, saying cream', /Cream/.test(await page.textContent('#lfThemeRow')));
