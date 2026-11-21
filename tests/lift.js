@@ -2348,6 +2348,12 @@ const freeze = (at) => `(() => {
     await o.page.reload(); await settle(o.page);
     ok('it is still put away after a reload', (await store(o.page)).hp.join() === 'ppl,ul' || (await store(o.page)).hp.length === 2);
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfProgMg'); await settle(o.page);
+    ok('a removed program also has Delete beside Restore, and the heading clears the card under it', await o.page.locator('.lf-sheet [data-a="purge"]').count() === 2 && await o.page.evaluate(() => { const h = [...document.querySelectorAll('.lf-sheet .lf-gh')].find(x => /Removed/.test(x.textContent)); const c = h.nextElementSibling; return c.getBoundingClientRect().top - h.getBoundingClientRect().bottom >= 6; }));
+    await o.page.locator('.lf-sheet [data-a="purge"]').first().click(); await settle(o.page);
+    ok('Delete takes it off the list for good and Restore no longer offers it', await o.page.locator('.lf-sheet [data-a="purge"]').count() === 1 && await o.page.locator('.lf-sheet [data-a="restore"]').count() === 1 && (await store(o.page)).hx.length === 1);
+    await o.page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); delete s.hx; localStorage.setItem('lift.v1', JSON.stringify(s)); });
+    await o.page.reload(); await settle(o.page);
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfProgMg'); await settle(o.page);
     await o.page.locator('.lf-sheet [data-a="restore"]').first().click(); await settle(o.page);
     await o.page.locator('.lf-sheet [data-a="restore"]').first().click(); await settle(o.page);
     ok('Restore brings both back and the record forgets it was ever put away', (await strip()).length === 7 && (await store(o.page)).hp === undefined);
