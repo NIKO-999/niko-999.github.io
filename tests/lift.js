@@ -1805,7 +1805,7 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => document.querySelector('#lfWeek').click()); await page.waitForTimeout(600);
     ok('opening a second trend puts the first away', await page.locator('.lf-vsh').count() === 1);
     /* and across the app: a press on the page puts away whatever sheet is up */
-    await page.evaluate(() => { const b = document.querySelector('#lfGrid'); b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); b.click(); }); await page.waitForTimeout(600);
+    await page.evaluate(() => { const b = document.querySelector('#lfLastWeek'); b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); b.click(); }); await page.waitForTimeout(600);
     ok('a sheet opened from the page puts away the one before it, whatever it was', await page.locator('.lf-sheet').count() === 1 && await page.locator('.lf-vsh').count() === 0);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfVol'); await page.waitForTimeout(1600);
