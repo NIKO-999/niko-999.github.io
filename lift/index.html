@@ -6236,6 +6236,8 @@ function frStats() {
     }), vol30: Math.round(windowStats(addDays(t, -29), t).vol),
     /* the accent you chose, as a hue, so your page is your colour to friends */
     ac: lfAccent(),
+    /* the programme you are on, so a friend can add it to theirs: the same pack Share makes, and nothing for someone who has not made one */
+    pg: (!lfNew() && PROGRAMS[S.prog]) ? lfProgPack(S.prog) : undefined,
     /* what you wear: a title, a flair, a frame and a backdrop, as ids */
     ti: rk.ti, fl: rk.fl, fm: rk.fm,
     /* TRAINING NOW: when the workout in progress started, or nothing */
@@ -7444,6 +7446,31 @@ function lfDragon(col) {
   raf = requestAnimationFrame(frame);
   return { stop: function () { cancelAnimationFrame(raf); cv.remove(); } };
 }
+/* THEIR PROGRAM, a fold under the banner: the days they train and one press to add it to your own. It is read through the same pass a pasted program is, so nothing from a friend's phone is trusted. Two layouts are drawn while the choice is made (window.__frPgv). */
+function frPgPanel(st) {
+  if (!st || !st.pg || typeof st.pg !== 'object') return null;
+  var pk; try { pk = lfProgUnpack(lfB64(JSON.stringify(st.pg))); } catch (e) { pk = null; }
+  if (!pk) return null;
+  var v = window.__frPgv === 2 ? 2 : 1, days = pk.d.slice().sort(function (a, c) { return ((a.w + 6) % 7) - ((c.w + 6) % 7); });
+  var c = el('<div class="lf-card fr-pg" id="frPg" style="padding:2px 16px"><h3 class="lf-fold-h"><button type="button" class="lf-fold-b" id="frPgFold" aria-controls="frPgBody" aria-expanded="false"><span class="lf-cap">Their program</span><span class="lf-lab"></span>' + IC.chev + '</button></h3><div class="fr-pg-b" id="frPgBody" hidden><div class="lf-list"></div></div></div>');
+  $('.lf-lab', c).textContent = pk.n + ' · ' + days.length + (days.length === 1 ? ' day' : ' days');
+  var body = $('#frPgBody', c), list = $('.lf-list', body);
+  days.forEach(function (d) {
+    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b><span></span></div></div>');
+    $('b', li).textContent = DOW_LONG[d.w].slice(0, 3) + ' · ' + d.n;
+    $('span', li).textContent = d.x.length + ' exercise' + (d.x.length === 1 ? '' : 's') + (d.sp ? ' · ' + d.sp : '');
+    list.appendChild(li);
+  });
+  var add = el('<button type="button" class="lf-btn is-ink is-full" id="frPgAdd" style="margin:6px 0 12px">Add to my programs</button>');
+  add.addEventListener('click', function () { lfProgPreview(pk); });
+  var fold = $('#frPgFold', c);
+  if (v === 2) {
+    /* B: the add button is always there, the days fold open under it */
+    c.insertBefore(add, body); add.style.margin = '2px 0 8px'; $('.lf-fold-b .lf-cap', c).textContent = 'Their program';
+  } else body.appendChild(add);
+  fold.addEventListener('click', function () { var o = fold.getAttribute('aria-expanded') !== 'true'; fold.setAttribute('aria-expanded', o ? 'true' : 'false'); body.hidden = !o; });
+  return c;
+}
 function frSheet(f) {
   var st = f.s || {}, col = frColOf(st), nm = f.me ? (FRS.name || 'You') : (f.n || 'Friend');
   /* THE BANNER: their colour, their initial, their name, and the three
@@ -7466,6 +7493,7 @@ function frSheet(f) {
     var t = el('<div class="lf-card lf-stat"></div>'); t.innerHTML = k[0] + '<b class="lf-num"></b><span></span>';
     $('b', t).textContent = fmtBig(k[1]); $('span', t).textContent = k[2]; frTap(t, k[3]); row.appendChild(t);
   });
+  var pgp = f.me ? null : frPgPanel(st); if (pgp) b.appendChild(pgp);
   b.appendChild(row);
   var fbg = frBadges(st);
   if (fbg.length) {

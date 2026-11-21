@@ -474,6 +474,14 @@ function liftClean(b) {
       };
     })
   })) : [];
+  /* THEIR PROGRAM, offered to friends to add: a name, up to seven days of up to thirty [id, sets, low, high] rows, and the custom exercises it names. Cut and bounded here; the app reads it again through the same pass a pasted program gets */
+  const pg = b.s.pg;
+  if (pg && typeof pg === 'object' && typeof pg.n === 'string' && Array.isArray(pg.d)) {
+    const id = (v) => typeof v === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(v);
+    const d = pg.d.slice(0, 7).filter((r) => Array.isArray(r) && Number.isInteger(r[0]) && r[0] >= 0 && r[0] <= 6 && Array.isArray(r[3])).map((r) => [r[0], txt(r[1], 40), txt(r[2], 60), r[3].slice(0, 30).filter((e) => Array.isArray(e) && id(e[0])).map((e) => [e[0], Math.round(+e[1]) || 0, Math.round(+e[2]) || 0, Math.round(+e[3]) || 0].concat(typeof e[4] === 'string' && e[4] ? [e[4].slice(0, 20)] : [])), Array.isArray(r[4]) ? r[4].slice(0, 6).map((g) => Array.isArray(g) ? g.filter(id).slice(0, 6) : []) : []]);
+    const c = Array.isArray(pg.c) ? pg.c.slice(0, 60).filter((e) => Array.isArray(e) && id(e[0])).map((e) => [e[0], txt(e[1], 60), txt(e[2], 20), txt(e[3], 20)]) : [];
+    if (d.length) s.pg = { n: txt(pg.n, 30), d, c };
+  }
   return { n: n || 'Lifter', s };
 }
 
