@@ -2698,9 +2698,9 @@ const freeze = (at) => `(() => {
     ok('and so is one above it', await nw.page.locator('#lfForce').count() === 0);
     await nw.c.close();
     const bad = await open('1.2', '1.3', 'https://evil.example/');
-    ok('a link that is not the App Store is not followed: the app\'s own address is used', await bad.page.locator('#lfForce').count() === 1 && (await bad.page.getAttribute('#lfForceGo', 'href')) === 'https://apps.apple.com/app/id6833453418');
+    ok('a link that is not the App Store is not followed: TestFlight is opened instead, until the App Store page is live', await bad.page.locator('#lfForce').count() === 1 && (await bad.page.getAttribute('#lfForceGo', 'href')) === 'itms-beta://');
     const none = await open('1.2', '1.3', '');
-    ok('and with none in the file the button still goes to the App Store', (await none.page.getAttribute('#lfForceGo', 'href')) === 'https://apps.apple.com/app/id6833453418');
+    ok('and with none in the file the button still opens TestFlight', (await none.page.getAttribute('#lfForceGo', 'href')) === 'itms-beta://');
     await none.c.close();
     await bad.c.close();
     const web = await open('', '9.9', '', false);
