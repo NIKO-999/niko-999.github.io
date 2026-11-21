@@ -1046,8 +1046,7 @@ const freeze = (at) => `(() => {
       const shot1 = await page.locator('.lf-cv-stage').screenshot(); await page.waitForTimeout(1400); const shot2 = await page.locator('.lf-cv-stage').screenshot();
       ok('a badge left alone keeps turning on its own, long after it has settled', !shot1.equals(shot2));
     }
-    ok('opening an earned badge throws confetti in its colour, white and black', await page.locator('canvas.lf-bconf').count() === 1 && /^#[0-9a-f]{6},#ffffff,#15151a$/i.test(await page.getAttribute('canvas.lf-bconf', 'data-cols')), await page.locator('canvas.lf-bconf').count());
-    ok('and it comes from the top of the screen, across the whole width, not from the middle of the badge', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'), q = sc.slice(sc.indexOf('function lfBadgeConfetti'), sc.indexOf('a banner from the top, once')); return /y: -12 - Math\.random\(\) \* 90/.test(q) && /x: Math\.random\(\) \* W/.test(q) && !/x: ox \+/.test(q) && !/y: oy \+/.test(q); })());
+    ok('opening an earned badge throws no confetti', await page.locator('canvas.lf-bconf').count() === 0);
     await page.keyboard.press('Escape'); await page.waitForSelector('.lf-cv', { state: 'detached', timeout: 5000 }).catch(() => {});
     ok('and is gone when it closes, not hidden', await page.locator('.lf-cv').count() === 0);
     ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');
@@ -2511,6 +2510,11 @@ const freeze = (at) => `(() => {
     ok('and it says it was a perfect week', /Perfect week/.test(await o.page.locator('#lfWeekSum .lf-ws-k').textContent().catch(() => '')) && /Seven for seven/.test(await o.page.locator('#lfWeekSum .lf-ws-verdict').textContent().catch(() => '')));
     ok('it can be shared as the moving story', await o.page.locator('#lfWsShare').count() === 1);
     ok('and it comes once: the week is marked as reported', (await store(o.page)).wkSum === '2026-11-09');
+    await o.page.click('#lfWsShare'); await o.page.waitForTimeout(1200);
+    const wkl = await o.page.evaluate(() => (window.lfCardLast && window.lfCardLast.lines) || []);
+    ok('on the week\'s story each session says when it started, not how long it was', wkl.length > 0 && wkl.every((l) => /\d{1,2}:\d\d (am|pm)/.test(l[1]) && !/\d+\s*(min|h)\b/.test(l[1].replace(/\d{1,2}:\d\d (am|pm)/g, ''))), JSON.stringify(wkl.slice(0, 2)));
+    ok('and the seven days come in before the ring, the figures and the workouts', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'); return /var P0 = P; if \(wk && anim\) P = cl\(\(P - \.22\) \/ \.78\)/.test(sc) && /eo\(\(P0 - \(\.02 \+ di \* \.03\)\) \/ \.08\)/.test(sc); })());
+    await o.page.keyboard.press('Escape'); await o.page.waitForTimeout(400);
     await o.c.close();
     const q = await ctx({ unit: 'kg', goal: 7, wkSum: '2000-01-01', rt: [{ id: 'r1', n: 'Press day', sp: '', ex: ['bench'], tg: { bench: [2, 5, 8] } }], pick: { d: dd(11), id: 'r1' }, wo: [9, 10, 13, 14, 15].map(wk) }, '2026-11-11T07:00:00');
     await q.page.click('#lfGo'); await settle(q.page);

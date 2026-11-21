@@ -1170,7 +1170,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv { position: fixed; inset: 0; z-index: 70; display: grid; grid-template-rows: auto 1fr auto; background: var(--bg); opacity: 0; transition: opacity .22s;
   padding: calc(var(--safe-t) + 12px) 16px calc(var(--safe-b) + 24px); }
 .lf-cv.is-up { opacity: 1; }
-.lf-bconf { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 80; pointer-events: none; }
 .lf-cvb { position: fixed; inset: 0; z-index: 69; background: var(--bg); opacity: 0; transition: opacity .22s; pointer-events: none; }
 .lf-cvb.is-up { opacity: 1; }
 .lf-cv-x { justify-self: end; width: 44px; height: 44px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; }
@@ -4260,6 +4259,8 @@ function lfCardDraw(sp, prog, into) {
   y += cp ? 82 : 96;
   var tpx = cp ? 76 : 104, tl = wrap(sp.title, tpx, 800, W - 180).slice(0, 2); tl.forEach(function (l) { T(l, tpx, 800, '#ffffff', y); y += tpx + 8; }); y -= tpx + 8;
   y += cp ? 54 : 64; if (!wk) T(sp.sub, cp ? 34 : 38, 500, 'rgba(255,255,255,.62)', y); y += wk ? 52 : cp ? 150 : 200;
+  /* THE DAYS COME FIRST, then the ring and the figures, and the workouts last: everything but the seven days is timed on a clock that starts a little after them */
+  var P0 = P; if (wk && anim) P = cl((P - .22) / .78);
   if (wk) {
     /* THE WEEK'S GOAL AS ITS RING, in the review's own look: the ring filled to how much of the goal the week closed, the count inside it */
     /* THE REVIEW'S OWN RING, drawn to the same proportions as the one on the screen: a 120 box, a 52 radius, a 12 stroke, a rounded arc with its glow, and when the goal is hit a wide soft light round it */
@@ -4281,7 +4282,7 @@ function lfCardDraw(sp, prog, into) {
     y += 32; var dw = 96, dg = (W - 180 - dw * 7) / 6;
     for (var di = 0; di < 7; di++) {
       var dx = 90 + di * (dw + dg), st = sp.days[di];
-      x.globalAlpha = anim ? eo((P - (.34 + di * .05)) / .1) : 1;
+      x.globalAlpha = anim ? eo((P0 - (.02 + di * .03)) / .08) : 1;
       if (st === 1) { x.shadowColor = A(.55); x.shadowBlur = 26; x.fillStyle = A(1); rr(dx, y, dw, 84, 26); x.fill(); x.shadowBlur = 0; }
       else if (st === 2) { x.strokeStyle = 'rgba(255,255,255,.22)'; x.lineWidth = 3; rr(dx + 1.5, y + 1.5, dw - 3, 81, 25); x.stroke(); }
       else { x.fillStyle = 'rgba(255,255,255,.08)'; rr(dx, y, dw, 84, 26); x.fill(); }
@@ -4319,7 +4320,7 @@ function lfCardDraw(sp, prog, into) {
     var wn = lines.length, wrh = 62, wpad = 28, wsc = Math.max(.4, Math.min(1, (avail - 2 * wpad) / (wn * wrh))), wch = wn * wrh * wsc + 2 * wpad;
     fade(.64, .12); x.fillStyle = 'rgba(255,255,255,.06)'; rr(90, top, W - 180, wch, 36); x.fill();
     lines.forEach(function (ln, wi) {
-      var pr = String(ln[1]).split(/\s+·\s+/), right = [pr[0], pr[2], pr[3]].filter(Boolean).join('  ·  '), wy = top + wpad + (wi + .68) * wrh * wsc;
+      var pr = String(ln[1]).split(/\s+·\s+/), right = pr.filter(Boolean).join('  ·  '), wy = top + wpad + (wi + .68) * wrh * wsc;
       x.globalAlpha = anim ? eo((P - (.66 + wi * .035)) / .1) : 1;
       x.textAlign = 'right'; x.font = '500 ' + (27 * wsc) + 'px ' + FF; x.fillStyle = 'rgba(255,255,255,.66)'; x.fillText(right, W - 120, wy); var rw = x.measureText(right).width;
       x.textAlign = 'left'; x.font = '800 ' + (33 * wsc) + 'px ' + FF; x.fillStyle = '#fff'; x.fillText(ln[0], 120, wy, Math.max(120, W - 240 - rw - 30));
@@ -4447,7 +4448,7 @@ function lfShareCardSheet(sp, name) {
   if (sh.foot) sh.foot.classList.add('is-wrap');
   /* a press on the dim button lands here: say why nothing happened */
   if (sh.foot) sh.foot.addEventListener('click', function () { if (!blob && !dead && rec) lfToast('Making your video. A few more seconds'); });
-  window.lfCards = (window.lfCards || 0) + 1; window.lfCardLast = { w: cv.width, h: cv.height, mime: mime };
+  window.lfCards = (window.lfCards || 0) + 1; window.lfCardLast = { w: cv.width, h: cv.height, mime: mime, lines: sp.lines || [] };
   return sh;
 }
 
@@ -4660,8 +4661,9 @@ function lfWeekSheet(m) {
   shr.addEventListener('click', function () {
     var cl = [], dy = [];
     ws.slice().sort(function (x, y) { return x.d < y.d ? -1 : x.d > y.d ? 1 : (x.s || 0) - (y.s || 0); }).forEach(function (w) {
-      var at = w.s > 1e11 ? fmtAt(new Date(w.s)) : '', du = w.s > 1e11 && w.e > w.s ? fmtDur(w.e - w.s) : '';
-      cl.push([w.n || 'Workout', [fmtDay(w.d), at, du, fmtBig(toDisp(woVol(w))) + ' ' + S.unit].filter(Boolean).join('  ·  ')]);
+      var at = w.s > 1e11 ? fmtAt(new Date(w.s)) : '';
+      /* THE START, NOT THE LENGTH: when each one began is what the week looked like */
+      cl.push([w.n || 'Workout', [fmtDay(w.d), at, fmtBig(toDisp(woVol(w))) + ' ' + S.unit].filter(Boolean).join('  ·  ')]);
     });
     for (var di = 0; di < 7; di++) { var dk = ymd(addDays(m, di)); dy.push(ws.some(function (w) { return w.d === dk; }) ? 1 : S.rd[dk] ? 2 : 0); }
     var tl = []; if (top) tl.push('Most trained: ' + top + '  ·  ' + lfSetsN(mu[top]) + ' sets' + (streak > 0 ? '  ·  ' + streak + (streak === 1 ? ' week' : ' wks') + ' on goal' : '')); else if (streak > 0) tl.push(streak + (streak === 1 ? ' week' : ' weeks') + ' in a row on goal');
@@ -7668,38 +7670,6 @@ function lfConfetti(x, y, col) {
   document.body.appendChild(bu);
   setTimeout(function () { bu.remove(); }, 1700);
 }
-/* OPENING A BADGE THROWS CONFETTI IN THE BADGE'S OWN COLOUR: its accent, white and black. The accent is the finish's glow for an exotic or a mythic, lava orange for the owner's, gold for a day streak, red for hours, and the kind's colour for everything else. */
-function lfBadgeAccent(x) {
-  var b = x.b;
-  if (b.t === 5) return '#ff5a1f';
-  if (b.fx && BD_FXGL[b.fx]) return BD_FXGL[b.fx];
-  if (/^d\d+$/.test(b.id)) return '#f0c75a';
-  if (/^hr\d+$/.test(b.id)) return '#e8352e';
-  return b.c || (BD_KIND[b.k] && BD_KIND[b.k].c) || '#f0c75a';
-}
-function lfBadgeConfetti(x, host) {
-  var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches; if (calm) return;
-  var acc = lfBadgeAccent(x), cols = [acc, acc, acc, '#ffffff', '#ffffff', '#15151a'], cv = el('<canvas class="lf-bconf" aria-hidden="true"></canvas>'), dpr = Math.min(2, window.devicePixelRatio || 1), W = window.innerWidth, H = window.innerHeight;
-  cv.width = W * dpr; cv.height = H * dpr; cv.dataset.cols = [acc, '#ffffff', '#15151a'].join(','); document.body.appendChild(cv);
-  var c = cv.getContext('2d'), st = $('.lf-cv-stage', host), r0 = st ? st.getBoundingClientRect() : { left: W / 2, top: H / 2, width: 0, height: 0 }, ox = r0.left + r0.width / 2, oy = r0.top + r0.height * .45, P = [], t0 = performance.now(), last = t0;
-  /* two bursts, the second a beat behind, so it opens and then keeps coming */
-  /* IT COMES FROM THE TOP OF THE SCREEN and falls across the whole width, not from the middle of the badge */
-  function burst(n, sp) { for (var i = 0; i < n; i++) { var v = sp * (.15 + Math.random() * .5); P.push({ x: Math.random() * W, y: -12 - Math.random() * 90, vx: (Math.random() - .5) * 90, vy: v, w: 5 + Math.random() * 7, h: 3 + Math.random() * 5, r: Math.random() * 6.28, vr: (Math.random() - .5) * 12, ph: Math.random() * 6.28, col: cols[(Math.random() * cols.length) | 0], life: 3 + Math.random() * 1.6, age: 0, tilt: Math.random() * 6.28 }); } }
-  burst(110, 700); setTimeout(function () { burst(70, 560); }, 350);
-  (function loop(now) {
-    var dt = Math.min(.04, (now - last) / 1000); last = now;
-    if (!host.isConnected && now - t0 > 400) { cv.remove(); return; }
-    c.setTransform(dpr, 0, 0, dpr, 0, 0); c.clearRect(0, 0, W, H);
-    var alive = 0;
-    P.forEach(function (p) {
-      p.age += dt; if (p.age > p.life) return; alive++;
-      p.vy += 900 * dt; p.vx *= Math.pow(.18, dt); p.vy *= Math.pow(.3, dt * .6); p.x += p.vx * dt + Math.sin(p.age * 3 + p.ph) * 18 * dt; p.y += p.vy * dt; p.r += p.vr * dt;
-      var a = Math.max(0, Math.min(1, (p.life - p.age) / .7)), sc = Math.cos(p.r * 1.4 + p.tilt);
-      c.save(); c.globalAlpha = a; c.translate(p.x, p.y); c.rotate(p.tilt); c.scale(1, sc); c.fillStyle = p.col; c.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); c.strokeStyle = 'rgba(128,128,128,.45)'; c.lineWidth = .8; c.strokeRect(-p.w / 2, -p.h / 2, p.w, p.h); c.restore();
-    });
-    if (alive) requestAnimationFrame(loop); else cv.remove();
-  })(t0);
-}
 /* a banner from the top, once: the week done, two of you in sync */
 function lfBanner(icon, title, sub, col) {
   var bn = el('<div class="lf-wkdone" role="status"><span class="lf-wkd-ic"></span><div><b></b><span class="lf-wkd-s"></span></div></div>');
@@ -10598,7 +10568,6 @@ function lfCoinView(x, earnedNow) {
   var vb = el('<div class="lf-cvb" aria-hidden="true"></div>'); document.body.appendChild(vb);
   document.body.appendChild(v); document.body.classList.add('lf-lock');
   requestAnimationFrame(function () { v.classList.add('is-up'); vb.classList.add('is-up'); });
-  if (x.d) setTimeout(function () { if (v.isConnected) lfBadgeConfetti(x, v); }, 260);
   var stage = $('.lf-cv-stage', v), raf = 0, r = null, aw = null, done = false;
   if (x.d && x.b.t > 1) stage.classList.add('is-t' + x.b.t);
   if (x.d && BD_SCENE[x.b.id]) stage.classList.add('is-scene');
