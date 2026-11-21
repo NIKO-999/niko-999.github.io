@@ -437,7 +437,7 @@ const freeze = (at) => `(() => {
   await page.click('.lf-bar [data-v="you"]');
   await page.click('#lfUnit [data-u="lb"]');
   await page.click('.lf-bar [data-v="home"]');
-  ok('pounds is a display, the record stays in kilos', (await page.$$eval('.lf-stat span', (x) => x.map((e) => e.textContent)))[2] === 'lb' && (await store(page)).wo.find((w) => w.id !== 'old').x[0].sets[0].w === 60);
+  ok('pounds is a display, the record stays in kilos', (await page.$$eval('.lf-stat span', (x) => x.map((e) => e.textContent)))[2] === 'lb' && (await store(page)).wo.find((w) => !/^old/.test(w.id)).x[0].sets[0].w === 60);
 
   ok('nothing leaves this phone', offOrigin.length === 0, offOrigin);
   ok('nothing threw', errors.length === 0, errors);
