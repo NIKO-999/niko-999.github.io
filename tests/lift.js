@@ -1957,12 +1957,33 @@ const freeze = (at) => `(() => {
     ok('and it never says red: a month is not graded', await o.page.evaluate(() => !document.querySelector('.lf-wsh.is-miss')));
     await o.page.click('#lfMoShare'); await settle(o.page);
     ok('the card is a 1080 by 1920 story that plays, with one Share video button, and no still picture', await o.page.locator('.lf-card-pv img').count() === 0 && await o.page.locator('.lf-card-st').count() === 1 && await o.page.evaluate(() => window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920) && await o.page.locator('#lfCardShare').count() === 1 && await o.page.locator('#lfCardSave').count() === 0 && /Share video/.test(await o.page.locator('#lfCardShare').textContent()));
+    /* THE BUTTON IS NOT READY, AND SAYS SO: it was bright blue for the ten seconds the video takes and ignored every press, which reads as a broken button */
+    const prep = await o.page.evaluate(() => { const b = document.querySelector('#lfCardShare'), cs = getComputedStyle(b); return { dim: +cs.opacity, pe: cs.pointerEvents, busy: b.getAttribute('aria-busy'), disabled: b.disabled, bar: !!b.querySelector('i') }; });
+    ok('until the video exists the Share video button is dim, busy and inert', prep.disabled && prep.dim < 0.9 && prep.pe === 'none' && prep.busy === 'true' && prep.bar, prep);
+    await o.page.waitForTimeout(1500);
+    ok('and a bar along its foot is filling', parseFloat(await o.page.$eval('#lfCardShare i', (e) => e.style.width)) > 5);
+    const bb = await o.page.locator('#lfCardShare').boundingBox();
+    await o.page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
+    ok('pressing it says what is going on instead of nothing', /Making your video/.test(await o.page.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await o.page.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
     ok('it records itself as it plays, and what it recorded is a video that loops in place of the canvas', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
+    const rdy = await o.page.evaluate(() => { const b = document.querySelector('#lfCardShare'), cs = getComputedStyle(b); return { dim: +cs.opacity, busy: b.getAttribute('aria-busy'), bar: !!b.querySelector('i') }; });
+    ok('once it exists the button is full strength and the bar is gone', rdy.dim === 1 && rdy.busy === null && !rdy.bar, rdy);
+    /* a throw in the page's own share used to be swallowed by the event handler: now it goes the long way round, and shows */
+    await o.page.evaluate(() => { navigator.canShare = () => { throw new Error('boom'); }; });
+    await o.page.click('#lfCardShare');
+    ok('if the share itself throws, the press still does something you can see', /Saving the video|Could not open/.test(await o.page.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     ok('the video is not a picture file: no png, no image button', !/image\/png/.test(src2.slice(src2.indexOf('function lfShareCardSheet'), src2.indexOf('THE MONTH IN REVIEW'))) && !/Save image/.test(src2));
     await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfMoDone'); await settle(o.page);
     await o.page.reload(); await o.page.waitForTimeout(4500);
     ok('once: a reload does not bring it back', await o.page.locator('#lfMonthSum').count() === 0);
+    await o.c.close();
+    /* a phone with no recorder says so, rather than leaving a button that never wakes */
+    o = await ctx({ unit: 'kg', goal: 1, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: oct }, '2026-11-01T10:00:00');
+    await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
+    await o.page.evaluate(() => { window.MediaRecorder = undefined; });
+    await o.page.click('#lfMoShare'); await settle(o.page);
+    ok('with no recorder it says the phone cannot make the video, and the button stays off', /cannot make the video/.test(await o.page.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')) && await o.page.locator('#lfCardShare').isDisabled());
     await o.c.close();
     o = await ctx({ unit: 'kg', goal: 1, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: oct }, '2026-11-05T10:00:00');
     await o.page.waitForTimeout(4200);

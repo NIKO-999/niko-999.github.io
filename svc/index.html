@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#000000" />
-<meta name="description" content="Structure. Volume. Consistency. Time every backtest, live and journal session." />
+<meta name="description" content="Structure. Volume. Consistency. Backtest volume, every day." />
 <title>SVC</title>
 <link rel="manifest" href="manifest.json" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
@@ -32,7 +32,7 @@ body {
   font-size: 14px; line-height: 1.35; -webkit-font-smoothing: antialiased;
   min-height: 100vh;
 }
-button, input, select, textarea { font: inherit; color: inherit; }
+button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; background: none; border: 0; }
 .num { font-variant-numeric: tabular-nums; }
 .wrap { max-width: 1240px; margin: 0 auto; padding: 40px 48px 64px; }
@@ -67,7 +67,7 @@ button { cursor: pointer; background: none; border: 0; }
 .timer-card { animation-delay: .05s; } .today { animation-delay: .13s; }
 .stats .card:nth-child(1) { animation-delay: .21s; } .stats .card:nth-child(2) { animation-delay: .26s; }
 .stats .card:nth-child(3) { animation-delay: .31s; } .stats .card:nth-child(4) { animation-delay: .36s; }
-.pace-c { animation-delay: .43s; } .yr-c { animation-delay: .5s; } .log { animation-delay: .57s; }
+.bd-c { animation-delay: .4s; } .pace-c { animation-delay: .43s; } .yr-c { animation-delay: .5s; } .log { animation-delay: .57s; }
 @keyframes sv-in { from { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .card, .mark i { animation: none; opacity: 1; } }
 
@@ -80,11 +80,16 @@ button { cursor: pointer; background: none; border: 0; }
 .timer-card { display: flex; flex-direction: column; align-items: center; gap: 20px; }
 .ring { position: relative; width: 280px; height: 280px; }
 .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+/* the halo reaches past the drawing: an svg clips what it holds to its
+   own box, which drew the glow as a square. Let it out. */
+.ring svg { overflow: visible; }
 .ring circle { fill: none; stroke-width: 14; }
 .ring .tr { stroke: var(--track); }
-.ring .fl { stroke: var(--ink); stroke-linecap: round; transition: stroke-dashoffset .5s ease, filter .6s ease; }
+.ring .fl { stroke: var(--ink); stroke-linecap: round; transition: stroke-dashoffset .5s ease, filter .6s ease, opacity .3s; }
 .ring.is-run .fl { animation: sv-breathe 3.2s ease-in-out infinite; }
 .ring.is-hit .fl { filter: drop-shadow(0 0 7px rgba(255,255,255,.7)) drop-shadow(0 0 22px rgba(255,255,255,.35)); }
+.ring.is-paused .fl { opacity: .45; }
+.ring.is-paused .ring-big { color: var(--dim); }
 @keyframes sv-breathe { 0%, 100% { filter: drop-shadow(0 0 0 rgba(255,255,255,0)); } 50% { filter: drop-shadow(0 0 9px rgba(255,255,255,.55)); } }
 @media (prefers-reduced-motion: reduce) { .ring.is-run .fl { animation: none; } }
 .ring-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
@@ -99,27 +104,19 @@ button { cursor: pointer; background: none; border: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-.kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 100%; padding: 4px; background: #111; border-radius: 14px; }
-.kind { height: 40px; border-radius: 10px; color: var(--dim); font-size: 13px; }
-.kind[aria-pressed="true"] { background: #262626; color: var(--ink); }
-.kind:disabled { cursor: default; }
-.go { width: 100%; height: 58px; border-radius: 16px; background: var(--ink); color: #000; font-size: 16px; font-weight: 800; letter-spacing: .02em; }
+/* start, and once running pause and end beside each other */
+.gobar { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
+.gobar.is-two { grid-template-columns: 1fr 1fr; }
+.go { height: 58px; border-radius: 16px; background: var(--ink); color: #000; font-size: 16px; font-weight: 800; letter-spacing: .02em; }
 .go:hover { background: #e6e6e6; }
 .go.is-on { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
 .go.is-on:hover { background: #111; }
-/* Running, the one button becomes two: pause (or resume) beside end. */
-.gobar { display: grid; grid-template-columns: 1fr; gap: 10px; width: 100%; }
-.gobar.is-two { grid-template-columns: 1fr 1fr; }
 .go.soft { background: #1a1a1a; color: var(--ink); }
 .go.soft:hover { background: #262626; }
-.ring.is-paused .fl { opacity: .45; }
-.ring.is-paused .ring-big { color: var(--dim); }
-td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 .hint-k { font-size: 12px; color: var(--quiet); }
 
 /* ── today ── */
 .today { display: flex; flex-direction: column; }
-.pane { flex: 1; display: flex; flex-direction: column; min-height: 0; }
 .today-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
 .row { display: grid; grid-template-columns: 1fr auto; align-items: baseline; gap: 6px 16px; padding: 16px 0; border-top: 1px solid var(--edge); }
 .row:first-of-type { border-top: 0; }
@@ -133,19 +130,98 @@ td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left
 .pace { margin-top: auto; padding-top: 18px; border-top: 1px solid var(--edge); display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
 .fig b { display: block; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; margin-top: 6px; }
 .fig span { color: var(--quiet); font-size: 12px; }
-/* The notes take the whole panel: while the chart is live, this is the
-   thing you are looking at between candles, so it gets the room. */
-.notes { flex: 1; min-height: 360px; width: 100%; resize: none; background: transparent; border: 0; outline: none; color: var(--ink); font-size: 16px; line-height: 1.6; }
-.notes::placeholder { color: var(--mute); }
 
-/* ── week, month, streak ── */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap); margin-top: var(--gap); align-items: stretch; }
+
+/* ── badges: a coin each, turned in the hand ──
+   The card shows what is earned and what is next; pressing it opens the
+   case. A coin is drawn at run time, so nothing is downloaded but the
+   three.js beside the page, and only when a coin is first looked at. */
+.bd-c { margin-top: var(--gap); display: block; width: 100%; }
+.bd-h { display: flex; justify-content: flex-start; align-items: baseline; gap: 14px; margin-bottom: 16px; }
+.dlg .bd-h { justify-content: space-between; }
+.bd-row { display: flex; gap: 14px; align-items: center; }
+.bd-row img, .bd-g img { display: block; border-radius: 50%; }
+/* a finer coin is lit: a still glow for weeks of work, one that breathes for
+   months, and a light turning behind the longest. Opacity and transform
+   only, and none of it moves under reduced motion. */
+.bdc { position: relative; display: inline-block; flex: none; border-radius: 50%; isolation: isolate; }
+.bdc::before, .bd-stage::before { content: ''; position: absolute; inset: -8%; border-radius: 50%; z-index: -1; pointer-events: none; opacity: 0; }
+.bd-t2::before { opacity: 1; background: radial-gradient(closest-side, rgba(227,173,52,.3), transparent 72%); }
+.bd-t3::before { opacity: 1; inset: -16%; background: radial-gradient(closest-side, rgba(255,200,90,.5), rgba(227,173,52,.16) 62%, transparent 80%); animation: sv-breathe-c 3.4s ease-in-out infinite alternate; }
+.bd-t4::before { opacity: 1; inset: -30%; background: conic-gradient(from 0deg, rgba(255,214,120,0), rgba(255,214,120,.55), rgba(255,214,120,0) 14%, rgba(255,214,120,.4) 30%, rgba(255,214,120,0) 44%, rgba(255,214,120,.55) 60%, rgba(255,214,120,0) 74%, rgba(255,214,120,.4) 88%, rgba(255,214,120,0));
+  -webkit-mask: radial-gradient(closest-side, #000 42%, transparent 74%); mask: radial-gradient(closest-side, #000 42%, transparent 74%); animation: sv-spin-c 14s linear infinite; }
+.bd-stage.bd-t3::before { inset: 4%; } .bd-stage.bd-t4::before { inset: -10%; }
+@keyframes sv-breathe-c { from { opacity: .55; } to { opacity: 1; } }
+@keyframes sv-spin-c { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bd-t3::before, .bd-t4::before { animation: none; } }
+.bd-row img { width: 56px; height: 56px; }
+.bd-row img.is-off, .bd-g img.is-off { filter: grayscale(1) brightness(.55); }
+.bd-x { margin-left: auto; text-align: right; color: var(--dim); font-size: 12px; max-width: 300px; }
+.bd-x b { display: block; color: var(--ink); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+.dlg.bd-dlg { max-height: calc(100vh - 32px); overflow-y: auto; width: 760px; max-width: calc(100vw - 48px); padding: 32px 36px; }
+.bd-g { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px 6px; margin-top: 14px; }
+.bd-g button { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px 2px; border-radius: 14px; color: var(--dim); font-size: 11px; line-height: 1.2; text-align: center; }
+.bd-g button:hover { background: #111; color: var(--ink); }
+.bd-g button:focus-visible { outline: 2px solid var(--dim); outline-offset: 1px; }
+.bd-g img { width: 64px; height: 64px; }
+.bd-gh { grid-column: 1 / -1; margin-top: 6px; }
+.bd-gh:first-child { margin-top: 0; }
+/* a coin on its own */
+.veil:has(.bd-view) { background: rgba(0,0,0,.97); }
+.dlg.bd-view { width: auto; max-width: none; background: transparent; border: 0; padding: 0; overflow: visible; }
+.bd-vw { display: flex; align-items: center; gap: 28px; }
+.bd-mid { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; width: 460px; }
+.bd-nv { width: 52px; height: 52px; border-radius: 50%; background: #141414; font-size: 26px; line-height: 1; color: var(--dim); flex: none; }
+.bd-nv:hover { background: #222; color: var(--ink); }
+.bd-stage { position: relative; width: 440px; height: 440px; touch-action: none; cursor: grab; isolation: isolate; }
+.bd-stage:active { cursor: grabbing; }
+.bd-stage canvas, .bd-stage img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.bd-stage img { border-radius: 50%; object-fit: contain; }
+.bd-view .bd-stage::before { content: ''; position: absolute; inset: 2%; border-radius: 50%; z-index: -1; opacity: 1; background: radial-gradient(closest-side, rgba(227,173,52,.34), rgba(227,173,52,.1) 62%, transparent 80%); animation: sv-breathe-c 3.4s ease-in-out infinite alternate; }
+.bd-view .bd-stage.bd-t3::before { background: radial-gradient(closest-side, rgba(255,200,90,.55), rgba(227,173,52,.18) 62%, transparent 82%); }
+.bd-view .bd-stage.bd-t4::before { inset: -14%; animation: none; background: conic-gradient(from 0deg, rgba(255,214,120,0), rgba(255,214,120,.6), rgba(255,214,120,0) 14%, rgba(255,214,120,.45) 30%, rgba(255,214,120,0) 44%, rgba(255,214,120,.6) 60%, rgba(255,214,120,0) 74%, rgba(255,214,120,.45) 88%, rgba(255,214,120,0));
+  -webkit-mask: radial-gradient(closest-side, #000 40%, transparent 74%); mask: radial-gradient(closest-side, #000 40%, transparent 74%); animation: sv-spin-c 14s linear infinite; }
+.bd-view .bd-stage.is-off::before { background: radial-gradient(closest-side, rgba(255,255,255,.07), transparent 75%); animation: none; }
+/* sparkle: the finest wear a scatter of lights that come and go */
+.bd-sp { display: none; position: absolute; inset: -6%; pointer-events: none; z-index: 2; }
+.bd-stage.bd-t4 .bd-sp { display: block; }
+.bd-sp::before, .bd-sp::after { content: ''; position: absolute; width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(#fff, rgba(255,230,150,.6) 40%, transparent 70%); opacity: 0; animation: sv-twk 2.6s ease-in-out infinite; }
+.bd-sp::before { left: 18%; top: 22%; } .bd-sp::after { right: 16%; bottom: 26%; animation-delay: 1.3s; }
+@keyframes sv-twk { 0%, 100% { opacity: 0; transform: scale(.3); } 50% { opacity: 1; transform: scale(1.4); } }
+@media (prefers-reduced-motion: reduce) { .bd-sp::before, .bd-sp::after, .bd-view .bd-stage::before { animation: none; } }
+.bd-name { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; margin-top: 10px; }
+.bd-line { color: var(--dim); font-size: 14px; }
+.bd-st { color: var(--dim); font-size: 13px; min-height: 18px; }
+.bd-mid .bar { width: 260px; margin-top: 4px; }
+.bd-mid .acts { width: 100%; max-width: 320px; margin-top: 14px; }
+.unl { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 14px; background: #0f0f0f; border: 1px solid #2a2a2a; border-radius: 18px; padding: 10px 22px 10px 10px; text-align: left; box-shadow: 0 10px 40px rgba(0,0,0,.6), 0 0 40px rgba(227,173,52,.18); animation: sv-unl .5s cubic-bezier(.2,.8,.2,1) both; }
+.unl img { width: 60px; height: 60px; border-radius: 50%; }
+.unl { overflow: visible; }
+.unl b { display: block; font-size: 16px; font-weight: 800; }
+.unl span { display: block; color: var(--dim); font-size: 12px; margin-top: 2px; }
+.unl .lbl { color: #e3ad34; margin-bottom: 3px; }
+@keyframes sv-unl { from { opacity: 0; transform: translate(-50%, -16px); } }
+@media (prefers-reduced-motion: reduce) { .unl { animation: none; } }
+
+/* ── week, target, month, streak ── */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap); margin-top: var(--gap); align-items: stretch; }
 .stat { display: flex; flex-direction: column; gap: 10px; }
 .stat-h { display: flex; justify-content: space-between; align-items: center; margin: -8px -10px -6px 0; }
 .stat-v { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1; }
 .stat-v small { font-size: 14px; font-weight: 400; color: var(--quiet); letter-spacing: 0; }
 .stat .bar { margin-top: auto; }
 .stat-x { color: var(--dim); font-size: 12px; }
+/* a card that opens something is a button wearing the card's clothes */
+.stat-b { position: relative; text-align: left; width: 100%; font: inherit; color: inherit; cursor: pointer; transition: background .2s, border-color .2s; }
+.stat-b:hover { background: #0e0e0e; border-color: #2a2a2a; }
+.stat-b:focus-visible { outline: 2px solid var(--dim); outline-offset: 2px; }
+.chev { position: absolute; top: 22px; right: 26px; color: var(--quiet); font-size: 18px; line-height: 1; }
+.stat-b:hover .chev { color: var(--ink); }
+.ex { margin-top: 18px; }
+.ex-r { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 14px 0; border-top: 1px solid var(--edge); }
+.ex-r span { color: var(--dim); }
+.ex-r b { font-size: 18px; font-weight: 700; }
+.ex-r small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 .dots { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: auto; }
 .dots .dw { font-size: 10px; color: var(--quiet); text-align: center; }
 .dot { height: 16px; border-radius: 5px; background: var(--track); }
@@ -193,14 +269,12 @@ table { width: 100%; border-collapse: collapse; }
 td { padding: 12px 0; border-bottom: 1px solid #141414; font-size: 14px; }
 td.t { width: 140px; color: var(--dim); }
 td.k { font-weight: 600; }
+td.k small { font-weight: 400; color: var(--quiet); font-size: 12px; margin-left: 8px; }
 td.d { width: 120px; text-align: right; }
 td.x { width: 56px; text-align: right; }
 .del { width: 32px; height: 32px; border-radius: 8px; color: var(--mute); }
 .del:hover { color: var(--ink); background: #161616; }
 .empty { color: var(--quiet); padding: 28px 0 8px; }
-.note-r td { padding: 0 0 14px; border-bottom: 1px solid #141414; }
-.note-r div { white-space: pre-wrap; color: var(--dim); font-size: 13px; line-height: 1.5; padding-left: 140px; max-width: 900px; }
-tr.has-note td { border-bottom: 0; }
 
 /* ── dialog ── */
 .veil { position: fixed; inset: 0; background: rgba(0,0,0,.72); display: grid; place-items: center; z-index: 50; }
@@ -217,9 +291,6 @@ tr.has-note td { border-bottom: 0; }
 .btn:hover { background: #242424; }
 .btn.pri { background: var(--ink); color: #000; }
 .btn.pri:hover { background: #e6e6e6; }
-.chk { display: flex; align-items: center; gap: 10px; margin-top: 18px; font-size: 14px; }
-.chk input { width: 18px; height: 18px; accent-color: #fff; }
-
 /* ── the week in review ── */
 .dlg.wide { width: 760px; padding: 36px 40px; position: relative; overflow: hidden; }
 .rv-top { display: flex; align-items: center; justify-content: space-between; }
@@ -234,7 +305,7 @@ tr.has-note td { border-bottom: 0; }
 .rv-big span { color: var(--dim); font-size: 16px; }
 .rv-bar { height: 6px; border-radius: 6px; background: var(--track); margin-top: 16px; overflow: hidden; }
 .rv-bar i { display: block; height: 100%; background: var(--ink); border-radius: 6px; }
-.rv-figs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 28px; }
+.rv-figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 28px; }
 .rv-figs span { display: block; font-size: 12px; color: var(--quiet); }
 .rv-figs b { display: block; font-size: 22px; font-weight: 700; margin-top: 6px; }
 .rv-figs small { display: block; color: var(--dim); font-size: 12px; margin-top: 4px; }
@@ -256,7 +327,6 @@ tr.has-note td { border-bottom: 0; }
 
 /* ── toast ── */
 .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #161616; border: 1px solid #262626; border-radius: 14px; padding: 6px 6px 6px 18px; display: flex; align-items: center; gap: 14px; z-index: 60; width: max-content; }
-.toast.is-bare { padding: 14px 18px; }
 .toast button { height: 36px; padding: 0 14px; border-radius: 10px; background: var(--ink); color: #000; font-weight: 700; }
 
 /* A narrow window still works, stacked, but this is built for a desk. */
@@ -273,7 +343,7 @@ tr.has-note td { border-bottom: 0; }
     <h1 class="mark" id="svMark" aria-label="Structure. Volume. Consistency."><span>STRUCTURE.</span> <span>VOLUME.</span> <span>CONSISTENCY.</span></h1>
     <div class="hd-r">
       <span class="hd-date" id="svDate"></span>
-      <button class="icon-btn" id="svSet" aria-label="Targets and backup" title="Targets and backup">
+      <button class="icon-btn" id="svSet" aria-label="Target and backup" title="Target and backup">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
       </button>
     </div>
@@ -295,40 +365,33 @@ tr.has-note td { border-bottom: 0; }
         <label><span>Started the day at</span><input class="in num" id="svA" type="number" min="0" inputmode="numeric" placeholder="0" /></label>
         <label><span>Sitting at</span><input class="in num" id="svB" type="number" min="0" inputmode="numeric" placeholder="0" /></label>
       </div>
-      <div class="kinds" role="group" aria-label="Session" id="svKinds">
-        <button class="kind" data-k="bt" aria-pressed="true">Backtest</button>
-        <button class="kind" data-k="live" aria-pressed="false">Live charts</button>
-        <button class="kind" data-k="cnt" aria-pressed="false">Content + journal</button>
-      </div>
       <div class="gobar" id="svBar">
         <button class="go soft" id="svPause" hidden>Pause</button>
-        <button class="go" id="svGo">Start session</button>
+        <button class="go" id="svGo">Start backtesting</button>
       </div>
-      <div class="hint-k" id="svKeys">Space starts a session</div>
+      <div class="hint-k" id="svKeys">Space starts</div>
     </div>
 
     <div class="card today">
-      <div class="pane" id="svTodayP">
-        <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
-        <div id="svRows"></div>
-        <div class="pace">
-          <div class="fig"><span id="svFor40">40 trades take</span><b class="num" id="svEta">–</b></div>
-          <div class="fig"><span>100 trades would take</span><b class="num" id="svEta100">–</b></div>
-        </div>
-      </div>
-      <div class="pane" id="svNotesP" hidden>
-        <div class="today-h"><span class="lbl">Live notes</span><span class="hint-k" id="svNotesT"></span></div>
-        <textarea class="notes" id="svNotes" aria-label="Live notes" placeholder="What you see, as you see it"></textarea>
+      <div class="today-h"><span class="lbl">Today</span><span class="hint-k" id="svPlan"></span></div>
+      <div id="svRows"></div>
+      <div class="pace">
+        <div class="fig"><span id="svT1L"></span><b class="num" id="svT1">–</b></div>
+        <div class="fig"><span id="svT2L"></span><b class="num" id="svT2">–</b></div>
       </div>
     </div>
   </section>
 
   <section class="stats">
-    <div class="card stat"><div class="stat-h"><span class="lbl">This week</span><button class="link" id="svRev">Review</button></div><div class="stat-v num" id="svWk"></div><div class="stat-x" id="svWkX"></div><div class="bar"><i id="svWkB"></i></div></div>
-    <div class="card stat"><span class="lbl">Live charts this week</span><div class="stat-v num" id="svLv"></div><div class="stat-x" id="svLvX"></div><div class="bar"><i id="svLvB"></i></div></div>
-    <div class="card stat"><span class="lbl">This month</span><div class="stat-v num" id="svMo"></div><div class="stat-x" id="svMoX"></div><div class="bar"><i id="svMoB"></i></div></div>
+    <div class="card stat"><span class="lbl">Target</span><div class="stat-v num" id="svTg"></div><div class="stat-x" id="svTgX"></div><div class="bar"><i id="svTgB"></i></div></div>
     <div class="card stat"><span class="lbl">Streak</span><div class="stat-v num" id="svSt"></div><div class="stat-x" id="svStX"></div><div class="dots" id="svDots"></div></div>
+    <button class="card stat stat-b" id="svEx" aria-label="Expectancy: what to expect at your pace. Open the detail"><span class="lbl">Expectancy</span><span class="chev" aria-hidden="true">›</span><div class="stat-v num" id="svExV"></div><div class="stat-x" id="svExX"></div><div class="bar"><i id="svExB"></i></div></button>
   </section>
+
+  <button class="card bd-c stat-b" id="svBd" aria-label="Badges. Open the case">
+    <div class="bd-h"><span class="lbl">Badges</span><span class="chev" aria-hidden="true">›</span><span class="hint-k num" id="svBdN"></span></div>
+    <div class="bd-row" id="svBdRow"></div>
+  </button>
 
   <section class="card pace-c">
     <div class="pace-h">
@@ -342,11 +405,11 @@ tr.has-note td { border-bottom: 0; }
   <section class="card yr-c">
     <div class="yr-h"><span class="lbl">The year · a square a day</span><span class="hint-k num" id="svYrX"></span></div>
     <div class="yr-m" id="svYrM"></div>
-    <div class="yr" id="svYr" role="img" aria-label="Every day this year, brighter the closer you got to your trade target"></div>
+    <div class="yr" id="svYr" role="img" aria-label="Every day this year, brighter the closer you got to that day's trade target"></div>
   </section>
 
   <section class="card log">
-    <div class="log-h"><span class="lbl">Sessions</span><button class="link" id="svAdd">+ Add a past session</button></div>
+    <div class="log-h"><span class="lbl">Backtesting sessions</span><button class="link" id="svAdd">+ Add a past session</button></div>
     <div id="svLog"></div>
   </section>
 </div>
@@ -356,21 +419,61 @@ tr.has-note td { border-bottom: 0; }
 'use strict';
 
 var KEY = 'svc.v1';
+/* Only backtesting is tracked now. The other two are what earlier
+   versions saved: they are still read, so nothing already logged is
+   lost, and they are never shown or counted. */
 var KINDS = { bt: 'Backtest', live: 'Live charts', cnt: 'Content + journal' };
-var GOAL0 = { bt: 40, live: 60, cnt: 30, wkLive: 300 };
 var DAY = 864e5;
+var FIRST = 50, STEP = 15, EVERY = 14;
+/* Badges are earned by the record and by nothing else: a best run of
+   days at target, backtests logged, the best single day, and days at
+   target in all. `m` is the figure it reads, `need` the line to cross.
+   Earned is written once, with its date, and stays: editing a day later
+   cannot take a badge back. */
+var BADGES = [
+  { id: 'day1', n: 'DAY ONE', line: 'YOU STARTED', e: 'star', g: 'violet', m: 'start', need: 1, t: 4, fx: 'prism', big: '1', unit: 'DAY' },
+  { id: 's3', n: 'THE SPARK', line: '3 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 3, t: 1, big: '3', unit: 'DAYS' },
+  { id: 's7', n: 'THE DISCIPLE', line: '7 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 7, t: 2, big: '7', unit: 'DAYS' },
+  { id: 's14', n: 'THE FORTNIGHT', line: '14 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 14, t: 2, big: '14', unit: 'DAYS' },
+  { id: 's30', n: 'UNBROKEN', line: '30 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 30, t: 3, fx: 'obsidian', big: '30', unit: 'DAYS' },
+  { id: 's60', n: 'THE MONK', line: '60 DAYS IN A ROW', e: 'flame', g: 'red', m: 'best', need: 60, t: 4, fx: 'galaxy', big: '60', unit: 'DAYS' },
+  { id: 's100', n: 'THE LEGEND', line: '100 DAYS IN A ROW', e: 'crown', g: 'red', m: 'best', need: 100, t: 4, fx: 'obsidian', big: '100', unit: 'DAYS' },
+  { id: 'v250', n: 'THE FIRST 250', line: '250 BACKTESTS', e: 'bars', g: 'blue', m: 'total', need: 250, t: 1, big: '250', unit: 'BACKTESTS' },
+  { id: 'v500', n: 'THE FIVE HUNDRED', line: '500 BACKTESTS', e: 'bars', g: 'blue', m: 'total', need: 500, t: 2, big: '500', unit: 'BACKTESTS' },
+  { id: 'v1000', n: 'THE THOUSAND', line: '1,000 BACKTESTS', e: 'bars', g: 'blue', m: 'total', need: 1000, t: 3, fx: 'galaxy', big: '1,000', unit: 'BACKTESTS' },
+  { id: 'v2500', n: 'THE GRINDER', line: '2,500 BACKTESTS', e: 'bars', g: 'blue', m: 'total', need: 2500, t: 3, fx: 'aurora', big: '2,500', unit: 'BACKTESTS' },
+  { id: 'v5000', n: 'THE ARCHIVE', line: '5,000 BACKTESTS', e: 'bars', g: 'blue', m: 'total', need: 5000, t: 4, fx: 'obsidian', big: '5,000', unit: 'BACKTESTS' },
+  { id: 'd65', n: 'THE CLIMBER', line: '65 IN A DAY', e: 'chevrons', g: 'violet', m: 'day', need: 65, t: 1, big: '65', unit: 'IN A DAY' },
+  { id: 'd75', n: 'OVERDRIVE', line: '75 IN A DAY', e: 'bolt', g: 'green', m: 'day', need: 75, t: 2, big: '75', unit: 'IN A DAY' },
+  { id: 'd100', n: 'THE CENTURION', line: '100 IN A DAY', e: 'bolt', g: 'green', m: 'day', need: 100, t: 3, fx: 'aurora', big: '100', unit: 'IN A DAY' },
+  { id: 'h10', n: 'THE REGULAR', line: '10 DAYS AT TARGET', e: 'target', g: 'blue', m: 'hits', need: 10, t: 1, big: '10', unit: 'AT TARGET' },
+  { id: 'h30', n: 'THE CLOSER', line: '30 DAYS AT TARGET', e: 'target', g: 'blue', m: 'hits', need: 30, t: 2, big: '30', unit: 'AT TARGET' },
+  { id: 'h100', n: 'THE CENTURY', line: '100 DAYS AT TARGET', e: 'target', g: 'blue', m: 'hits', need: 100, t: 3, fx: 'galaxy', big: '100', unit: 'AT TARGET' },
+  { id: 'n1', n: 'THE FIRST', line: 'YOUR FIRST SESSION', e: 'clock', g: 'violet', m: 'sess', need: 1, t: 1, big: '1', unit: 'SESSION' },
+  { id: 'n25', n: 'THE ROUTINE', line: '25 SESSIONS', e: 'clock', g: 'violet', m: 'sess', need: 25, t: 2, big: '25', unit: 'SESSIONS' },
+  { id: 'n100', n: 'THE HABIT', line: '100 SESSIONS', e: 'clock', g: 'violet', m: 'sess', need: 100, t: 3, fx: 'galaxy', big: '100', unit: 'SESSIONS' },
+  { id: 'u10', n: 'TEN HOURS', line: '10 HOURS BACKTESTING', e: 'clock', g: 'green', m: 'hours', need: 10, t: 1, big: '10', unit: 'HOURS' },
+  { id: 'u50', n: 'FIFTY HOURS', line: '50 HOURS BACKTESTING', e: 'clock', g: 'green', m: 'hours', need: 50, t: 2, big: '50', unit: 'HOURS' },
+  { id: 'u100', n: 'THE HUNDRED HOURS', line: '100 HOURS BACKTESTING', e: 'clock', g: 'green', m: 'hours', need: 100, t: 3, fx: 'aurora', big: '100', unit: 'HOURS' },
+  { id: 'u250', n: 'THE LONG GAME', line: '250 HOURS BACKTESTING', e: 'clock', g: 'green', m: 'hours', need: 250, t: 4, fx: 'obsidian', big: '250', unit: 'HOURS' }
+];
+var BADGE_UNIT = { start: 'started', best: 'days in a row', total: 'backtests', day: 'in your best day', hits: 'days at target', sess: 'sessions', hours: 'hours of backtesting' };
 var $ = function (id) { return document.getElementById(id); };
 
 /* ── store ──
-   One key. A session is a kind, a start and an end in epoch ms: it is
-   time and nothing else. Trades are not counted per session. They come
-   from the day's counter, `d`, keyed by date: the number the counter
-   started the day at (`a`) and the number it sits at now (`b`), and the
-   day's trades are the difference. `a` may be left out, and then the day
-   starts where the last recorded day ended, so on an ordinary day the
-   only thing typed is where it ended. `run` is the session on the clock,
-   so a reload or a closed laptop picks it back up. A damaged entry costs
-   itself and never the rest. */
+   One key. A session is a start and an end in epoch ms, and the time
+   paused (`p`): it is time and nothing else. Trades are not counted per
+   session. They come from the day's counter, `d`, keyed by date: the
+   number the counter started the day at (`a`) and the number it sits at
+   now (`b`), and the day's trades are the difference. `a` may be left
+   out, and then the day starts where the last recorded day ended, so on
+   an ordinary day the only thing typed is where it ended. `run` is the
+   session on the clock, so a reload or a closed laptop picks it back
+   up. A damaged entry costs itself and never the rest.
+
+   The target is a history, `t`: the target in force from each date. A
+   day is judged against the one it was lived under, so raising the
+   target never turns last week's hit into a miss. */
 function numOrNull(v) { return v !== undefined && v !== null && v !== '' && isFinite(+v) && +v >= 0 && +v < 1e9 ? Math.round(+v) : null; }
 function load() {
   var o = null;
@@ -380,10 +483,9 @@ function load() {
     return x && KINDS[x.k] && isFinite(x.a) && isFinite(x.b) && x.b >= x.a;
   }).map(function (x) {
     var o2 = { i: String(x.i || id()), k: x.k, a: +x.a, b: +x.b, n: x.k === 'bt' ? Math.max(0, Math.round(+x.n || 0)) : 0 };
-    /* time spent paused, written only when there was some, so every
-       session saved before pausing existed reads back as it was */
-    if (isFinite(x.p) && +x.p > 0 && +x.p < o2.b - o2.a) o2.p = Math.round(+x.p);
     if (typeof x.t === 'string' && x.t.trim()) o2.t = x.t.slice(0, 20000);
+    /* time spent paused, written only when there was some */
+    if (isFinite(x.p) && +x.p > 0 && +x.p < o2.b - o2.a) o2.p = Math.round(+x.p);
     return o2;
   }) : [];
   var d = {};
@@ -394,13 +496,25 @@ function load() {
     if (b !== null) r.b = b;
     if (a !== null || b !== null) d[k] = r;
   });
-  var g = Object.assign({}, GOAL0);
-  if (o.g) Object.keys(GOAL0).forEach(function (k) { var v = +o.g[k]; if (v > 0) g[k] = Math.round(v); });
-  var run = o.run && KINDS[o.run.k] && isFinite(o.run.a) ? { k: o.run.k, a: +o.run.a, t: typeof o.run.t === 'string' ? o.run.t.slice(0, 20000) : '',
-    p: isFinite(o.run.p) && +o.run.p > 0 ? Math.round(+o.run.p) : 0, pa: isFinite(o.run.pa) && +o.run.pa >= +o.run.a ? +o.run.pa : null } : null;
-  var rm = o.rem || {};
-  var rem = { on: rm.on !== false, at: /^\d\d:\d\d$/.test(rm.at) ? rm.at : '20:00', last: typeof rm.last === 'string' ? rm.last : '' };
-  return { s: s, d: d, g: g, run: run, kind: KINDS[o.kind] ? o.kind : 'bt', rem: rem,
+  var g = o.g || {};
+  g = { step: isFinite(g.step) && +g.step >= 0 ? Math.round(+g.step) : STEP, every: isFinite(g.every) && +g.every >= 1 ? Math.round(+g.every) : EVERY };
+  var t = Array.isArray(o.t) ? o.t.filter(function (x) { return x && /^\d{4}-\d\d-\d\d$/.test(x.f) && isFinite(x.n) && +x.n > 0; })
+    .map(function (x) { return { f: x.f, n: Math.round(+x.n) }; }).sort(function (p, q) { return p.f < q.f ? -1 : p.f > q.f ? 1 : 0; }) : [];
+  if (!t.length) {
+    /* From before the target had a history: whatever was logged was
+       judged against the old daily target, and fifty starts today */
+    var old = o.g && +o.g.bt > 0 ? Math.round(+o.g.bt) : 40, td = isoDay(Date.now());
+    t = s.length || Object.keys(d).length ? [{ f: '2000-01-01', n: old }, { f: td, n: FIRST }] : [{ f: td, n: FIRST }];
+  }
+  var run = o.run && isFinite(o.run.a) ? { a: +o.run.a, p: isFinite(o.run.p) && +o.run.p > 0 ? Math.round(+o.run.p) : 0, pa: isFinite(o.run.pa) && +o.run.pa >= +o.run.a ? +o.run.pa : null } : null;
+  /* null means badges have never been looked at: the first look grants
+     what the record already earns, quietly */
+  var bg = null;
+  if (o.bg && typeof o.bg === 'object') {
+    bg = {};
+    BADGES.forEach(function (b) { if (/^\d{4}-\d\d-\d\d$/.test(o.bg[b.id])) bg[b.id] = o.bg[b.id]; });
+  }
+  return { s: s, d: d, g: g, t: t, run: run, bg: bg,
     rev: typeof o.rev === 'string' ? o.rev : '', cel: typeof o.cel === 'string' ? o.cel : '' };
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
@@ -443,12 +557,42 @@ function isoDay(t) { var d = new Date(t); return d.getFullYear() + '-' + pad(d.g
 function isoMs(k) { var p = k.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]).getTime(); }
 function short(t) { return new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
 
+/* ── the target ──
+   Fifty a day, and fifteen more every fortnight. `goal(t)` is the target
+   in force on day t. Past the last entry it carries on up the same
+   ladder, so a month that has a raise inside it already knows what its
+   later days ask. The raises that have come due are written into the
+   history, which is what stops a later change to the step or the
+   fortnight from rewriting the days already lived. */
+function goal(t) {
+  var k = isoDay(t), e = S.t[0];
+  S.t.forEach(function (x) { if (x.f <= k) e = x; });
+  if (e !== S.t[S.t.length - 1] || k < e.f) return e.n;
+  return e.n + Math.floor(Math.round((dayStart(t) - isoMs(e.f)) / DAY) / S.g.every) * S.g.step;
+}
+function goalIn(a, b) { var n = 0; for (var t = dayStart(a); t < b; t = addDays(t, 1)) n += goal(t); return n; }
+function applyRaises() {
+  var last = S.t[S.t.length - 1], today = isoDay(Date.now()), changed = false;
+  for (var n = 0; n < 200 && S.g.step > 0; n++) {
+    var f = isoDay(addDays(isoMs(last.f), S.g.every));
+    if (f > today) break;
+    last = { f: f, n: last.n + S.g.step }; S.t.push(last); changed = true;
+  }
+  if (changed) save();
+}
+function nextRaise() {
+  var last = S.t[S.t.length - 1];
+  if (!S.g.step) return null;
+  var f = isoDay(addDays(isoMs(last.f), S.g.every));
+  return { f: f, n: last.n + S.g.step, days: Math.round((isoMs(f) - dayStart(Date.now())) / DAY), since: Math.round((dayStart(Date.now()) - isoMs(last.f)) / DAY) };
+}
+
 /* ── sums ──
-   A session is on the clock for its range less the time paused. */
+   Backtesting sessions only. A session is on the clock for its range
+   less the time paused. */
+function within(a, b) { return S.s.filter(function (x) { return x.k === 'bt' && x.a >= a && x.a < b; }); }
 function len(x) { return x.b - x.a - (x.p || 0); }
-function within(a, b) { return S.s.filter(function (x) { return x.a >= a && x.a < b; }); }
-function sum(list, k, f) { return list.reduce(function (t, x) { return x.k === k ? t + f(x) : t; }, 0); }
-function mins(list, k) { return sum(list, k, function (x) { return len(x) / 6e4; }); }
+function btMs(a, b) { return within(a, b).reduce(function (t, x) { return t + len(x); }, 0); }
 
 /* The counter at the end of the last recorded day before this one. */
 function prevEnd(t) {
@@ -463,10 +607,9 @@ function startOf(t) { var r = S.d[isoDay(t)]; return r && r.a !== undefined ? r.
 function dayTrades(t) {
   var r = S.d[isoDay(t)];
   if (r && r.b !== undefined) { var a = startOf(t); return a === null ? 0 : Math.max(0, r.b - a); }
-  return within(t, t + DAY).reduce(function (n, x) { return n + (x.k === 'bt' ? x.n : 0); }, 0);
+  return within(t, t + DAY).reduce(function (n, x) { return n + x.n; }, 0);
 }
 function tradesIn(a, b) { var n = 0; for (var t = dayStart(a); t < b; t = addDays(t, 1)) n += dayTrades(t); return n; }
-function btMs(a, b) { return sum(within(a, b), 'bt', len); }
 /* Pace is backtesting time over trades, for the days that have both. */
 function rangePace(a, b) {
   var n = 0, ms = 0;
@@ -481,27 +624,23 @@ function el0() { return S.run ? (S.run.pa || Date.now()) - S.run.a - S.run.p : 0
 function paintRing() {
   var arc = $('svArc'), big = $('svBig'), sub = $('svSub');
   arc.style.strokeDasharray = C;
-  var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), fr = done / S.g.bt;
+  var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), g = goal(d0);
   if (S.run) {
     /* on the clock: since the start, less every pause, and frozen at the
        moment of the pause while one is on */
-    var el = (S.run.pa || now) - S.run.a - S.run.p;
-    big.textContent = clock(el); big.classList.add('is-clock');
-    var goal = S.run.k === 'bt' ? 0 : (S.run.k === 'live' ? S.g.live : S.g.cnt) * 6e4;
-    sub.textContent = KINDS[S.run.k] + (S.run.pa ? ' · paused' : ' · since ' + hm(S.run.a));
-    /* On a timed session the ring fills toward that session's own target.
-       A backtest keeps the day's trades, because trades are the target. */
-    if (goal) fr = (mins(within(d0, d0 + DAY), S.run.k) * 6e4 + el) / goal;
+    big.textContent = clock(el0()); big.classList.add('is-clock');
+    sub.textContent = S.run.pa ? 'Paused' : 'Backtesting since ' + hm(S.run.a);
   } else {
     big.textContent = fmt(done); big.classList.remove('is-clock');
-    sub.textContent = 'of ' + S.g.bt + ' trades today';
+    sub.textContent = 'of ' + g + ' trades today';
   }
-  arc.style.strokeDashoffset = C * (1 - Math.min(1, fr));
+  /* the ring is the day's trades even while the clock runs: trades are the target */
+  arc.style.strokeDashoffset = C * (1 - Math.min(1, done / g));
   var rg = document.querySelector('.ring');
   rg.classList.toggle('is-run', !!S.run && !S.run.pa);
   rg.classList.toggle('is-paused', !!(S.run && S.run.pa));
-  rg.classList.toggle('is-hit', done >= S.g.bt);
-  document.title = S.run ? (S.run.pa ? 'Paused · ' : '') + clock(el0()) + ' · ' + KINDS[S.run.k] : 'SVC';
+  rg.classList.toggle('is-hit', done >= g);
+  document.title = S.run ? (S.run.pa ? 'Paused · ' : '') + clock(el0()) : 'SVC';
 }
 
 /* ── the counter ──
@@ -520,6 +659,13 @@ function setCounter(k, which, val) {
   if (r.a === undefined && r.b === undefined) delete S.d[k];
   save();
 }
+/* A past day, both numbers at once. */
+function setDay(k, f) {
+  var r = {};
+  ['a', 'b'].forEach(function (w) { var v = numOrNull(f[w]); if (v !== null) r[w] = v; });
+  if (r.a === undefined && r.b === undefined) delete S.d[k]; else S.d[k] = r;
+  save();
+}
 
 /* ── today ── */
 function row(name, note, val, valNote, frac, extra) {
@@ -529,46 +675,51 @@ function row(name, note, val, valNote, frac, extra) {
     + (extra ? '<div class="row-x num">' + extra + '</div>' : '') + '</div>';
 }
 function paintToday() {
-  var now = Date.now(), d0 = dayStart(now), today = within(d0, d0 + DAY);
-  var bt = dayTrades(d0), ms = btMs(d0, d0 + DAY);
-  var lv = mins(today, 'live'), cn = mins(today, 'cnt');
+  var now = Date.now(), d0 = dayStart(now);
+  var bt = dayTrades(d0), ms = btMs(d0, d0 + DAY), g = goal(d0);
   var clockNote = ms ? ' · ' + dur(ms) + ' on the clock' : '';
-  $('svRows').innerHTML =
-    row('Backtesting', '', fmt(bt), '/ ' + S.g.bt, bt / S.g.bt, (bt >= S.g.bt ? 'Target hit' : fmt(S.g.bt - bt) + ' to go') + clockNote)
-    + row('Live charts', '20:00–21:00 New York', dur(lv * 6e4), '/ ' + dur(S.g.live * 6e4), lv / S.g.live, '')
-    + row('Content + journal', '', dur(cn * 6e4), '/ ' + dur(S.g.cnt * 6e4), cn / S.g.cnt, '');
-  var p = pace();
-  $('svFor40').textContent = S.g.bt + ' trades take';
-  $('svEta').textContent = p ? dur(p * S.g.bt) : '–';
-  $('svEta100').textContent = p ? dur(p * 100) : '–';
-  $('svPlan').textContent = new Date(now).toLocaleDateString('en-GB', { weekday: 'long' });
+  $('svRows').innerHTML = row('Backtesting', '', fmt(bt), '/ ' + g, bt / g, (bt >= g ? 'Target hit' : fmt(g - bt) + ' to go') + clockNote);
+  var p = pace(), nx = nextRaise();
+  $('svT1L').textContent = g + ' trades take';
+  $('svT1').textContent = p ? dur(p * g) : '–';
+  $('svT2L').textContent = nx ? nx.n + ' trades would take' : g + 100 + ' trades would take';
+  $('svT2').textContent = p ? dur(p * (nx ? nx.n : g + 100)) : '–';
+  $('svPlan').textContent = nx ? 'Target ' + g + ' · ' + nx.n + ' from ' + short(isoMs(nx.f)) : 'Target ' + g;
 }
 
-/* ── week, month, streak ── */
+/* ── week, target, month, streak ── */
 function bar(id, f) { $(id).style.width = Math.round(Math.min(1, f) * 100) + '%'; }
+/* ── what to expect ──
+   Not a goal and not a grade: your own rate carried forward. The rate is
+   the trades a day over the days you have actually been at it, the last
+   fortnight at most, so a week that began on a Thursday is read as a
+   Thursday and not as a week short of three hundred. Today is expected
+   to finish at your rate, or where it already is if that is higher, and
+   every day still to come at the rate. It is a projection of the
+   volume you are doing. It says nothing about how the trades went: the
+   app counts them and does not record their results. */
+function expect() {
+  var now = Date.now(), d0 = dayStart(now), done = dayTrades(d0), first = firstDay();
+  var start = Math.max(first, addDays(d0, -14)), days = Math.round((d0 - start) / DAY);
+  var rate = days >= 1 ? tradesIn(start, d0) / days : done, rr = Math.round(rate);
+  var today = Math.max(done, rr), w0 = weekStart(now), m0 = monthStart(now);
+  var wkSo = tradesIn(w0, d0 + DAY), moSo = tradesIn(m0, d0 + DAY);
+  var wkLeft = 6 - ((new Date(now).getDay() + 6) % 7), moLeft = daysInMonth(now) - new Date(now).getDate();
+  return { has: tradesIn(first, d0 + DAY) > 0, rate: rate, rr: rr, days: days, done: done, today: today, wkSo: wkSo, moSo: moSo,
+    week: wkSo - done + today + rr * wkLeft, month: moSo - done + today + rr * moLeft };
+}
 function paintStats() {
-  var now = Date.now(), w0 = weekStart(now), m0 = monthStart(now);
-  var wkT = tradesIn(w0, addDays(w0, 7)), wkGoal = S.g.bt * 7;
-  $('svWk').innerHTML = fmt(wkT) + ' <small>/ ' + fmt(wkGoal) + '</small>';
-  $('svWkX').textContent = wkT >= wkGoal ? 'Week done' : fmt(wkGoal - wkT) + ' to go';
-  bar('svWkB', wkT / wkGoal);
+  var now = Date.now(), d0 = dayStart(now);
+  var nx = nextRaise();
+  $('svTg').innerHTML = goal(d0) + ' <small>a day</small>';
+  $('svTgX').textContent = nx ? nx.n + ' from ' + short(isoMs(nx.f)) + ' · ' + nx.days + (nx.days === 1 ? ' day' : ' days') : 'No raise set';
+  bar('svTgB', nx ? nx.since / S.g.every : 0);
 
-  var lv = mins(within(w0, addDays(w0, 7)), 'live');
-  $('svLv').innerHTML = dur(lv * 6e4) + ' <small>/ ' + dur(S.g.wkLive * 6e4) + '</small>';
-  $('svLvX').textContent = lv >= S.g.wkLive ? 'Week done' : dur((S.g.wkLive - lv) * 6e4) + ' to go';
-  bar('svLvB', lv / S.g.wkLive);
-
-  var dim = daysInMonth(now), moT = tradesIn(m0, addDays(m0, dim)), moGoal = S.g.bt * dim;
-  $('svMo').innerHTML = fmt(moT) + ' <small>/ ' + fmt(moGoal) + '</small>';
-  var expect = S.g.bt * Math.round((dayStart(now) - m0) / DAY + 1);
-  $('svMoX').textContent = moT >= expect ? fmt(moT - expect) + ' ahead of pace' : fmt(expect - moT) + ' behind pace';
-  bar('svMoB', moT / moGoal);
-
-  /* A day counts when the trade target was reached. The streak may end
+  /* A day counts when that day's target was reached. The streak may end
      yesterday: today is not over, so not having hit it yet is not a
      break. Four weeks, Monday first, so a weekday sits in one column. */
-  function hit(t) { return dayTrades(t) >= S.g.bt; }
-  var d0 = dayStart(now), run = 0, t = hit(d0) ? d0 : addDays(d0, -1);
+  function hit(t) { return dayTrades(t) >= goal(t); }
+  var run = 0, t = hit(d0) ? d0 : addDays(d0, -1);
   while (hit(t) && run < 3650) { run++; t = addDays(t, -1); }
   var best = 0, cur = 0;
   for (t = firstDay(); t <= d0; t = addDays(t, 1)) { cur = hit(t) ? cur + 1 : 0; if (cur > best) best = cur; }
@@ -577,16 +728,24 @@ function paintStats() {
   ['M', 'T', 'W', 'T', 'F', 'S', 'S'].forEach(function (l) { html += '<span class="dw">' + l + '</span>'; });
   for (var i = 0; i < 28; i++) {
     var day = addDays(start, i), n = dayTrades(day);
-    var cls = day > d0 ? 'is-ahead' : n >= S.g.bt ? 'is-hit' : n > 0 ? 'is-part' : '';
+    var cls = day > d0 ? 'is-ahead' : n >= goal(day) ? 'is-hit' : n > 0 ? 'is-part' : '';
     html += '<span class="dot ' + cls + (day === d0 ? ' is-now' : '') + '" data-tip="' + esc(dayName(day)) + ' · ' + n + ' trades"></span>';
   }
   $('svDots').innerHTML = html;
   $('svStX').textContent = 'Best run ' + best;
+
+  var x = expect();
+  if (!x.has) { $('svExV').textContent = '–'; $('svExX').textContent = 'Log a day to see it'; bar('svExB', 0); }
+  else {
+    $('svExV').innerHTML = x.rr + ' <small>a day</small>';
+    $('svExX').textContent = fmt(x.week) + ' this week · ' + fmt(x.month) + ' this month';
+    bar('svExB', x.rate / goal(d0));
+  }
 }
 /* The first day anything was recorded, by session or by counter. */
 function firstDay() {
   var t = dayStart(Date.now());
-  S.s.forEach(function (x) { t = Math.min(t, dayStart(x.a)); });
+  within(0, Infinity).forEach(function (x) { t = Math.min(t, dayStart(x.a)); });
   Object.keys(S.d).forEach(function (k) { t = Math.min(t, isoMs(k)); });
   return t;
 }
@@ -596,11 +755,11 @@ function firstDay() {
    stored: a long log is something you open on purpose. */
 var logAll = false;
 function paintLog() {
-  var all = S.s.slice().sort(function (a, b) { return b.a - a.a; });
+  var all = within(0, Infinity).sort(function (a, b) { return b.a - a.a; });
   var cut = addDays(dayStart(Date.now()), -6);
   var list = logAll ? all : all.filter(function (x) { return x.a >= cut; });
   var more = all.length - list.length;
-  if (!all.length) { $('svLog').innerHTML = '<div class="empty">Nothing yet. Press Start session.</div>'; return; }
+  if (!all.length) { $('svLog').innerHTML = '<div class="empty">Nothing yet. Press Start backtesting.</div>'; return; }
   var html = '', last = null, rows = '';
   function flush() {
     if (last === null) return;
@@ -612,10 +771,9 @@ function paintLog() {
   list.slice(0, 200).forEach(function (x) {
     var d = dayStart(x.a);
     if (d !== last) { flush(); last = d; }
-    rows += '<tr data-i="' + x.i + '"' + (x.t ? ' class="has-note"' : '') + '><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">' + KINDS[x.k] + (x.p ? '<small>' + dur(x.p) + ' paused</small>' : '') + '</td>'
+    rows += '<tr data-i="' + x.i + '"><td class="t num">' + hm(x.a) + '–' + hm(x.b) + '</td><td class="k">Backtest' + (x.p ? '<small>' + dur(x.p) + ' paused</small>' : '') + '</td>'
       + '<td class="d num">' + dur(len(x)) + '</td>'
-      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>'
-      + (x.t ? '<tr class="note-r"><td colspan="4"><div>' + esc(x.t) + '</div></td></tr>' : '');
+      + '<td class="x"><button class="del" aria-label="Delete this session" title="Delete">×</button></td></tr>';
   });
   flush();
   if (more) html += '<div class="empty"><button class="link" data-more="1">Show ' + more + ' older ' + (more === 1 ? 'session' : 'sessions') + '</button></div>';
@@ -624,34 +782,21 @@ function paintLog() {
 }
 
 function paintControls() {
-  var on = !!S.run, k = on ? S.run.k : S.kind;
-  Array.prototype.forEach.call(document.querySelectorAll('.kind'), function (b) {
-    b.setAttribute('aria-pressed', String(b.dataset.k === k));
-    b.disabled = on && b.dataset.k !== k;
-  });
-  /* A live session swaps Today for a notepad, filled from the run so a
-     reload keeps what you wrote. Only on the change of state: a repaint
-     must never touch the field you are typing in. */
-  var live = on && S.run.k === 'live', np = $('svNotesP');
-  if (live === np.hidden) {
-    np.hidden = !live; $('svTodayP').hidden = live;
-    if (live) { $('svNotes').value = S.run.t || ''; $('svNotesT').textContent = 'since ' + hm(S.run.a); }
-  }
-  var go = $('svGo'), ps = $('svPause'), paused = on && !!S.run.pa;
-  go.textContent = on ? 'End session' : 'Start session';
+  var on = !!S.run, paused = on && !!S.run.pa, go = $('svGo'), ps = $('svPause');
+  go.textContent = on ? 'End session' : 'Start backtesting';
   go.classList.toggle('is-on', on);
   ps.hidden = !on;
   ps.textContent = paused ? 'Resume' : 'Pause';
   /* the action on offer is the white one: resume while paused */
   ps.classList.toggle('soft', !paused);
   $('svBar').classList.toggle('is-two', on);
-  $('svKeys').textContent = on ? (paused ? 'Space resumes' : 'Space pauses') : 'Space starts a session';
+  $('svKeys').textContent = on ? (paused ? 'Space resumes' : 'Space pauses') : 'Space starts';
 }
 
 function paint() {
+  applyRaises();
   $('svDate').textContent = new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-  paintRing(); paintCounter(); paintToday(); paintStats(); paintPace(); paintYear(); paintLog(); paintControls();
-  remind();
+  paintRing(); paintCounter(); paintToday(); paintStats(); paintPace(); paintYear(); paintLog(); paintControls(); bdCheck(); bdPaintCard();
 }
 
 /* ── pace ──
@@ -677,7 +822,7 @@ function paintPace() {
 
 /* ── the year ──
    Fifty-three weeks, Monday at the top. A day is one square: dark for
-   nothing, brighter up to the target, white at the target and haloed at
+   nothing, brighter up to that day's target, white at it and haloed at
    half as much again. Days still to come are an outline, not a miss. */
 function paintYear() {
   var now = Date.now(), d0 = dayStart(now), start = addDays(weekStart(now), -52 * 7);
@@ -687,7 +832,7 @@ function paintYear() {
     if (t > d0) cls = 'is-ahead';
     else {
       n = dayTrades(t);
-      var f = n / S.g.bt;
+      var f = n / goal(t);
       cls = !n ? '' : f >= 1.5 ? 'l4' : f >= 1 ? 'l3' : f >= .5 ? 'l2' : 'l1';
       if (f >= 1) { hits++; run++; if (run > best) best = run; } else run = 0;
     }
@@ -702,26 +847,6 @@ function paintYear() {
   $('svYrX').textContent = hits + ' days on target · best run ' + best;
 }
 
-/* ── the 8pm reminder ──
-   A page cannot be woken, so this only goes off while the app is open,
-   installed or in a tab. Once a day, inside the hour it names, and not
-   at all once a live session has happened or is running. */
-function remind() {
-  var R0 = S.rem; if (!R0.on) return;
-  var now = Date.now(), d = new Date(now), key = isoDay(now);
-  var at = R0.at.split(':'), m = d.getHours() * 60 + d.getMinutes(), m0 = +at[0] * 60 + +at[1];
-  if (R0.last === key || m < m0 || m >= m0 + 60) return;
-  if ((S.run && S.run.k === 'live') || within(dayStart(now), dayStart(now) + DAY).some(function (x) { return x.k === 'live'; })) return;
-  R0.last = key; save();
-  try {
-    if ('Notification' in window && Notification.permission === 'granted') {
-      var nt = new Notification('Live charts · ' + R0.at, { body: 'The New York hour is on. Start your live session.', tag: 'svc-live', icon: 'icon-192.png' });
-      nt.onclick = function () { window.focus(); nt.close(); };
-    }
-  } catch (e) {}
-  toast('Live charts · ' + R0.at + ' — the New York hour is on', S.run ? null : function () { S.kind = 'live'; start(); }, 'Start live', 60000);
-}
-
 /* ── the clock ── */
 var tick = null;
 function clockOn() {
@@ -731,20 +856,20 @@ function clockOn() {
 
 /* ── toast ── */
 var toastT = null;
-function toast(msg, undo, label, ms) {
+function toast(msg, undo) {
   var old = document.querySelector('.toast'); if (old) old.remove();
   clearTimeout(toastT);
   var t = document.createElement('div');
-  t.className = 'toast' + (undo ? '' : ' is-bare');
+  t.className = 'toast';
   t.setAttribute('role', 'status');
   var s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
   if (undo) {
-    var b = document.createElement('button'); b.textContent = label || 'Undo';
+    var b = document.createElement('button'); b.textContent = 'Undo';
     b.addEventListener('click', function () { undo(); t.remove(); });
     t.appendChild(b);
-  }
+  } else t.style.padding = '14px 18px';
   document.body.appendChild(t);
-  toastT = setTimeout(function () { t.remove(); }, ms || 6000);
+  toastT = setTimeout(function () { t.remove(); }, 6000);
 }
 
 /* ── dialogs ──
@@ -755,7 +880,12 @@ function dialog(html, onOpen, cls) {
   v.className = 'veil';
   v.innerHTML = '<div class="dlg' + (cls ? ' ' + cls : '') + '" role="dialog" aria-modal="true">' + html + '</div>';
   function close() { v.remove(); document.removeEventListener('keydown', esc, true); }
-  function esc(e) { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); } }
+  function esc(e) {
+    if (e.key !== 'Escape') return;
+    /* with one dialog over another, Escape takes only the top one */
+    var all = document.querySelectorAll('.veil'); if (all[all.length - 1] !== v) return;
+    e.preventDefault(); e.stopPropagation(); close();
+  }
   v.addEventListener('mousedown', function (e) { if (e.target === v) close(); });
   document.addEventListener('keydown', esc, true);
   document.body.appendChild(v);
@@ -763,15 +893,519 @@ function dialog(html, onOpen, cls) {
 }
 function dialogOpen() { return !!document.querySelector('.veil'); }
 
-/* ── start and end ── */
+/* ── the coin ──
+   Drawn, not photographed. Every face is made at run time from three
+   canvases that are the same drawing three times over: the colour, the
+   relief (grey is height) and the finish (green is how rough, blue is how
+   metal). The relief becomes a normal map, so the engraving, the rim and
+   the ruled field catch the light and move when the coin turns. The edge
+   is reeded. Three.js is vendored beside the page and loaded the first
+   time a coin is on screen; without WebGL the colour canvas is shown flat. */
+function bdRng(seed) { var a = seed >>> 0; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function bdHash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+
+/* what a mode draws with: colour, height, or finish */
+function bdPen(mode) {
+  return function (c, h, r) {
+    if (mode === 'c') return c;
+    if (mode === 'h') { var v = Math.round(Math.max(0, Math.min(1, h)) * 255); return 'rgb(' + v + ',' + v + ',' + v + ')'; }
+    return 'rgb(0,' + Math.round(r[0] * 255) + ',' + Math.round(r[1] * 255) + ')';
+  };
+}
+var BD_TURN = { f: -Math.PI / 2, b: -Math.PI / 2 }, BD_FLIP = 1;
+var BD_PAL = {
+  gold: { base: '#cf951f', hi: '#f6cf62', lo: '#8f5d0f', line: '#6a4208', text: '#eab742', rough: .3, metal: 1 },
+  dark: { base: '#34363c', hi: '#5a5d66', lo: '#1c1d21', line: '#121316', text: '#454851', rough: .5, metal: .9 }
+};
+/* the inlay: a base, the veins running through it, and a hot colour */
+var BD_LAVA = {
+  red: ['#3a050b', '#ff3b24', '#ff9a3c'],
+  blue: ['#06143a', '#2f7bff', '#9fd0ff'],
+  green: ['#04281b', '#10c47a', '#a9ffd8'],
+  violet: ['#1d0838', '#a15bff', '#e0c4ff']
+};
+
+function bdRing(g, r1, r2, C) { g.beginPath(); g.arc(C, C, r2, 0, 6.2832); g.arc(C, C, r1, 0, 6.2832, true); g.fill('evenodd'); }
+function bdArcText(g, text, C, r, mid, size, bottom, fill, stroke, lw) {
+  g.font = '700 ' + size + 'px Georgia, "Times New Roman", "DejaVu Serif", serif';
+  g.textAlign = 'center'; g.textBaseline = 'alphabetic';
+  var sp = size * .12, ws = [], tot = 0, i;
+  for (i = 0; i < text.length; i++) { ws.push(g.measureText(text[i]).width + sp); tot += ws[i]; }
+  var ang = tot / r, a = bottom ? mid + ang / 2 : mid - ang / 2;
+  for (i = 0; i < text.length; i++) {
+    var w = ws[i] / r;
+    a += bottom ? -w / 2 : w / 2;
+    g.save(); g.translate(C + r * Math.cos(a), C + r * Math.sin(a)); g.rotate(bottom ? a - Math.PI / 2 : a + Math.PI / 2);
+    if (stroke) { g.lineWidth = lw; g.strokeStyle = stroke; g.strokeText(text[i], 0, 0); }
+    g.fillStyle = fill; g.fillText(text[i], 0, 0);
+    g.restore();
+    a += bottom ? -w / 2 : w / 2;
+  }
+}
+/* the widest an arc of lettering may be, so a long name shrinks to fit */
+function bdFit(g, text, r, size, maxAng) {
+  g.font = '700 ' + size + 'px Georgia, "Times New Roman", "DejaVu Serif", serif';
+  var tot = 0; for (var i = 0; i < text.length; i++) tot += g.measureText(text[i]).width + size * .12;
+  return tot / r > maxAng ? size * maxAng * r / tot : size;
+}
+
+/* emblems, in a box from -1 to 1 */
+var BD_EMB = {
+  flame: function (g) {
+    g.beginPath(); g.moveTo(0, 1);
+    g.bezierCurveTo(-.56, 1, -.92, .64, -.86, .12);
+    g.bezierCurveTo(-.82, -.22, -.52, -.36, -.46, -.74);
+    g.bezierCurveTo(-.26, -.54, -.16, -.34, -.2, -.1);
+    g.bezierCurveTo(-.04, -.36, .06, -.72, .1, -1);
+    g.bezierCurveTo(.3, -.7, .78, -.3, .82, .22);
+    g.bezierCurveTo(.86, .66, .52, 1, 0, 1);
+    g.closePath();
+    g.moveTo(0, .78);
+    g.bezierCurveTo(-.3, .78, -.46, .54, -.4, .3);
+    g.bezierCurveTo(-.32, .08, -.12, .02, -.06, -.2);
+    g.bezierCurveTo(.12, .04, .42, .24, .38, .54);
+    g.bezierCurveTo(.34, .74, .18, .78, 0, .78);
+    g.closePath();
+  },
+  bars: function (g) {
+    var bar = function (x, w, h) { g.moveTo(x, 1); g.lineTo(x, 1 - h + w / 2); g.arc(x + w / 2, 1 - h + w / 2, w / 2, Math.PI, 0); g.lineTo(x + w, 1); g.closePath(); };
+    g.beginPath(); bar(-.9, .5, .9); bar(-.25, .5, 1.45); bar(.4, .5, 2); g.rect(-1, .92, 1.9, .08);
+  },
+  bolt: function (g) {
+    g.beginPath(); g.moveTo(.22, -1); g.lineTo(-.62, .12); g.lineTo(-.08, .12); g.lineTo(-.28, 1); g.lineTo(.68, -.22); g.lineTo(.1, -.22); g.closePath();
+  },
+  star: function (g) {
+    var k, a, rr;
+    g.beginPath();
+    for (k = 0; k < 10; k++) { a = -Math.PI / 2 + k * Math.PI / 5; rr = k % 2 ? .42 : 1; g[k ? 'lineTo' : 'moveTo'](Math.cos(a) * rr, Math.sin(a) * rr + .06); }
+    g.closePath();
+  },
+  clock: function (g) {
+    g.beginPath(); g.arc(0, 0, 1, 0, 6.2832); g.arc(0, 0, .74, 0, 6.2832, true);
+    g.rect(-.07, -.58, .14, .62); g.rect(-.07, -.07, .5, .14);
+    g.rect(-.07, -.07, .14, .14);
+  },
+  target: function (g) {
+    g.beginPath(); g.arc(0, 0, 1, 0, 6.2832); g.arc(0, 0, .76, 0, 6.2832, true);
+    g.moveTo(.5, 0); g.arc(0, 0, .5, 0, 6.2832); g.arc(0, 0, .26, 0, 6.2832, true);
+  },
+  crown: function (g) {
+    g.beginPath(); g.moveTo(-1, .72); g.lineTo(-1, -.52); g.lineTo(-.5, .02); g.lineTo(0, -.9); g.lineTo(.5, .02); g.lineTo(1, -.52); g.lineTo(1, .72); g.closePath();
+    g.rect(-1, .82, 2, .18);
+  },
+  chevrons: function (g) {
+    var cv = function (y) { g.moveTo(-.9, y + .3); g.lineTo(0, y - .6); g.lineTo(.9, y + .3); g.lineTo(.9, y + .62); g.lineTo(0, y - .28); g.lineTo(-.9, y + .62); g.closePath(); };
+    g.beginPath(); cv(-.42); cv(.34);
+  }
+};
+
+/* THE HARDER, THE FINER. A coin's inlay climbs with how long it takes to
+   win. Marble is the plain one. Galaxy, aurora and obsidian are the three
+   finishes the long ones wear, and the longest of all also carry a light
+   turning behind them. Gold stays gold: the metal never says a tier. */
+function bdSheen(g) {
+  var sh = g.createLinearGradient(-1, -1, .9, .9); sh.addColorStop(0, '#ffffff55'); sh.addColorStop(.35, '#ffffff10'); sh.addColorStop(.5, '#0000'); sh.addColorStop(1, '#00000066');
+  g.fillStyle = sh; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+}
+function bdGalaxy(g, rng) {
+  var i, x, y, gr;
+  g.fillStyle = '#04051a'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  [['#5b2bd8', -.4, -.3, .9], ['#0b8fb8', .5, .4, .8], ['#b02a9a', .1, -.6, .6]].forEach(function (n) {
+    gr = g.createRadialGradient(n[1], n[2], 0, n[1], n[2], n[3]); gr.addColorStop(0, n[0] + 'bb'); gr.addColorStop(1, '#0000'); g.fillStyle = gr; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  });
+  for (i = 0; i < 220; i++) { x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1; g.fillStyle = 'rgba(255,255,255,' + (.35 + rng() * .65) + ')'; g.beginPath(); g.arc(x, y, .004 + rng() * rng() * .014, 0, 6.2832); g.fill(); }
+  for (i = 0; i < 5; i++) { x = rng() * 1.6 - .8; y = rng() * 1.6 - .8; g.strokeStyle = 'rgba(255,255,255,.9)'; g.lineWidth = .006; g.beginPath(); g.moveTo(x - .06, y); g.lineTo(x + .06, y); g.moveTo(x, y - .06); g.lineTo(x, y + .06); g.stroke(); }
+  bdSheen(g);
+}
+function bdAurora(g, rng) {
+  var i, k, y0;
+  g.fillStyle = '#031a1c'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  g.lineCap = 'round'; g.lineJoin = 'round';
+  [['#19e6a0', .5], ['#38c8ff', .35], ['#9a6bff', .25]].forEach(function (c, n) {
+    for (i = 0; i < 3; i++) {
+      y0 = -.7 + n * .45 + i * .22 + rng() * .1;
+      [[.34, .1], [.2, .2], [.08, .6]].forEach(function (w) {
+        g.beginPath(); g.moveTo(-1.2, y0);
+        for (k = 1; k <= 8; k++) g.lineTo(-1.2 + k * .3, y0 + Math.sin(k * .9 + n * 2 + i) * .22 + Math.cos(k * 1.7 + i) * .08);
+        g.strokeStyle = c[0] + Math.round(w[1] * c[1] * 255).toString(16).padStart(2, '0'); g.lineWidth = w[0]; g.stroke();
+      });
+    }
+  });
+  bdSheen(g);
+}
+function bdObsidian(g, rng) {
+  var i, k, x, y;
+  g.fillStyle = '#060608'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  var gl = g.createLinearGradient(-1, -1, 1, 1); gl.addColorStop(0, '#2a2c38'); gl.addColorStop(.3, '#0a0a0e'); gl.addColorStop(.62, '#15161e'); gl.addColorStop(1, '#050506');
+  g.fillStyle = gl; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  g.lineCap = 'round';
+  for (i = 0; i < 9; i++) {
+    x = rng() * 2 - 1; y = rng() * 2 - 1; g.beginPath(); g.moveTo(x, y);
+    for (k = 0; k < 5; k++) { x += (rng() - .5) * .6; y += (rng() - .5) * .6; g.lineTo(x, y); }
+    g.strokeStyle = 'rgba(240,190,70,.95)'; g.lineWidth = .006 + rng() * .01; g.stroke();
+    g.strokeStyle = 'rgba(240,190,70,.22)'; g.lineWidth = .04; g.stroke();
+  }
+  var st = g.createLinearGradient(-.9, -.2, .2, .9); st.addColorStop(0, '#fff0'); st.addColorStop(.5, '#ffffff30'); st.addColorStop(1, '#fff0');
+  g.fillStyle = st; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  bdSheen(g);
+}
+
+/* PRISM: the rarest finish. A holographic foil that throws the whole
+   spectrum across the inlay and glints as the coin turns. */
+function bdPrism(g, rng) {
+  var i, x, y, gr = g.createLinearGradient(-1.1, -1.1, 1.1, 1.1);
+  g.fillStyle = '#0d0d16'; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  ['#ff3d7f', '#ff9a3d', '#fff23d', '#3dff9a', '#3dc8ff', '#7a5cff', '#ff3dd4', '#ff3d7f'].forEach(function (c, k, a) { gr.addColorStop(k / (a.length - 1), c); });
+  g.globalAlpha = .85; g.fillStyle = gr; g.fillRect(-1.1, -1.1, 2.2, 2.2); g.globalAlpha = 1;
+  g.lineWidth = .05;
+  for (i = -14; i < 14; i++) { g.strokeStyle = i % 2 ? 'rgba(255,255,255,.16)' : 'rgba(0,0,0,.2)'; g.beginPath(); g.moveTo(-1.2 + i * .11, -1.2); g.lineTo(1.2 + i * .11, 1.2); g.stroke(); }
+  for (i = 0; i < 160; i++) { x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1; g.fillStyle = 'rgba(255,255,255,' + (.4 + rng() * .6) + ')'; g.beginPath(); g.arc(x, y, .004 + rng() * .012, 0, 6.2832); g.fill(); }
+  bdSheen(g);
+}
+
+/* the marble in the inlay: dark body, bright veins, glowing pockets, a glassy sheen */
+function bdLava(g, group, S, rng, fx) {
+  if (fx === 'prism') return bdPrism(g, rng);
+  if (fx === 'galaxy') return bdGalaxy(g, rng);
+  if (fx === 'aurora') return bdAurora(g, rng);
+  if (fx === 'obsidian') return bdObsidian(g, rng);
+  var L = BD_LAVA[group] || BD_LAVA.red, i, x, y;
+  g.fillStyle = L[0]; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  var hot = g.createRadialGradient(.1, .2, .05, 0, 0, 1.2); hot.addColorStop(0, L[1] + '66'); hot.addColorStop(1, '#0000');
+  g.fillStyle = hot; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+  g.lineCap = 'round';
+  for (i = 0; i < 46; i++) {
+    x = rng() * 2.2 - 1.1; y = rng() * 2.2 - 1.1;
+    g.beginPath(); g.moveTo(x, y);
+    for (var k = 0; k < 4; k++) g.quadraticCurveTo(x + (rng() - .5) * .8, y + (rng() - .5) * .8, x += (rng() - .5) * .7, y += (rng() - .5) * .7);
+    g.strokeStyle = (i % 5 === 0 ? L[2] : L[1]) + (i % 3 ? '88' : 'cc'); g.lineWidth = .006 + rng() * .02; g.stroke();
+  }
+  for (i = 0; i < 9; i++) {
+    var pk = g.createRadialGradient(0, 0, 0, 0, 0, .18), px = rng() * 1.6 - .8, py = rng() * 1.6 - .8;
+    g.save(); g.translate(px, py); pk.addColorStop(0, L[2] + 'aa'); pk.addColorStop(1, '#0000'); g.fillStyle = pk; g.fillRect(-.2, -.2, .4, .4); g.restore();
+  }
+  var sh = g.createLinearGradient(-1, -1, .9, .9); sh.addColorStop(0, '#ffffff55'); sh.addColorStop(.35, '#ffffff10'); sh.addColorStop(.5, '#0000'); sh.addColorStop(1, '#00000066');
+  g.fillStyle = sh; g.fillRect(-1.1, -1.1, 2.2, 2.2);
+}
+
+/* one pass over the front of a coin: mode is colour, height or finish */
+function bdFacePaint(g, mode, S, b, locked, dateText, back) {
+  var V = bdPen(mode), pal = locked ? BD_PAL.dark : BD_PAL.gold, C = S / 2, R = S / 2, rng = bdRng(bdHash(b.id + (back ? 'b' : 'f'))), i, a;
+  var RM = function (k) { return [pal.rough * (k || 1), pal.metal]; };
+  g.save(); g.translate(C, C); g.rotate(BD_TURN[back ? 'b' : 'f']); if (back) g.scale(BD_FLIP, 1); g.translate(-C, -C);
+  /* the ground */
+  if (mode === 'c') {
+    var gr = g.createRadialGradient(C * .8, C * .7, R * .08, C, C, R);
+    gr.addColorStop(0, pal.hi); gr.addColorStop(.5, pal.base); gr.addColorStop(1, pal.lo); g.fillStyle = gr;
+  } else g.fillStyle = V(pal.base, .5, RM());
+  g.fillRect(0, 0, S, S);
+  /* the rim, and the groove inside it */
+  g.fillStyle = V(pal.hi, .9, RM(.7)); bdRing(g, R * .93, R, C);
+  g.fillStyle = V(pal.lo, .28, RM(1.2)); bdRing(g, R * .905, R * .93, C);
+  /* the border of small flowers */
+  for (i = 0; i < 90; i++) {
+    a = i / 90 * 6.2832; var bx = C + Math.cos(a) * R * .87, by = C + Math.sin(a) * R * .87;
+    g.fillStyle = V(pal.hi, .8, RM(.8)); g.beginPath(); g.arc(bx, by, R * .017, 0, 6.2832); g.fill();
+    g.fillStyle = V(pal.lo, .32, RM(1.2)); g.beginPath(); g.arc(bx, by, R * .0065, 0, 6.2832); g.fill();
+    if (i % 3 === 0) { g.fillStyle = V(pal.hi, .86, RM(.7)); for (var p = 0; p < 5; p++) { var pa = p / 5 * 6.2832; g.beginPath(); g.arc(bx + Math.cos(pa) * R * .03, by + Math.sin(pa) * R * .03, R * .008, 0, 6.2832); g.fill(); } }
+  }
+  g.fillStyle = V(pal.hi, .85, RM(.8)); bdRing(g, R * .815, R * .83, C);
+  /* the lettering */
+  var txtFill = mode === 'c' ? pal.text : V(pal.text, .86, RM(.6)), txtLine = mode === 'c' ? pal.line : V(pal.lo, .22, RM(1));
+  var rIn = R * .65, size = R * .165;
+  if (!back) {
+    var s1 = bdFit(g, b.n, rIn + size * .72, size, 2.55), s2 = bdFit(g, b.line, rIn + size * .72, size, 2.55);
+    bdArcText(g, b.n, C, rIn, -Math.PI / 2, s1, false, txtFill, txtLine, R * .006);
+    bdArcText(g, b.line, C, rIn + size * .72, Math.PI / 2, s2, true, txtFill, txtLine, R * .006);
+  } else {
+    bdArcText(g, 'STRUCTURE · VOLUME', C, rIn, -Math.PI / 2, bdFit(g, 'STRUCTURE · VOLUME', rIn + size * .72, size * .8, 2.5), false, txtFill, txtLine, R * .006);
+    bdArcText(g, dateText, C, rIn + size * .72, Math.PI / 2, bdFit(g, dateText, rIn + size * .72, size * .8, 2.5), true, txtFill, txtLine, R * .006);
+  }
+  /* the field: sunk, and ruled */
+  g.fillStyle = V(pal.base, .42, RM(1.05)); bdRing(g, 0, R * .55, C);
+  g.save(); g.beginPath(); g.arc(C, C, R * .545, 0, 6.2832); g.clip();
+  g.fillStyle = V(pal.lo, mode === 'h' ? .55 : .5, RM(1.2)); g.globalAlpha = mode === 'c' ? .34 : 1;
+  for (var y = C - R * .56; y < C + R * .56; y += S / 150) g.fillRect(C - R, y, R * 2, S / 600 + 1);
+  g.restore();
+  g.fillStyle = V(pal.hi, .88, RM(.7)); bdRing(g, R * .55, R * .568, C);
+  /* the middle */
+  if (!back) {
+    var em = BD_EMB[b.e] || BD_EMB.flame, E = R * .4;
+    g.save(); g.translate(C, C); g.scale(E, E);
+    em(g);
+    g.lineJoin = 'round'; g.lineWidth = b.thumb ? .17 : .09;
+    g.strokeStyle = V(pal.hi, .9, RM(.6)); g.stroke();
+    if (locked) { g.fillStyle = V('#15161a', .34, [.55, .6]); g.fill('evenodd'); }
+    else if (mode === 'c') { g.save(); g.clip('evenodd'); bdLava(g, b.g, S, rng, b.fx); if (b.thumb) { g.fillStyle = 'rgba(255,255,255,.2)'; g.fillRect(-1.1, -1.1, 2.2, 2.2); } g.restore(); }
+    else { g.fillStyle = V('#000', .3, [.07, .2]); g.fill('evenodd'); }
+    g.restore();
+  } else {
+    var num = b.big, fs = R * (num.length > 4 ? .33 : num.length > 3 ? .4 : .5);
+    g.font = '700 ' + fs + 'px Georgia, "Times New Roman", "DejaVu Serif", serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = R * .01; g.strokeStyle = txtLine; if (mode === 'c' || mode === 'h') g.strokeText(num, C, C - R * .03);
+    g.fillStyle = txtFill; g.fillText(num, C, C - R * .03);
+    g.font = '700 ' + R * .09 + 'px Georgia, "Times New Roman", "DejaVu Serif", serif';
+    g.fillStyle = txtFill; g.fillText(b.unit, C, C + R * .3);
+  }
+  /* wear: scratches, speckle, uneven finish */
+  var w = locked ? .45 : 1;
+  if (mode === 'c') {
+    g.lineWidth = 1;
+    for (i = 0; i < 160; i++) { var sx = rng() * S, sy = rng() * S, sa = rng() * 6.28, sl = 14 + rng() * 70; g.strokeStyle = rng() < .5 ? 'rgba(255,230,160,.09)' : 'rgba(60,30,0,.1)'; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + Math.cos(sa) * sl, sy + Math.sin(sa) * sl); g.stroke(); }
+    for (i = 0; i < 2600; i++) { g.fillStyle = rng() < .5 ? 'rgba(255,225,150,.07)' : 'rgba(50,25,0,.08)'; g.fillRect(rng() * S, rng() * S, 1 + rng() * 2, 1 + rng() * 2); }
+    for (i = 0; i < 40; i++) { var wg = g.createRadialGradient(0, 0, 0, 0, 0, 30 + rng() * 60); wg.addColorStop(0, 'rgba(120,70,0,' + (.1 * w) + ')'); wg.addColorStop(1, 'rgba(120,70,0,0)'); g.save(); g.translate(rng() * S, rng() * S); g.fillStyle = wg; g.fillRect(-100, -100, 200, 200); g.restore(); }
+  } else if (mode === 'r') {
+    g.globalAlpha = .16;
+    for (i = 0; i < 360; i++) { g.fillStyle = V('#000', .5, [.2 + rng() * .45, 1]); g.beginPath(); g.arc(rng() * S, rng() * S, 4 + rng() * 22, 0, 6.2832); g.fill(); }
+    g.globalAlpha = 1;
+  } else {
+    for (i = 0; i < 3000; i++) { g.fillStyle = 'rgba(' + (rng() < .5 ? '255,255,255' : '0,0,0') + ',.05)'; g.fillRect(rng() * S, rng() * S, 1 + rng() * 2, 1 + rng() * 2); }
+  }
+  g.restore();
+}
+function bdEdgePaint(g, mode, W, H, locked) {
+  var V = bdPen(mode), pal = locked ? BD_PAL.dark : BD_PAL.gold, N = 200, sw = W / N, k;
+  g.fillStyle = V(pal.base, .5, [pal.rough * 1.1, pal.metal]); g.fillRect(0, 0, W, H);
+  for (k = 0; k < N; k++) {
+    var gr = g.createLinearGradient(k * sw, 0, (k + 1) * sw, 0);
+    if (mode === 'h') { gr.addColorStop(0, '#222'); gr.addColorStop(.5, '#fff'); gr.addColorStop(1, '#222'); }
+    else if (mode === 'c') { gr.addColorStop(0, pal.lo); gr.addColorStop(.5, pal.hi); gr.addColorStop(1, pal.lo); }
+    else { gr.addColorStop(0, 'rgb(0,100,255)'); gr.addColorStop(.5, 'rgb(0,60,255)'); gr.addColorStop(1, 'rgb(0,100,255)'); }
+    g.fillStyle = gr; g.fillRect(k * sw, 0, sw + .5, H);
+  }
+}
+function bdCanvas(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+/* relief to a normal map: the slope of the height, read off the grey */
+function bdNormal(hc, strength) {
+  var w = hc.width, h = hc.height, src = hc.getContext('2d').getImageData(0, 0, w, h).data, out = bdCanvas(w, h), og = out.getContext('2d'), id = og.createImageData(w, h), d = id.data;
+  for (var y = 0; y < h; y++) {
+    var yu = y > 0 ? y - 1 : y, yd = y < h - 1 ? y + 1 : y;
+    for (var x = 0; x < w; x++) {
+      var xl = x > 0 ? x - 1 : x, xr = x < w - 1 ? x + 1 : x;
+      var dx = (src[(y * w + xr) * 4] - src[(y * w + xl) * 4]) / 255 * strength, dy = (src[(yd * w + x) * 4] - src[(yu * w + x) * 4]) / 255 * strength;
+      var nx = -dx, ny = dy, nz = 1, l = Math.sqrt(nx * nx + ny * ny + nz * nz), o = (y * w + x) * 4;
+      d[o] = (nx / l * .5 + .5) * 255; d[o + 1] = (ny / l * .5 + .5) * 255; d[o + 2] = (nz / l * .5 + .5) * 255; d[o + 3] = 255;
+    }
+  }
+  og.putImageData(id, 0, 0); return out;
+}
+/* the three maps for one face or the edge */
+function bdMaps(paint, w, h, strength) {
+  var c = bdCanvas(w, h), hh = bdCanvas(w, h), r = bdCanvas(w, h);
+  paint(c.getContext('2d'), 'c'); paint(hh.getContext('2d'), 'h'); paint(r.getContext('2d'), 'r');
+  return { c: c, n: bdNormal(hh, strength), r: r };
+}
+function bdFlat(b, locked, S, dateText) {
+  var c = bdCanvas(S, S); bdFacePaint(c.getContext('2d'), 'c', S, b, locked, dateText, false); return c;
+}
+
+/* the studio the metal reflects: a dark room with soft boxes */
+function bdEnvCanvas() {
+  var W = 1024, H = 512, c = bdCanvas(W, H), g = c.getContext('2d');
+  var bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#171b26'); bg.addColorStop(.5, '#2a2f3e'); bg.addColorStop(1, '#0b0d14'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  var box = function (cx, cy, rw, rh, col, a) { var gr = g.createRadialGradient(cx, cy, 0, cx, cy, Math.max(rw, rh)); gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.save(); g.globalAlpha = a; g.translate(cx, cy); g.scale(rw / Math.max(rw, rh), rh / Math.max(rw, rh)); g.translate(-cx, -cy); g.fillStyle = gr; g.fillRect(cx - Math.max(rw, rh), cy - Math.max(rw, rh), Math.max(rw, rh) * 2, Math.max(rw, rh) * 2); g.restore(); };
+  box(W * .75, H * .5, 210, 150, '#fff3d6', 1);
+  box(W * .62, H * .3, 150, 90, '#ffffff', .95);
+  box(W * .9, H * .36, 110, 70, '#ffe2b0', .9);
+  box(W * .7, H * .78, 190, 70, '#ffcf80', .7);
+  box(W * .4, H * .42, 120, 120, '#9db6ff', .55);
+  box(W * .2, H * .5, 120, 90, '#ffe6bd', .5);
+  g.fillStyle = 'rgba(255,255,255,.9)'; g.fillRect(W * .76, 0, 4, H); g.fillStyle = 'rgba(255,240,210,.7)'; g.fillRect(W * .55, 0, 3, H);
+  return c;
+}
+
+/* a coin in a scene */
+function bdBuild(T, b, locked, S, dateText) {
+  var grp = new T.Group(), disposables = [];
+  var tex = function (cv, srgb) { var t = new T.CanvasTexture(cv); if (srgb) t.encoding = T.sRGBEncoding; t.anisotropy = 8; disposables.push(t); return t; };
+  var mk = function (m) { var mat = new T.MeshStandardMaterial({ map: tex(m.c, true), normalMap: tex(m.n, false), roughnessMap: tex(m.r, false), metalnessMap: tex(m.r, false), roughness: 1, metalness: 1, envMapIntensity: 1.25 }); mat.normalScale = new T.Vector2(1.5, 1.5); disposables.push(mat); return mat; };
+  var front = bdMaps(function (g, m) { bdFacePaint(g, m, S, b, locked, dateText, false); }, S, S, 3.2);
+  var back = bdMaps(function (g, m) { bdFacePaint(g, m, S, b, locked, dateText, true); }, S, S, 3.2);
+  var edge = bdMaps(function (g, m) { bdEdgePaint(g, m, 2048, 64, locked); }, 2048, 64, 2.2);
+  var geo = new T.CylinderGeometry(1, 1, .17, 160, 1, false); disposables.push(geo);
+  var mats = [mk(edge), mk(front), mk(back)];
+  var coin = new T.Mesh(geo, mats); coin.rotation.x = Math.PI / 2; grp.add(coin);
+  var gold = locked ? 0x3a3c43 : 0xe3ad34;
+  var rimMat = new T.MeshStandardMaterial({ color: gold, metalness: 1, roughness: .24, envMapIntensity: 1.3 }); disposables.push(rimMat);
+  var rimGeo = new T.TorusGeometry(.965, .03, 14, 160); disposables.push(rimGeo);
+  [-1, 1].forEach(function (s) { var rim = new T.Mesh(rimGeo, rimMat); rim.position.z = s * .085; grp.add(rim); });
+  grp.userData.dispose = function () { disposables.forEach(function (d) { if (d.dispose) d.dispose(); }); };
+  return grp;
+}
+function bdStage(T, canvas, w, h) {
+  var r = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2)); r.setSize(w, h, false);
+  r.outputEncoding = T.sRGBEncoding; r.toneMapping = T.ACESFilmicToneMapping; r.toneMappingExposure = 1.2;
+  var scene = new T.Scene(), cam = new T.PerspectiveCamera(24, w / h, .1, 50); cam.position.set(0, 0, 7);
+  var et = new T.CanvasTexture(bdEnvCanvas()); et.mapping = T.EquirectangularReflectionMapping; et.encoding = T.sRGBEncoding;
+  var pm = new T.PMREMGenerator(r); scene.environment = pm.fromEquirectangular(et).texture; et.dispose(); pm.dispose();
+  var key = new T.DirectionalLight(0xfff0d2, 1.1); key.position.set(-2.5, 3.5, 5); scene.add(key);
+  var rim = new T.DirectionalLight(0x9db6ff, .5); rim.position.set(4, -2, -3); scene.add(rim);
+  return { r: r, scene: scene, cam: cam, key: key, render: function () { r.render(scene, cam); },
+    dispose: function () { scene.environment && scene.environment.dispose(); r.dispose(); } };
+}
+
+/* ── earning, and the case ── */
+function bdStats() {
+  var d0 = dayStart(Date.now()), run = 0, best = 0, hits = 0, total = 0, day = 0;
+  for (var t = firstDay(); t <= d0; t = addDays(t, 1)) {
+    var n = dayTrades(t);
+    total += n; if (n > day) day = n;
+    if (n > 0 && n >= goal(t)) { run++; hits++; if (run > best) best = run; } else run = 0;
+  }
+  var all = within(0, Infinity);
+  return { start: all.length || Object.keys(S.d).length ? 1 : 0, best: best, total: total, day: day, hits: hits, sess: all.length, hours: Math.floor(all.reduce(function (n, x) { return n + len(x); }, 0) / 36e5) };
+}
+var bdSeen = '';
+function bdCheck() {
+  var st = bdStats(), quiet = false, fresh = [], today = isoDay(Date.now());
+  if (!S.bg) { S.bg = {}; quiet = true; }
+  BADGES.forEach(function (b) {
+    if (st[b.m] >= b.need && !S.bg[b.id]) { S.bg[b.id] = b.m === 'start' ? isoDay(firstDay()) : today; fresh.push(b); }
+  });
+  if (fresh.length || quiet) save();
+  if (fresh.length && !quiet) bdAnnounce(fresh);
+}
+function bdDate(k) { return isoMs(k).toLocaleString === undefined ? k : new Date(isoMs(k)).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase(); }
+var bdCache = {};
+function bdThumb(b, locked, px) {
+  var k = b.id + (locked ? 'l' : 'e') + px;
+  if (!bdCache[k]) bdCache[k] = bdFlat(Object.assign({}, b, { thumb: 1 }), locked, px * 3, '').toDataURL('image/png');
+  return bdCache[k];
+}
+function bdImg(b, on, px, tip) {
+  return '<span class="bdc' + (on ? ' bd-t' + b.t : '') + '"' + (tip ? ' data-tip="' + esc(b.n) + '"' : '') + '><img alt="" class="' + (on ? '' : 'is-off') + '" src="' + bdThumb(b, !on, px) + '"></span>';
+}
+function bdProg(b, st) { return Math.min(1, st[b.m] / b.need); }
+function bdPaintCard() {
+  var st = bdStats(), earned = BADGES.filter(function (b) { return S.bg[b.id]; });
+  var sig = earned.map(function (b) { return b.id + S.bg[b.id]; }).join() + '|' + st.best + st.total + st.day + st.hits;
+  if (sig === bdSeen) return; bdSeen = sig;
+  $('svBdN').textContent = earned.length + ' of ' + BADGES.length;
+  var latest = earned.slice().sort(function (p, q) { return S.bg[p.id] < S.bg[q.id] ? 1 : S.bg[p.id] > S.bg[q.id] ? -1 : BADGES.indexOf(q) - BADGES.indexOf(p); }).slice(0, 6);
+  var next = BADGES.filter(function (b) { return !S.bg[b.id]; }).sort(function (p, q) { return bdProg(q, st) - bdProg(p, st); })[0];
+  var html = latest.map(function (b) { return bdImg(b, true, 56, true); }).join('');
+  if (next) html += bdImg(next, false, 56);
+  html += next ? '<div class="bd-x"><b>Next: ' + esc(next.n) + '</b>' + fmt(Math.min(st[next.m], next.need)) + ' of ' + fmt(next.need) + ' ' + BADGE_UNIT[next.m] + '</div>'
+    : '<div class="bd-x"><b>Every badge earned</b></div>';
+  if (!latest.length && next) html = bdImg(next, false, 56) + '<div class="bd-x" style="margin-left:0;text-align:left"><b>Next: ' + esc(next.n) + '</b>' + fmt(Math.min(st[next.m], next.need)) + ' of ' + fmt(next.need) + ' ' + BADGE_UNIT[next.m] + '</div>';
+  $('svBdRow').innerHTML = html;
+}
+function bdAnnounce(list) {
+  var old = document.querySelector('.unl'); if (old) old.remove();
+  var b = list[0], u = document.createElement('button');
+  u.className = 'unl'; u.setAttribute('role', 'status');
+  u.classList.add('bd-t' + b.t); u.innerHTML = bdImg(b, true, 60) + '<div><div class="lbl">Badge unlocked</div><b>' + esc(b.n) + '</b><span>' + esc(b.line) + (list.length > 1 ? ' · and ' + (list.length - 1) + ' more' : '') + '</span></div>';
+  u.addEventListener('click', function () { u.remove(); bdView(b.id); });
+  document.body.appendChild(u);
+  if (b.t >= 3) burst(u);
+  setTimeout(function () { u.remove(); }, 9000);
+}
+function bdLoad(cb) {
+  if (window.THREE) return cb(true);
+  var sc = document.createElement('script'); sc.src = 'three.min.js';
+  sc.onload = function () { cb(!!window.THREE); }; sc.onerror = function () { cb(false); };
+  document.head.appendChild(sc);
+}
+function bdCase() {
+  var all = BADGES.every(function (b) { return S.bg[b.id]; });
+  var groups = [['start', 'The beginning'], ['best', 'Streaks'], ['total', 'Volume'], ['day', 'Best day'], ['hits', 'Consistency'], ['sess', 'Sessions'], ['hours', 'Time']], grid = '';
+  groups.forEach(function (g) {
+    grid += '<div class="lbl bd-gh">' + g[1] + '</div>';
+    BADGES.forEach(function (b) {
+      if (b.m !== g[0]) return;
+      var on = !!S.bg[b.id];
+      grid += '<button data-b="' + b.id + '" aria-label="' + esc(b.n) + ', ' + (on ? 'earned' : 'locked') + '">' + bdImg(b, on, 64) + esc(b.n.replace(/^THE /, '')) + '</button>';
+    });
+  });
+  dialog('<div class="bd-h" style="margin:0"><h2>Badges</h2><span class="hint-k num">' + BADGES.filter(function (b) { return S.bg[b.id]; }).length + ' of ' + BADGES.length + '</span></div>'
+    + '<div class="bd-g">' + grid + '</div>'
+    + '<div class="acts"><button class="btn" id="bdAll">' + (all ? 'Lock the rest again' : 'Unlock all') + '</button><button class="btn pri" data-a="x">Close</button></div>', function (d, close) {
+    d.classList.add('bd-dlg');
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    /* FOR NOW: a way to see every coin without earning it. Unlocking writes
+       the same record earning does, so the card, the case and the viewer
+       all agree; locking again throws it away and lets the record decide. */
+    d.querySelector('#bdAll').addEventListener('click', function () {
+      if (all) S.bg = null;
+      else { S.bg = S.bg || {}; BADGES.forEach(function (b) { if (!S.bg[b.id]) S.bg[b.id] = b.m === 'start' ? isoDay(firstDay()) : isoDay(Date.now()); }); }
+      save(); bdCheck(); bdSeen = ''; bdPaintCard(); close(); bdCase();
+    });
+    d.querySelector('.bd-g').addEventListener('click', function (e) { var b = e.target.closest('[data-b]'); if (b) bdView(b.dataset.b); });
+  });
+}
+/* ONE COIN, ALONE. Pressing a coin takes everything else away: it is lit
+   from behind, turns on its own, and can be taken in the hand. The glow is
+   its tier's, and a locked coin has none. */
+function bdView(id) {
+  var st = bdStats(), at = Math.max(0, BADGES.map(function (b) { return b.id; }).indexOf(id));
+  dialog('<div class="bd-vw"><button class="bd-nv" data-d="-1" aria-label="Previous badge">‹</button><div class="bd-mid"><div class="bd-stage" id="bdStage"><i class="bd-sp" aria-hidden="true"></i></div>'
+    + '<div class="bd-name" id="bdName"></div><div class="bd-line" id="bdLine"></div><div class="bd-st num" id="bdSt"></div><div class="bar" id="bdBar"><i></i></div>'
+    + '<div class="acts"><button class="btn" id="bdSpin">Hold still</button><button class="btn pri" data-a="x">Close</button></div></div><button class="bd-nv" data-d="1" aria-label="Next badge">›</button></div>', function (d, close) {
+    d.classList.add('bd-view');
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    var stage = d.querySelector('#bdStage'), cur = null, T = null, gl = null, coin = null, yaw = 0, pitch = 0, vy = 0, vp = 0, drag = null, still = false, t0 = performance.now(), want = 0;
+    var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function show(n) {
+      at = (n + BADGES.length) % BADGES.length; cur = BADGES[at];
+      var on = !!S.bg[cur.id], seq = ++want;
+      stage.className = 'bd-stage' + (on ? ' bd-t' + cur.t : ' is-off');
+      d.querySelector('#bdName').textContent = cur.n;
+      d.querySelector('#bdLine').textContent = cur.line;
+      d.querySelector('#bdSt').textContent = on ? 'Earned ' + bdDate(S.bg[cur.id]) : cur.m === 'start' ? 'Log a day or a session to begin' : fmt(Math.min(st[cur.m], cur.need)) + ' of ' + fmt(cur.need) + ' ' + BADGE_UNIT[cur.m];
+      d.querySelector('#bdBar').hidden = on; d.querySelector('#bdBar i').style.width = Math.round(bdProg(cur, st) * 100) + '%';
+      var date = on ? 'EARNED ' + bdDate(S.bg[cur.id]) : 'NOT YET EARNED';
+      if (coin && gl) { gl.scene.remove(coin); coin.userData.dispose(); coin = null; }
+      if (!gl) {
+        var flat = new Image(); flat.alt = cur.n + (on ? ', earned' : ', locked'); flat.src = bdFlat(cur, !on, 512, date).toDataURL('image/png');
+        var old = stage.querySelector('img'); if (old) old.remove(); stage.appendChild(flat);
+      }
+      if (T) setTimeout(function () {
+        if (seq !== want || !stage.isConnected) return;
+        if (!gl) { var cv = document.createElement('canvas'); try { gl = bdStage(T, cv, 440, 440); var im = stage.querySelector('img'); if (im) im.remove(); stage.appendChild(cv); } catch (e) { gl = null; T = null; return; } loop(); }
+        coin = bdBuild(T, cur, !on, 1024, date); yaw = 0; pitch = 0; vy = 0; t0 = performance.now(); gl.scene.add(coin);
+      }, 30);
+    }
+    function loop() {
+      if (!stage.isConnected) { if (coin) coin.userData.dispose(); if (gl) gl.dispose(); gl = null; return; }
+      if (coin) {
+        var tt = (performance.now() - t0) / 1000;
+        if (!drag) {
+          if (still) { var k = Math.round(yaw / (Math.PI * 2)) * Math.PI * 2; yaw += (k - yaw) * .2 + vy; vy *= .85; if (Math.abs(k - yaw) < .003 && Math.abs(vy) < .001) { yaw = k; vy = 0; } }
+          else { yaw += vy + (calm ? 0 : .011); vy *= .95; }
+          pitch += vp; vp *= .94; pitch += (0 - pitch) * .04;
+        }
+        coin.rotation.y = yaw; coin.rotation.x = pitch + (calm || still ? 0 : Math.sin(tt * .7) * .05);
+        gl.render();
+      }
+      requestAnimationFrame(loop);
+    }
+    stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX }; vy = 0; try { stage.setPointerCapture(e.pointerId); } catch (x) {} });
+    stage.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - drag.x; drag.x = e.clientX; yaw += dx * .012; vy = dx * .004;
+      if (e.movementY) pitch = Math.max(-.7, Math.min(.7, pitch + e.movementY * .006));
+    });
+    var up = function () { drag = null; };
+    stage.addEventListener('pointerup', up); stage.addEventListener('pointercancel', up);
+    d.querySelector('#bdSpin').addEventListener('click', function () { still = !still; this.textContent = still ? 'Spin' : 'Hold still'; });
+    d.querySelectorAll('.bd-nv').forEach(function (b) { b.addEventListener('click', function () { show(at + (+b.dataset.d)); }); });
+    document.addEventListener('keydown', function key(e) {
+      if (!stage.isConnected) { document.removeEventListener('keydown', key); return; }
+      if (e.key === 'ArrowRight') show(at + 1); else if (e.key === 'ArrowLeft') show(at - 1);
+    });
+    show(at);
+    bdLoad(function (ok) { if (!ok || !stage.isConnected) return; var cv = document.createElement('canvas'), probe; try { probe = cv.getContext('webgl2') || cv.getContext('webgl'); } catch (x) { probe = null; } if (!probe) return; T = window.THREE; show(at); });
+  });
+}
+/* ── start, pause and end ── */
 function start() {
-  S.run = { k: S.kind, a: Date.now(), t: '', p: 0, pa: null };
+  S.run = { a: Date.now(), p: 0, pa: null };
   save(); clockOn(); paint();
-  if (S.run.k === 'live') { stampFirst(); $('svNotes').focus(); }
 }
 function file(sess) {
   S.s.push(sess); save(); paint();
-  toast(KINDS[sess.k] + ' · ' + dur(len(sess)), function () {
+  toast('Backtest · ' + dur(len(sess)), function () {
     S.s = S.s.filter(function (x) { return x.i !== sess.i; }); save(); paint();
   });
 }
@@ -781,9 +1415,8 @@ function end() {
   S.run = null; clockOn();
   /* ended while paused, it ends where the pause began: the time away is
      not part of the session, however long it was */
-  var sess = { i: id(), k: run.k, a: run.a, b: b, n: 0 };
+  var sess = { i: id(), k: 'bt', a: run.a, b: b, n: 0 };
   if (run.p > 0) sess.p = run.p;
-  if (run.k === 'live') { var t = $('svNotes').value; if (t.trim()) sess.t = t.slice(0, 20000); }
   file(sess);
 }
 function toggle() { if (S.run) end(); else start(); }
@@ -810,21 +1443,19 @@ function weekData(w0) {
   var days = [], hit = 0, best = null, total = 0;
   for (var i = 0; i < 7; i++) {
     var t = addDays(w0, i), n = dayTrades(t);
-    days.push({ t: t, n: n }); total += n;
-    if (t <= d0 && n >= S.g.bt) hit++;
+    days.push({ t: t, n: n, g: goal(t) }); total += n;
+    if (t <= d0 && n >= goal(t)) hit++;
     if (n && (!best || n > best.n)) best = { t: t, n: n };
   }
-  var list = within(w0, w1);
-  return { trades: total, goal: S.g.bt * 7, live: mins(list, 'live'), cnt: mins(list, 'cnt'),
-    btMs: btMs(w0, w1), pace: rangePace(w0, w1), prevPace: rangePace(addDays(w0, -7), w0),
-    days: days, hit: hit, best: best };
+  return { trades: total, goal: goalIn(w0, w1), btMs: btMs(w0, w1), pace: rangePace(w0, w1), prevPace: rangePace(addDays(w0, -7), w0),
+    days: days, hit: hit, best: best, daily: goal(w0) };
 }
 function review(w0, celebrate) {
   var first = weekStart(firstDay()), cur = weekStart(Date.now());
   dialog('', function (d) {
     function draw() {
       var W = weekData(w0), win = W.trades >= W.goal, live = w0 === cur;
-      var max = Math.max.apply(null, W.days.map(function (x) { return x.n; }).concat([S.g.bt]));
+      var max = Math.max.apply(null, W.days.map(function (x) { return x.n; }).concat(W.days.map(function (x) { return x.g; })));
       var pc = '';
       if (W.pace && W.prevPace) {
         var dd = Math.round((W.prevPace - W.pace) / 1000);
@@ -838,13 +1469,12 @@ function review(w0, celebrate) {
         + '<div class="rv-big num"><b>' + fmt(W.trades) + '</b><span>trades of ' + fmt(W.goal) + (win ? ' · target hit' : ' · ' + fmt(W.goal - W.trades) + (live ? ' to go' : ' short')) + '</span></div>'
         + '<div class="rv-bar"><i style="width:' + Math.round(Math.min(1, W.trades / W.goal) * 100) + '%"></i></div>'
         + '<div class="rv-figs num">'
-        + '<div><span>Live charts</span><b>' + dur(W.live * 6e4) + '</b><small>of ' + dur(S.g.wkLive * 6e4) + '</small></div>'
-        + '<div><span>Days on target</span><b>' + W.hit + ' / 7</b><small>' + S.g.bt + ' a day</small></div>'
-        + '<div><span>Backtesting time</span><b>' + dur(W.btMs) + '</b><small>content ' + dur(W.cnt * 6e4) + '</small></div>'
+        + '<div><span>Days on target</span><b>' + W.hit + ' / 7</b><small>' + W.daily + ' a day</small></div>'
+        + '<div><span>Backtesting time</span><b>' + dur(W.btMs) + '</b><small>on the clock</small></div>'
         + '<div><span>Pace</span><b>' + (W.pace ? per(W.pace) : '–') + '</b><small>' + (pc || 'a trade') + '</small></div>'
         + '</div><div class="rv-days num">'
         + W.days.map(function (x) {
-          return '<div><em>' + (x.n || '') + '</em><i class="' + (x.n >= S.g.bt ? 'is-hit' : '') + '" style="height:' + Math.max(3, Math.round(x.n / max * 70)) + 'px"></i><span>'
+          return '<div><em>' + (x.n || '') + '</em><i class="' + (x.n >= x.g ? 'is-hit' : '') + '" style="height:' + Math.max(3, Math.round(x.n / max * 70)) + 'px"></i><span>'
             + new Date(x.t).toLocaleDateString('en-GB', { weekday: 'short' }) + '</span></div>';
         }).join('')
         + '</div><p class="rv-best">' + (W.best ? 'Best day: ' + new Date(W.best.t).toLocaleDateString('en-GB', { weekday: 'long' }) + ' · ' + W.best.n + ' trades' : 'No trades logged this week') + '</p>'
@@ -875,7 +1505,6 @@ function burst(host) {
 function addPast() {
   var now = new Date(), iso = isoDay(now.getTime());
   dialog('<h2>Add a past session</h2>'
-    + '<label class="fld"><span>Session</span><select class="in" id="svPK"><option value="bt">Backtest</option><option value="live">Live charts</option><option value="cnt">Content + journal</option></select></label>'
     + '<div class="two"><label class="fld"><span>Day</span><input class="in num" id="svPD" type="date" value="' + iso + '" max="' + iso + '" /></label>'
     + '<label class="fld"><span>Started</span><input class="in num" id="svPS" type="time" value="' + pad(now.getHours()) + ':00" /></label></div>'
     + '<label class="fld"><span>Minutes</span><input class="in num" id="svPM" type="number" min="1" max="720" value="60" /></label>'
@@ -888,23 +1517,24 @@ function addPast() {
       var p = dv.split('-'), q = sv.split(':');
       var a = new Date(+p[0], +p[1] - 1, +p[2], +q[0], +q[1]).getTime();
       close();
-      file({ i: id(), k: d.querySelector('#svPK').value, a: a, b: a + m * 6e4, n: 0 });
+      file({ i: id(), k: 'bt', a: a, b: a + m * 6e4, n: 0 });
     });
   });
 }
 
 /* ── a day's counter, for a day you forgot ── */
 function dayEdit(k) {
-  var r = S.d[k] || {}, pe = prevEnd(isoMs(k));
-  dialog('<h2>' + esc(dayName(isoMs(k))) + '</h2><p>Where the counter was, and where it ended.</p>'
-    + '<div class="two"><label class="fld"><span>Started the day at</span><input class="in num" data-f="a" type="number" min="0" inputmode="numeric" placeholder="' + (pe !== null ? pe : 0) + '" value="' + (r.a !== undefined ? r.a : '') + '" /></label>'
-    + '<label class="fld"><span>Ended at</span><input class="in num" data-f="b" type="number" min="0" inputmode="numeric" value="' + (r.b !== undefined ? r.b : '') + '" /></label></div>'
+  var r = S.d[k] || {}, pe = prevEnd(isoMs(k)), v = function (w) { return r[w] !== undefined ? r[w] : ''; };
+  var inp = function (w, label, ph) { return '<label class="fld"><span>' + label + '</span><input class="in num" data-f="' + w + '" type="number" min="0" inputmode="numeric"' + (ph !== undefined ? ' placeholder="' + ph + '"' : '') + ' value="' + v(w) + '" /></label>'; };
+  dialog('<h2>' + esc(dayName(isoMs(k))) + '</h2><p>Where the counter was at the start and the end of the day.</p>'
+    + '<div class="two">' + inp('a', 'Started the day at', pe !== null ? pe : 0) + inp('b', 'Ended at') + '</div>'
     + '<div class="acts"><button class="btn" data-a="x">Cancel</button><button class="btn pri" data-a="save">Save</button></div>', function (d, close) {
-    var f = d.querySelector('[data-f="b"]'); f.focus();
+    d.querySelector('[data-f="b"]').focus();
     d.querySelector('[data-a="x"]').addEventListener('click', close);
     function done() {
-      var wk = weekStart(isoMs(k)), before = tradesIn(wk, addDays(wk, 7));
-      setCounter(k, 'a', d.querySelector('[data-f="a"]').value); setCounter(k, 'b', d.querySelector('[data-f="b"]').value);
+      var wk = weekStart(isoMs(k)), before = tradesIn(wk, addDays(wk, 7)), f = {};
+      ['a', 'b'].forEach(function (w) { f[w] = d.querySelector('[data-f="' + w + '"]').value; });
+      setDay(k, f);
       close(); paint(); crossed(wk, before);
     }
     d.querySelector('[data-a="save"]').addEventListener('click', done);
@@ -913,33 +1543,51 @@ function dayEdit(k) {
 }
 /* Crossing the week's target is the one moment the app makes a fuss. */
 function crossed(w0, before) {
-  var goal = S.g.bt * 7, after = tradesIn(w0, addDays(w0, 7));
-  if (before < goal && after >= goal && S.cel !== isoDay(w0)) { S.cel = isoDay(w0); save(); setTimeout(function () { review(w0, true); }, 300); }
+  var g = goalIn(w0, addDays(w0, 7)), after = tradesIn(w0, addDays(w0, 7));
+  if (before < g && after >= g && S.cel !== isoDay(w0)) { S.cel = isoDay(w0); save(); setTimeout(function () { review(w0, true); }, 300); }
 }
 
-/* ── targets and backup ── */
+/* ── expectancy, opened ── */
+function expectancy() {
+  var x = expect(), g = goal(dayStart(Date.now()));
+  var row = function (name, big, small) { return '<div class="ex-r"><span>' + name + '</span><b class="num">' + big + (small ? '<small>' + small + '</small>' : '') + '</b></div>'; };
+  var over = x.days >= 1 ? (x.days === 1 ? 'the last day' : 'the last ' + x.days + ' days') : 'today so far';
+  dialog('<h2>Expectancy</h2><p>' + (x.has ? 'What to expect at your own pace: ' + x.rr + ' a day over ' + over + '.' : 'Log a day and it works out what to expect.') + '</p>'
+    + (x.has ? '<div class="ex">'
+      + row('Today finishes at', fmt(x.today), 'you have ' + x.done)
+      + row('This week', fmt(x.week), x.wkSo + ' so far')
+      + row('This month', fmt(x.month), x.moSo + ' so far')
+      + row('Against ' + g + ' a day', x.rr >= g ? '✓' : fmt(g - x.rr), x.rr >= g ? 'at or above it' : 'a day short')
+      + '</div>' : '')
+    + '<div class="acts"><button class="btn" data-a="rv">Weekly review</button><button class="btn pri" data-a="x">Close</button></div>', function (d, close) {
+    d.querySelector('[data-a="x"]').addEventListener('click', close);
+    d.querySelector('[data-a="rv"]').addEventListener('click', function () { close(); review(weekStart(Date.now()), false); });
+  });
+}
+
+/* ── the target and backup ──
+   Changing the target here starts a new fortnight from today: it is
+   written into the history from this day on, and every day before it
+   stays judged against what it was. */
 function settings() {
-  dialog('<h2>Targets</h2>'
-    + '<div class="two"><label class="fld"><span>Trades a day</span><input class="in num" data-g="bt" type="number" min="1" value="' + S.g.bt + '" /></label>'
-    + '<label class="fld"><span>Live minutes a day</span><input class="in num" data-g="live" type="number" min="1" value="' + S.g.live + '" /></label></div>'
-    + '<div class="two"><label class="fld"><span>Live hours a week</span><input class="in num" data-g="wkLive" type="number" min="0.5" step="0.5" value="' + (S.g.wkLive / 60) + '" /></label>'
-    + '<label class="fld"><span>Content minutes a day</span><input class="in num" data-g="cnt" type="number" min="1" value="' + S.g.cnt + '" /></label></div>'
-    + '<label class="chk"><input type="checkbox" id="svRemOn"' + (S.rem.on ? ' checked' : '') + ' /> Remind me to start live charts at</label>'
-    + '<label class="fld"><input class="in num" id="svRemAt" type="time" value="' + S.rem.at + '" aria-label="Reminder time" /></label>'
+  var g0 = goal(dayStart(Date.now()));
+  dialog('<h2>Target</h2>'
+    + '<div class="two"><label class="fld"><span>Trades a day</span><input class="in num" data-g="n" type="number" min="1" value="' + g0 + '" /></label>'
+    + '<label class="fld"><span>Raise it by</span><input class="in num" data-g="step" type="number" min="0" value="' + S.g.step + '" /></label></div>'
+    + '<label class="fld"><span>Every how many days</span><input class="in num" data-g="every" type="number" min="1" value="' + S.g.every + '" /></label>'
     + '<div class="acts"><button class="btn" data-a="exp">Download backup</button><button class="btn" data-a="imp">Restore</button></div>'
     + '<div class="acts"><button class="btn" data-a="x">Cancel</button><button class="btn pri" data-a="save">Save</button></div>', function (d, close) {
     d.querySelector('[data-a="x"]').addEventListener('click', close);
     d.querySelector('[data-a="save"]').addEventListener('click', function () {
-      Array.prototype.forEach.call(d.querySelectorAll('[data-g]'), function (inp) {
-        var v = +inp.value, k = inp.dataset.g;
-        if (k === 'wkLive') v = v * 60;
-        if (v > 0) S.g[k] = Math.round(v);
-      });
-      var on = d.querySelector('#svRemOn').checked, at = d.querySelector('#svRemAt').value;
-      if (/^\d\d:\d\d$/.test(at) && at !== S.rem.at) { S.rem.at = at; S.rem.last = ''; }
-      S.rem.on = on;
-      /* asked on this press, which is a real gesture: the only honest moment */
-      if (on && 'Notification' in window && Notification.permission === 'default') { try { Notification.requestPermission(); } catch (e) {} }
+      var q = function (w) { return +d.querySelector('[data-g="' + w + '"]').value; };
+      var step = q('step'), every = q('every'), n = Math.round(q('n')), today = isoDay(Date.now());
+      var changed = false;
+      if (isFinite(step) && step >= 0 && Math.round(step) !== S.g.step) { S.g.step = Math.round(step); changed = true; }
+      if (isFinite(every) && every >= 1 && Math.round(every) !== S.g.every) { S.g.every = Math.round(every); changed = true; }
+      if (n > 0 && (n !== g0 || changed)) {
+        var last = S.t[S.t.length - 1];
+        if (last.f === today) last.n = n; else S.t.push({ f: today, n: n });
+      }
       save(); close(); paint();
     });
     d.querySelector('[data-a="exp"]').addEventListener('click', function () {
@@ -967,14 +1615,9 @@ function settings() {
 /* ── wiring ── */
 $('svGo').addEventListener('click', toggle);
 $('svPause').addEventListener('click', togglePause);
-$('svKinds').addEventListener('click', function (e) {
-  var b = e.target.closest('.kind'); if (!b || S.run) return;
-  S.kind = b.dataset.k; save(); paintControls();
-  /* so Space, which starts a session, does not press this chip again */
-  b.blur();
-});
 $('svAdd').addEventListener('click', addPast);
-$('svRev').addEventListener('click', function () { review(weekStart(Date.now()), false); });
+$('svSet').addEventListener('click', settings);
+$('svEx').addEventListener('click', expectancy);
 
 /* The counter is saved as it is typed, so a closed window loses nothing,
    and the week is only judged when you leave the field: a number half
@@ -1004,28 +1647,7 @@ document.addEventListener('mousemove', function (e) {
 });
 document.addEventListener('mouseleave', function () { tip.classList.remove('on'); });
 
-/* ── time-stamped notes ──
-   Every line of the live notes starts with the time it was begun, so
-   the page reads back as the session happened. Shift+Enter is a plain
-   new line, for a thought that runs on. */
-function stamp() { return hm(Date.now()) + '  '; }
-function stampFirst() { var n = $('svNotes'); if (!n.value) { n.value = stamp(); if (S.run) S.run.t = n.value; } }
-var noteT = null;
-$('svNotes').addEventListener('input', function () {
-  if (!S.run) return;
-  S.run.t = this.value;
-  clearTimeout(noteT); noteT = setTimeout(save, 250);
-});
-$('svNotes').addEventListener('keydown', function (e) {
-  if (e.key !== 'Enter' || e.shiftKey || e.isComposing) return;
-  e.preventDefault();
-  var n = this, a = n.selectionStart, b = n.selectionEnd, ins = '\n' + stamp();
-  n.value = n.value.slice(0, a) + ins + n.value.slice(b);
-  n.selectionStart = n.selectionEnd = a + ins.length;
-  n.dispatchEvent(new Event('input'));
-});
-$('svNotes').addEventListener('focus', function () { if (S.run && S.run.k === 'live') stampFirst(); });
-$('svSet').addEventListener('click', settings);
+$('svBd').addEventListener('click', function () { bdCase(); });
 $('svLog').addEventListener('click', function (e) {
   if (e.target.closest('[data-more]')) { logAll = !logAll; paintLog(); return; }
   var dd = e.target.closest('[data-day]'); if (dd) { dayEdit(dd.dataset.day); return; }
@@ -1045,8 +1667,6 @@ document.addEventListener('keydown', function (e) {
   if (S.run) togglePause(); else start();
 });
 /* Another window, or the same app open twice, writes the key: follow it. */
-/* typing is saved on a short timer; closing the window must not lose the last line */
-window.addEventListener('pagehide', function () { if (noteT) { clearTimeout(noteT); save(); } });
 window.addEventListener('storage', function (e) { if (e.key === KEY) { S = load(); clockOn(); paint(); } });
 /* The date can roll over while the app sits open; repaint once a minute. */
 setInterval(paint, 60000);
@@ -1062,8 +1682,6 @@ document.addEventListener('visibilitychange', function () { if (!document.hidden
   });
 })();
 
-/* Between 20:00 and 21:00 the session on offer is the live one. */
-if (!S.run) { var hr = new Date().getHours(); if (hr === 20) S.kind = 'live'; }
 paint(); clockOn();
 
 /* The first open of a new week reviews the week just gone, once. */
