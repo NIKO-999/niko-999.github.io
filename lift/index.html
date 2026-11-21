@@ -4301,9 +4301,39 @@ function lfCardDraw(sp, prog, into) {
   if (wk && sp.top && sp.top.length) { sp.top.forEach(function (tl) { T(tl, 32, 700, 'rgba(255,255,255,.82)', y + 4, 'center', W - 180); y += 52; }); y += 6; }
   fade(.6, .12);
   if (sp.prs && sp.prs.length) {
-    var ptxt = (sp.prs.length === 1 ? '1 new record' : sp.prs.length + ' new records'); x.font = '800 32px ' + FF; var pw = x.measureText(ptxt).width + 80, ph = cp ? 62 : 70;
-    x.fillStyle = A(1); rr(W / 2 - pw / 2, y - 44, pw, ph, ph / 2); x.fill(); x.fillStyle = '#0b0b0e'; x.textAlign = 'center'; x.fillText(ptxt, W / 2, y + 2);
-    y += 40; var pn = sp.prs.slice(0, 3).join('  ·  ') + (sp.prs.length > 3 ? '  +' + (sp.prs.length - 3) : ''); T(pn, 29, 600, 'rgba(255,255,255,.7)', y + 24, 'center', W - 180); y += cp ? 70 : 82;
+    /* THE RECORDS AS CHIPS, the way the review's own list draws them: a small label, then a rounded chip for each lift with a trophy, in the accent, under a divider heading. They wrap onto as many rows as they need. */
+    var pl = sp.prs.slice(0, 4), pex = sp.prs.length - pl.length;
+    /* THE HEADING IS A DIVIDER: the words in the accent between two lines that fade out toward the edges */
+    x.save(); fade(.6, .12); x.textAlign = 'center'; x.font = '800 26px ' + FF; if ('letterSpacing' in x) x.letterSpacing = '5px'; var hw = x.measureText('NEW RECORDS').width;
+    x.fillStyle = A(1); x.fillText('NEW RECORDS', W / 2 + 2, y); if ('letterSpacing' in x) x.letterSpacing = '0px';
+    var hl = x.createLinearGradient(90, 0, W / 2 - hw / 2 - 24, 0); hl.addColorStop(0, A(0)); hl.addColorStop(1, A(.9)); x.fillStyle = hl; x.fillRect(90, y - 10, W / 2 - hw / 2 - 24 - 90, 2);
+    var hr = x.createLinearGradient(W / 2 + hw / 2 + 24, 0, W - 90, 0); hr.addColorStop(0, A(.9)); hr.addColorStop(1, A(0)); x.fillStyle = hr; x.fillRect(W / 2 + hw / 2 + 24, y - 10, W - 90 - (W / 2 + hw / 2 + 24), 2);
+    x.restore();
+    y += 34;
+    var CH = 78, CG = 14, MAXW = W - 180, chips = pl.map(function (nm) { x.font = '700 33px ' + FF; var tw = x.measureText(nm).width; return { nm: nm, tw: tw, w: 24 + 36 + 12 + tw + 28 }; });
+    if (pex > 0) { x.font = '700 33px ' + FF; chips.push({ nm: '+' + pex, tw: x.measureText('+' + pex).width, w: x.measureText('+' + pex).width + 48, more: 1 }); }
+    var rowsC = [[]], rw0 = 0; chips.forEach(function (c) { if (rw0 && rw0 + CG + c.w > MAXW) { rowsC.push([]); rw0 = 0; } rowsC[rowsC.length - 1].push(c); rw0 += (rw0 ? CG : 0) + c.w; });
+    var ci = 0;
+    rowsC.forEach(function (row) {
+      var tot = row.reduce(function (a, c) { return a + c.w; }, 0) + CG * (row.length - 1), cx = (W - tot) / 2;
+      row.forEach(function (c) {
+        x.globalAlpha = anim ? eo((P - (.62 + ci * .04)) / .1) : 1; ci++;
+        x.fillStyle = A(.2); rr(cx, y, c.w, CH, CH / 2); x.fill();
+        x.textAlign = 'left'; x.fillStyle = A(1);
+        if (c.more) { x.font = '700 33px ' + FF; x.fillText(c.nm, cx + 24, y + CH / 2 + 11); }
+        else {
+          /* the trophy: a cup, two handles, a stem and a foot */
+          var tx0 = cx + 24 + 18, ty0 = y + CH / 2; x.save(); x.translate(tx0, ty0); x.strokeStyle = A(1); x.fillStyle = A(1); x.lineWidth = 3.4; x.lineCap = 'round'; x.lineJoin = 'round';
+          x.beginPath(); x.moveTo(-9, -13); x.lineTo(9, -13); x.lineTo(9, -6); x.quadraticCurveTo(9, 4, 0, 4); x.quadraticCurveTo(-9, 4, -9, -6); x.closePath(); x.fill();
+          x.beginPath(); x.moveTo(-9, -10); x.quadraticCurveTo(-17, -10, -15, -4); x.quadraticCurveTo(-14, 0, -8, 0); x.moveTo(9, -10); x.quadraticCurveTo(17, -10, 15, -4); x.quadraticCurveTo(14, 0, 8, 0); x.stroke();
+          x.beginPath(); x.moveTo(0, 4); x.lineTo(0, 11); x.moveTo(-6, 13); x.lineTo(6, 13); x.stroke(); x.restore();
+          x.font = '700 33px ' + FF; x.fillStyle = A(1); x.fillText(c.nm, cx + 24 + 36 + 12, y + CH / 2 + 11);
+        }
+        cx += c.w + CG;
+      });
+      y += CH + CG;
+    });
+    x.globalAlpha = 1; y += cp ? 20 : 28;
   } else y += cp ? 6 : 0;
   /* the workout itself: as large as it can be and still all be there */
   var top = y, bottom = 1670, avail = bottom - top - 40, scale = 1, lines = sp.lines || [];
