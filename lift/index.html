@@ -2367,16 +2367,23 @@ function fromDisp(v) { return S.unit === 'lb' ? v * LB : v; }
 function capW(kg) { return Math.min(W_MAX, Math.max(0, kg)); }
 function capR(r) { return Math.min(REP_MAX, Math.max(0, r)); }
 function lfCapIn(inp, max) { var v = parseFloat(inp.value); if (isFinite(v) && v > max) { inp.value = String(max); inp.classList.remove('is-cap'); void inp.offsetWidth; inp.classList.add('is-cap'); buzz(8); } }
-/* PRs START AFTER TWO WEEKS. Everything is a PR the first time you log
-   it, so for the first fourteen days from your first workout you are
-   building the numbers a PR is measured against, and nothing counts. And
-   a jump past half again your best and 10 kg more is a typo, not a PR. */
+/* A JUMP PAST HALF AGAIN YOUR BEST AND 10 KG MORE IS A TYPO, not a PR (see lfPrOk). The old two-week rule is gone: a lift now has to have three earlier days logged before it can set a record (lfPrN). lfPrFrom is kept only as the argument the callers already pass. */
 function lfPrFrom() {
   var f = ''; S.wo.forEach(function (w) { if (!f || w.d < f) f = w.d; });
   if (!f) f = ymd(today());
   var p = f.split('-'); return ymd(addDays(new Date(+p[0], +p[1] - 1, +p[2]), 14));
 }
-function lfPrOk(d, w, best, from) { return d >= (from || lfPrFrom()) && w <= best * 1.5 + 10 + 1e-9; }
+/* A LIFT HAS TO BE KNOWN BEFORE IT CAN SET A RECORD: three earlier days on which you logged it. The first time you do an exercise it is not your best, only your first, and a fourth day is when "heavier than ever" starts to mean anything. This replaced "nothing counts for the first two weeks", which held back every lift you had trained for years and let a brand-new one through on day fifteen. */
+var PR_MIN = 3, prMemo = { k: '', m: null };
+function lfPrN(id, d) {
+  var k = S.wo.length + '|' + S.wo.reduce(function (a, w) { return a + w.x.length; }, 0);
+  if (prMemo.k !== k || !prMemo.m) {
+    var m = {}; S.wo.forEach(function (w) { w.x.forEach(function (e) { if (e.sets.some(function (q) { return +q.r > 0; })) { (m[e.id] = m[e.id] || {})[w.d] = 1; } }); });
+    Object.keys(m).forEach(function (i) { m[i] = Object.keys(m[i]).sort(); }); prMemo = { k: k, m: m };
+  }
+  var days = prMemo.m[id] || [], n = 0; for (var i = 0; i < days.length && days[i] < d; i++) n++; return n;
+}
+function lfPrOk(d, w, best, from, id) { return w <= best * 1.5 + 10 + 1e-9 && lfPrN(id, d) >= PR_MIN; }
 function fmtW(kg) { var v = Math.round(toDisp(kg) * 10) / 10; return String(v); }
 /* A SET'S weight: nought is your body weight, and says so. "0 × 12" on a
    sit-up reads as a set that lifted nothing; "BW × 12" is what it was. */
@@ -2801,7 +2808,7 @@ function lfTags() {
     var best = {};
     S.wo.forEach(function (w) { if (w.d < tk) w.x.forEach(function (e) { e.sets.forEach(function (q) { if (q.r > 0 && (best[e.id] === undefined || (+q.w || 0) > best[e.id])) best[e.id] = +q.w || 0; }); }); });
     var prs = 0, pf = lfPrFrom();
-    ws.forEach(function (w) { w.x.forEach(function (e) { if (best[e.id] !== undefined && e.sets.some(function (q) { var v = +q.w || 0; return q.r > 0 && v > 0 && v > best[e.id] + 1e-9 && lfPrOk(w.d, v, best[e.id], pf); })) prs++; }); });
+    ws.forEach(function (w) { w.x.forEach(function (e) { if (best[e.id] !== undefined && e.sets.some(function (q) { var v = +q.w || 0; return q.r > 0 && v > 0 && v > best[e.id] + 1e-9 && lfPrOk(w.d, v, best[e.id], pf, e.id); })) prs++; }); });
     if (prs) out.push(['pr', prs === 1 ? 'New PR' : prs + ' new PRs']);
     var w0 = ws[ws.length - 1], prev = woSorted().filter(function (w) { return w.d < tk && w.n === w0.n; }).pop();
     if (prev && woVol(prev) > 0) { var p = Math.round((woVol(w0) - woVol(prev)) / woVol(prev) * 100); if (p > 0) out.push(['up', '+' + p + '% today']); }
@@ -3049,7 +3056,7 @@ function lfTrendSheet(k, src) {
       w.x.forEach(function (e) {
         var top = -1; e.sets.forEach(function (st) { if (st.r > 0 && (+st.w || 0) > top) top = +st.w || 0; });
         if (top < 0) return;
-        if (bestW[e.id] !== undefined && top > 0 && top > bestW[e.id] + 1e-9 && lfPrOk(w.d, top, bestW[e.id], pf)) { hitW++; if (ix >= 0) prJ[ix] = Math.max(prJ[ix], top - bestW[e.id]); }
+        if (bestW[e.id] !== undefined && top > 0 && top > bestW[e.id] + 1e-9 && lfPrOk(w.d, top, bestW[e.id], pf, e.id)) { hitW++; if (ix >= 0) prJ[ix] = Math.max(prJ[ix], top - bestW[e.id]); }
         if (bestW[e.id] === undefined || top > bestW[e.id]) bestW[e.id] = top;
       });
       if (ix >= 0) prN[ix] += hitW;
@@ -3934,7 +3941,7 @@ function lfIsPr(e, si, s) {
   function look(q) { if ((+q.r || 0) > 0 && (+q.w || 0) > top) top = +q.w || 0; }
   historyFor(e.id).forEach(function (h) { h.sets.forEach(look); });
   for (var i = 0; i < si; i++) if (e.sets[i].ok) look(e.sets[i]);
-  return top >= 0 && w > top + 1e-9 && lfPrOk(ymd(today()), w, top);
+  return top >= 0 && w > top + 1e-9 && lfPrOk(ymd(today()), w, top, 0, e.id);
 }
 function lfIsRep(e, si, s) {
   var w = +s.w || 0, r = +s.r || 0; if (!(r > 0)) return false;
@@ -4107,7 +4114,7 @@ function lfWoPrs(w) {
     var top = -1, before = -1;
     e.sets.forEach(function (q) { if (q.r > 0) top = Math.max(top, +q.w || 0); });
     S.wo.forEach(function (o) { if (o === w || !(o.d < w.d || (o.d === w.d && o.s < w.s))) return; o.x.forEach(function (x) { if (x.id === e.id) x.sets.forEach(function (q) { if (q.r > 0) before = Math.max(before, +q.w || 0); }); }); });
-    if (before >= 0 && top > 0 && top > before + 1e-9 && lfPrOk(w.d, top, before, pf)) out.push(exName(e.id, e.n));
+    if (before >= 0 && top > 0 && top > before + 1e-9 && lfPrOk(w.d, top, before, pf, e.id)) out.push(exName(e.id, e.n));
   });
   return out;
 }
@@ -4302,7 +4309,7 @@ function lfCardDraw(sp, prog, into) {
   fade(.6, .12);
   if (sp.prs && sp.prs.length) {
     /* THE RECORDS AS CHIPS, the way the review's own list draws them: a small label, then a rounded chip for each lift with a trophy, in the accent, under a divider heading. They wrap onto as many rows as they need. */
-    var pl = sp.prs.slice(0, 4), pex = sp.prs.length - pl.length;
+    /* EVERY RECORD IS NAMED: none is folded into a "+ more". Past three they draw a little smaller so the workout under them keeps its room. */
     /* THE HEADING IS A DIVIDER: the words in the accent between two lines that fade out toward the edges */
     x.save(); fade(.6, .12); x.textAlign = 'center'; x.font = '800 26px ' + FF; if ('letterSpacing' in x) x.letterSpacing = '5px'; var hw = x.measureText('NEW RECORDS').width;
     x.fillStyle = A(1); x.fillText('NEW RECORDS', W / 2 + 2, y); if ('letterSpacing' in x) x.letterSpacing = '0px';
@@ -4310,8 +4317,8 @@ function lfCardDraw(sp, prog, into) {
     var hr = x.createLinearGradient(W / 2 + hw / 2 + 24, 0, W - 90, 0); hr.addColorStop(0, A(.9)); hr.addColorStop(1, A(0)); x.fillStyle = hr; x.fillRect(W / 2 + hw / 2 + 24, y - 10, W - 90 - (W / 2 + hw / 2 + 24), 2);
     x.restore();
     y += 34;
-    var CH = 78, CG = 14, MAXW = W - 180, chips = pl.map(function (nm) { x.font = '700 33px ' + FF; var tw = x.measureText(nm).width; return { nm: nm, tw: tw, w: 24 + 36 + 12 + tw + 28 }; });
-    if (pex > 0) { x.font = '700 33px ' + FF; chips.push({ nm: '+' + pex, tw: x.measureText('+' + pex).width, w: x.measureText('+' + pex).width + 48, more: 1 }); }
+    var pl = sp.prs, cs = pl.length <= 3 ? 1 : pl.length <= 6 ? .8 : .66;
+    var CH = 78 * cs, CG = 14 * cs, MAXW = W - 180, fz = 33 * cs, chips = pl.map(function (nm) { x.font = '700 ' + fz + 'px ' + FF; var tw = x.measureText(nm).width; return { nm: nm, tw: tw, w: (24 + 36 + 12 + 28) * cs + tw }; });
     var rowsC = [[]], rw0 = 0; chips.forEach(function (c) { if (rw0 && rw0 + CG + c.w > MAXW) { rowsC.push([]); rw0 = 0; } rowsC[rowsC.length - 1].push(c); rw0 += (rw0 ? CG : 0) + c.w; });
     var ci = 0;
     rowsC.forEach(function (row) {
@@ -4320,15 +4327,12 @@ function lfCardDraw(sp, prog, into) {
         x.globalAlpha = anim ? eo((P - (.62 + ci * .04)) / .1) : 1; ci++;
         x.fillStyle = A(.2); rr(cx, y, c.w, CH, CH / 2); x.fill();
         x.textAlign = 'left'; x.fillStyle = A(1);
-        if (c.more) { x.font = '700 33px ' + FF; x.fillText(c.nm, cx + 24, y + CH / 2 + 11); }
-        else {
-          /* the trophy: a cup, two handles, a stem and a foot */
-          var tx0 = cx + 24 + 18, ty0 = y + CH / 2; x.save(); x.translate(tx0, ty0); x.strokeStyle = A(1); x.fillStyle = A(1); x.lineWidth = 3.4; x.lineCap = 'round'; x.lineJoin = 'round';
-          x.beginPath(); x.moveTo(-9, -13); x.lineTo(9, -13); x.lineTo(9, -6); x.quadraticCurveTo(9, 4, 0, 4); x.quadraticCurveTo(-9, 4, -9, -6); x.closePath(); x.fill();
-          x.beginPath(); x.moveTo(-9, -10); x.quadraticCurveTo(-17, -10, -15, -4); x.quadraticCurveTo(-14, 0, -8, 0); x.moveTo(9, -10); x.quadraticCurveTo(17, -10, 15, -4); x.quadraticCurveTo(14, 0, 8, 0); x.stroke();
-          x.beginPath(); x.moveTo(0, 4); x.lineTo(0, 11); x.moveTo(-6, 13); x.lineTo(6, 13); x.stroke(); x.restore();
-          x.font = '700 33px ' + FF; x.fillStyle = A(1); x.fillText(c.nm, cx + 24 + 36 + 12, y + CH / 2 + 11);
-        }
+        /* the trophy: a cup, two handles, a stem and a foot */
+        var tx0 = cx + (24 + 18) * cs, ty0 = y + CH / 2; x.save(); x.translate(tx0, ty0); x.scale(cs, cs); x.strokeStyle = A(1); x.fillStyle = A(1); x.lineWidth = 3.4; x.lineCap = 'round'; x.lineJoin = 'round';
+        x.beginPath(); x.moveTo(-9, -13); x.lineTo(9, -13); x.lineTo(9, -6); x.quadraticCurveTo(9, 4, 0, 4); x.quadraticCurveTo(-9, 4, -9, -6); x.closePath(); x.fill();
+        x.beginPath(); x.moveTo(-9, -10); x.quadraticCurveTo(-17, -10, -15, -4); x.quadraticCurveTo(-14, 0, -8, 0); x.moveTo(9, -10); x.quadraticCurveTo(17, -10, 15, -4); x.quadraticCurveTo(14, 0, 8, 0); x.stroke();
+        x.beginPath(); x.moveTo(0, 4); x.lineTo(0, 11); x.moveTo(-6, 13); x.lineTo(6, 13); x.stroke(); x.restore();
+        x.font = '700 ' + fz + 'px ' + FF; x.fillStyle = A(1); x.fillText(c.nm, cx + (24 + 36 + 12) * cs, y + CH / 2 + fz * .34);
         cx += c.w + CG;
       });
       y += CH + CG;
@@ -4337,10 +4341,10 @@ function lfCardDraw(sp, prog, into) {
   } else y += cp ? 6 : 0;
   /* the workout itself: as large as it can be and still all be there */
   var top = y, bottom = 1670, avail = bottom - top - 40, scale = 1, lines = sp.lines || [];
-  var layout = function (sc) {
+  var maxTx = 4, layout = function (sc) {
     var tot = 0, rows = [];
     lines.forEach(function (ln) {
-      var nm = wrap(ln[0], 38 * sc, 800, W - 240).slice(0, 1), tx = wrap(ln[1], 31 * sc, 500, W - 240).slice(0, 4);
+      var nm = wrap(ln[0], 38 * sc, 800, W - 240).slice(0, 1), tx = wrap(ln[1], 31 * sc, 500, W - 240).slice(0, maxTx);
       rows.push({ nm: nm[0], tx: tx }); tot += 50 * sc + tx.length * 40 * sc + 24 * sc;
     });
     return { rows: rows, tot: tot };
@@ -4357,9 +4361,10 @@ function lfCardDraw(sp, prog, into) {
     });
     x.globalAlpha = 1; return cv;
   }
+  /* EVERY EXERCISE IS ALWAYS THERE, never "+ 1 more": the rows shrink together, then give up their extra set lines, then shrink again, until the whole workout fits */
   var L = layout(1); while (L.tot > avail && scale > .5) { scale -= .04; L = layout(scale); }
+  if (L.tot > avail) { maxTx = 1; scale = Math.min(scale, .9); L = layout(scale); while (L.tot > avail && scale > .3) { scale -= .03; L = layout(scale); } }
   var rows = L.rows, more = 0;
-  while (L.tot > avail && rows.length > 1) { rows.pop(); more++; L.tot = layout(scale).rows.slice(0, rows.length).reduce(function (a, r) { return a + 50 * scale + r.tx.length * 40 * scale + 24 * scale; }, 0); }
   fade(.64, .12);
   if (rows.length) {
     var cardH = Math.min(avail + 40, L.tot + 70 + (more ? 44 : 0)); x.fillStyle = 'rgba(255,255,255,.06)'; rr(90, top, W - 180, cardH, 36); x.fill();
@@ -4505,7 +4510,7 @@ function lfPrsIn(a, z) {
   Object.keys(ex).forEach(function (id) {
     var before = -1, inM = -1;
     S.wo.forEach(function (w) { w.x.forEach(function (q) { if (q.id !== id) return; q.sets.forEach(function (st) { if (!(st.r > 0)) return; var v = +st.w || 0; if (w.d < a) before = Math.max(before, v); else if (w.d <= z) inM = Math.max(inM, v); }); }); });
-    if (before >= 0 && inM > 0 && inM > before + 1e-9 && lfPrOk(z, inM, before)) prs.push(exName(id, ex[id]));
+    if (before >= 0 && inM > 0 && inM > before + 1e-9 && lfPrOk(z, inM, before, 0, id)) prs.push(exName(id, ex[id]));
   });
   return prs;
 }
@@ -4679,7 +4684,7 @@ function lfWeekSheet(m) {
   Object.keys(exIds).forEach(function (id) {
     var before = -1, inW = -1;
     S.wo.forEach(function (w) { w.x.forEach(function (x) { if (x.id !== id) return; x.sets.forEach(function (q) { if (!(q.r > 0)) return; var v = +q.w || 0; if (w.d < a) before = Math.max(before, v); else if (w.d <= z) inW = Math.max(inW, v); }); }); });
-    if (before >= 0 && inW > 0 && inW > before + 1e-9 && lfPrOk(z, inW, before)) prs.push(exName(id, exIds[id]));
+    if (before >= 0 && inW > 0 && inW > before + 1e-9 && lfPrOk(z, inW, before, 0, id)) prs.push(exName(id, exIds[id]));
   });
   if (met && prs.length) { var pl = el('<div class="lf-fin-l" id="lfWsPr"><div class="lf-cap">Records this week</div><div class="lf-tags"></div></div>'); prs.forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
   var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= a && x.d <= z; });
@@ -6231,7 +6236,7 @@ function frStats() {
     w.x.forEach(function (e) { e.sets.forEach(function (st) {
       if (!(st.r > 0)) return;
       var v = +st.w || 0, b0 = best[e.id];
-      if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && w.d >= from30 && lfPrOk(w.d, v, b0, pf)) pr30++; best[e.id] = v; }
+      if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && w.d >= from30 && lfPrOk(w.d, v, b0, pf, e.id)) pr30++; best[e.id] = v; }
     }); });
   });
   var mon = monday(t), wkFrom = ymd(mon);
@@ -7114,7 +7119,7 @@ function lfPrTotal() {
   var best = {}, n = 0, pf = lfPrFrom();
   S.wo.slice().sort(function (a, b) { return a.s - b.s; }).forEach(function (w) { w.x.forEach(function (e) { e.sets.forEach(function (st) {
     if (!(st.r > 0)) return; var v = +st.w || 0, b0 = best[e.id];
-    if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && lfPrOk(w.d, v, b0, pf)) n++; best[e.id] = v; }
+    if (b0 === undefined || v > b0 + 1e-9) { if (b0 !== undefined && v > 0 && lfPrOk(w.d, v, b0, pf, e.id)) n++; best[e.id] = v; }
   }); }); });
   return n;
 }
@@ -8598,7 +8603,7 @@ function lfBadges() {
     w.x.forEach(function (e) {
       var top = -1; e.sets.forEach(function (q) { if (q.r > 0 && (+q.w || 0) > top) top = +q.w || 0; if (BARBELL[e.id] && q.w >= 140) heavy = true; });
       if (top < 0) return;
-      if (best[e.id] !== undefined && top > 0 && top > best[e.id] + 1e-9 && lfPrOk(w.d, top, best[e.id], pf)) hit++;
+      if (best[e.id] !== undefined && top > 0 && top > best[e.id] + 1e-9 && lfPrOk(w.d, top, best[e.id], pf, e.id)) hit++;
       if (best[e.id] === undefined || top > best[e.id]) best[e.id] = top;
     });
     if (hit) { won('pr', w.d); for (var h = 0; h < hit; h++) prDays.push(w.d); }
