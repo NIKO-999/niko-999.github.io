@@ -167,6 +167,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sp-h .lf-sp-w { flex: none; width: 84px; margin: 0; }
 .lf-sp-h .lf-sp-n { flex: 1; min-width: 0; margin: 0; }
 .lf-sp-day .lf-list { margin: 6px 0; }
+@media (max-width: 360px) { .lf-sp-h { flex-wrap: wrap; } .lf-sp-h .lf-sp-w { margin-right: auto; } .lf-sp-h .lf-sp-n { order: 3; flex: 1 1 100%; } }
 .lf-fold-h { margin: 0; font: inherit; }
 .lf-fold-b { display: flex; width: 100%; align-items: center; gap: 8px; min-height: 44px; padding: 0 2px; background: none; border: 0; color: inherit; text-align: left; }
 .lf-fold-b .lf-cap { flex: 1; margin: 0; }
@@ -429,6 +430,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-seg button[aria-pressed="true"] { background: var(--card3); color: var(--ink); }
 /* the programs are five, so the switch is two rows: a rounded block, not a pill */
 #lfProg { border-radius: 22px; row-gap: 3px; }
+#lfProg button { min-width: 0; padding: 0 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ── calendar ── */
 .lf-calnav { display: flex; align-items: center; justify-content: space-between; margin: 14px 0 10px; }
@@ -860,7 +862,7 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 /* THE WORKOUT GUIDE: a short film made of the real rows, with a finger doing what you would do */
 .lf-howto { display: flex; flex: none; align-items: center; gap: 6px; height: 44px; padding: 0 6px; font-size: 13px; font-weight: 600; color: var(--log); white-space: nowrap; }
 .lf-howto svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
-.lf-tr-stage { position: relative; height: 340px; overflow: hidden; pointer-events: none; }
+.lf-tr-stage { position: relative; height: 372px; overflow: hidden; pointer-events: none; }
 .lf-tr-stage .lf-ex { margin-top: 0; margin-bottom: 10px; transition: opacity .4s, transform .4s; }
 .lf-tr-stage .lf-set { transition: transform .5s ease, opacity .4s; }
 .lf-tr-stage .lf-ex-n { transition: opacity .25s; }
@@ -2604,7 +2606,7 @@ function lfTour() {
 
 /* HOW TO PUT YOUR PROGRAMME IN. A first open has nothing in it, and a screen of someone else's routines tells a stranger nothing about how to get theirs there. Four short scenes, the real cards, a finger doing the pressing: add it, check it, pick it on Today, log it. It plays once by itself on a first open and is always one press away in Settings and under Your routines. */
 var SETUP = [
-  ['Add your split', 'Open Exercises and tap New split. Choose Read it from a photo, PDF or text and paste your whole week, or build it by hand.', 9000],
+  ['Add your split', 'Open Exercises and tap New split. Paste your whole week and every day is made for you, or build it by hand.', 9000],
   ['Check it and save', 'Each day is read with its exercises, sets and reps. Fix anything it missed, name the split, then save.', 6400],
   ['Start it from Today', 'Your split is on and today\'s day shows on the Today card, ready to go. Press Start.', 6000],
   ['Log your sets', 'Tick each set as you finish it. The rest timer starts by itself.', 5600]
@@ -2625,7 +2627,7 @@ function lfSetupTour() {
   function press(sel, ms, fn) { T(ms, function () { aim(sel); }); T(ms + 650, function () { f.classList.add('is-tap'); }); T(ms + 760, function () { if (fn) fn(); }); T(ms + 930, function () { f.classList.remove('is-tap'); }); }
   function typeIn(node, lines, ms, step) { lines.forEach(function (ln, k) { T(ms + k * step, function () { node.textContent = lines.slice(0, k + 1).join('\n'); }); }); }
   var PLAY = '<span class="lf-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg></span>';
-  function rtCard() { return '<h2 class="lf-h1" style="margin-top:0">Exercises</h2><button type="button" class="lf-add" id="trNew" tabindex="-1">' + IC.plus + 'New routine</button><div class="lf-cap lf-gh">Your split</div><div class="lf-card" style="padding:4px 16px"><div class="lf-list"><div class="lf-li"><div class="lf-li-t"><b>Mon · Upper body</b></div></div><div class="lf-li"><div class="lf-li-t"><b>Tue · Lower body</b></div></div></div></div>'; }
+  function rtCard() { return '<h2 class="lf-h1" style="margin-top:0">Exercises</h2><button type="button" class="lf-add" id="trNew" tabindex="-1">' + IC.plus + 'New split</button>'; }
   function play(i) {
     clear(); at = i; stage.textContent = '';
     $$('button', segs).forEach(function (b, j) { b.classList.toggle('is-done', j < i); b.classList.toggle('is-on', false); b.setAttribute('aria-selected', j === i ? 'true' : 'false'); });
@@ -2633,19 +2635,22 @@ function lfSetupTour() {
     $('b', cap).textContent = SETUP[i][0]; $('p', cap).textContent = SETUP[i][1];
     back.disabled = i === 0; next.textContent = i === SETUP.length - 1 ? 'Done' : 'Next';
     var html = '';
-    if (i === 0) html = rtCard() + '<div class="tr-sh" id="trSh"><button type="button" class="lf-btn is-full" id="trRead" tabindex="-1" style="margin-bottom:8px">Read it from a photo, PDF or text</button><div id="trPaste" style="display:none"><span class="lf-flab">Or paste the text</span><div class="tr-ta" id="trTa"></div><button type="button" class="lf-btn is-ink is-full" id="trGo" tabindex="-1">Read it</button></div><div id="trName"><span class="lf-flab">Name</span><div class="tr-ta" style="min-height:0">Push day</div></div></div>';
-    else if (i === 1) html = '<div class="lf-cap lf-gh">Check it</div><input class="lf-field" value="Push day" readonly tabindex="-1" />'
-      + '<div class="lf-list" style="margin-top:6px">' + [['Bench press', '4 × 8'], ['Incline dumbbell press', '3 × 10'], ['Cable flyes', '3 × 12'], ['Overhead press', '3 × 10']].map(function (r) { return '<div class="lf-li"><div class="lf-li-t"><b>' + r[0] + '</b></div><span class="lf-li-r lf-num">' + r[1] + '</span></div>'; }).join('') + '</div>'
-      + '<button type="button" class="lf-btn is-ink is-full" id="trSave" tabindex="-1" style="margin-top:10px">Save routines</button><div class="tr-toast" id="trToast">Saved 1 routine</div>';
-    else if (i === 2) html = '<div class="lf-card lf-today"><div class="lf-lab">Today</div><div><button type="button" class="lf-title-box" id="trPick" tabindex="-1">Push day</button></div><div class="lf-sub">Bench press, incline dumbbell press, cable flyes</div><button type="button" class="lf-go" id="trStart" tabindex="-1">' + PLAY + '<span>Start</span></button></div>';
+    if (i === 0) html = rtCard() + '<div class="tr-sh" id="trSh"><span class="lf-flab">Name</span><div class="tr-ta" style="min-height:0;margin-bottom:8px">My week</div><span class="lf-flab">Paste your whole programme</span><div class="tr-ta" id="trTa"></div></div>';
+    else if (i === 1) {
+      var rowH = function (r) { return '<div class="lf-li"><div class="lf-li-t"><b>' + r[0] + '</b></div><span class="lf-li-r lf-num">' + r[1] + '</span></div>'; };
+      html = '<input class="lf-field" value="My week" readonly tabindex="-1" style="margin-bottom:0" />'
+        + '<div class="lf-cap lf-gh" style="margin-top:10px">Mon · Push</div><div class="lf-list">' + [['Bench press', '4 × 8'], ['Overhead press', '3 × 10']].map(rowH).join('') + '</div>'
+        + '<div class="lf-cap lf-gh" style="margin-top:6px">Wed · Pull</div><div class="lf-list">' + [['Barbell row', '4 × 8']].map(rowH).join('') + '</div>'
+        + '<button type="button" class="lf-btn is-ink is-full" id="trSave" tabindex="-1" style="margin-top:10px">Save split</button><div class="tr-toast" id="trToast">My week added</div>';
+    }
+    else if (i === 2) html = '<div class="lf-card lf-today"><div class="lf-lab">Today</div><div><button type="button" class="lf-title-box" id="trPick" tabindex="-1">Push</button></div><div class="lf-sub">Bench press, overhead press · 2 exercises</div><button type="button" class="lf-go" id="trStart" tabindex="-1">' + PLAY + '<span>Start</span></button></div>';
     else html = trCard('a', 'Bench press', trRow('', 1, '60×8', '60', '8') + trRow('', 2, '60×8', '60', '8') + trRow('', 3, '60×7', '60', '8'), 1) + '<div class="tr-rest" id="trRest"><span class="lf-chip">Resting</span><span class="lf-num">1:30</span></div>';
     stage.innerHTML = html; f = el('<i class="lf-tr-f" aria-hidden="true"></i>'); stage.appendChild(f);
     f.style.transition = 'none'; f.style.transform = 'translate(' + (stage.clientWidth / 2 - 17) + 'px,' + (stage.clientHeight + 10) + 'px)'; void f.offsetWidth; f.style.transition = '';
     if (i === 0) {
       press('#trNew', 600, function () { q('#trSh').classList.add('is-up'); });
-      press('#trRead', 2300, function () { q('#trRead').style.display = 'none'; q('#trName').style.display = 'none'; q('#trPaste').style.display = 'block'; });
-      typeIn(q('#trTa'), ['Push day', 'Bench press 4x8', 'Incline dumbbell press 3x10', 'Cable flyes 3x12', 'Overhead press 3x10'], 3900, 600);
-      press('#trGo', 7000, function () { q('#trSh').classList.remove('is-up'); });
+      typeIn(q('#trTa'), ['Monday - Push', 'Bench press 4x8', 'Overhead press 3x10', 'Wednesday - Pull', 'Barbell row 4x8'], 2600, 600);
+      T(6400, function () { q('#trSh').classList.remove('is-up'); });
     } else if (i === 1) {
       T(500, function () { aim('.lf-li:nth-child(2)'); });
       press('#trSave', 1800, function () { q('#trToast').classList.add('is-up'); });
@@ -2659,7 +2664,7 @@ function lfSetupTour() {
     T(SETUP[i][2], function () { if (reduced) return; play(i >= SETUP.length - 1 ? i : i + 1); });
   }
   function tick(row) { if (row) row.classList.add('is-done', 'is-pop'); }
-  sh = lfSheet({ title: 'Set up your routine', body: body, foot: [back, next], onClose: function () { clear(); } });
+  sh = lfSheet({ title: 'Set up your split', body: body, foot: [back, next], onClose: function () { clear(); } });
   play(0);
   return sh;
 }
@@ -4959,7 +4964,9 @@ function planParse(text) {
     var mt2 = name.length > 2 && !/\d{2,}/.test(name) ? (planBare(name) || planMatch(name)) : null;
     if (mt2 && mt2.score >= .75 && !PLAN_DAY.test(name)) { if (!cur) day('Imported routine'); cur.ex.push({ raw: name.slice(0, 60), id: mt2.id, sets: 3, lo: 8, hi: 12 }); return; }
     var words = name.split(' ').length;
-    if (name.length > 1 && name.length <= 40 && words <= 5 && (PLAN_DAY.test(name) || /^[A-Z0-9][^a-z]*$/.test(raw) || /^[A-Z][A-Za-z &/]*[:]?$/.test(raw))) day(name.replace(/:$/, '').replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); }));
+    var wkStart = /^(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\b/i.test(name);
+    /* a heading that opens with a weekday is a heading however long its title runs ("Saturday - Delts, arms and abs"); the case it was written in is kept, only its first letter is raised */
+    if (name.length > 1 && name.length <= (wkStart ? 60 : 40) && words <= (wkStart ? 9 : 5) && (PLAN_DAY.test(name) || /^[A-Z0-9][^a-z]*$/.test(raw) || /^[A-Z][A-Za-z &/]*[:]?$/.test(raw))) day(name.replace(/:$/, '').replace(/^([a-z])/, function (c) { return c.toUpperCase(); }));
   });
   /* A DAY THAT NAMES ITS WEEKDAY KEEPS IT. "Monday - Push", "Tue: Legs" and a bare "Wednesday" all put the day on that weekday, and what is left of the heading is its name; with nothing left the name is worked out from what is in it, the way the built-in days are named. */
   var WD = [['sun', 0], ['mon', 1], ['tue', 2], ['wed', 3], ['thu', 4], ['fri', 5], ['sat', 6]];
@@ -4986,7 +4993,7 @@ function planDaySp(rows) {
   var o = '', parts = [];
   rows.forEach(function (r) {
     var n = exName(r[0]), t = parts.length ? n.charAt(0).toLowerCase() + n.slice(1) : n;
-    if ((o + (o ? ', ' : '') + t).length > 56 || parts.length >= 4) return;
+    if ((o + (o ? ', ' : '') + t).length > 28 || parts.length >= 3) return;
     parts.push(t); o = parts.join(', ');
   });
   return o;
@@ -5028,7 +5035,7 @@ function lfPlanPreview(days) {
 }
 function lfSplitForm(days, name) {
   days = days || [];
-  var b = el('<div><label class="lf-flab" for="lfSpN">Name</label><input class="lf-field" id="lfSpN" maxlength="30" placeholder="My split" autocomplete="off" /><label class="lf-flab" for="lfSpPaste">Paste your whole programme</label><textarea class="lf-field" id="lfSpPaste" rows="4" placeholder="Monday&#10;Bench press 4x8&#10;Overhead press 3x10&#10;Tuesday&#10;Barbell row 4x8" autocomplete="off" autocapitalize="off" spellcheck="false" style="resize:none;font-family:inherit"></textarea><div id="lfSpDays"></div><button type="button" class="lf-add" id="lfSpAddDay">' + IC.plus + 'Add a day</button></div>');
+  var b = el('<div><label class="lf-flab" for="lfSpN">Name</label><input class="lf-field" id="lfSpN" maxlength="30" placeholder="My split" autocomplete="off" /><label class="lf-flab" for="lfSpPaste">Paste your whole programme</label><textarea class="lf-field" id="lfSpPaste" rows="4" placeholder="Monday&#10;Bench press 4x8&#10;Overhead press 3x10&#10;Tuesday&#10;Barbell row 4x8" autocomplete="off" autocapitalize="off" spellcheck="false" style="resize:none;font-family:inherit;min-height:104px;margin-bottom:8px"></textarea><div id="lfSpDays"></div><button type="button" class="lf-add" id="lfSpAddDay">' + IC.plus + 'Add a day</button></div>');
   $('#lfSpN', b).value = name || '';
   /* PASTE THE WHOLE THING AND THE DAYS ARE MADE. No pressing Read, no pasting a day at a time: the text is read as it arrives and the days appear under it, each on its weekday. A photo or PDF, which only the phone can read, comes in through the same form. */
   var pt = $('#lfSpPaste', b), pTimer = 0;
@@ -5205,7 +5212,7 @@ function lfProgSync() {
   Object.keys(PROGRAMS).forEach(function (k) { if (BUILTIN_PROGS.indexOf(k) < 0) delete PROGRAMS[k]; });
   (S.pg || []).forEach(function (p) {
     var raw = p.d.map(function (d) { return { id: d.id, dow: d.w, n: d.n, sp: d.sp, ss: d.ss, ex: d.x }; });
-    PROGRAMS[p.id] = { n: p.n, s: p.n.slice(0, 14), days: lfMkProg(raw), focus: lfFocusFrom(raw, {}), mine: 1 };
+    PROGRAMS[p.id] = { n: p.n, s: p.n, days: lfMkProg(raw), focus: lfFocusFrom(raw, {}), mine: 1 };
     PROG_IDS.push(p.id);
   });
 }
@@ -5289,7 +5296,8 @@ function lfProgAdd(pk, name) {
   if (wasNew) S.focus = lfFocusOf(PROGRAMS[id].focus && PROGRAMS[id].focus.length ? PROGRAMS[id].focus : FOCUS_DEFAULT);
   lfSave(); lfRender();
   if (wasNew) setTimeout(lfTargetsAsk, 450);
-  lfToast(p.n + ' added and on', function () {
+  /* the first split's confirmation is the targets sheet itself: a toast over its list would cover the last rows */
+  if (!wasNew) lfToast(p.n + ' added and on', function () {
     S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; if (wasNew) delete S.hp;
     S.pg = (S.pg || []).filter(function (q) { return q.id !== id; }); if (!S.pg.length) delete S.pg; lfProgSync(); lfSave(); lfRender();
   });
@@ -5389,7 +5397,7 @@ function lfRenderLib() {
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
      to the new plan's — but only when they are still the old plan's own,
      so targets you set yourself are never overwritten. */
-  var pg = el('<div class="lf-seg" id="lfProg" style="--n:3;margin-bottom:10px"></div>');
+  var pg = el('<div class="lf-seg" id="lfProg" style="margin-bottom:10px"></div>'); pg.style.setProperty('--n', Math.min(3, Math.max(1, lfProgVisible().length)));
   lfProgVisible().forEach(function (k) {
     var bt = el('<button type="button"></button>'); bt.dataset.p = k;
     /* the routine that is yours is its name and a star */

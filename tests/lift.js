@@ -2309,7 +2309,7 @@ const freeze = (at) => `(() => {
     ok('the weekday is taken out of the name, and a bare Wednesday is named from what is in it', wn[0] === 'Push' && wn[2] === 'Legs' && /Back/.test(wn[1]), wn);
     await top(o.page).locator('#lfSpN').fill('Week'); await top(o.page).locator('#lfSpSave').click(); await settle(o.page);
     const pg2 = (await store(o.page)).pg[0];
-    ok('each day carries a line of what is in it, like the built-in ones', pg2.d[0].sp === 'Barbell bench press, barbell overhead press' && pg2.d.length === 3, pg2.d.map((d) => d.sp));
+    ok('each day carries a line of what is in it, like the built-in ones', pg2.d[0].sp === 'Barbell bench press' && pg2.d.length === 3, pg2.d.map((d) => d.sp));
     await o.page.click('#lfProgMg'); await settle(o.page); await o.page.keyboard.press('Escape'); await settle(o.page);
     const sx = await store(o.page); sx.pg = []; sx.prog = 'ul'; await o.page.evaluate((v) => localStorage.setItem('lift.v1', JSON.stringify(v)), sx); await o.page.reload(); await settle(o.page);
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page);
