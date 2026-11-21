@@ -1047,6 +1047,7 @@ const freeze = (at) => `(() => {
       ok('a badge left alone keeps turning on its own, long after it has settled', !shot1.equals(shot2));
     }
     ok('opening an earned badge throws confetti in its colour, white and black', await page.locator('canvas.lf-bconf').count() === 1 && /^#[0-9a-f]{6},#ffffff,#15151a$/i.test(await page.getAttribute('canvas.lf-bconf', 'data-cols')), await page.locator('canvas.lf-bconf').count());
+    ok('and it comes from the top of the screen, across the whole width, not from the middle of the badge', (() => { const sc = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8'), q = sc.slice(sc.indexOf('function lfBadgeConfetti'), sc.indexOf('a banner from the top, once')); return /y: -12 - Math\.random\(\) \* 90/.test(q) && /x: Math\.random\(\) \* W/.test(q) && !/x: ox \+/.test(q) && !/y: oy \+/.test(q); })());
     await page.keyboard.press('Escape'); await page.waitForSelector('.lf-cv', { state: 'detached', timeout: 5000 }).catch(() => {});
     ok('and is gone when it closes, not hidden', await page.locator('.lf-cv').count() === 0);
     ok('each kind of badge wears its own colour, never a metal for a tier', await page.getAttribute('#lfBadges .lf-coin[data-b="wo10"]', 'data-m') === 'start' && await page.getAttribute('#lfBadges .lf-coin[data-b="wo50"]', 'data-m') === 'lock');

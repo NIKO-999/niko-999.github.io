@@ -7683,8 +7683,9 @@ function lfBadgeConfetti(x, host) {
   cv.width = W * dpr; cv.height = H * dpr; cv.dataset.cols = [acc, '#ffffff', '#15151a'].join(','); document.body.appendChild(cv);
   var c = cv.getContext('2d'), st = $('.lf-cv-stage', host), r0 = st ? st.getBoundingClientRect() : { left: W / 2, top: H / 2, width: 0, height: 0 }, ox = r0.left + r0.width / 2, oy = r0.top + r0.height * .45, P = [], t0 = performance.now(), last = t0;
   /* two bursts, the second a beat behind, so it opens and then keeps coming */
-  function burst(n, sp) { for (var i = 0; i < n; i++) { var a = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.25, v = sp * (.45 + Math.random() * .75); P.push({ x: ox + (Math.random() - .5) * 40, y: oy + (Math.random() - .5) * 30, vx: Math.cos(a) * v, vy: Math.sin(a) * v, w: 5 + Math.random() * 7, h: 3 + Math.random() * 5, r: Math.random() * 6.28, vr: (Math.random() - .5) * 12, ph: Math.random() * 6.28, col: cols[(Math.random() * cols.length) | 0], life: 2.6 + Math.random() * 1.4, age: 0, tilt: Math.random() * 6.28 }); } }
-  burst(110, 760); setTimeout(function () { burst(60, 560); }, 180);
+  /* IT COMES FROM THE TOP OF THE SCREEN and falls across the whole width, not from the middle of the badge */
+  function burst(n, sp) { for (var i = 0; i < n; i++) { var v = sp * (.15 + Math.random() * .5); P.push({ x: Math.random() * W, y: -12 - Math.random() * 90, vx: (Math.random() - .5) * 90, vy: v, w: 5 + Math.random() * 7, h: 3 + Math.random() * 5, r: Math.random() * 6.28, vr: (Math.random() - .5) * 12, ph: Math.random() * 6.28, col: cols[(Math.random() * cols.length) | 0], life: 3 + Math.random() * 1.6, age: 0, tilt: Math.random() * 6.28 }); } }
+  burst(110, 700); setTimeout(function () { burst(70, 560); }, 350);
   (function loop(now) {
     var dt = Math.min(.04, (now - last) / 1000); last = now;
     if (!host.isConnected && now - t0 > 400) { cv.remove(); return; }
