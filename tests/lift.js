@@ -2284,15 +2284,15 @@ const freeze = (at) => `(() => {
   {
     const o = await ctx({ unit: 'kg', goal: 3 }, '2026-10-30T18:00:00');
     await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page);
-    await o.page.click('#lfNewSplit'); await settle(o.page); await top(o.page).locator('#lfSpRead').click(); await settle(o.page);
-    await top(o.page).locator('#lfPlnT').fill('Push Day\nExercise Sets Reps\nFlat DB Press 3 8-10\nSquat - 5 sets of 5'); await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
+    await o.page.click('#lfNewSplit'); await settle(o.page);
+    await top(o.page).locator('#lfSpPaste').fill('Push Day\nExercise Sets Reps\nFlat DB Press 3 8-10\nSquat - 5 sets of 5'); await o.page.waitForTimeout(700);
     const tbl = await top(o.page).locator('.lf-li b').allTextContents(), tblN = await top(o.page).locator('.lf-sp-n').evaluateAll((x) => x.map((e) => e.value));
     ok('a table header is not a day, a Flat DB press is the dumbbell bench and a bare Squat is the barbell squat', tblN.join() === 'Push Day' && /dumbbell bench/i.test(tbl[0]) && /^barbell squat$/i.test(tbl[1]), [tblN, tbl]);
-    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page); await top(o.page).locator('#lfSpRead').click(); await settle(o.page);
-    ok('Read a split opens with a place to paste', await top(o.page).locator('#lfPlnT').count() === 1);
-    ok('and offers no photo or PDF button on the web, where nothing can read one', await top(o.page).locator('.lf-pln-src button').count() === 0);
-    await top(o.page).locator('#lfPlnT').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
-    await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
+    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page);
+    ok('the form opens with a place to paste the whole programme', await top(o.page).locator('#lfSpPaste').count() === 1);
+    ok('and offers no photo or PDF button on the web, where nothing can read one', await top(o.page).locator('#lfSpRead').count() === 0);
+    await top(o.page).locator('#lfSpPaste').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
+    await o.page.waitForTimeout(700);
     const inputs = await top(o.page).locator('.lf-sp-n').evaluateAll((x) => x.map((e) => e.value));
     ok('it finds the two days', inputs.join() === 'PUSH DAY,PULL DAY', inputs);
     const days = await top(o.page).locator('.lf-sp-w').evaluateAll((x) => x.map((e) => e.value));
@@ -2301,9 +2301,9 @@ const freeze = (at) => `(() => {
     ok('each line is matched to the library', rows.length === 6 && /bench/i.test(rows[0]) && /overhead|press/i.test(rows[1]) && /pull/i.test(rows[3]), rows);
     ok('and a line it cannot place says so and waits for a choice', rows[5] === 'Made up lift' && /Not matched/.test(await top(o.page).locator('.lf-sp-day .lf-li').nth(5).textContent()));
     ok('the sets and reps are kept', /4 × 8–10/.test(await top(o.page).locator('.lf-sp-day .lf-li').first().textContent()));
-    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page); await top(o.page).locator('#lfSpRead').click(); await settle(o.page);
-    await top(o.page).locator('#lfPlnT').fill('Monday - Push\nBench press 4x8\nOverhead press 3x10\nWednesday\nBarbell row 3x8\nPull-ups 4x6\nFriday: Legs\nSquat 4x6');
-    await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
+    await o.page.keyboard.press('Escape'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page);
+    await top(o.page).locator('#lfSpPaste').fill('Monday - Push\nBench press 4x8\nOverhead press 3x10\nWednesday\nBarbell row 3x8\nPull-ups 4x6\nFriday: Legs\nSquat 4x6');
+    await o.page.waitForTimeout(700);
     const wk = await top(o.page).locator('.lf-sp-w').evaluateAll((x) => x.map((e) => e.value)), wn = await top(o.page).locator('.lf-sp-n').evaluateAll((x) => x.map((e) => e.value));
     ok('a day that names its weekday keeps it: Monday, Wednesday and Friday, not one after another', wk.join() === '1,3,5', wk);
     ok('the weekday is taken out of the name, and a bare Wednesday is named from what is in it', wn[0] === 'Push' && wn[2] === 'Legs' && /Back/.test(wn[1]), wn);
@@ -2312,9 +2312,9 @@ const freeze = (at) => `(() => {
     ok('each day carries a line of what is in it, like the built-in ones', pg2.d[0].sp === 'Barbell bench press, barbell overhead press' && pg2.d.length === 3, pg2.d.map((d) => d.sp));
     await o.page.click('#lfProgMg'); await settle(o.page); await o.page.keyboard.press('Escape'); await settle(o.page);
     const sx = await store(o.page); sx.pg = []; sx.prog = 'ul'; await o.page.evaluate((v) => localStorage.setItem('lift.v1', JSON.stringify(v)), sx); await o.page.reload(); await settle(o.page);
-    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page); await top(o.page).locator('#lfSpRead').click(); await settle(o.page);
-    await top(o.page).locator('#lfPlnT').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
-    await top(o.page).locator('#lfPlnGo').click(); await settle(o.page);
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page);
+    await top(o.page).locator('#lfSpPaste').fill('PUSH DAY\nBench press 4x8-10\nOverhead press - 3 sets of 8-12\nTricep pushdown 3 12-15\nPULL DAY\n1. Pull-ups 4x6\nBarbell row 3x8\nMade up lift 3x5');
+    await o.page.waitForTimeout(700);
     await top(o.page).locator('#lfSpSave').click(); await settle(o.page);
     ok('saving without a name asks for one', /Name your split/.test(await o.page.textContent('.lf-toast')));
     await top(o.page).locator('#lfSpN').fill('My week'); await top(o.page).locator('#lfSpSave').click(); await settle(o.page);
@@ -2324,6 +2324,12 @@ const freeze = (at) => `(() => {
     ok('and it is on, in the strip beside the others', st.prog === st.pg[0].id && (await o.page.locator('#lfProg button').count()) === 8);
     await o.page.reload(); await settle(o.page);
     ok('and it survives a reload, targets and all', (await store(o.page)).pg[0].d[0].x[0].slice(1).join() === '4,8,10');
+    await o.page.click('.lf-bar [data-v="lib"]'); await settle(o.page); await o.page.click('#lfNewSplit'); await settle(o.page);
+    await top(o.page).locator('#lfSpPaste').fill('Monday\nQuad strength\nHack squat 4x6-10\nBench 3x8\nTuesday\nPush\nPress 4x6');
+    await o.page.waitForTimeout(700);
+    const wk2 = await top(o.page).locator('.lf-sp-w').evaluateAll((x) => x.map((e) => e.value)), nm2 = await top(o.page).locator('.lf-sp-n').evaluateAll((x) => x.map((e) => e.value)), rw2 = await top(o.page).locator('.lf-sp-day .lf-li b').allTextContents();
+    ok('a weekday on its own line and the title under it are one day, and the whole text makes every day at once', wk2.join() === '1,2' && nm2.join() === 'Quad strength,Push', [wk2, nm2]);
+    ok('and a bare Bench is the barbell bench and a bare Press the overhead press', /^Barbell bench press$/.test(rw2[1]) && /^Barbell overhead press$/.test(rw2[2]), rw2);
     await o.c.close();
   }
 
@@ -2794,9 +2800,9 @@ const freeze = (at) => `(() => {
     ok('and there is no way round it: no ready-made split link here either', await page.locator('#lfSplitLink').count() === 0);
     await page.click('.lf-bar [data-v="home"]'); await page.waitForTimeout(300);
     await page.click('#lfCreateSplit'); await page.waitForTimeout(500);
-    ok('and Create split opens the new split form, with the reader inside it', await page.locator('#lfSpRead').count() === 1 && await page.locator('#lfSpN').count() === 1);
-    await page.click('#lfSpRead'); await page.waitForTimeout(400);
-    await page.fill('#lfPlnT', 'Monday - Push\nBench press 4x8\nOverhead press 3x10\nTuesday - Pull\nBarbell row 4x8\nPull-ups 3x8'); await page.click('#lfPlnGo'); await page.waitForTimeout(500);
+    ok('and Create split opens the new split form, with the paste box in it', await page.locator('#lfSpPaste').count() === 1 && await page.locator('#lfSpN').count() === 1);
+    await page.waitForTimeout(100);
+    await page.fill('#lfSpPaste', 'Monday - Push\nBench press 4x8\nOverhead press 3x10\nTuesday - Pull\nBarbell row 4x8\nPull-ups 3x8'); await page.waitForTimeout(700);
     await page.fill('#lfSpN', 'My week'); await page.click('#lfSpSave'); await page.waitForTimeout(1200);
     ok('making the first split asks what your targets are, worked out from it', await page.locator('#lfTgKeep').count() === 1 && /sets a week/.test(await page.textContent('.lf-sheet.is-up')));
     await page.click('#lfTgKeep'); await page.waitForTimeout(500);

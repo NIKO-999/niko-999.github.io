@@ -4932,11 +4932,15 @@ function planMatch(name) {
   });
   return bs >= .6 ? { id: best.id, score: bs } : null;
 }
+/* A BARE NAME MEANS THE COMMON LIFT. "Bench", "Press" and "Row" fit a dozen exercises each and the closest word match picks whichever is shortest (Bench became Bench dips, Press became Leg press), so the ones people write on their own are decided here. */
+var PLAN_BARE = { bench: 'bench', 'bench press': 'bench', press: 'ohp', 'overhead press': 'ohp', 'military press': 'ohp', ohp: 'ohp', squat: 'squat', squats: 'squat', 'back squat': 'squat', deadlift: 'deadlift', deadlifts: 'deadlift', row: 'bbrow', rows: 'bbrow', 'barbell row': 'bbrow', 'bent over row': 'bbrow', pulldown: 'latpd', pulldowns: 'latpd', 'lat pulldown': 'latpd', 'lat pulldowns': 'latpd', 'pull up': 'pullupbw', 'pull ups': 'pullupbw', pullups: 'pullupbw', 'chin up': 'chinup', 'chin ups': 'chinup', curl: 'curl', curls: 'curl', 'bicep curl': 'curl', 'bicep curls': 'curl', 'biceps curl': 'curl', 'biceps curls': 'curl', 'leg press': 'legpress', 'leg curl': 'seatcurl', 'leg curls': 'seatcurl', 'leg extension': 'legext', 'leg extensions': 'legext', rdl: 'rdl', dips: 'dips', dip: 'dips', 'lateral raise': 'latraise', 'lateral raises': 'latraise', 'face pull': 'facepull', 'face pulls': 'facepull', shrug: 'shrug', shrugs: 'shrug', 'calf raise': 'calfstand', 'calf raises': 'calfstand', 'hip thrust': 'hipthrust', 'hip thrusts': 'hipthrust', lunge: 'lunge', lunges: 'lunge', 'tricep pushdown': 'tripush', 'triceps pushdown': 'tripush', 'tricep pushdowns': 'tripush', 'triceps pushdowns': 'tripush', 'push up': 'pushup', 'push ups': 'pushup', pushups: 'pushup' };
+function planBare(name) { var k = String(name).toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim(); var id = PLAN_BARE[k]; return id && exById(id) ? { id: id, score: 1 } : null; }
 var PLAN_DAY = /^(?:day\s*\d+|week\s*\d+|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?|push|pull|legs?|upper|lower|full\s*body|chest|back|shoulders?|arms?|abs|core|glutes?|quads?|hamstrings?)\b/i;
 function planParse(text) {
   var lines = String(text || '').split(/\r?\n/).map(function (l) { return l.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
   var days = [], cur = null;
-  function day(n) { cur = { n: n.slice(0, 40), ex: [] }; days.push(cur); }
+  /* A WEEKDAY ON ITS OWN LINE, THEN THE DAY'S TITLE ON THE NEXT, is one heading: Monday / Quad strength is Monday's Quad strength, not an empty day and a second one. */
+  function day(n) { if (cur && !cur.ex.length && /^(?:mon|tue|wed|thu|fri|sat|sun)[a-z]*\.?:?$/i.test(cur.n)) { cur.n = (cur.n.replace(/:$/, '') + ' - ' + n).slice(0, 60); return; } cur = { n: n.slice(0, 40), ex: [] }; days.push(cur); }
   lines.forEach(function (raw) {
     /* the header of a table (Exercise, Sets, Reps) is not a day or a lift */
     if (/^(?:exercises?|movements?|lifts?|name)\b.*\b(?:sets?|reps?|rest|weight|load|rpe)\b/i.test(raw)) return;
@@ -4948,11 +4952,11 @@ function planParse(text) {
     if (sets > 0 && sets <= 12 && lo > 0 && lo <= 100 && name.length > 1) {
       if (hi < lo) hi = lo;
       if (!cur) day('Imported routine');
-      var mt = planMatch(name);
+      var mt = planBare(name) || planMatch(name);
       cur.ex.push({ raw: name.slice(0, 60), id: mt ? mt.id : null, sets: sets, lo: lo, hi: hi });
       return;
     }
-    var mt2 = name.length > 2 && !/\d{2,}/.test(name) ? planMatch(name) : null;
+    var mt2 = name.length > 2 && !/\d{2,}/.test(name) ? (planBare(name) || planMatch(name)) : null;
     if (mt2 && mt2.score >= .75 && !PLAN_DAY.test(name)) { if (!cur) day('Imported routine'); cur.ex.push({ raw: name.slice(0, 60), id: mt2.id, sets: 3, lo: 8, hi: 12 }); return; }
     var words = name.split(' ').length;
     if (name.length > 1 && name.length <= 40 && words <= 5 && (PLAN_DAY.test(name) || /^[A-Z0-9][^a-z]*$/.test(raw) || /^[A-Z][A-Za-z &/]*[:]?$/.test(raw))) day(name.replace(/:$/, '').replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); }));
@@ -5024,10 +5028,24 @@ function lfPlanPreview(days) {
 }
 function lfSplitForm(days, name) {
   days = days || [];
-  var b = el('<div><label class="lf-flab" for="lfSpN">Name</label><input class="lf-field" id="lfSpN" maxlength="30" placeholder="My split" autocomplete="off" /><div id="lfSpDays"></div><button type="button" class="lf-add" id="lfSpAddDay">' + IC.plus + 'Add a day</button></div>');
+  var b = el('<div><label class="lf-flab" for="lfSpN">Name</label><input class="lf-field" id="lfSpN" maxlength="30" placeholder="My split" autocomplete="off" /><label class="lf-flab" for="lfSpPaste">Paste your whole programme</label><textarea class="lf-field" id="lfSpPaste" rows="4" placeholder="Monday&#10;Bench press 4x8&#10;Overhead press 3x10&#10;Tuesday&#10;Barbell row 4x8" autocomplete="off" autocapitalize="off" spellcheck="false" style="resize:none;font-family:inherit"></textarea><div id="lfSpDays"></div><button type="button" class="lf-add" id="lfSpAddDay">' + IC.plus + 'Add a day</button></div>');
   $('#lfSpN', b).value = name || '';
-  if (!days.length) {
-    var rd = el('<button type="button" class="lf-btn is-full" id="lfSpRead" style="margin-bottom:6px">Read it from a photo, PDF or text</button>');
+  /* PASTE THE WHOLE THING AND THE DAYS ARE MADE. No pressing Read, no pasting a day at a time: the text is read as it arrives and the days appear under it, each on its weekday. A photo or PDF, which only the phone can read, comes in through the same form. */
+  var pt = $('#lfSpPaste', b), pTimer = 0;
+  function readPaste() {
+    var v = pt.value; if (!v.trim()) return;
+    var got = planParse(v);
+    if (!got.length) { if (v.length > 24) lfToast('No exercises found. Lines like "Bench press 4x8" work best'); return; }
+    var used = {}, free = function () { return [1, 2, 3, 4, 5, 6, 0].filter(function (q) { return !used[q]; })[0]; };
+    got.forEach(function (d) { if (d.dow !== undefined && !used[d.dow]) { d.w = d.dow; used[d.w] = 1; } });
+    got.forEach(function (d) { if (d.w === undefined) { var f = free(); d.w = f === undefined ? 1 : f; used[d.w] = 1; } });
+    days.length = 0; got.slice(0, 7).forEach(function (d) { days.push({ w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, sets: x.sets, lo: x.lo, hi: x.hi }; }) }); });
+    paint();
+  }
+  pt.addEventListener('input', function () { clearTimeout(pTimer); pTimer = setTimeout(readPaste, 250); });
+  pt.addEventListener('paste', function () { clearTimeout(pTimer); pTimer = setTimeout(readPaste, 30); });
+  if (LF_WGT && LF_WGT.readPlan) {
+    var rd = el('<button type="button" class="lf-btn is-full" id="lfSpRead" style="margin-bottom:6px">Read it from a photo or PDF</button>');
     rd.addEventListener('click', function () { var nm = $('#lfSpN', b).value; s.close(true); lfPlanSheet(nm); });
     b.insertBefore(rd, b.firstChild);
   }
