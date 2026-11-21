@@ -2635,7 +2635,7 @@ const freeze = (at) => `(() => {
     await page.locator('#lfTargets #lfGoal button').nth(2).click(); await settle(page);
     ok('the weekly goal is set from it', (await store(page)).goal === 3);
     ok('there is no body weight goal: weight is logged, not chased', await page.locator('#lfGoalBw, #lfGoalBwNote').count() === 0);
-    await page.click('#lfBw'); await settle(page);
+    await page.click('#lfYou #lfBw'); await settle(page);
     ok('and the weight sheet has no goal field either', await page.locator('#lfBwGoal').count() === 0 && await page.locator('#lfBwIn').count() === 1);
     await page.keyboard.press('Escape'); await settle(page);
     ok('Settings no longer holds the weekly goal', await page.locator('#lfSet #lfGoal').count() === 0);
