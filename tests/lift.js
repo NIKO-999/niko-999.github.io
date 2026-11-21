@@ -2074,7 +2074,7 @@ const freeze = (at) => `(() => {
     const orig = await first().getAttribute('data-ex');
     ok('the day starts on its own first exercise', orig === 'pendulum', orig);
     await first().locator('.lf-swp').click(); await page.waitForTimeout(500);
-    await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Front squat' }).first().click(); await page.waitForTimeout(600);
+    await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: /^Front squat/ }).first().click(); await page.waitForTimeout(600);
     ok('swapping puts the other exercise in its place, with the same number of sets', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-set:not(.is-hd)').count() >= 3);
     ok('and says what it stands in for, with the way back', /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()));
     ok('it picks up from what you did on the original', /Picking up from Pendulum squat/.test(await first().locator('.lf-aim').textContent()), await first().locator('.lf-aim').textContent());
@@ -2089,13 +2089,13 @@ const freeze = (at) => `(() => {
     st = await store(page);
     ok('back to the original is one press, and puts the day back as it was', await first().getAttribute('data-ex') === 'pendulum' && !st.sw && await first().locator('.lf-from').count() === 0, st.sw);
     await first().locator('.lf-swp').click(); await page.waitForTimeout(500);
-    await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Front squat' }).first().click(); await page.waitForTimeout(500);
+    await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: /^Front squat/ }).first().click(); await page.waitForTimeout(500);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('Settings no longer lists swaps', await page.locator('#lfSwaps').count() === 0 && !/Swapped exercises/.test(await page.textContent('#lfYou')));
     await page.click('.lf-bar [data-v="lib"]'); await settle(page);
     await page.click('#lfSplit .lf-li >> nth=4'); await settle(page);
-    const sw = top(page).locator('.lf-li', { hasText: 'Front squat' });
+    const sw = top(page).locator('.lf-li', { hasText: /^Front squat/ });
     ok('the day page shows the swapped exercise in the accent', await sw.count() === 1 && await sw.locator('b').evaluate((e) => getComputedStyle(e).color !== getComputedStyle(document.body).color));
     await sw.click(); await settle(page);
     await top(page).locator('.lf-btn.is-log', { hasText: 'Revert to Pendulum squat' }).click(); await settle(page);
@@ -2764,6 +2764,7 @@ const freeze = (at) => `(() => {
     ok('a muscle opens on its own press', await page.locator('#lfLibList .lf-list').first().isVisible());
     await page.click('#lfLibFold'); await page.waitForTimeout(200);
     ok('and the whole section puts away again', !(await page.locator('#lfLibList').isVisible()));
+    await page.click('#lfLibFold'); await page.waitForTimeout(200); await page.locator('#lfLibBody .lf-seg button, #lfLibBody [role=tab], #lfLibBody button', { hasText: /^All$/ }).first().click(); await page.waitForTimeout(300);
     const all = await page.evaluate(() => { var o = []; document.querySelectorAll('#lfLibList .lf-li-t b').forEach((b) => o.push(b.textContent.toLowerCase())); return o; });
     ok('no two exercises on the list share a name', new Set(all).size === all.length, String(all.length));
     ok('the list is a long one now, with machine and dumbbell variations in it', all.length > 280 && all.some((n) => /^machine /.test(n)) && all.some((n) => /^dumbbell /.test(n)) && all.some((n) => /plate-loaded/.test(n)), String(all.length));
