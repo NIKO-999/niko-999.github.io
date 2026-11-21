@@ -1968,7 +1968,7 @@ const freeze = (at) => `(() => {
     await o.page.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2);
     ok('pressing it says what is going on instead of nothing', /Making your video/.test(await o.page.evaluate(() => (document.querySelector('.lf-toast') || {}).textContent || '')));
     await o.page.waitForFunction(() => window.lfStoryBytes > 2000, null, { timeout: 40000 }).catch(() => {});
-    ok('it records itself as it plays, and what it recorded is a video that loops in place of the canvas', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
+    ok('it records itself as it plays, and what it recorded is a video that plays once in place of the canvas', await o.page.evaluate(() => window.lfStoryBytes > 2000) && await o.page.locator('.lf-card-st video').count() === 1 && await o.page.locator('#lfCardShare').isEnabled());
     const rdy = await o.page.evaluate(() => { const b = document.querySelector('#lfCardShare'), cs = getComputedStyle(b); return { dim: +cs.opacity, busy: b.getAttribute('aria-busy'), bar: !!b.querySelector('i') }; });
     ok('once it exists the button is full strength and the bar is gone', rdy.dim === 1 && rdy.busy === null && !rdy.bar, rdy);
     /* a throw in the page's own share used to be swallowed by the event handler: now it goes the long way round, and shows */

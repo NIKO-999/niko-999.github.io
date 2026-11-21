@@ -4263,7 +4263,7 @@ function lfCardDraw(sp, prog, into) {
     /* THE WEEK'S GOAL AS ITS RING, in the review's own look: the ring filled to how much of the goal the week closed, the count inside it */
     /* THE REVIEW'S OWN RING, drawn to the same proportions as the one on the screen: a 120 box, a 52 radius, a 12 stroke, a rounded arc with its glow, and when the goal is hit a wide soft light round it */
     fade(.04, .14);
-    var D = 250, K = D / 168, rc = y - 6 + D / 2 - 40, rR = 52 / 120 * D, lw = 12 / 120 * D;
+    var D = 200, K = D / 168, rc = y - 6 + D / 2 - 40, rR = 52 / 120 * D, lw = 12 / 120 * D;
     if (sp.ring[2]) { x.save(); x.shadowColor = A(.45); x.shadowBlur = 40 * K; x.strokeStyle = 'rgba(0,0,0,0)'; x.lineWidth = 2; x.beginPath(); x.arc(W / 2, rc, D / 2 + 10 * K, 0, Math.PI * 2); x.stroke(); x.fillStyle = 'rgba(0,0,0,0)'; x.restore(); x.save(); x.shadowColor = A(.45); x.shadowBlur = 40 * K; x.fillStyle = '#000'; x.globalCompositeOperation = 'destination-over'; x.beginPath(); x.arc(W / 2, rc, D / 2 + 10 * K, 0, Math.PI * 2); x.fill(); x.restore(); }
     x.lineWidth = lw; x.lineCap = 'round'; x.strokeStyle = '#1e1e22'; x.beginPath(); x.arc(W / 2, rc, rR, 0, Math.PI * 2); x.stroke();
     x.save(); x.shadowColor = A(.6); x.shadowBlur = 8 * K; x.strokeStyle = A(1); x.beginPath(); x.arc(W / 2, rc, rR, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * Math.max(.001, Math.min(1, sp.ring[0] / Math.max(1, sp.ring[1])) * eo((P - .1) / .5))); x.stroke(); x.restore();
@@ -4313,6 +4313,18 @@ function lfCardDraw(sp, prog, into) {
     });
     return { rows: rows, tot: tot };
   };
+  /* THE WEEK LISTS EVERY SESSION, one line each: the name, then the day, how long and how much. Nothing is left as "+ more": the ring above gives up room for it, and the rows shrink together to fit however many there were. */
+  if (wk && lines.length) {
+    var wn = lines.length, wrh = 62, wpad = 28, wsc = Math.max(.4, Math.min(1, (avail - 2 * wpad) / (wn * wrh))), wch = wn * wrh * wsc + 2 * wpad;
+    fade(.64, .12); x.fillStyle = 'rgba(255,255,255,.06)'; rr(90, top, W - 180, wch, 36); x.fill();
+    lines.forEach(function (ln, wi) {
+      var pr = String(ln[1]).split(/\s+·\s+/), right = [pr[0], pr[2], pr[3]].filter(Boolean).join('  ·  '), wy = top + wpad + (wi + .68) * wrh * wsc;
+      x.globalAlpha = anim ? eo((P - (.66 + wi * .035)) / .1) : 1;
+      x.textAlign = 'right'; x.font = '500 ' + (27 * wsc) + 'px ' + FF; x.fillStyle = 'rgba(255,255,255,.66)'; x.fillText(right, W - 120, wy); var rw = x.measureText(right).width;
+      x.textAlign = 'left'; x.font = '800 ' + (33 * wsc) + 'px ' + FF; x.fillStyle = '#fff'; x.fillText(ln[0], 120, wy, Math.max(120, W - 240 - rw - 30));
+    });
+    x.globalAlpha = 1; return cv;
+  }
   var L = layout(1); while (L.tot > avail && scale > .5) { scale -= .04; L = layout(scale); }
   var rows = L.rows, more = 0;
   while (L.tot > avail && rows.length > 1) { rows.pop(); more++; L.tot = layout(scale).rows.slice(0, rows.length).reduce(function (a, r) { return a + 50 * scale + r.tx.length * 40 * scale + 24 * scale; }, 0); }
@@ -4359,7 +4371,9 @@ function lfCardMime() {
 function lfShareCardSheet(sp, name) {
   var cv = document.createElement('canvas'), b = el('<div class="lf-card-pv"><div class="lf-card-st" aria-label="The story, as it will be shared"></div></div>');
   var holder = $('.lf-card-st', b); holder.appendChild(cv);
-  lfCardDraw(sp, 0, cv);
+  /* THE ANIMATION PLAYS ONCE, AS THE VIDEO. It is drawn and recorded on a canvas kept off the screen, while the one you look at holds the finished card; showing the live animation and then the recording of it played it through twice. */
+  var rcv = document.createElement('canvas'); rcv.style.cssText = 'position:fixed;left:-9999px;top:0;width:270px;height:480px;pointer-events:none'; rcv.setAttribute('aria-hidden', 'true'); document.body.appendChild(rcv);
+  lfCardDraw(sp, 1, cv); lfCardDraw(sp, 0, rcv);
   var foot = [], blob = null, mime = lfCardMime(), ext = /mp4/.test(mime) ? 'mp4' : 'webm', url = '', rec = null, raf = 0, dead = false;
   var mk = function (id, txt, cls) { var q = el('<button type="button" class="lf-btn ' + (cls || '') + '" id="' + id + '" disabled></button>'); q.textContent = txt; return q; };
   /* ONE button, Share video: the phone's own share sheet has Save Video, Instagram, Facebook and TikTok in it, so none of them needs a button of its own */
@@ -4394,20 +4408,26 @@ function lfShareCardSheet(sp, name) {
     blob = new Blob(chunks, { type: mime.split(';')[0] || 'video/webm' }); if (dead) return;
     url = URL.createObjectURL(blob);
     /* the finished video plays on a loop in place of the canvas */
-    var v = document.createElement('video'); v.src = url; v.muted = true; v.loop = true; v.autoplay = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('aria-label', 'The story, as it will be shared');
-    holder.textContent = ''; holder.appendChild(v);
+    var v = document.createElement('video'); v.src = url; v.muted = true; v.loop = false; v.autoplay = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.setAttribute('aria-label', 'The story, as it will be shared. Press to play it again');
+    v.addEventListener('click', function () { try { v.currentTime = 0; v.play(); } catch (e) {} });
+    holder.textContent = ''; holder.appendChild(v); rcv.remove();
     window.lfStoryBytes = blob.size; enable();
   };
   var frame = function (now) {
     if (dead) return; if (!t0) t0 = now;
-    var el0 = now - t0; lfCardDraw(sp, Math.min(1, el0 / DUR), cv);
+    var el0 = now - t0; lfCardDraw(sp, Math.min(1, el0 / DUR), rcv);
     bar.style.width = Math.min(100, el0 / (DUR + HOLD) * 100) + '%';
     if (el0 < DUR + HOLD) raf = requestAnimationFrame(frame); else if (rec && rec.state !== 'inactive') rec.stop();
   };
   /* no recorder (an old browser): the finished card plays out once and the buttons stay off, because there is nothing to send */
+  /* THE FONT HAS TO BE THERE FIRST. A canvas asked to draw in a face the page has not used yet draws nothing at all, so the first card came up as shapes with no words in them; the card is drawn, and the recording started, once the face is loaded (or a second has passed). */
+  var begun = false;
+  var begin = function () {
+    if (begun || dead) return; begun = true;
+    lfCardDraw(sp, 1, cv); lfCardDraw(sp, 0, rcv);
   try {
-    if (!mime || !cv.captureStream) throw new Error('no recorder');
-    rec = new MediaRecorder(cv.captureStream(30), { mimeType: mime, videoBitsPerSecond: 4500000 });
+    if (!mime || !rcv.captureStream) throw new Error('no recorder');
+    rec = new MediaRecorder(rcv.captureStream(30), { mimeType: mime, videoBitsPerSecond: 4500000 });
     rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
     rec.onstop = finish; rec.start(250); raf = requestAnimationFrame(frame);
     /* a recorder that never stops leaves the button dim for ever: ask again, use what it has, or say so */
@@ -4416,8 +4436,13 @@ function lfShareCardSheet(sp, name) {
       try { if (rec.state !== 'inactive') rec.stop(); } catch (e) {}
       setTimeout(function () { if (blob || dead) return; if (chunks.length) finish(); else { bar.remove(); lfToast('The video did not finish. Close this and try again'); } }, 1500);
     }, DUR + HOLD + 2500);
-  } catch (e) { lfCardDraw(sp, 1, cv); foot.forEach(function (q) { q.disabled = true; }); bar.remove(); lfToast('This phone cannot make the video'); }
-  var sh = lfSheet({ title: 'Share', body: b, foot: foot, onClose: function () { dead = true; cancelAnimationFrame(raf); try { if (rec && rec.state !== 'inactive') rec.stop(); } catch (e) {} if (url) setTimeout(function () { URL.revokeObjectURL(url); }, 4000); } });
+  } catch (e) { rcv.remove(); lfCardDraw(sp, 1, cv); foot.forEach(function (q) { q.disabled = true; }); bar.remove(); lfToast('This phone cannot make the video'); }
+  };
+  try {
+    if (document.fonts && document.fonts.load) Promise.race([Promise.all([document.fonts.load('800 40px Inter'), document.fonts.load('700 30px Inter'), document.fonts.load('500 30px Inter')]), new Promise(function (res) { setTimeout(res, 1000); })]).then(begin, begin);
+    else begin();
+  } catch (e) { begin(); }
+  var sh = lfSheet({ title: 'Share', body: b, foot: foot, onClose: function () { dead = true; rcv.remove(); cancelAnimationFrame(raf); try { if (rec && rec.state !== 'inactive') rec.stop(); } catch (e) {} if (url) setTimeout(function () { URL.revokeObjectURL(url); }, 4000); } });
   if (sh.foot) sh.foot.classList.add('is-wrap');
   /* a press on the dim button lands here: say why nothing happened */
   if (sh.foot) sh.foot.addEventListener('click', function () { if (!blob && !dead && rec) lfToast('Making your video. A few more seconds'); });
