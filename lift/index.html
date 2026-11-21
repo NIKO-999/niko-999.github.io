@@ -4939,7 +4939,35 @@ function planParse(text) {
     var words = name.split(' ').length;
     if (name.length > 1 && name.length <= 40 && words <= 5 && (PLAN_DAY.test(name) || /^[A-Z0-9][^a-z]*$/.test(raw) || /^[A-Z][A-Za-z &/]*[:]?$/.test(raw))) day(name.replace(/:$/, '').replace(/\b([a-z])/g, function (c) { return c.toUpperCase(); }));
   });
-  return days.filter(function (d) { return d.ex.length; });
+  /* A DAY THAT NAMES ITS WEEKDAY KEEPS IT. "Monday - Push", "Tue: Legs" and a bare "Wednesday" all put the day on that weekday, and what is left of the heading is its name; with nothing left the name is worked out from what is in it, the way the built-in days are named. */
+  var WD = [['sun', 0], ['mon', 1], ['tue', 2], ['wed', 3], ['thu', 4], ['fri', 5], ['sat', 6]];
+  var out = days.filter(function (d) { return d.ex.length; });
+  out.forEach(function (d) {
+    var m = /\b(mon|tue|wed|thu|fri|sat|sun)(?:day|s|sday|nesday|rsday|r|urday)?\b/i.exec(d.n);
+    if (!m) return;
+    d.dow = WD.filter(function (w) { return w[0] === m[1].toLowerCase(); })[0][1];
+    d.n = d.n.replace(m[0], ' ').replace(/^[\s\-–—:·,|.]+|[\s\-–—:·,|.]+$/g, '').replace(/\s+/g, ' ');
+  });
+  out.forEach(function (d) { if (!d.n || /^(?:day|week)\s*\d*$/i.test(d.n) || d.n === 'Imported routine') d.n = planDayName(d); });
+  return out;
+}
+function planDayName(d) {
+  var c = {}, o = [];
+  d.ex.forEach(function (x) { var e = x.id && exById(x.id); if (e) { if (!c[e.m]) { c[e.m] = 0; o.push(e.m); } c[e.m]++; } });
+  o.sort(function (a, b) { return c[b] - c[a]; });
+  if (!o.length) return 'Day';
+  var n = o.slice(0, 2).map(function (m, i) { return i ? m.toLowerCase() : m; }).join(' & ');
+  return n;
+}
+/* what the day is for, in the same short form the built-in days carry */
+function planDaySp(rows) {
+  var o = '', parts = [];
+  rows.forEach(function (r) {
+    var n = exName(r[0]), t = parts.length ? n.charAt(0).toLowerCase() + n.slice(1) : n;
+    if ((o + (o ? ', ' : '') + t).length > 56 || parts.length >= 4) return;
+    parts.push(t); o = parts.join(', ');
+  });
+  return o;
 }
 var spDraft = '';
 function lfPlanSheet(nm) {
@@ -4971,7 +4999,10 @@ function lfPlanGo(from, text) {
 }
 /* A SPLIT IS A WHOLE WEEK IN ONE. Reading a programme from a photo, a PDF or pasted text, or building one by hand, ends in the same place: one split, named, with a weekday on every day, added to the strip beside the ones that come with the app. It is never a pile of separate routines. */
 function lfPlanPreview(days) {
-  lfSplitForm(days.map(function (d, i) { return { w: [1, 2, 3, 4, 5, 6, 0][i % 7], n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, sets: x.sets, lo: x.lo, hi: x.hi }; }) }; }), spDraft);
+  var used = {}, free = function () { return [1, 2, 3, 4, 5, 6, 0].filter(function (q) { return !used[q]; })[0]; };
+  days.forEach(function (d) { if (d.dow !== undefined && !used[d.dow]) { d.w = d.dow; used[d.w] = 1; } });
+  days.forEach(function (d) { if (d.w === undefined) { var f = free(); d.w = f === undefined ? 1 : f; used[d.w] = 1; } });
+  lfSplitForm(days.map(function (d, i) { return { w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, sets: x.sets, lo: x.lo, hi: x.hi }; }) }; }), spDraft);
 }
 function lfSplitForm(days, name) {
   days = days || [];
@@ -5022,7 +5053,7 @@ function lfSplitForm(days, name) {
       used[w] = 1;
       var seen = {}, rows = [];
       x.forEach(function (e) { if (!seen[e.id]) { seen[e.id] = 1; rows.push([e.id, e.sets, e.lo, e.hi]); } });
-      out.push({ w: w, n: (d.n || '').trim().slice(0, 40) || DOW_LONG[w], sp: '', x: rows, ss: [] });
+      out.push({ w: w, n: (d.n || '').trim().slice(0, 40) || DOW_LONG[w], sp: planDaySp(rows), x: rows, ss: [] });
     });
     if (!out.length) { lfToast('Add a day with at least one exercise'); return; }
     s.close(true); lfProgAdd({ n: nm, d: out, c: [], dropped: 0 }, nm);
