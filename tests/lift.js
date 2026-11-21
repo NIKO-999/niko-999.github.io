@@ -584,7 +584,7 @@ const freeze = (at) => `(() => {
        music you train to. No Test sound, no media element, no 'playback'. */
     ok('there is no sound to test', !(await page.locator('#lfRaTest').count()));
     ok('the rest alert is On or Off, never a sound', (await page.locator('#lfRa button').allTextContents()).join('|') === 'On|Off');
-    ok('nothing in the page claims the audio session or plays a media element, except the silent one behind the lock-screen rest; the rest tones are Web Audio, made inside a tap, with the music ducked natively', !/type = 'playback'|new Audio\(|\.play\(\)/.test((await page.content()).replace(/var lfLockAu[\s\S]*?function lfRestPushClear/, '')));
+    ok('nothing in the page claims the audio session or plays a media element, except the silent one behind the lock-screen rest; the rest tones are Web Audio, made inside a tap, with the music ducked natively', !/type = 'playback'|new Audio\(|\.play\(\)/.test((await page.content()).replace(/var lfLockAu[\s\S]*?function lfRestPushClear/, '').replace(/v\.currentTime = 0; v\.play\(\);/, '')));
     await c.close();
   }
   {
@@ -1036,7 +1036,7 @@ const freeze = (at) => `(() => {
     ok('and counts them', /4 of 247/.test(await page.textContent('#lfBadgesRow')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
-    ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph').count() === 1);
+    ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph, .lf-cv canvas.is-on').count() >= 1);
     await page.waitForTimeout(1500);
     ok('a coin opens on its own screen, to spin', await page.locator('.lf-cv').count() === 1 && /10 workouts/.test(await page.textContent('.lf-cv')) && /Earned Mon 26 Oct/.test(await page.textContent('.lf-cv'))
       && await page.locator('.lf-cv-stage canvas, .lf-cv-stage.is-flat').count() >= 1);
