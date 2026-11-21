@@ -1076,7 +1076,7 @@ const freeze = (at) => `(() => {
     const page = await c.newPage(); await page.goto(URL); await page.waitForTimeout(300);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('nothing on You folds open and shut', await page.locator('#lfYou .lf-fold, #lfYou button[aria-expanded]').count() === 0);
-    ok('it is weight, goals and one list of five rows', await page.locator('#lfYou #lfBw').count() === 1 && await page.locator('#lfTargets').count() === 1 && (await page.locator('#lfMenu .lf-rowl b').allTextContents()).join() === 'Muscle targets,Appearance,Badges,Monthly medals,Settings');
+    ok('it is goals and one list of five rows, with no body weight on it', await page.locator('#lfBw').count() === 0 && await page.locator('#lfTargets').count() === 1 && (await page.locator('#lfMenu .lf-rowl b').allTextContents()).join() === 'Muscle targets,Appearance,Badges,Monthly medals,Settings');
     ok('a shelf builds nothing until its row is pressed', await page.locator('.lf-coin').count() === 0 && /of 247/.test(await page.textContent('#lfBadges')));
     await page.click('#lfBadges'); await settle(page);
     ok('pressing a row opens its screen', await page.locator('.lf-sheet #lfBadgesBody .lf-coin').count() === 247);
@@ -1805,7 +1805,7 @@ const freeze = (at) => `(() => {
     await page.evaluate(() => document.querySelector('#lfWeek').click()); await page.waitForTimeout(600);
     ok('opening a second trend puts the first away', await page.locator('.lf-vsh').count() === 1);
     /* and across the app: a press on the page puts away whatever sheet is up */
-    await page.evaluate(() => { const b = document.querySelector('#lfBw'); b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); b.click(); }); await page.waitForTimeout(600);
+    await page.evaluate(() => { const b = document.querySelector('#lfGrid'); b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); b.click(); }); await page.waitForTimeout(600);
     ok('a sheet opened from the page puts away the one before it, whatever it was', await page.locator('.lf-sheet').count() === 1 && await page.locator('.lf-vsh').count() === 0);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfVol'); await page.waitForTimeout(1600);
@@ -2669,10 +2669,9 @@ const freeze = (at) => `(() => {
     ok('and sits above Appearance', ys[0] < ys[1], ys);
     await page.locator('#lfTargets #lfGoal button').nth(2).click(); await settle(page);
     ok('the weekly goal is set from it', (await store(page)).goal === 3);
-    ok('there is no body weight goal: weight is logged, not chased', await page.locator('#lfGoalBw, #lfGoalBwNote').count() === 0);
-    await page.click('#lfYou #lfBw'); await settle(page);
-    ok('and the weight sheet has no goal field either', await page.locator('#lfBwGoal').count() === 0 && await page.locator('#lfBwIn').count() === 1);
-    await page.keyboard.press('Escape'); await settle(page);
+    ok('there is no body weight on You, and no goal for it', await page.locator('#lfBw, #lfGoalBw, #lfGoalBwNote').count() === 0);
+    await page.click('.lf-bar [data-v="home"]'); await settle(page);
+    ok('and none on Today either', await page.locator('#lfBw').count() === 0);
     ok('Settings no longer holds the weekly goal', await page.locator('#lfSet #lfGoal').count() === 0);
     await c.close();
   }
@@ -2853,6 +2852,14 @@ const freeze = (at) => `(() => {
     const src = await co.locator('img').getAttribute('src');
     ok('its picture is drawn on the phone, not the old pre-made medal', !!src && !/^bd\//.test(src), String(src).slice(0, 40));
     await c.close();
+    const two = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-30T18:00:00', true);
+    for (let k = 0; k < 8 && await two.page.locator('.lf-cv').count(); k++) { await two.page.locator('.lf-cv-x').first().click(); await two.page.waitForTimeout(500); }
+    await two.page.click('.lf-bar [data-v="you"]'); await settle(two.page);
+    await two.page.click('#lfBadges'); await settle(two.page);
+    const sc = two.page.locator('#lfBadgesBody .lf-bdi', { hasText: 'Steady' }).first().locator('.lf-coin');
+    await sc.scrollIntoViewIfNeeded(); await sc.evaluate((e) => { e.click(); e.click(); }); await two.page.waitForTimeout(700);
+    ok('pressing a badge twice opens one viewer, never a second over the first', await two.page.locator('.lf-cv').count() === 1 && await two.page.locator('.lf-cvb').count() === 1);
+    await two.c.close();
   }
 
   await browser.close();

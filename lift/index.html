@@ -335,10 +335,6 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-gl { display: grid; grid-template-columns: 80px minmax(0, 1fr) 40px; align-items: center; gap: 10px; margin-top: 10px; font-size: 14px; }
 .lf-gl em { font-style: normal; color: var(--dim); font-size: 12px; }
 
-/* ── body weight ── */
-.lf-bw { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.lf-bw .lf-big { font-size: 19px; }
-.lf-spark { width: 120px; height: 40px; }
 
 /* ── empty ── */
 .lf-empty { text-align: center; color: var(--dim); padding: 24px 16px; font-size: 13px; }
@@ -2759,7 +2755,6 @@ function lfRenderHome() {
   root.appendChild(r);
   var lw = lfLastWeekBtn(); if (lw) root.appendChild(lw);
   var lm = lfLastMonthBtn(); if (lm) root.appendChild(lm);
-  root.appendChild(lfBwCard());
 }
 /* LAST WEEK, AGAIN. The week in review comes up once and was then gone for
    good. This opens it whenever you like, for the one week it is about: the
@@ -3339,42 +3334,6 @@ function lfWeekCard(inSheet) {
   return c;
 }
 
-function lfBwCard() {
-  var last = S.bw[S.bw.length - 1];
-  var c = el('<button type="button" class="lf-card lf-tap" id="lfBw"><div class="lf-hd"><span class="lf-lab">Body weight</span>' + IC.chev + '</div><div class="lf-bw"><div><div class="lf-big lf-num"></div><div class="lf-lab"></div></div><div class="lf-spark"></div></div></button>');
-  $('.lf-big', c).innerHTML = last ? esc(fmtW(last.kg)) + '<small>' + S.unit + '</small>' : '—';
-  $('.lf-bw .lf-lab', c).textContent = !last ? 'Tap to log your weight'
-    : 'Logged ' + fmtDay(last.d);
-  var pts = S.bw.slice(-30);
-  if (pts.length > 1) {
-    var mn = Math.min.apply(null, pts.map(function (p) { return p.kg; })), mx = Math.max.apply(null, pts.map(function (p) { return p.kg; })), rg = mx - mn || 1;
-    var d = pts.map(function (p, i) { return (i ? 'L' : 'M') + (i / (pts.length - 1) * 120).toFixed(1) + ' ' + (36 - (p.kg - mn) / rg * 32).toFixed(1); }).join(' ');
-    $('.lf-spark', c).innerHTML = '<svg viewBox="0 0 120 40" aria-hidden="true"><path d="' + d + '" fill="none" style="stroke:var(--mark-on)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  }
-  c.addEventListener('click', lfBwSheet);
-  return c;
-}
-
-function lfBwSheet() {
-  var last = S.bw[S.bw.length - 1];
-  var b = el('<div><label class="lf-flab" for="lfBwIn">Today, in ' + S.unit + '</label><input class="lf-field lf-num" id="lfBwIn" inputmode="decimal" autocomplete="off" /><div class="lf-list lf-sec" id="lfBwList"></div></div>');
-  if (last) $('#lfBwIn', b).placeholder = fmtW(last.kg);
-  S.bw.slice(-8).reverse().forEach(function (p) {
-    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b></div><span class="lf-li-r lf-num"></span></div>');
-    $('b', li).textContent = fmtDay(p.d); $('.lf-li-r', li).textContent = fmtW(p.kg) + ' ' + S.unit; $('#lfBwList', b).appendChild(li);
-  });
-  var save = el('<button type="button" class="lf-btn is-log is-full">Log weight</button>');
-  var s = lfSheet({ title: 'Body weight', body: b, foot: [save] });
-  save.addEventListener('click', function () {
-    var v = num(parseFloat($('#lfBwIn', b).value));
-    if (v) {
-      var d = ymd(today()), kg = fromDisp(v);
-      S.bw = S.bw.filter(function (p) { return p.d !== d; }); S.bw.push({ d: d, kg: kg });
-      S.bw.sort(function (a, c) { return a.d < c.d ? -1 : 1; });
-    }
-    lfSave(); s.close(true); lfRender(); if (v) lfToast('Logged ' + v + ' ' + S.unit);
-  });
-}
 
 /* ═══════════ THE DAY: STEPS, FOOD, WATER ═══════════
    Each is a list of entries per date and the figure is their sum, so a
@@ -5718,7 +5677,6 @@ function lfWoEdit(w) {
 function lfRenderYou() {
   var root = $('#lfYou'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">You</h2>'));
-  root.appendChild(lfBwCard());
   /* GOALS: what you are aiming at, in one place, open when you arrive. The workouts a week. */
   var gb = el('<div><span class="lf-flab">Workouts a week</span><div class="lf-seg" id="lfGoal" style="--n:7"></div></div>');
   var c = el('<div><span class="lf-flab">Units</span><div class="lf-seg" id="lfUnit"><button type="button" data-u="kg">kg</button><button type="button" data-u="lb">lb</button></div>'
@@ -6125,7 +6083,7 @@ function lfHealthSave(w) {
 }
 function lfHealthCard() {
   if (!LF_WGT || !LF_WGT.healthAuth || !lfCaps.health) return null;
-  var c = el('<div class="lf-card" id="lfHealth"><div class="lf-lab" style="margin-bottom:10px">Apple Health</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfHkSave"></button><button type="button" class="lf-btn" style="flex:1" id="lfHkWt">Read weight</button></div></div>');
+  var c = el('<div class="lf-card" id="lfHealth"><div class="lf-lab" style="margin-bottom:10px">Apple Health</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfHkSave"></button></div></div>');
   var sv = $('#lfHkSave', c);
   function paint() { sv.textContent = S.hk ? 'Saving workouts · on' : 'Save workouts'; sv.classList.toggle('is-ink', !!S.hk); sv.setAttribute('aria-pressed', S.hk ? 'true' : 'false'); }
   paint();
@@ -6135,14 +6093,6 @@ function lfHealthCard() {
       if (!r || !r.ok) { lfToast('Allow Health in Settings to turn this on'); return; }
       S.hk = true; lfSave(); paint(); lfToast('Workouts will be saved to Health');
     }, function () { lfToast('Health is not available here'); });
-  });
-  $('#lfHkWt', c).addEventListener('click', function () {
-    LF_WGT.healthAuth({}).then(function () { return LF_WGT.healthWeight({}); }).then(function (r) {
-      if (!r || !(r.kg > 0)) { lfToast('No weight in Health yet'); return; }
-      var d = ymd(new Date(r.t || Date.now()));
-      S.bw = S.bw.filter(function (p) { return p.d !== d; }); S.bw.push({ d: d, kg: Math.round(r.kg * 10) / 10 }); S.bw.sort(function (a, b) { return a.d < b.d ? -1 : 1; });
-      lfSave(); lfRender(); lfToast('Weight read from Health');
-    }, function () { lfToast('Could not read Health'); });
   });
   return c;
 }
@@ -10564,7 +10514,10 @@ function lfCoinBtn(x, size) {
 
 /* ── the live award: drag to spin with momentum, tap to flip, it settles face-on.
    It is the one badge built at full size, and it is given back when it closes. */
+var lfCvOpen = null;
 function lfCoinView(x, earnedNow) {
+  /* ONE VIEWER AT A TIME. A second press, or an announcement landing while one is up, used to open another on top of it; the one already up is put away first. */
+  if (lfCvOpen) lfCvOpen.close(true);
   var v = el('<div class="lf-cv" role="dialog" aria-modal="true"><button type="button" class="lf-cv-x" aria-label="Close">' + IC.x + '</button><div class="lf-cv-stage"></div>'
     + '<div class="lf-cv-cap"><div class="lf-cv-k"></div><div class="lf-cv-n"></div><p></p><div class="lf-cv-h">Drag to spin · tap to flip</div></div></div>');
   var kd = $('.lf-cv-k', v); kd.textContent = earnedNow ? (x.b.k === 'month' ? 'Medal won' : 'Badge earned') : x.r ? 'Personal best' : x.d ? BD_KIND[x.b.k].n : x.b.k === 'month' ? 'This month' : 'Not yet earned';
@@ -10601,13 +10554,15 @@ function lfCoinView(x, earnedNow) {
     for (var ei = 0; ei < 22; ei++) { var sp = document.createElement('s'); sp.style.left = (4 + Math.random() * 92) + '%'; sp.style.setProperty('--d', (3 + Math.random() * 3.5).toFixed(2) + 's'); sp.style.setProperty('--w', (-Math.random() * 6).toFixed(2) + 's'); sp.style.setProperty('--x', Math.round(Math.random() * 80 - 40) + 'px'); sp.style.setProperty('--z', (2 + Math.random() * 4).toFixed(1) + 'px'); own.appendChild(sp); }
     stage.insertBefore(own, stage.firstChild);
   }
-  function close() {
-    if (done) return; done = true; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up'); vb.classList.remove('is-up');
-    setTimeout(function () { if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); vb.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); }, 240);
+  function close(instant) {
+    if (done) return; done = true; if (lfCvOpen === api) lfCvOpen = null; cancelAnimationFrame(raf); document.removeEventListener('keydown', esc); v.classList.remove('is-up'); vb.classList.remove('is-up');
+    /* the renderer is shared, so a viewer put away by another opening must be cleared NOW: its delayed clean-up would otherwise lift the canvas out of the new one */
+    var fin = function () { if (aw) bdViewKeep(aw); if (r) { r.domElement.classList.remove('is-on'); if (r.domElement.parentNode) r.domElement.parentNode.removeChild(r.domElement); } bdViewOn = false; v.remove(); vb.remove(); if (!stack.length) document.body.classList.remove('lf-lock'); bdPump(); };
+    if (instant === true) fin(); else setTimeout(fin, 240);
   }
   function esc(e) { if (e.key === 'Escape') { e.stopPropagation(); close(); } }
   document.addEventListener('keydown', esc);
-  $('.lf-cv-x', v).addEventListener('click', close);
+  $('.lf-cv-x', v).addEventListener('click', function () { close(); });
   /* IT OPENS AT ONCE: the shelf's own picture of it fills the stage while
      the live award is built, which only starts once the screen is up — a
      build that ran first held the whole screen back until it was done */
@@ -10653,7 +10608,8 @@ function lfCoinView(x, earnedNow) {
       if (aw.userData.flow) { var tt = performance.now() / 1000; aw.userData.flow.offset.set(Math.sin(tt * .21) * .12, -tt * .045); aw.userData.flow2.offset.set(tt * .03, Math.cos(tt * .17) * .1); aw.userData.haze.opacity = .17 + Math.sin(tt * 1.9) * .05; var phs = tt % 3.6, gp = phs / 1.1, g2 = (phs - .45) / 1.1; aw.userData.glint.forEach(function (t, i) { var q = i ? g2 : gp; t.offset.x = q > 0 && q < 1 ? (i ? -.8 + q * 1.6 : .8 - q * 1.6) : 2; });
         /* the lava surges as the light crosses it, then settles */ var sg = 1 + 1.6 * Math.exp(-Math.pow((phs - .5) / .35, 2)) + Math.sin(tt * 3.3) * .15; aw.userData.lavaM.forEach(function (m) { m.color.setScalar(sg); }); }
       r.render(sc, cam);
-      if (ph.parentNode) { r.domElement.classList.add('is-on'); setTimeout(function () { ph.remove(); }, 220); }
+      /* the live badge replaces the still in one frame: a fade left both on screen, a little different in size, which read as a second badge opening over the first */
+      if (ph.parentNode) { r.domElement.style.transition = 'none'; r.domElement.classList.add('is-on'); ph.remove(); }
     })();
     stage.addEventListener('pointerdown', function (e) { drag = { x: e.clientX, y: e.clientY, m: 0 }; vy = vx = 0; stage.setPointerCapture(e.pointerId); });
     stage.addEventListener('pointermove', function (e) {
@@ -10664,11 +10620,13 @@ function lfCoinView(x, earnedNow) {
     stage.addEventListener('pointercancel', function () { drag = null; });
     });
   });
-  return { close: close };
+  var api = { close: close }; lfCvOpen = api;
+  return api;
 }
 
 /* ── announced once: whatever has been won and not yet seen ── */
 function lfBadgeNew() {
+  if (lfCvOpen || document.querySelector('.lf-cv')) return;
   var all = lfBadges().concat(lfMedals()), fresh = all.filter(function (x) { return x.d && !S.bseen[x.b.id]; });
   if (!fresh.length) return;
   fresh.forEach(function (x) { S.bseen[x.b.id] = 1; }); lfSave();
