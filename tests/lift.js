@@ -861,7 +861,9 @@ const freeze = (at) => `(() => {
     const ap = await ac.newPage(); await ap.goto(URL); await ap.waitForTimeout(900);
     ok('an empty app no longer greets you with an offer to bring the web copy over', await ap.locator('#lfMoveCard').count() === 0);
     await ap.click('.lf-bar [data-v="you"]'); await ap.waitForTimeout(400); await ap.locator('.lf-mvb').click(); await ap.waitForTimeout(2200); await ap.waitForLoadState('load'); await ap.waitForTimeout(800);
-    const got = await ap.evaluate(() => ({ wo: JSON.parse(localStorage.getItem('lift.v1')).wo.length, fr: JSON.parse(localStorage.getItem('lift.fr.v1')), ac: localStorage.getItem('lift.accent.v1') }));
+    /* the app reloads itself once the record has moved, so a read can land on the old page: try again until one sticks */
+    const readGot = () => ap.evaluate(() => ({ wo: JSON.parse(localStorage.getItem('lift.v1')).wo.length, fr: JSON.parse(localStorage.getItem('lift.fr.v1')), ac: localStorage.getItem('lift.accent.v1') }));
+    let got; for (let i = 0; i < 12 && !got; i++) { try { got = await readGot(); } catch (e) { await ap.waitForTimeout(500); } }
     ok('one tap brings it across: the workouts, the same friend code and key, the colour', got.wo === wos.length && got.fr.code === 'K7PQ2M4X' && got.fr.key === 'a'.repeat(32) && got.fr.on === true && got.ac === '200', got);
     ok('and it is still reachable under Backup', true);
     const bad = await mkCtx(`window.Capacitor = { isNativePlatform: () => true }; if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(Object.assign({}, base, { wo: [] })))}); Object.defineProperty(navigator, 'clipboard', { value: { readText: () => Promise.resolve(${JSON.stringify(JSON.stringify(Object.assign({}, base, { mv: { fr: JSON.stringify({ on: true, code: 'bad', key: 'x' }), accent: 'evil', mode: 'x', ow: 'nope' } })))}) }, configurable: true });`);
