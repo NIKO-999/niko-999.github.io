@@ -5835,6 +5835,8 @@ function lfRenderLib() {
     $('.lf-list', pc).appendChild(li);
   });
   if (!newU) root.appendChild(pc);
+  /* YOUR SPLIT IS THE TOP OF THE SCREEN: it is what you open this tab for, so the targets and the quick actions sit under it. It is built after them only because of the order the code reads in; moved up here in one go. */
+  if (!newU) { var top = root.querySelector('#lfTgCard'); var cap = Array.prototype.filter.call(root.querySelectorAll('.lf-cap.lf-gh'), function (x) { return x.textContent === 'Your split'; })[0]; [cap, pg, pc].forEach(function (x) { if (x && top) root.insertBefore(x, top); }); }
   /* routines */
   /* SPLITS ARE THE ONLY THING YOU ADD. Routines written before this stay and still edit from here, but the section is only drawn while there are some. */
   var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
