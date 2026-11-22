@@ -480,8 +480,22 @@ const freeze = (at) => `(() => {
       const { c, page } = await ctx(last([10, 10, 10]), '2026-11-02T07:00:00');
       await page.click('#lfGo'); await settle(page);
       const ex = page.locator('.lf-session .lf-ex').first();
+      /* EVERY SET AT THE TOP: one more set at the same weight comes before any more weight */
+      ok('every set at the top adds one set before it adds weight', await ex.locator('.lf-set:not(.is-hd)').count() === 5);
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
-      ok('ten on every set moves the weight up 2.5 and the reps back to six', ph.join() === '82.5,6,82.5,6,82.5,6,82.5,6', ph);
+      ok('and the aim for them is the same weight at the top of the range', ph.join() === '80,10,80,10,80,10,80,10,80,10', ph);
+      ok('and says so', (await ex.locator('.lf-aim').textContent()) === 'Add a set: 80 × 10');
+      await ex.locator('.lf-aim').click(); await settle(page);
+      ok('one tap on it fills every empty set with the aim', (await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '80,10,80,10,80,10,80,10,80,10');
+      await c.close();
+    }
+    {
+      /* with the extra set already at the top as well, it is weight that goes up */
+      const { c, page } = await ctx(last([10, 10, 10, 10, 10]), '2026-11-02T07:00:00');
+      await page.click('#lfGo'); await settle(page);
+      const ex = page.locator('.lf-session .lf-ex').first();
+      const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
+      ok('ten on every set including the extra moves the weight up 2.5 and the reps back to six', ph.join() === '82.5,6,82.5,6,82.5,6,82.5,6', ph);
       ok('and says so in four words', (await ex.locator('.lf-aim').textContent()) === 'Try 82.5 × 6');
       await ex.locator('.lf-aim').click(); await settle(page);
       ok('one tap on it fills every empty set with the aim', (await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '82.5,6,82.5,6,82.5,6,82.5,6');

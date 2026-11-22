@@ -3725,7 +3725,14 @@ function lfStart(rt) {
     if (!exById(id)) return;
     var tg = rt.tg && rt.tg[id0];
     if (cut && tg) tg = [lfCut(tg[0], half), tg[1], tg[2]].concat(tg[3] ? [tg[3]] : []);
+    /* SETS BEFORE WEIGHT: when every set of an exercise reached the top of its range last time, the next session adds ONE set at the same weight first (never more than one over the plan); the session after that, with the extra set at the top as well, is the one that adds weight */
+    var xs = 0;
+    if (tg && id === id0 && !cut && tg[3] !== 'rounds' && tg[2] > 0) {
+      var lp = lastFor(id);
+      if (lp && lp.length && lp.length <= tg[0] && lp.every(function (q) { return q && q.r >= tg[2]; }) && !lfStalled(id, tg[2])) { tg = [tg[0] + 1, tg[1], tg[2]].concat(tg[3] ? [tg[3]] : []); xs = 1; }
+    }
     lfAddEx(id, tg);
+    if (xs) act.x[act.x.length - 1].xs = 1;
     if (id !== id0) act.x[act.x.length - 1].from = id0;
   });
   /* the day's superset groups, from the plan: those exercises are linked from the start */
@@ -3781,6 +3788,7 @@ function lfAim0(e, last) {
   if (!last || !last.length) return { sets: [], note: tg && tg[3] !== 'rounds' ? 'First time. Find a weight for ' + lfRange(lo, hi) : '' };
   if (tg && tg[3] === 'rounds') return { sets: last, note: '' };
   var top = last.reduce(function (a, s) { return s.w > a.w ? s : a; }, last[0]);
+  if (e.xs && tg) { var ext = []; for (var xi = 0; xi < tg[0]; xi++) ext.push({ w: top.w, r: hi }); return { sets: ext, fill: ext, note: 'Add a set: ' + (bw ? 'BW' : fmtWS(top.w)) + ' × ' + hi }; }
   /* the whole of a plain progression: every set at the top of the range, add weight and start the reps again; otherwise the same weight and one more rep */
   if (!bw && last.every(function (s) { return s.r >= hi; })) {
     var step = S.unit === 'lb' ? 5 * LB : 2.5, w = top.w + step;
