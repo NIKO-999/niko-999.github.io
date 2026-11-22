@@ -1580,6 +1580,12 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-hh-r > div { grid-template-columns: auto 1fr; align-items: center; column-gap: 10px; row-gap: 2px; }
 .lf-hh-r .lf-hi-i { grid-row: 1 / 3; width: 28px; height: 28px; }
 .lf-hh-r .lf-hi-i svg { width: 16px; height: 16px; }
+/* FEWER THAN THREE READINGS: the room is there, so the figures and their icons are larger */
+.lf-hh-r.is-few { grid-auto-columns: 1fr; justify-content: stretch; }
+.lf-hh-r.is-few .lf-hi-i { width: 40px; height: 40px; }
+.lf-hh-r.is-few .lf-hi-i svg { width: 20px; height: 20px; }
+.lf-hh-r.is-few b { font-size: 28px; }
+.lf-hh-r.is-few > div { column-gap: 14px; }
 .lf-hh-r b { grid-column: 2; align-self: end; }
 .lf-hh-r span { grid-column: 2; align-self: start; }
 .lf-hh-r div { display: grid; } .lf-hh-r b { font-size: 20px; line-height: 1; letter-spacing: -.02em; } .lf-hh-r span { font-size: 12px; color: var(--dim); }
@@ -6675,7 +6681,7 @@ function lfHealthHome() {
     return c;
   }
   c = el('<button type="button" class="lf-card lf-tap lf-hh" id="lfHealthHomeOn"><div class="lf-hh-h">' + ico + '<span class="lf-lab">Apple Health</span>' + IC.chev + '</div><div class="lf-hh-r"><div><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.steps + '</svg></i><b class="lf-num">--</b><span>steps</span></div><div><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.sleep + '</svg></i><b class="lf-num">--</b><span>sleep</span></div><div><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.cal + '</svg></i><b class="lf-num">--</b><span>kcal</span></div></div></button>');
-  function paint(r) { var v = c.querySelectorAll('.lf-hh-r b'); v[0].textContent = r.steps > 0 ? lfHkNum(r.steps) : '--'; v[1].textContent = r.sleep && r.sleep.total ? lfHkMin(r.sleep.total) : '--'; v[2].textContent = r.energy > 0 ? lfHkNum(r.energy) : '--'; Array.prototype.forEach.call(v, function (x) { x.parentNode.hidden = x.textContent === '--'; }); }
+  function paint(r) { var v = c.querySelectorAll('.lf-hh-r b'); v[0].textContent = r.steps > 0 ? lfHkNum(r.steps) : '--'; v[1].textContent = r.sleep && r.sleep.total ? lfHkMin(r.sleep.total) : '--'; v[2].textContent = r.energy > 0 ? lfHkNum(r.energy) : '--'; Array.prototype.forEach.call(v, function (x) { x.parentNode.hidden = x.textContent === '--'; }); c.querySelector('.lf-hh-r').classList.toggle('is-few', c.querySelectorAll('.lf-hh-r > div:not([hidden])').length < 3); }
   if (lfHkCache && Date.now() - lfHkAt < 300000) paint(lfHkCache);
   else LF_WGT.healthDay({}).then(function (r) { if (r && r.ok) { lfHkCache = r; lfHkAt = Date.now(); paint(r); } }, function () {});
   c.addEventListener('click', lfHealthSheet);
