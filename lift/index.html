@@ -2943,7 +2943,8 @@ function lfProgCard() {
   var r = 21, len = 2 * Math.PI * r, f = goal ? Math.min(1, (done + frz) / goal) : 0;
   var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><div class="lf-pgr-h"><span>Weekly goal</span><span></span></div><div class="lf-pgr-n"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span><b class="lf-num"></b><i></i></span></div><div class="lf-pgr-w"></div></button>');
   /* GOAL HIT: the ring and the flame take the accent only once the week has reached its goal */
-  if (goal && f >= 1) c.classList.add('is-hit');
+  /* real workouts only: a frozen day fills the ring but is not the target hit */
+  if (goal && done >= goal) c.classList.add('is-hit');
   var e = addDays(mon, 6);
   $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
   /* PAST THE GOAL IT STAYS AT THE GOAL: a seventh workout in a six-a-week week still reads 6 / 6 */
