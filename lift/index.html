@@ -3500,7 +3500,7 @@ function lfWeekDone() {
    throws fireworks. Tap anywhere, or it goes by itself. */
 function lfGoalRun() {
   var m = monday(today()), n = 0;
-  for (var i = 0; i < 104; i++) { var a = addDays(m, -7 * i); if (wkDays(a) >= S.goal) n++; else break; }
+  for (var i = 0; i < 104; i++) { var a = addDays(m, -7 * i); if (lfWkOk(a)) n++; else break; }
   return n;
 }
 function lfGoalHit() {
@@ -4921,7 +4921,7 @@ function lfWeekSheet(m) {
   ws.forEach(function (w) { if (w.s > 1e11 && w.e > w.s) mins += (w.e - w.s) / 60000; });
   function inWeek(mm) { return wkDays(mm); }
   var gd = wkDays(m);
-  var streak = 0; for (var q = m, g = 0; g < 104 && S.goal > 0 && inWeek(q) >= S.goal; q = addDays(q, -7), g++) streak++;
+  var streak = 0; for (var q = m, g = 0; g < 104 && lfWkOk(q); q = addDays(q, -7), g++) streak++;
   var hit = S.goal > 0 && gd >= S.goal;
   /* THE WEEK'S TARGETS: the workouts a week, and the sets each muscle in
      focus asked for (the priority ones, or all of them if none is). Met, the
@@ -6515,8 +6515,8 @@ function lfWidgetSnap() {
   var t = today(), m = monday(t), days = [], i, done = false, rt = lfToday();
   for (i = 0; i < 7; i++) { var dk = ymd(addDays(m, i)); days.push(S.wo.some(function (w) { return w.d === dk; }) ? 1 : S.rd && S.rd[dk] ? 2 : 0); }
   done = days[(t.getDay() + 6) % 7] === 1;
-  var streak = 0, q = S.goal > 0 && wkDays(m) >= S.goal ? m : addDays(m, -7);
-  for (var g = 0; g < 104 && S.goal > 0 && wkDays(q) >= S.goal; q = addDays(q, -7), g++) streak++;
+  var streak = 0, q = lfWkOk(m) ? m : addDays(m, -7);
+  for (var g = 0; g < 104 && lfWkOk(q); q = addDays(q, -7), g++) streak++;
   var got = lfBadgesCache().filter(function (x) { return x.d; }).sort(function (x, y) { return x.d < y.d ? 1 : x.d > y.d ? -1 : 0; })[0];
   return { v: 1, d: ymd(t), accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2', unit: S.unit,
     today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: days.filter(function (x) { return x === 1; }).length, goal: S.goal || 0, days: days }, streak: streak,
@@ -6592,8 +6592,8 @@ function frStats() {
   });
   var mon = monday(t), wkFrom = ymd(mon);
   function inWeek(m) { return wkDays(m); }
-  var wk = inWeek(mon), streak = wk >= S.goal ? 1 : 0;
-  for (var m = addDays(mon, -7), g = 0; g < 104 && inWeek(m) >= S.goal; m = addDays(m, -7), g++) streak++;
+  var wk = inWeek(mon), streak = lfWkOk(mon) ? 1 : 0;
+  for (var m = addDays(mon, -7), g = 0; g < 104 && lfWkOk(m); m = addDays(m, -7), g++) streak++;
   var last = S.wo.reduce(function (a, w) { return w.d > a ? w.d : a; }, '');
   /* This week as a friend's dashboard draws it: sets by day, and sets by
      muscle against the targets they set. Counts, never a weight. */
@@ -6890,7 +6890,7 @@ function frStrip(dstr) {
    see. Empty, it falls back to your three latest, as before. */
 function lfShow() { var got = {}; lfBadgesCache().forEach(function (x) { if (x.d) got[x.b.id] = x.d; }); return (S.show || []).filter(function (id) { return got[id]; }).slice(0, 3); }
 var lfBC = null, lfBCk = '';
-function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.length - 1].id : '') + ':' + JSON.stringify(S.fx || '').length + ':' + (S.bw || []).length; if (k !== lfBCk) { lfBC = lfBadges(); lfBCk = k; } return lfBC; }
+function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.length - 1].id : '') + ':' + JSON.stringify(S.fx || '').length + ':' + (S.bw || []).length + ':' + (S.fz || []).join(','); if (k !== lfBCk) { lfBC = lfBadges(); lfBCk = k; } return lfBC; }
 /* ── WHAT YOU WEAR ──────────────────────────────────────────────────────
    A title, a flair beside the name, a frame round the picture and a
    backdrop behind the page, each earned from what you have done and worn
@@ -8027,8 +8027,8 @@ function frRxBar(w, f) {
 function frMyRun() {
   var mon = monday(today());
   function inWeek(m) { return wkDays(m); }
-  var wk = inWeek(mon), streak = wk >= S.goal ? 1 : 0;
-  for (var m = addDays(mon, -7), g = 0; g < 104 && inWeek(m) >= S.goal; m = addDays(m, -7), g++) streak++;
+  var wk = inWeek(mon), streak = lfWkOk(mon) ? 1 : 0;
+  for (var m = addDays(mon, -7), g = 0; g < 104 && lfWkOk(m); m = addDays(m, -7), g++) streak++;
   return { wk: wk, goal: S.goal, streak: streak };
 }
 /* A SHARED STREAK: the weeks running that you and they both closed the
@@ -8719,7 +8719,7 @@ function lfDayRun() {
   if (!ws.length) return out;
   ws.forEach(function (w) { on[w.d] = 1; }); lfProg().days.forEach(function (x) { dows[x.dow] = 1; });
   for (var d = parseYmd(ws[0].d), g = 0; ymd(d) <= tk && g < 2000; d = addDays(d, 1), g++) {
-    var k = ymd(d), ok = on[k] || S.rd[k] === 1 || !dows[d.getDay()];
+    var k = ymd(d), ok = on[k] || S.rd[k] === 1 || lfFz(k) || !dows[d.getDay()];
     if (ok) { run++; if (!out.hit[run]) out.hit[run] = k; if (run > out.best) out.best = run; } else if (k < tk) run = 0;
   }
   return out;
@@ -8918,6 +8918,13 @@ var BARBELL = { squat: 1, bench: 1, deadlift: 1, rdl: 1, frontsq: 1, inclbb: 1, 
    one, the old reading, so nothing already earned is taken back */
 function frWon(v) { return v.length > 5 ? !!v[5] && v[2] > 0 : v[0] > 0 && v[0] > v[1] && v[2] > 0; }
 /* WHAT EACH LADDER COUNTS, worked out from the log in one pass: after every workout, a snapshot of every running figure, so a medal is won on the first day its figure reaches its count */
+/* A RUN OF DAYS, WITH FREEZES: from one workout day to the next, a gap that is made only of frozen days does not break the run, and each frozen day counts as a day in it. Anything else restarts it. */
+function lfRunStep(prevD, d, run) {
+  var gp = Math.round((parseYmd(d) - parseYmd(prevD)) / 864e5);
+  if (gp === 1) return run + 1;
+  if (gp > 1) { for (var i = 1; i < gp; i++) if (!lfFz(ymd(addDays(parseYmd(prevD), i)))) return 1; return run + gp; }
+  return run;
+}
 function lfLadderMetrics(ws) {
   var snaps = [], c = { sets: 0, reps: 0, min: 0, chest: 0, bk: 0, sh: 0, arm: 0, leg: 0, abs: 0, post: 0, cd: 0, cdm: 0, early: 0, owl: 0, mo: 0, ex: 0, sig: 0, plate: 0, run: 0 };
   var seen = {}, uses = {}, monN = {}, prevD = '', runNow = 0;
@@ -8936,7 +8943,7 @@ function lfLadderMetrics(ws) {
     if (w.cd) { c.cd++; c.cdm += +w.cd.m || 0; }
     if (w.s > 1e11) { var h = new Date(w.s).getHours(); if (h < 7) c.early++; if (h >= 20) c.owl++; }
     var mk = w.d.slice(0, 7); monN[mk] = (monN[mk] || 0) + 1; if (monN[mk] === 12) c.mo++;
-    if (prevD !== w.d) { var gp = prevD ? Math.round((parseYmd(w.d) - parseYmd(prevD)) / 864e5) : 0; runNow = gp === 1 ? runNow + 1 : 1; prevD = w.d; if (runNow > c.run) c.run = runNow; }
+    if (prevD !== w.d) { runNow = prevD ? lfRunStep(prevD, w.d, runNow) : 1; prevD = w.d; if (runNow > c.run) c.run = runNow; }
     var sn = {}; for (var k in c) sn[k] = c[k]; snaps.push([w.d, sn]);
   });
   return { snaps: snaps, last: snaps.length ? snaps[snaps.length - 1][1] : c };
@@ -8983,6 +8990,8 @@ function lfBadges() {
       else if (b < ymd(today())) fullRun = 0;
       wk = dayFirst(wk);
       if (wk.length >= S.goal) { won('goal', wk[S.goal - 1].d); streak++; var dd = wk[S.goal - 1].d; if (streak === 4) won('st4', dd); if (streak === 12) won('st12', dd); if (streak === 26) won('st26', dd); }
+      /* A FREEZE KEEPS THE RUN: a week the frozen days bring up to the goal carries the weekly streak on, and the 4, 12 and 26 week badges can still be won through it. It is not a goal hit, so the Week goal badge is left alone. */
+      else if (S.goal > 0 && lfFzIn(m) > 0 && wk.length + lfFzIn(m) >= S.goal) { streak++; var fzd = (S.fz || []).filter(function (k) { return k >= a && k <= b; }).sort().pop(); if (streak === 4) won('st4', fzd); if (streak === 12) won('st12', fzd); if (streak === 26) won('st26', fzd); }
       else if (b < ymd(today())) streak = 0;
       /* the sets add up through the week; the day a target is reached is the day the badge is won */
       var cum = {}, dAny = '', dPri = '', dAll = '', dQ = '';
@@ -9027,7 +9036,7 @@ function lfBadges() {
     /* reps a week, Monday on: the day a thousand and two thousand are passed */
     var rk = ymd(monday(parseYmd(w.d))), r0 = wkReps[rk] || 0; wkReps[rk] = r0 + woReps(w);
     if (r0 < 1000 && wkReps[rk] >= 1000) won('rep1k', w.d); if (r0 < 2000 && wkReps[rk] >= 2000) won('rep2k', w.d);
-    if (prevD) { var gap = Math.round((parseYmd(w.d) - parseYmd(prevD)) / 864e5); if (gap >= 15) won('back', w.d); if (gap === 1) runD++; else if (gap > 1) runD = 1; }
+    if (prevD) { var gap = Math.round((parseYmd(w.d) - parseYmd(prevD)) / 864e5); if (gap >= 15) won('back', w.d); if (gap > 0) runD = lfRunStep(prevD, w.d, runD); }
     else runD = 1;
     if (runD > bestRun) bestRun = runD;
     if (runD === 7) won('seven', w.d);

@@ -1562,6 +1562,18 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── A FREEZE KEEPS THE BADGES: a frozen day does not break a run of days, so the straight-run badges can still be won through it ── */
+  {
+    const w = (i, d) => ({ id: 'r' + i, d, s: i, e: i + 1, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] });
+    const days = []; for (let i = 0; i < 21; i++) { const d = new Date(2026, 9, 9 + i); days.push(d.toISOString().slice(0, 10)); }
+    const gap = '2026-10-19';
+    const wo = days.filter((d) => d !== gap).map((d, i) => w(i + 1, d));
+    const shelfOf = async (fz) => { const { c, page } = await ctx({ unit: 'kg', goal: 3, wo, ...(fz ? { fz: [gap] } : {}), rd: {} }, '2026-10-30T18:00:00', true); await page.click('.lf-bar [data-v="you"]'); await settle(page); await page.click('#lfBadges'); await settle(page); const sh = await page.$$eval('.lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent)); await c.close(); return sh.filter((x) => /^Three Weeks Straight/.test(x))[0] || ''; };
+    const no = await shelfOf(false), yes = await shelfOf(true);
+    ok('twenty-one days with one missed does not earn Three Weeks Straight', /\//.test(no), no);
+    ok('with that one day frozen the run is unbroken and the badge is won', yes && !/\//.test(yes), yes);
+  }
+
   /* ── ZONES: the weekly sets for each muscle from one choice, on Exercises, Sets this week and the first split ── */
   {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'z1', d: '2026-10-20', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] }] }, '2026-10-29T18:00:00');
