@@ -227,7 +227,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-cell.is-fz .lf-dots { display: flex; justify-content: center; } .lf-cell.is-fz .lf-fzi { width: 13px; height: 13px; }
 .lf-wk.is-fz .lf-fzi { width: 18px; height: 18px; }
 .lf-fz-e { display: grid; justify-items: center; gap: 6px; } .lf-fz-e .lf-fzi { width: 26px; height: 26px; }
-#lfSk { margin-top: 18px; }
+#lfSk { margin: 14px 0 6px; }
 .lf-sf-fz { margin: 16px 0 0; padding: 14px; border-radius: 18px; background: var(--card2); }
 .lf-sf-h { margin: 0; font: inherit; }
 .lf-sf-t { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font: inherit; text-align: left; padding: 0; }
@@ -2964,9 +2964,6 @@ function lfStreakView(b) {
     var how = el('<button type="button" class="lf-card lf-tap lf-sf-how"><i>' + LF_FLAME + '</i><div><b>How streaks work?</b><span>Keep your weekly streak going.</span></div>' + IC.chev + '</button>');
     how.addEventListener('click', function () { lfStreakHow(); });
     b.appendChild(how);
-    var ch = el('<button type="button" class="lf-btn is-full" id="lfSkGoal">' + (goal ? 'Change goal' : 'Set a goal') + '</button>');
-    ch.addEventListener('click', function () { lfGoalSheet(); });
-    b.appendChild(ch);
   }
   paint();
 }
@@ -5862,6 +5859,8 @@ function lfRenderCal() {
     b.addEventListener('click', function () { calMode = b.dataset.m; calAt = today(); lfRenderCal(); });
   });
   root.appendChild(seg);
+  /* the streak leads the month: the weeks in a row, the freezes, how it works */
+  if (calMode === 'month') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk); }
   var t = today();
   var from, to, label;
   if (calMode === 'month') { from = new Date(calAt.getFullYear(), calAt.getMonth(), 1); to = new Date(calAt.getFullYear(), calAt.getMonth() + 1, 0); label = MON[from.getMonth()] + ' ' + from.getFullYear(); }
@@ -5938,7 +5937,6 @@ function lfRenderCal() {
     goal.textContent = dayFirst(S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); })).length + ' of ' + S.goal + ' this week';
     root.appendChild(rdl); root.appendChild(sum); root.appendChild(goal);
   }
-  if (calMode === 'month') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk); }
   /* Every workout in the range, newest first. */
   var ws2 = S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); }).sort(function (a, b) { return a.d === b.d ? b.s - a.s : (a.d < b.d ? 1 : -1); });
   if (ws2.length && calMode === 'month') {
