@@ -1570,8 +1570,25 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
 .lf-toast span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-#lfMoreBody { display: flex; flex-direction: column; gap: 10px; }
-#lfMoreBody[hidden] { display: none; }
+/* ROOMIER HOME: larger cards, larger figures, more air */
+#lfHome .lf-pgr { min-height: 200px; padding: 22px 20px 24px; }
+#lfHome .lf-pgr-h { font-size: 12px; }
+#lfHome .lf-pgr-n { margin: 14px 0 18px; gap: 14px; font-size: 14px; }
+#lfHome .lf-pgr-n b { font-size: 38px; margin-right: 4px; }
+#lfHome .lf-pgr-ring { width: 68px; height: 68px; }
+#lfHome .lf-pgr-ring .fl { width: 28px; height: 28px; }
+#lfHome .lf-pgr-w { gap: 8px; }
+#lfHome .lf-pgr-w i { height: 12px; border-radius: 6px; }
+#lfHome .lf-pgr-w div { font-size: 12px; gap: 8px; }
+#lfHome .lf-hh { padding: 22px 20px; gap: 18px; }
+#lfHome .lf-stat { padding: 26px 8px 28px; }
+#lfHome .lf-stat .lf-ic { width: 22px; height: 22px; margin: 4px auto 8px; }
+#lfHome .lf-stat b { font-size: 30px; }
+#lfHome .lf-stat span { font-size: 14px; margin-top: 4px; }
+#lfHome #lfGrid { padding: 22px 20px 26px; }
+#lfHome #lfGrid .lf-days { gap: 12px 8px; margin-top: 20px; }
+#lfHome #lfGrid .lf-day { height: 22px; }
+#lfHome .lf-today { padding: 24px 20px; }
 .lf-hh { display: grid; gap: 12px; width: 100%; text-align: left; }
 .lf-hh-h { display: flex; align-items: center; gap: 10px; } .lf-hh-h b { flex: 1; font-size: 15px; } .lf-hh-h .lf-lab { flex: 1; }
 .lf-hh-r { display: grid; grid-auto-flow: column; grid-auto-columns: auto; justify-content: space-between; gap: 12px; }
@@ -3063,21 +3080,17 @@ function lfRenderHome() {
   root.appendChild(lfTodayCard());
   root.appendChild(lfProgCard());
   var hh = lfHealthHome(); if (hh) root.appendChild(hh);
+  /* THE HOME SCREEN IS NEVER COLLAPSIBLE: everything is on it, and it is made roomier rather than shorter. Each card is larger, so a screen holds fewer of them and none of it reads as a wall. */
+  root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
-  /* THE REST FOLDS. Today, the goal, Health and the month are the screen; the three totals, the weekly targets, the volume and week cards and the two reviews are one press away under More, shut until you open them. The suite's in-place mode keeps them out. */
-  var more = el('<div id="lfMoreBody"></div>'), hd = el('<h3 class="lf-fold-h lf-gh"><button type="button" class="lf-fold-b" id="lfMoreFold" aria-controls="lfMoreBody"><span class="lf-cap">More</span>' + IC.chev + '</button></h3>');
-  function foldMore() { $('#lfMoreFold', hd).setAttribute('aria-expanded', homeMore ? 'true' : 'false'); more.hidden = !homeMore; }
-  $('#lfMoreFold', hd).addEventListener('click', function () { homeMore = !homeMore; foldMore(); });
-  root.appendChild(hd); root.appendChild(more); foldMore();
-  more.appendChild(lfStatRow());
   /* NO SETS UNTIL THERE IS A SPLIT: a first install has nothing to count against, so the weekly targets only appear once the first split is made */
-  if (!lfNew()) more.appendChild(lfLegCard());
+  if (!lfNew()) root.appendChild(lfLegCard());
   var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard()); setTimeout(lfWeekDone, 0);
-  more.appendChild(r);
-  var lw = lfLastWeekBtn(); if (lw) more.appendChild(lw);
-  var lm = lfLastMonthBtn(); if (lm) more.appendChild(lm);
+  root.appendChild(r);
+  var lw = lfLastWeekBtn(); if (lw) root.appendChild(lw);
+  var lm = lfLastMonthBtn(); if (lm) root.appendChild(lm);
 }
-var homeMore = !!window.__lfInline;
+
 /* LAST WEEK, AGAIN. The week in review comes up once and was then gone for
    good. This opens it whenever you like, for the one week it is about: the
    week just finished. When the next one finishes it takes its place, and
