@@ -3773,7 +3773,9 @@ function lfAim0(e, last) {
   }
   var st = bw ? null : lfStalled(e.id, hi);
   if (st) { var dl = last.map(function () { return { w: st.w, r: lo }; }); return { stall: st, sets: tg ? dl : last, fill: dl, note: 'Stalled for 3 sessions. Try ' + fmtW(st.w) + ' × ' + lo }; }
-  var sets = last.map(function (s) { return { w: s.w, r: bw ? s.r + 1 : Math.min(hi, Math.max(lo, s.r + 1)) }; });
+  /* EACH SET PROGRESSES FROM ITS OWN LAST RESULT, so they are not all the same: a set that already reached the top of the range steps the weight up and starts the reps again, and one that has not adds a rep. The first set usually gets there first and the others follow. */
+  var stp = S.unit === 'lb' ? 5 * LB : 2.5;
+  var sets = last.map(function (s) { return !bw && hi && s.r >= hi && s.w > 0 ? { w: s.w + stp, r: lo } : { w: s.w, r: bw ? s.r + 1 : Math.min(hi, Math.max(lo, s.r + 1)) }; });
   /* an exercise with no plan still ticks as last time; the suggestion is there, and one tap takes it */
   return { sets: tg ? sets : last, fill: sets, note: 'Try ' + (bw ? 'BW' : fmtWS(sets[0].w)) + ' × ' + sets[0].r };
 }

@@ -489,6 +489,15 @@ const freeze = (at) => `(() => {
       ok('and a second tap changes nothing that is filled', (await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '82.5,6,82.5,6,82.5,6,82.5,6');
       await c.close();
     }
+    {
+      /* EACH SET PROGRESSES FROM ITS OWN LAST RESULT: the one that reached the top steps the weight up, the others add a rep */
+      const { c, page } = await ctx(last([10, 9, 9, 8]), '2026-11-02T07:00:00');
+      await page.click('#lfGo'); await settle(page);
+      const ex = page.locator('.lf-session .lf-ex').first();
+      const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
+      ok('a set that reached the top steps up while the others add a rep', ph.join() === '82.5,6,80,10,80,10,80,9', ph);
+      await c.close();
+    }
   }
 
   /* ── THE AUDIT: things found off-centre, cut short or unreadable, and kept fixed ── */
