@@ -1569,7 +1569,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
-.lf-toast span { white-space: nowrap; }
+.lf-toast span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .lf-hi-g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 18px; }
 .lf-hi-t { display: grid; gap: 8px; align-content: start; padding: 14px; border-radius: 22px; background: var(--card2); }
 .lf-hi-f { display: flex; align-items: baseline; gap: 6px; }
@@ -1578,7 +1578,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-hi-b { height: 6px; border-radius: 99px; background: var(--dash); overflow: hidden; }
 .lf-hi-b i { display: block; height: 100%; border-radius: 99px; background: var(--log); }
 .lf-hi-c { font-size: 12px; color: var(--dim); min-height: 15px; }
-.lf-toast .lf-fzi { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+.lf-toast .lf-fzi { display: inline-block; width: 15px; height: 15px; flex: none; margin: 0; }
 .lf-toast .lf-fzg { color: var(--log); font-weight: 800; text-shadow: 0 0 8px color-mix(in srgb, var(--log) 70%, transparent), 0 0 18px color-mix(in srgb, var(--log) 40%, transparent); }
 .lf-toast button { min-height: 44px; padding: 0 12px; font-weight: 700; }
 
@@ -2944,7 +2944,7 @@ function lfFzCheck() {
   var more = av - S.fzAv; S.fzAv = av; lfSave();
   if (more > 0) setTimeout(function () {
     lfToast('Streak freeze earned');
-    var sp = $('.lf-toast span'); if (sp) sp.innerHTML = lfFzI() + ' Streak freeze earned <b class="lf-fzg">+' + more + '</b>';
+    var sp = $('.lf-toast span'); if (sp) sp.innerHTML = lfFzI() + '<span>Streak freeze earned</span><b class="lf-fzg">+' + more + '</b>';
   }, 700);
 }
 function lfFzUse(k) {
