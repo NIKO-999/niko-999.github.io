@@ -416,10 +416,11 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-vr.is-met i b { background: var(--good); }
 .lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
 .lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
-.lf-aim { appearance: none; background: none; border: 0; padding: 0; font: inherit; font-size: 10px; font-weight: 700; color: var(--log); margin: 2px 0 6px; text-align: left; cursor: pointer; display: block; }
-.lf-aim::before { content: '\2728  COACH'; display: inline-block; margin-right: 6px; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--log); vertical-align: 0; white-space: pre; }
+.lf-aim { appearance: none; background: none; border: 0; padding: 0; font: inherit; font-size: 10px; font-weight: 700; color: var(--log); margin: 2px 0 6px; text-align: left; cursor: pointer; display: flex; align-items: center; }
+.lf-aim::before { content: 'COACH'; order: -1; margin-right: 8px; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--log); }
+.lf-aim-s { order: -2; flex: none; width: 12px; height: 12px; margin-right: 4px; fill: none; stroke: var(--log); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .lf-aim.is-stall::before { display: none; }
-.lf-aim:not(.is-info)::after { content: ' ›'; color: var(--dim); }
+.lf-aim:not(.is-info)::after { content: '›'; order: 1; margin-left: 4px; color: var(--dim); }
 .lf-aim.is-info { color: var(--dim); cursor: default; }
 .lf-aim.is-up { color: var(--good); }
 /* A STALLED LIFT is a tag and the figure, never a sentence: the tag says what, the figure says what to do. Neutral, because a stall is not a failure. */
@@ -4141,6 +4142,8 @@ function lfPaintSession() {
        for what the exercise is everywhere else. */
     $('.lf-tg', card).textContent = (e.tg ? lfTgTxt(e.tg) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs);
     $('.lf-aim', card).textContent = aim.note;
+    /* the sparkle is a drawing in the accent, put in front of the words; it adds no text, so the line still reads as just the suggestion */
+    if (aim.note) $('.lf-aim', card).insertAdjacentHTML('afterbegin', '<svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg>');
     $('.lf-aim', card).classList.toggle('is-up', !!aim.up);
     if (aim.stall && aim.sets && aim.sets.length) {
       var aimEl = $('.lf-aim', card), aimF = (aim.fill || aim.sets)[0];
