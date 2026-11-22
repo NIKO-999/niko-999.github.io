@@ -2408,7 +2408,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await page.waitForSelector('.lf-tr-stage', { timeout: 6000 }).catch(() => {});
     const g1 = [await page.locator('.lf-tr-stage').count(), await page.locator('.lf-session').count()];
     ok('the first workout opens the guide once, over the session', g1[0] === 1 && g1[1] === 1, g1);
-    ok('five scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
+    ok('six scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove","Coach"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
     await page.click('.lf-tr-segs button:nth-child(2)'); await page.waitForTimeout(3800);
     ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
     await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);
@@ -2582,7 +2582,7 @@ const freeze = (at) => `(() => {
       const o = await ctx(seed([sess('a', '2026-10-19', [7, 6, 6]), sess('b', '2026-10-26', [7, 6, 6]), sess('c', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
       await o.page.click('#lfGo'); await settle(o.page);
       const aim = await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent();
-      ok('three sessions at 60 with no rep gained is a stall, and the aim is a lighter weight', /^Stalled\s*Try 55 × 5$/.test(aim) && await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim-k').count() === 1, aim);
+      ok('three sessions at 60 with no rep gained is a stall, and the aim is a lighter weight', /^Deload\s*Try 55 × 5$/.test(aim) && await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim-k').count() === 1, aim);
       await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').click(); await settle(o.page);
       ok('one tap takes the lighter week', (await o.page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '55,5,55,5,55,5');
       for (let i = 0; i < 3; i++) await o.page.locator('.lf-session .lf-ex').first().locator('.lf-chk').nth(i).click();
@@ -2594,7 +2594,7 @@ const freeze = (at) => `(() => {
       const o = await ctx(seed([sess('a', '2026-10-19', [5, 5, 5]), sess('b', '2026-10-26', [6, 5, 5]), sess('c', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
       await o.page.click('#lfGo'); await settle(o.page);
       const aim = await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent();
-      ok('reps going up is not a stall', /^Try /.test(aim) && !/Stalled/.test(aim), aim);
+      ok('reps going up is not a stall', /^Try /.test(aim) && !/Deload/.test(aim), aim);
       await o.c.close();
     }
     {
@@ -2607,7 +2607,7 @@ const freeze = (at) => `(() => {
     {
       const o = await ctx(seed([sess('a', '2026-10-26', [7, 6, 6]), sess('b', '2026-10-30', [7, 6, 5])]), '2026-11-02T07:00:00');
       await o.page.click('#lfGo'); await settle(o.page);
-      ok('two sessions are too few to call a stall', !/Stalled/.test(await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent()));
+      ok('two sessions are too few to call a stall', !/Deload/.test(await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').textContent()));
       await o.c.close();
     }
   }
