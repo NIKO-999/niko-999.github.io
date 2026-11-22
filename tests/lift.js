@@ -490,12 +490,20 @@ const freeze = (at) => `(() => {
       await c.close();
     }
     {
-      /* EACH SET PROGRESSES FROM ITS OWN LAST RESULT: the one that reached the top steps the weight up, the others add a rep */
+      /* THE FIRST SET REACHED THE TOP, so you are stronger: the sets after it start from the new weight too, at the bottom of the range */
       const { c, page } = await ctx(last([10, 9, 9, 8]), '2026-11-02T07:00:00');
       await page.click('#lfGo'); await settle(page);
       const ex = page.locator('.lf-session .lf-ex').first();
       const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
-      ok('a set that reached the top steps up while the others add a rep', ph.join() === '82.5,6,80,10,80,10,80,9', ph);
+      ok('a first set that reached the top carries the new weight to the sets after it', ph.join() === '82.5,6,82.5,6,82.5,6,82.5,6', ph);
+      await c.close();
+    }
+    {
+      const { c, page } = await ctx(last([9, 8, 8, 8]), '2026-11-02T07:00:00');
+      await page.click('#lfGo'); await settle(page);
+      const ex = page.locator('.lf-session .lf-ex').first();
+      const ph = await ex.locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.placeholder));
+      ok('with the first set below the top each set just adds a rep', ph.join() === '80,10,80,9,80,9,80,9', ph);
       await c.close();
     }
   }
