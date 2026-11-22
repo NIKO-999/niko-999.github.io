@@ -1496,6 +1496,11 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-hd { display: flex; align-items: center; justify-content: space-between; }
 .fr-plus { width: 44px; height: 44px; display: grid; place-items: center; margin: -8px -10px 0 0; color: var(--ink); }
 .fr-plus .lf-ic { width: 24px; height: 24px; }
+.fr-me-w { display: grid; gap: 8px; }
+.fr-nm { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--card); border-radius: var(--r); width: 100%; text-align: left; font: inherit; color: var(--ink); }
+.fr-nm span { font-size: 13px; color: var(--dim); }
+.fr-nm b { flex: 1; min-width: 0; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-nm .lf-ic { width: 16px; height: 16px; color: var(--dim); }
 .fr-me { display: flex; align-items: center; gap: 4px; padding: 4px 4px 4px 16px; background: var(--card); border-radius: var(--r); }
 .fr-me-t { flex: 1; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
 .fr-me-t span { font-size: 13px; color: var(--dim); }
@@ -8520,7 +8525,11 @@ function frCodeRow(onOff) {
     + '<button type="button" class="fr-ib" id="frMore" aria-label="Friends settings"><svg class="lf-ic" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18" cy="12" r="1.2"/></svg></button></div>');
   $('.fr-code', code).textContent = FRS.code;
   $('#frShare', code).addEventListener('click', frShare);
-  $('#frMore', code).addEventListener('click', function () {
+  /* YOUR NAME IS ON THE FACE OF IT: a row under the code that shows the name friends see and opens the same sheet the three dots do, so changing it is not something to be found */
+  var nameRow = el('<button type="button" class="fr-nm" id="frNameRow"><span>Your name</span><b></b><svg class="lf-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button>');
+  $('b', nameRow).textContent = FRS.name || 'Lifter';
+  var wrap = el('<div class="fr-me-w"></div>'); wrap.appendChild(code); wrap.appendChild(nameRow);
+  function openMore() {
     var b = el('<div><label class="lf-flab" for="frNewName" style="margin-top:0">Your name, as friends see it</label><input class="lf-field" id="frNewName" maxlength="24" autocomplete="off" />'
       + '<span class="lf-flab">While you train</span><div class="lf-seg" id="frLvSw" style="--n:2"><button type="button" data-v="1">Show my sets</button><button type="button" data-v="0">Just that I am</button></div></div>');
     $$('#frLvSw button', b).forEach(function (q) {
@@ -8533,8 +8542,10 @@ function frCodeRow(onOff) {
     $('#frNewName', b).value = FRS.name;
     sv.addEventListener('click', function () { var n = $('#frNewName', b).value.trim(); if (!n) return; FRS.name = n; frSave(); frSig = ''; frPush(); s2.close(true); lfRender(); });
     off.addEventListener('click', function () { s2.close(true); if (onOff) onOff(); frTurnOff(); });
-  });
-  return code;
+  }
+  $('#frMore', code).addEventListener('click', openMore);
+  nameRow.addEventListener('click', openMore);
+  return wrap;
 }
 var frArrive = 0, frRgIn = 1, frRgMem = {}, frRgSeen = {}, frWoSeen = {}, frSyncSaid = '';
 try { frWoSeen = JSON.parse(localStorage.getItem('lift.frwo.v1') || '{}') || {}; } catch (e) {}
