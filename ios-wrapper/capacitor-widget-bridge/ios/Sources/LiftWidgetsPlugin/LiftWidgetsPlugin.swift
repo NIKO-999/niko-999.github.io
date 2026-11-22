@@ -35,6 +35,8 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, UIImagePickerContro
         CAPPluginMethod(name: "healthAuth", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "healthSave", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "healthWeight", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "healthReadAuth", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "healthDay", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "readPlan", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "duck", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "haptic", returnType: CAPPluginReturnPromise),
@@ -310,6 +312,108 @@ public class LiftWidgetsPlugin: CAPPlugin, CAPBridgedPlugin, UIImagePickerContro
         hs.execute(q)
         #else
         call.resolve([:])
+        #endif
+    }
+
+    // ── Health insights: today against your own thirty days. Read only, kept in memory by the page and never stored or sent.
+    @objc func healthReadAuth(_ call: CAPPluginCall) {
+        #if canImport(HealthKit)
+        guard HKHealthStore.isHealthDataAvailable() else { call.resolve(["ok": false]); return }
+        var read = Set<HKObjectType>()
+        let ids: [HKQuantityTypeIdentifier] = [.stepCount, .activeEnergyBurned, .appleExerciseTime, .distanceWalkingRunning, .restingHeartRate, .heartRateVariabilitySDNN]
+        for id in ids { if let t = HKObjectType.quantityType(forIdentifier: id) { read.insert(t) } }
+        if let sl = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) { read.insert(sl) }
+        hs.requestAuthorization(toShare: [], read: read) { ok, _ in call.resolve(["ok": ok]) }
+        #else
+        call.resolve(["ok": false])
+        #endif
+    }
+
+    @objc func healthDay(_ call: CAPPluginCall) {
+        #if canImport(HealthKit)
+        guard HKHealthStore.isHealthDataAvailable() else { call.resolve(["ok": false]); return }
+        let cal = Calendar.current
+        let start0 = cal.startOfDay(for: Date())
+        let from = cal.date(byAdding: .day, value: -30, to: start0) ?? start0
+        let box = NSMutableDictionary()
+        box["ok"] = true
+        let lock = NSLock()
+        let group = DispatchGroup()
+        func put(_ k: String, _ v: Any) { lock.lock(); box[k] = v; lock.unlock() }
+        let window = HKQuery.predicateForSamples(withStart: from, end: nil, options: [])
+
+        // a day's total, for today and as the average of the days before it
+        let sums: [(String, HKQuantityTypeIdentifier, HKUnit)] = [
+            ("steps", .stepCount, HKUnit.count()),
+            ("energy", .activeEnergyBurned, HKUnit.kilocalorie()),
+            ("exercise", .appleExerciseTime, HKUnit.minute()),
+            ("distance", .distanceWalkingRunning, HKUnit.meterUnit(with: .kilo))
+        ]
+        for (key, id, unit) in sums {
+            guard let t = HKObjectType.quantityType(forIdentifier: id) else { continue }
+            group.enter()
+            let q = HKStatisticsCollectionQuery(quantityType: t, quantitySamplePredicate: window, options: .cumulativeSum, anchorDate: start0, intervalComponents: DateComponents(day: 1))
+            q.initialResultsHandler = { _, res, _ in
+                var vals: [Double] = []
+                res?.enumerateStatistics(from: from, to: Date()) { st, _ in vals.append(st.sumQuantity()?.doubleValue(for: unit) ?? 0) }
+                let todayV = vals.last ?? 0
+                let prev = Array(vals.dropLast())
+                let avg = prev.isEmpty ? 0 : prev.reduce(0, +) / Double(prev.count)
+                put(key, todayV); put(key + "Avg", avg)
+                group.leave()
+            }
+            hs.execute(q)
+        }
+
+        // the latest reading, and the thirty day average to set it against
+        let spot: [(String, HKQuantityTypeIdentifier, HKUnit)] = [
+            ("rhr", .restingHeartRate, HKUnit.count().unitDivided(by: HKUnit.minute())),
+            ("hrv", .heartRateVariabilitySDNN, HKUnit.secondUnit(with: .milli))
+        ]
+        for (key, id, unit) in spot {
+            guard let t = HKObjectType.quantityType(forIdentifier: id) else { continue }
+            group.enter()
+            let latest = HKSampleQuery(sampleType: t, predicate: nil, limit: 1, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)]) { _, r, _ in
+                if let m = r?.first as? HKQuantitySample { put(key, m.quantity.doubleValue(for: unit)) }
+                group.leave()
+            }
+            hs.execute(latest)
+            group.enter()
+            let avgQ = HKStatisticsQuery(quantityType: t, quantitySamplePredicate: window, options: .discreteAverage) { _, st, _ in
+                if let v = st?.averageQuantity()?.doubleValue(for: unit) { put(key + "Avg", v) }
+                group.leave()
+            }
+            hs.execute(avgQ)
+        }
+
+        // last night: from six the evening before
+        if let sl = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
+            group.enter()
+            let since = cal.date(byAdding: .hour, value: -6, to: start0) ?? start0
+            let sq = HKSampleQuery(sampleType: sl, predicate: HKQuery.predicateForSamples(withStart: since, end: nil, options: []), limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, r, _ in
+                var deep = 0.0, rem = 0.0, core = 0.0, awake = 0.0, other = 0.0
+                for x in (r as? [HKCategorySample]) ?? [] {
+                    let m = x.endDate.timeIntervalSince(x.startDate) / 60
+                    if #available(iOS 16.0, *) {
+                        switch x.value {
+                        case HKCategoryValueSleepAnalysis.asleepDeep.rawValue: deep += m
+                        case HKCategoryValueSleepAnalysis.asleepREM.rawValue: rem += m
+                        case HKCategoryValueSleepAnalysis.asleepCore.rawValue: core += m
+                        case HKCategoryValueSleepAnalysis.awake.rawValue: awake += m
+                        case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue: other += m
+                        default: break
+                        }
+                    } else if x.value == HKCategoryValueSleepAnalysis.asleep.rawValue { other += m }
+                }
+                put("sleep", ["total": deep + rem + core + other, "deep": deep, "rem": rem, "core": core, "awake": awake])
+                group.leave()
+            }
+            hs.execute(sq)
+        }
+
+        group.notify(queue: .main) { call.resolve((box as? [String: Any]) ?? ["ok": false]) }
+        #else
+        call.resolve(["ok": false])
         #endif
     }
 

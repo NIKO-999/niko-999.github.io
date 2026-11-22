@@ -67,7 +67,7 @@ jobs:
           gem list xcodeproj -i >/dev/null 2>&1 || sudo gem install xcodeproj --no-document
           ruby native/add-widgets.rb
           /usr/libexec/PlistBuddy -c "Add :NSSupportsLiveActivities bool true" ios/App/App/Info.plist || /usr/libexec/PlistBuddy -c "Set :NSSupportsLiveActivities true" ios/App/App/Info.plist
-          /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string Lift reads your body weight from Health so you do not type it twice." ios/App/App/Info.plist || true
+          /usr/libexec/PlistBuddy -c "Add :NSHealthShareUsageDescription string Lift reads your body weight, steps, active calories, exercise minutes, distance, sleep, resting heart rate and heart rate variability from Health, to show your day in the app. Nothing is stored or sent anywhere." ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :NSHealthUpdateUsageDescription string Lift saves your finished workouts to Health." ios/App/App/Info.plist || true
           /usr/libexec/PlistBuddy -c "Add :LiftCaps bool ${{ inputs.capabilities }}" ios/App/App/Info.plist || /usr/libexec/PlistBuddy -c "Set :LiftCaps ${{ inputs.capabilities }}" ios/App/App/Info.plist
           /usr/libexec/PlistBuddy -c "Add :NSPhotoLibraryAddUsageDescription string Lift saves your workout video to Photos." ios/App/App/Info.plist || true

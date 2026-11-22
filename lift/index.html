@@ -1570,6 +1570,14 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
 .lf-toast span { white-space: nowrap; }
+.lf-hi-g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 18px; }
+.lf-hi-t { display: grid; gap: 8px; align-content: start; padding: 14px; border-radius: 22px; background: var(--card2); }
+.lf-hi-f { display: flex; align-items: baseline; gap: 6px; }
+.lf-hi-f b { font-size: 24px; line-height: 1; letter-spacing: -.02em; }
+.lf-hi-f span { font-size: 13px; color: var(--dim); }
+.lf-hi-b { height: 6px; border-radius: 99px; background: var(--dash); overflow: hidden; }
+.lf-hi-b i { display: block; height: 100%; border-radius: 99px; background: var(--log); }
+.lf-hi-c { font-size: 12px; color: var(--dim); min-height: 15px; }
 .lf-toast .lf-fzi { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
 .lf-toast .lf-fzg { color: var(--log); font-weight: 800; text-shadow: 0 0 8px color-mix(in srgb, var(--log) 70%, transparent), 0 0 18px color-mix(in srgb, var(--log) 40%, transparent); }
 .lf-toast button { min-height: 44px; padding: 0 12px; font-weight: 700; }
@@ -2239,6 +2247,8 @@ function lfClean(o) {
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
   d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn;
   d.bwGoal = num(o.bwGoal);
+  /* Health insights have been allowed on this phone */
+  if (o.hkr === true) d.hkr = true;
   /* the freeze count last seen, so a new one can be announced once */
   if (o.fzAv >= 0 && o.fzAv < 50) d.fzAv = Math.floor(o.fzAv);
   /* days a streak freeze was used on, once each */
@@ -6514,9 +6524,59 @@ function lfHealthSave(w) {
   if (!LF_WGT || !lfCaps.health || !S.hk || !w || (S.hkd && S.hkd[w.id])) return;
   LF_WGT.healthSave({ start: w.s, end: w.e, title: w.n }).then(function (r) { if (r && r.ok) { S.hkd = S.hkd || {}; S.hkd[w.id] = 1; lfSave(); } }, function () {});
 }
+/* HEALTH INSIGHTS: today set against your own last thirty days, read from Apple Health when the sheet opens. Read only: it is held in memory for as long as the sheet is up and is never saved, backed up or sent. The two scores are worked out from what is on screen and nothing else. */
+function lfHkMin(m) { m = Math.round(m || 0); return m >= 60 ? Math.floor(m / 60) + ' h' + (m % 60 ? ' ' + (m % 60) + ' m' : '') : m + ' min'; }
+function lfHkNum(n, d) { return (+n).toLocaleString(undefined, { maximumFractionDigits: d || 0 }); }
+function lfHealthSheet() {
+  var b = el('<div id="lfHi"></div>'), s = lfSheet({ title: 'Health insights', body: b, key: 'hi' });
+  function tile(lab, fig, unit, v, avg, up) {
+    var t = el('<div class="lf-hi-t"><span class="lf-lab"></span><div class="lf-hi-f"><b class="lf-num"></b><span></span></div><div class="lf-hi-b"><i></i></div><span class="lf-hi-c"></span></div>');
+    $('.lf-lab', t).textContent = lab; $('b', t).textContent = fig; $('.lf-hi-f span', t).textContent = unit || '';
+    var has = v !== null && v !== undefined && avg > 0;
+    $('.lf-hi-b i', t).style.width = has ? Math.min(100, Math.round(v / avg * 100)) + '%' : '0%';
+    $('.lf-hi-c', t).textContent = has && up !== null ? (v >= avg ? (up === false ? 'Above your average' : 'Above your daily average') : (up === false ? 'Below your average' : 'Below your daily average')) : '';
+    if (!has) $('.lf-hi-b', t).hidden = true;
+    return t;
+  }
+  function paint(r) {
+    b.textContent = '';
+    var sl = r.sleep || {}, tot = sl.total || 0;
+    var parts = [['steps', r.steps, r.stepsAvg], ['energy', r.energy, r.energyAvg], ['exercise', r.exercise, r.exerciseAvg]].filter(function (x) { return x[2] > 0; });
+    var act = parts.length ? Math.round(parts.reduce(function (a, x) { return a + Math.min(1, x[1] / x[2]); }, 0) / parts.length * 100) : null;
+    var slp = tot > 0 ? Math.min(100, Math.round(tot / 480 * 100)) : null;
+    var sc = el('<div class="lf-hi-g"></div>');
+    sc.appendChild(tile('Activity', act === null ? '--' : act, act === null ? '' : '/ 100', act, act === null ? 0 : 100, null));
+    sc.appendChild(tile('Sleep', slp === null ? '--' : slp, slp === null ? '' : '/ 100', slp, slp === null ? 0 : 100, null));
+    var g1 = el('<div class="lf-hi-g"></div>');
+    g1.appendChild(tile('Steps', lfHkNum(r.steps), '', r.steps, r.stepsAvg));
+    g1.appendChild(tile('Active calories', lfHkNum(r.energy), 'kcal', r.energy, r.energyAvg));
+    g1.appendChild(tile('Exercise', lfHkNum(r.exercise), 'min', r.exercise, r.exerciseAvg));
+    g1.appendChild(tile('Distance', lfHkNum(r.distance, 1), 'km', r.distance, r.distanceAvg));
+    var g2 = el('<div class="lf-hi-g"></div>');
+    g2.appendChild(tile('Total sleep', tot ? lfHkMin(tot) : '--', '', null, 0));
+    g2.appendChild(tile('Deep sleep', sl.deep ? lfHkMin(sl.deep) : '--', '', null, 0));
+    g2.appendChild(tile('REM sleep', sl.rem ? lfHkMin(sl.rem) : '--', '', null, 0));
+    g2.appendChild(tile('Awake', sl.awake ? lfHkMin(sl.awake) : '--', '', null, 0));
+    g2.appendChild(tile('Resting heart rate', r.rhr ? lfHkNum(r.rhr) : '--', r.rhr ? 'bpm' : '', r.rhr, r.rhrAvg, false));
+    g2.appendChild(tile('Heart rate variability', r.hrv ? lfHkNum(r.hrv) : '--', r.hrv ? 'ms' : '', r.hrv, r.hrvAvg, false));
+    [['Scores', sc], ['Today\u2019s activity', g1], ['Recovery', g2]].forEach(function (x) { var h = el('<span class="lf-flab"></span>'); h.textContent = x[0]; b.appendChild(h); b.appendChild(x[1]); });
+  }
+  function load() {
+    b.textContent = ''; b.appendChild(el('<p class="lf-lab" style="margin:0">Reading Health</p>'));
+    LF_WGT.healthDay({}).then(function (r) { if (!r || !r.ok) { b.textContent = ''; b.appendChild(el('<p class="lf-lab" style="margin:0">Health did not answer</p>')); return; } paint(r); }, function () { b.textContent = ''; b.appendChild(el('<p class="lf-lab" style="margin:0">Health is not available here</p>')); });
+  }
+  if (S.hkr) { load(); return; }
+  var ask = el('<div><p class="lf-lab" style="margin:0 0 12px">Lift reads your steps, calories, exercise, distance, sleep and heart rate from Health, and shows them here against your own last thirty days. They stay on this phone and are not saved.</p><button type="button" class="lf-btn is-ink is-full" id="lfHiAllow">Allow Health</button></div>');
+  $('#lfHiAllow', ask).addEventListener('click', function () {
+    LF_WGT.healthReadAuth({}).then(function (r) { if (!r || !r.ok) { lfToast('Allow Health in Settings to turn this on'); return; } S.hkr = true; lfSave(); load(); }, function () { lfToast('Health is not available here'); });
+  });
+  b.appendChild(ask);
+}
 function lfHealthCard() {
   if (!LF_WGT || !LF_WGT.healthAuth || !lfCaps.health) return null;
   var c = el('<div class="lf-card" id="lfHealth"><div class="lf-lab" style="margin-bottom:10px">Apple Health</div><div style="display:flex;gap:10px"><button type="button" class="lf-btn" style="flex:1" id="lfHkSave"></button></div></div>');
+  var ins = el('<button type="button" class="lf-btn" style="flex:1" id="lfHkIns">Health insights</button>');
+  ins.addEventListener('click', lfHealthSheet); $('#lfHkSave', c).parentNode.appendChild(ins);
   var sv = $('#lfHkSave', c);
   function paint() { sv.textContent = S.hk ? 'Saving workouts · on' : 'Save workouts'; sv.classList.toggle('is-ink', !!S.hk); sv.setAttribute('aria-pressed', S.hk ? 'true' : 'false'); }
   paint();

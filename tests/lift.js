@@ -1562,6 +1562,25 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── HEALTH INSIGHTS: today against your own thirty days, read on a phone that has Health, shown and never kept ── */
+  {
+    const c = await newCtx(PHONE);
+    await c.addInitScript(`window.__lfNoIntro = 1; window.Capacitor = { isNativePlatform: () => true, Plugins: { LiftWidgets: { caps: () => Promise.resolve({ health: true, group: false, version: '1.6' }), setSnapshot: () => Promise.resolve({}), healthAuth: () => Promise.resolve({ ok: true }), healthReadAuth: () => Promise.resolve({ ok: true }), healthDay: () => Promise.resolve({ ok: true, steps: 15111, stepsAvg: 9800, energy: 568, energyAvg: 420, exercise: 0, exerciseAvg: 22, distance: 11.1, distanceAvg: 7.4, rhr: 56, rhrAvg: 58, hrv: 61, hrvAvg: 54, sleep: { total: 421, deep: 68, rem: 92, core: 240, awake: 31 } }), keepAwake: () => Promise.resolve({}), haptic: () => Promise.resolve({}), duck: () => Promise.resolve({}), startRest: () => Promise.resolve({}), endRest: () => Promise.resolve({}), watchAct: () => Promise.resolve({}) } } }; if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', JSON.stringify({ unit: 'kg', goal: 4, tour: true, setup: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [] }));`);
+    const page = await c.newPage(); const pe = []; page.on('pageerror', (e) => pe.push(String(e)));
+    await page.goto(URL); await page.waitForTimeout(500);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page); await page.click('#lfSet'); await settle(page);
+    ok('Apple Health has a Health insights button beside Save workouts', await page.locator('#lfHkIns').count() === 1);
+    await page.click('#lfHkIns'); await settle(page);
+    ok('the first time it asks once, in a sentence, before reading anything', await page.locator('#lfHiAllow').count() === 1 && !(await store(page)).hkr);
+    await page.click('#lfHiAllow'); await settle(page);
+    const tiles = await page.$$eval('#lfHi .lf-hi-t', (x) => x.map((e) => e.querySelector('.lf-lab').textContent + ':' + e.querySelector('b').textContent));
+    ok('it shows the two scores, four activity figures and six recovery figures', tiles.length === 12 && tiles.includes('Steps:15,111') && tiles.includes('Total sleep:7 h 1 m') && tiles.includes('Resting heart rate:56') && tiles.includes('Sleep:88'), tiles.join('|'));
+    ok('a figure is set against your own average, and a score is not', await page.locator('#lfHi .lf-hi-c', { hasText: 'Above your daily average' }).count() >= 3 && (await page.$$eval('#lfHi .lf-hi-g:first-of-type .lf-hi-c', (x) => x.map((e) => e.textContent).join(''))) === '');
+    ok('what it reads is not saved: only that Health was allowed', await page.evaluate(() => { const s = localStorage.getItem('lift.v1'); return s.indexOf('15111') < 0 && s.indexOf('"hkr":true') >= 0; }));
+    ok('no page errors', pe.length === 0, pe.join('|'));
+    await c.close();
+  }
+
   /* ── A FREEZE EARNED IS SAID ONCE, and the lock screen goal has a frozen day to show ── */
   {
     const wo = [{ id: 'q1', d: '2026-10-28', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] }];
