@@ -5881,10 +5881,11 @@ function lfLibBuild(root, fold) {
     if (!all.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No exercises yet</b>Create your own here, or they arrive with the full list.</div>')); return; }
     if (!shown.length) { box.appendChild(el('<div class="lf-card lf-empty"><b>No match</b>Try another word, or create it.</div>')); return; }
     lfGrouped(shown).forEach(function (G) {
-      var c = el('<div class="lf-card" style="padding:4px 16px"><button type="button" class="lf-gf"><span class="lf-cap"></span>' + IC.chev + '</button><div class="lf-list"></div></div>');
+      /* IN THE LIBRARY SHEET THE GROUPS ARE OPEN AND HAVE NO FOLD: you opened the library to see them, so a second press to open each was a gate in front of what you came for */
+      var c = el(fold ? '<div class="lf-card" style="padding:4px 16px"><button type="button" class="lf-gf"><span class="lf-cap"></span>' + IC.chev + '</button><div class="lf-list"></div></div>' : '<div class="lf-card" style="padding:4px 16px"><div class="lf-gf" style="pointer-events:none"><span class="lf-cap"></span></div><div class="lf-list"></div></div>');
       c.dataset.g = G.g;
       $('.lf-cap', c).textContent = G.n + ' · ' + G.es.length;
-      var gopen = !!t || libGAll || !!libGO[G.g], gf = $('.lf-gf', c), gl = $('.lf-list', c);
+      var gopen = !fold || !!t || libGAll || !!libGO[G.g], gf = $('.lf-gf', c), gl = $('.lf-list', c);
       function foldG() { gf.setAttribute('aria-expanded', gopen ? 'true' : 'false'); gl.hidden = !gopen; }
       gf.addEventListener('click', function () { gopen = !gopen; libGO[G.g] = gopen; foldG(); });
       foldG();
