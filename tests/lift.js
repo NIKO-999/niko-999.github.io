@@ -1562,6 +1562,23 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── A FREEZE EARNED IS SAID ONCE, and the lock screen goal has a frozen day to show ── */
+  {
+    const wo = [{ id: 'q1', d: '2026-10-28', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] }];
+    const first = await ctx({ unit: 'kg', goal: 4, wo }, '2026-10-30T18:00:00');
+    await first.page.waitForTimeout(1300);
+    ok('a first open only learns the freeze count: nothing is announced', await first.page.locator('.lf-toast').count() === 0 && (await store(first.page)).fzAv === 1);
+    await first.c.close();
+    const more = await ctx({ unit: 'kg', goal: 4, wo, fzAv: 0 }, '2026-10-30T18:00:00');
+    await more.page.waitForTimeout(1300);
+    ok('a count that has gone up is announced once, with its glowing +1', /Streak freeze earned/.test(await more.page.textContent('.lf-toast')) && await more.page.locator('.lf-toast .lf-fzg').count() === 1);
+    await more.page.waitForTimeout(2800); await more.page.reload(); await more.page.waitForTimeout(1300);
+    ok('and not again on the next open', await more.page.locator('.lf-toast').count() === 0);
+    const snap = await more.page.evaluate(() => { const s = JSON.parse(localStorage.getItem('lift.v1')); return s.fzAv; });
+    ok('the count it has seen is kept', snap === 1);
+    await more.c.close();
+  }
+
   /* ── A FREEZE KEEPS THE BADGES: a frozen day does not break a run of days, so the straight-run badges can still be won through it ── */
   {
     const w = (i, d) => ({ id: 'r' + i, d, s: i, e: i + 1, n: 'Legs', x: [{ id: 'hack', n: 'Hack squat', sets: [{ w: 100, r: 8 }] }] });

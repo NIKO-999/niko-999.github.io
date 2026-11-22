@@ -12,7 +12,7 @@ struct LiftSnap: Codable {
     var badge: Badge?
 
     struct Today: Codable { var name: String; var sub: String?; var done: Bool; var rest: Bool? }
-    struct Week: Codable { var n: Int; var goal: Int; var days: [Int] }
+    struct Week: Codable { var n: Int; var goal: Int; var days: [Int]; var fz: Int? }
     struct Badge: Codable { var name: String; var d: String? }
 
     static var groupId: String {
@@ -82,9 +82,10 @@ struct WeekRing: View {
     var goal: Int
     var accent: Color
     var line: CGFloat = 9
+    var fz: Int = 0
 
     var body: some View {
-        let frac = goal > 0 ? min(1, Double(n) / Double(goal)) : (n > 0 ? 1 : 0)
+        let frac = goal > 0 ? min(1, Double(n + fz) / Double(goal)) : (n > 0 ? 1 : 0)
         ZStack {
             Circle().stroke(Color.white.opacity(0.12), lineWidth: line)
             Circle().trim(from: 0, to: CGFloat(max(0.001, frac)))
@@ -107,8 +108,9 @@ struct WeekDays: View {
                 let st = i < days.count ? days[i] : 0
                 VStack(spacing: 3) {
                     RoundedRectangle(cornerRadius: 6)
-                        .fill(st == 1 ? accent : Color.white.opacity(0.1))
-                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(st == 2 ? Color.white.opacity(0.3) : .clear, lineWidth: 1.5))
+                        .fill(st == 1 ? accent : (st == 3 ? accent.opacity(0.22) : Color.white.opacity(0.1)))
+                        .overlay(RoundedRectangle(cornerRadius: 6).stroke(st == 2 ? Color.white.opacity(0.3) : (st == 3 ? accent : .clear), lineWidth: 1.5))
+                        .overlay(Group { if st == 3 { Image(systemName: "snowflake").font(.system(size: 11, weight: .bold)).foregroundColor(accent) } })
                         .frame(height: 24)
                     Text(String(Array("MTWTFSS")[i])).font(.system(size: 9, weight: .semibold)).foregroundColor(.white.opacity(0.55))
                 }

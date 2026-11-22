@@ -57,12 +57,28 @@ struct WeekView: View {
     var body: some View {
         let accent = Color(hex: entry.snap?.accent)
         let w = entry.snap?.week
+        let n = w?.n ?? 0, goal = w?.goal ?? 0, fz = w?.fz ?? 0
         switch family {
         case .accessoryCircular:
-            WeekRing(n: w?.n ?? 0, goal: w?.goal ?? 0, accent: .white, line: 5)
+            WeekRing(n: n, goal: goal, accent: .white, line: 5, fz: fz)
+        case .accessoryRectangular:
+            // the lock screen goal: the flame in an open loop, 5 / 6 beside it, and a word for any frozen day
+            HStack(spacing: 8) {
+                ZStack {
+                    Circle().stroke(Color.white.opacity(0.25), lineWidth: 3)
+                    Circle().trim(from: 0, to: CGFloat(max(0.001, goal > 0 ? min(1, Double(n + fz) / Double(goal)) : 0)))
+                        .stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    Image(systemName: "flame.fill").font(.system(size: 13))
+                }.frame(width: 34, height: 34)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(goal > 0 ? "\(n) / \(goal)" : "\(n)").font(.system(size: 17, weight: .heavy, design: .rounded))
+                    Text(fz > 0 ? "workouts \u{00B7} \(fz) frozen" : "workouts this week").font(.system(size: 10, weight: .semibold)).lineLimit(1)
+                }
+            }.frame(maxWidth: .infinity, alignment: .leading)
         case .systemMedium:
             HStack(spacing: 16) {
-                WeekRing(n: w?.n ?? 0, goal: w?.goal ?? 0, accent: accent, line: 10).frame(width: 110, height: 110)
+                WeekRing(n: n, goal: goal, accent: accent, line: 10, fz: fz).frame(width: 110, height: 110)
                 VStack(alignment: .leading, spacing: 8) {
                     Text("THIS WEEK").font(.system(size: 11, weight: .bold)).foregroundColor(accent)
                     WeekDays(days: w?.days ?? [], accent: accent)
@@ -72,7 +88,7 @@ struct WeekView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .liftBackground()
         default:
-            WeekRing(n: w?.n ?? 0, goal: w?.goal ?? 0, accent: accent)
+            WeekRing(n: n, goal: goal, accent: accent, fz: fz)
                 .padding(4)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -86,7 +102,7 @@ struct WeekWidget: Widget {
         StaticConfiguration(kind: "LiftWeek", provider: LiftProvider()) { entry in WeekView(entry: entry) }
             .configurationDisplayName("Week")
             .description("The weekly goal ring and the days you trained.")
-            .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular])
+            .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular])
     }
 }
 

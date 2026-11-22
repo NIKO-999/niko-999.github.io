@@ -1569,6 +1569,9 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
+.lf-toast span { white-space: nowrap; }
+.lf-toast .lf-fzi { width: 14px; height: 14px; vertical-align: -2px; margin-right: 4px; }
+.lf-toast .lf-fzg { color: var(--log); font-weight: 800; text-shadow: 0 0 8px color-mix(in srgb, var(--log) 70%, transparent), 0 0 18px color-mix(in srgb, var(--log) 40%, transparent); }
 .lf-toast button { min-height: 44px; padding: 0 12px; font-weight: 700; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -2236,6 +2239,8 @@ function lfClean(o) {
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
   d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn;
   d.bwGoal = num(o.bwGoal);
+  /* the freeze count last seen, so a new one can be announced once */
+  if (o.fzAv >= 0 && o.fzAv < 50) d.fzAv = Math.floor(o.fzAv);
   /* days a streak freeze was used on, once each */
   if (Array.isArray(o.fz)) { var fzl = o.fz.filter(function (k, i, a) { return /^\d{4}-\d\d-\d\d$/.test(k) && a.indexOf(k) === i; }).slice(-60); if (fzl.length) d.fz = fzl; }
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
@@ -2920,12 +2925,24 @@ function lfFzAvail() {
   var best = lfStreakBest(), bonus = FZ_MILES.reduce(function (a, m) { return a + (best >= m[0] ? m[1] : 0); }, 0);
   return Math.max(0, pool + bonus);
 }
+/* A FREEZE IS EARNED QUIETLY, so it says so once: the count last seen is kept, and a Home that finds more than that says how many arrived. The first time there is nothing to compare to, so it only learns the number. */
+function lfFzCheck() {
+  if (lfNew()) return;
+  var av = lfFzAvail();
+  if (S.fzAv === undefined) { S.fzAv = av; lfSave(); return; }
+  if (av === S.fzAv) return;
+  var more = av - S.fzAv; S.fzAv = av; lfSave();
+  if (more > 0) setTimeout(function () {
+    lfToast('Streak freeze earned');
+    var sp = $('.lf-toast span'); if (sp) sp.innerHTML = lfFzI() + ' Streak freeze earned <b class="lf-fzg">+' + more + '</b>';
+  }, 700);
+}
 function lfFzUse(k) {
   var m = monday(parseYmd(k));
   if (!(S.goal > 0) || lfFz(k) || woOn(k).length || k > ymd(today()) || lfWkCount(m) >= S.goal || lfFzAvail() < 1) return;
   var was = (S.fz || []).slice();
-  S.fz = was.concat([k]).sort(); lfSave(); lfRender();
-  lfToast('Freeze used', function () { if (was.length) S.fz = was; else delete S.fz; lfSave(); lfRender(); });
+  S.fz = was.concat([k]).sort(); S.fzAv = lfFzAvail(); lfSave(); lfRender();
+  lfToast('Freeze used', function () { if (was.length) S.fz = was; else delete S.fz; S.fzAv = lfFzAvail(); lfSave(); lfRender(); });
 }
 /* THE STREAK IS TWO PARTS of the Month view: the weeks in a row above the calendar (part 'top') and the freezes and how it works below it (part 'rest'). THE STREAK LIVES UNDER THE MONTH on the Calendar tab: the weeks in a row, the freezes, how it works. The month above it is the calendar, so there is not a second one here. The Home card only changes the goal. */
 function lfStreakView(b, part) {
@@ -2992,6 +3009,7 @@ function lfGoalSheet() {
 }
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
+  lfFzCheck();
   var mvc = lfMoveCard(); if (mvc) root.appendChild(mvc);
   root.appendChild(lfTodayCard());
   root.appendChild(lfProgCard());
@@ -6513,13 +6531,13 @@ function lfHealthCard() {
 }
 function lfWidgetSnap() {
   var t = today(), m = monday(t), days = [], i, done = false, rt = lfToday();
-  for (i = 0; i < 7; i++) { var dk = ymd(addDays(m, i)); days.push(S.wo.some(function (w) { return w.d === dk; }) ? 1 : S.rd && S.rd[dk] ? 2 : 0); }
+  for (i = 0; i < 7; i++) { var dk = ymd(addDays(m, i)); days.push(S.wo.some(function (w) { return w.d === dk; }) ? 1 : lfFz(dk) ? 3 : S.rd && S.rd[dk] ? 2 : 0); }
   done = days[(t.getDay() + 6) % 7] === 1;
   var streak = 0, q = lfWkOk(m) ? m : addDays(m, -7);
   for (var g = 0; g < 104 && lfWkOk(q); q = addDays(q, -7), g++) streak++;
   var got = lfBadgesCache().filter(function (x) { return x.d; }).sort(function (x, y) { return x.d < y.d ? 1 : x.d > y.d ? -1 : 0; })[0];
   return { v: 1, d: ymd(t), accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2', unit: S.unit,
-    today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: days.filter(function (x) { return x === 1; }).length, goal: S.goal || 0, days: days }, streak: streak,
+    today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: days.filter(function (x) { return x === 1; }).length, fz: days.filter(function (x) { return x === 3; }).length, goal: S.goal || 0, days: days }, streak: streak,
     badge: got ? { name: got.b.n, d: got.d } : null };
 }
 function lfWidgetPush() {
