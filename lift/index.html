@@ -565,10 +565,10 @@ body.lf-v-home .lf-glow { opacity: 1; }
    as the streak being built; once per month shown, never on a repaint */
 .lf-month.is-play .lf-cell.is-on:not(.is-now) { animation: lf-light .55s cubic-bezier(.3, 1.4, .5, 1) backwards; animation-delay: calc(var(--i) * 55ms + 80ms); }
 .lf-month.is-play .lf-cell.is-rest { animation: lf-fadein .4s ease-out backwards; animation-delay: calc(var(--i) * 55ms + 80ms); }
-.lf-wkl.is-play .lf-wk { animation: lf-rise .4s var(--ease) backwards; animation-delay: calc(var(--i) * 45ms); }
+.lf-wkl.is-play .lf-wk { animation: lf-wkrise .4s var(--ease) backwards; animation-delay: calc(var(--i) * 45ms); }
 @keyframes lf-light { 0% { background: var(--card2); color: var(--dim); transform: scale(.82); } 55% { transform: scale(1.07); box-shadow: 0 0 16px 2px color-mix(in srgb, var(--log) 55%, transparent); } 100% { box-shadow: 0 0 0 0 transparent; } }
 @keyframes lf-fadein { from { opacity: 0; transform: scale(.85); } }
-@keyframes lf-rise { from { opacity: 0; transform: translateY(8px); } }
+@keyframes lf-wkrise { from { opacity: 0; transform: translateY(8px); } }
 @media (prefers-reduced-motion: reduce) { .lf-month.is-play .lf-cell, .lf-wkl.is-play .lf-wk { animation: none !important; } }
 .lf-dots { display: flex; gap: 3px; height: 5px; }
 .lf-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--ink); }
@@ -1120,7 +1120,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-coin img { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,.4)); transition: transform .2s var(--ease); }
 .lf-coin img:not([src]) { display: none; }
 .lf-coin .lf-bdlive { position: absolute; inset: -6%; width: 112%; height: 112%; display: block; pointer-events: none; }
-@keyframes lf-halo { to { transform: rotate(1turn); } }
 .lf-coin.is-sc::after { content: ''; position: absolute; right: -2%; bottom: 2%; width: 22%; height: 22%; border-radius: 50%; background: var(--log-g, var(--log)); box-shadow: 0 0 0 2px var(--card);
   -webkit-mask: none; }
 .lf-cv-tier { display: inline-block; margin: 0 0 6px; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }

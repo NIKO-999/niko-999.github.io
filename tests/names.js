@@ -499,6 +499,26 @@ for (const app of APPS.concat([['shell.js']])) {
     faults.join('; '));
 }
 
+/* ── A @keyframes NAME IS WRITTEN ONCE PER FILE ──────────────────────
+
+   Two sets of keyframes with one name do not throw: the later one
+   replaces the earlier, and every animation naming it quietly runs the
+   wrong motion. lift/ had `lf-rise` twice, the week list's eight-pixel
+   fade-in and the medal confetti's ninety-two-viewport-height flight,
+   so opening the week on the calendar threw its seven rows off the top
+   of the screen and faded them out. It reported as "glitchy". The text
+   says so without a browser. */
+{
+  const faults = [];
+  for (const f of ['lift/index.html', 'trading/index.html', 'days/index.html', 'cadence/index.html', 'orrery/index.html', 'doors/index.html']) {
+    let t; try { t = read(f); } catch (e) { continue; }
+    const seen = {};
+    for (const m of t.matchAll(/@keyframes\s+([\w-]+)/g)) seen[m[1]] = (seen[m[1]] || 0) + 1;
+    Object.keys(seen).filter((k) => seen[k] > 1).forEach((k) => faults.push(`${f}: @keyframes ${k} is written ${seen[k]} times`));
+  }
+  ok('no @keyframes name is written twice in one file', faults.length === 0, faults.join('; '));
+}
+
 /* ── NO IMAGE IN schedule/ IS loading="lazy" ──
    Every image this app builds — a cover, a friend's post, a profile
    wall's tile — is built inside `.sheet`, which rests at
