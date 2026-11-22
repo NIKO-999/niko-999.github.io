@@ -1570,25 +1570,29 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
 .lf-toast span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-/* ROOMIER HOME: larger cards, larger figures, more air */
-#lfHome .lf-pgr { min-height: 200px; padding: 22px 20px 24px; }
-#lfHome .lf-pgr-h { font-size: 12px; }
-#lfHome .lf-pgr-n { margin: 14px 0 18px; gap: 14px; font-size: 14px; }
-#lfHome .lf-pgr-n b { font-size: 38px; margin-right: 4px; }
-#lfHome .lf-pgr-ring { width: 68px; height: 68px; }
-#lfHome .lf-pgr-ring .fl { width: 28px; height: 28px; }
-#lfHome .lf-pgr-w { gap: 8px; }
-#lfHome .lf-pgr-w i { height: 12px; border-radius: 6px; }
-#lfHome .lf-pgr-w div { font-size: 12px; gap: 8px; }
-#lfHome .lf-hh { padding: 22px 20px; gap: 18px; }
-#lfHome .lf-stat { padding: 26px 8px 28px; }
-#lfHome .lf-stat .lf-ic { width: 22px; height: 22px; margin: 4px auto 8px; }
-#lfHome .lf-stat b { font-size: 30px; }
-#lfHome .lf-stat span { font-size: 14px; margin-top: 4px; }
-#lfHome #lfGrid { padding: 22px 20px 26px; }
-#lfHome #lfGrid .lf-days { gap: 12px 8px; margin-top: 20px; }
-#lfHome #lfGrid .lf-day { height: 22px; }
-#lfHome .lf-today { padding: 24px 20px; }
+/* HOME: a step roomier than the base, and QUIET. The accent is kept for the flame and for today; the bars, the ring, the Health icons, the streak tag and the met sets are the ink at a lower strength, so a bright accent colour is a mark on the screen rather than the screen. */
+#lfHome .lf-pgr { min-height: 164px; padding: 18px 18px 20px; }
+#lfHome .lf-pgr-n { margin: 10px 0 14px; gap: 14px; font-size: 14px; }
+#lfHome .lf-pgr-n b { font-size: 32px; margin-right: 4px; }
+#lfHome .lf-pgr-ring { width: 56px; height: 56px; }
+#lfHome .lf-pgr-ring .fl { width: 24px; height: 24px; }
+#lfHome .lf-pgr-ring .fg { stroke: color-mix(in srgb, var(--ink) 78%, transparent); }
+#lfHome .lf-pgr-w { gap: 7px; }
+#lfHome .lf-pgr-w i { height: 10px; border-radius: 5px; }
+#lfHome .lf-pgr-w .is-on i { background: color-mix(in srgb, var(--ink) 78%, transparent); }
+#lfHome .lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 60%, transparent); }
+#lfHome .lf-hh { padding: 18px; gap: 14px; }
+#lfHome .lf-hh .lf-hi-i svg { stroke: var(--dim); }
+#lfHome .lf-stat { padding: 20px 8px 22px; }
+#lfHome .lf-stat .lf-ic { width: 20px; height: 20px; margin: 2px auto 6px; }
+#lfHome .lf-stat b { font-size: 26px; }
+#lfHome .lf-stat span { font-size: 13px; margin-top: 3px; }
+#lfHome #lfGrid { padding: 18px 18px 22px; }
+#lfHome #lfGrid .lf-days { gap: 10px 7px; margin-top: 16px; }
+#lfHome #lfGrid .lf-day { height: 20px; }
+#lfHome #lfGrid .lf-tag { color: var(--dim); background: color-mix(in srgb, var(--ink) 9%, transparent); }
+#lfHome #lfLegs .lf-vr.is-met i b { background: color-mix(in srgb, var(--ink) 78%, transparent); }
+#lfHome .lf-today { padding: 20px 18px; }
 .lf-hh { display: grid; gap: 12px; width: 100%; text-align: left; }
 .lf-hh-h { display: flex; align-items: center; gap: 10px; } .lf-hh-h b { flex: 1; font-size: 15px; } .lf-hh-h .lf-lab { flex: 1; }
 .lf-hh-r { display: grid; grid-auto-flow: column; grid-auto-columns: auto; justify-content: space-between; gap: 12px; }
