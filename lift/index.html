@@ -5489,7 +5489,7 @@ function lfProgPack(k) {
 function lfProgShare(k) {
   var code = lfB64(JSON.stringify(lfProgPack(k)));
   var url = 'https://niko-999.github.io/lift/#p=' + code;
-  var text = PROGRAMS[k].n + ', a Lift program\nIn Lift: Exercises, Manage and share programs, Add a program, then paste this:\n' + url;
+  var text = PROGRAMS[k].n + ', a Lift program\nIn Lift: Exercises, Manage and share splits, Add a program, then paste this:\n' + url;
   window.lfProgLast = { code: code, url: url, text: text };
   if (navigator.share) navigator.share({ text: text }).catch(function () {});
   else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { lfToast('Copied, ready to send'); }, function () { lfToast('Could not copy'); });
@@ -5656,12 +5656,12 @@ function lfRenderLib() {
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
   /* NEW SPLIT IS THE FIRST THING ON THE SCREEN. Reading one from a photo, a PDF or pasted text is not a second control: it is the first thing inside this one. */
   var newU = lfNew();
-  /* THE TARGETS COME FIRST once there is a split to count against, then Create split with its plus at the end, then Manage and share programs straight under it */
+  /* THE TARGETS COME FIRST once there is a split to count against, then Create split with its plus at the end, then Manage and share splits straight under it */
   if (!newU) root.appendChild(lfTgCard());
   var nr = el('<button type="button" class="lf-add" id="lfNewSplit">Create split' + IC.plus + '</button>');
   nr.addEventListener('click', function () { lfSplitForm(null); });
   root.appendChild(nr);
-  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
+  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share splits</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
   /* the split, Monday first */
   if (!newU) root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
