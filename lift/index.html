@@ -6248,8 +6248,6 @@ function lfRenderYou() {
   root.appendChild(goals);
   var menu = el('<div class="lf-card lf-menu" id="lfMenu"></div>');
   /* APPLE HEALTH IS ON THE LIST: one row, Connect until it is, then Insights, and the sheet it opens does the asking */
-  /* YOUR NAME: the one name you go by, here where you set things up. Friends see this one too, so changing it changes it there. */
-  menu.appendChild(lfRow('lfNameRow', 'Your name', (FRS && FRS.name) || 'Set', function (bd) { lfNameForm(bd, null); }, lfNameSheet));
   if (LF_WGT && LF_WGT.healthReadAuth && lfCaps.health) menu.appendChild(lfRow('lfHealthRow', 'Apple Health', S.hkr ? 'Insights' : 'Connect', function (bd) { bd.appendChild(el('<span></span>')); }, lfHealthSheet));
   menu.appendChild(lfRow('lfRowFocus', 'Muscle targets', S.focus.length + ' muscles', function (bd) { bd.appendChild(lfFocusBody()); }, lfZonesSheet));
   menu.appendChild(lfAppearance());
@@ -6306,6 +6304,13 @@ function lfLookBody() {
     ti.hidden = !ti.firstChild;
   }
   rows.appendChild(lfRkRows(preview)); preview();
+  /* YOUR NAME IS PART OF HOW YOU LOOK, so it is changed here, at the top of Appearance: the name friends see, shown in the preview straight under it. It saves when you leave the box or press return. */
+  var nb = el('<div class="lf-nmb"><label class="lf-flab" for="lfNameIn" style="margin-top:0">Your name</label><input class="lf-field" id="lfNameIn" maxlength="24" autocomplete="off" placeholder="Your name" /></div>'), ni = $('#lfNameIn', nb);
+  ni.value = (FRS && FRS.name) || '';
+  function saveName() { var n = ni.value.trim(); if (!n || n === FRS.name) return; FRS.name = n; frSave(); frSig = ''; if (FRS.on) { try { frPush(); } catch (e) {} } preview(); lfToast('Name saved'); }
+  ni.addEventListener('change', saveName);
+  ni.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); saveName(); ni.blur(); } });
+  bd.insertBefore(nb, bd.firstChild);
   return bd;
 }
 /* APPEARANCE is one place for all of it: how you look to your friends (your title, flair, frame and the badges you show, as they will be seen) and the colour, the mode and the earned colours under it. */
@@ -6379,23 +6384,6 @@ function lfColourSheet() {
   return s;
 }
 /* A ROW THAT OPENS A SCREEN: the one way a list on You leads anywhere. It names the thing, says in a word what is in it, and a press opens it on a sheet of its own, built the first time it is asked for. */
-/* the name form, built into a sheet or into a row's own body */
-function lfNameForm(host, sheet) {
-  var f = el('<input class="lf-field" id="lfNameIn" maxlength="24" autocomplete="off" placeholder="Your name" aria-label="Your name" />'), go = el('<button type="button" class="lf-btn is-ink is-full" id="lfNameGo" style="margin-top:10px">Save name</button>');
-  f.value = (FRS && FRS.name) || '';
-  go.addEventListener('click', function () {
-    var n = f.value.trim(); if (!n) return;
-    FRS.name = n; frSave(); frSig = ''; if (FRS.on) { try { frPush(); } catch (e) {} }
-    if (sheet) sheet.close(true); lfToast('Name saved'); lfRender();
-  });
-  host.appendChild(f); if (!sheet) host.appendChild(go); else host._go = go;
-  return go;
-}
-function lfNameSheet() {
-  var b = el('<div></div>'), s = null, go = lfNameForm(b, { close: function (x) { s.close(x); } });
-  s = lfSheet({ title: 'Your name', body: b, foot: [go] });
-  setTimeout(function () { var i = $('#lfNameIn', b); if (i) i.focus(); }, 300);
-}
 function lfRow(id, title, side, fill, open) {
   var b = el('<button type="button" class="lf-li lf-rowl"><div class="lf-li-t"><b></b></div><em class="lf-num"></em>' + IC.chev + '</button>');
   b.id = id; b._fill = fill; $('b', b).textContent = title; $('em', b).textContent = side || '';
