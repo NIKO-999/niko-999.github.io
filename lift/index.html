@@ -198,7 +198,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-pgr-h { display: flex; align-items: center; justify-content: space-between; color: var(--dim); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
 .lf-pgr-h span:last-child { font-weight: 600; letter-spacing: 0; text-transform: none; }
 .lf-pgr-n { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px; font-size: 13px; color: var(--dim); }
-.lf-pgr-n > span:not(.lf-pgr-ring):not(.lf-pgr-fr) { flex: 1; }
+.lf-pgr-n > span:not(.lf-pgr-ring) { flex: 1; }
 .lf-pgr-n b { font-size: 26px; color: var(--ink); line-height: 1; letter-spacing: -.02em; margin-right: 6px; }
 .lf-pgr-fr { font-size: 15px; font-weight: 700; color: var(--ink); }
 .lf-pgr-ring { position: relative; width: 48px; height: 48px; flex: none; display: grid; place-items: center; }
@@ -2930,13 +2930,12 @@ function lfProgCard() {
   var mon = monday(today()), tk = ymd(today()), done = lfGoalDone(), goal = S.goal > 0 ? S.goal : 0, streak = lfStreakNow();
   /* ONE CARD, ONE PAGE: this week's days, and the flame inside an open loop that fills as the days add up to the goal. Pressing it opens the streak, where the goal is changed. */
   var r = 21, len = 2 * Math.PI * r, f = goal ? Math.min(1, done / goal) : 0;
-  var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><div class="lf-pgr-h"><span>Weekly streak</span><span></span></div><div class="lf-pgr-n"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span><b class="lf-num"></b><i></i></span><span class="lf-pgr-fr"></span></div><div class="lf-pgr-w"></div></button>');
+  var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><div class="lf-pgr-h"><span>Weekly goal</span><span></span></div><div class="lf-pgr-n"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span><b class="lf-num"></b><i></i></span></div><div class="lf-pgr-w"></div></button>');
   var e = addDays(mon, 6);
   $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
-  $('b', c).textContent = streak; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') : 'set a goal to start one';
-  $('.lf-pgr-fr', c).textContent = goal ? done + '/' + goal : '';
+  $('b', c).textContent = goal ? done + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') : 'set a goal to start';
   for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
-  c.setAttribute('aria-label', 'Weekly streak, ' + streak + (streak === 1 ? ' week' : ' weeks') + (goal ? ', ' + done + ' of ' + goal + ' days this week' : '') + '. Open the streak and goal');
+  c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + done + ' of ' + goal + ' workouts this week' : '') + '. Open the streak and goal');
   c.addEventListener('click', function () { lfStreakSheet(); });
   return c;
 }
