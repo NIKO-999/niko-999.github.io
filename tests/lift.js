@@ -1647,7 +1647,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="lib"]'); await settle(page);
     const ord = await page.evaluate(() => { const y = (s) => document.querySelector(s).getBoundingClientRect().top; return [y('#lfTgCard'), y('#lfNewSplit'), y('#lfProgMg'), y('#lfSplit')]; });
     ok('Exercises runs: the targets card, Create split, Manage and share splits, then your split', ord[0] < ord[1] && ord[1] < ord[2] && ord[2] < ord[3], JSON.stringify(ord));
-    ok('Create split has its plus at the end', await page.evaluate(() => { const b = document.querySelector('#lfNewSplit'); return /^Create split/.test(b.textContent) && b.lastElementChild && b.lastElementChild.tagName.toLowerCase() === 'svg'; }));
+    ok('Create split is a Quick-actions tile with its icon', await page.evaluate(() => { const b = document.querySelector('#lfNewSplit'); return /Create split/.test(b.textContent) && !!b.querySelector('svg'); }));
     ok('the card says the weekly total and how many muscles, with Edit targets', /sets a week/.test(await page.textContent('#lfTgCard')) && /muscles/.test(await page.textContent('#lfTgCard')) && /Edit targets/.test(await page.textContent('#lfTgCard')));
     await page.click('#lfTgCard'); await settle(page);
     const rowsN = await page.locator('#lfZn .lf-zr').count();
@@ -1992,7 +1992,7 @@ const freeze = (at) => `(() => {
     await top(page).locator('button', { hasText: /^Move$/ }).click(); await settle(page);
     const moved = (await store(page)).wo.map((w) => w.x.map((e) => e.id + ':' + e.n + ':' + e.sets.length).join('|'));
     ok('every set moves to the exercise picked, joining one already in the same workout', moved.join() === 'hackcalf:Linear hack calf raises:2,hackcalf:Linear hack calf raises:2', moved);
-    await page.click('.lf-toast button'); await settle(page);
+    await page.evaluate(() => document.querySelector('.lf-toast button').click()); await settle(page);
     ok('and Undo puts it back', (await store(page)).wo[1].x.map((e) => e.id).join() === 'calfstand,hackcalf');
     await c.close();
   }

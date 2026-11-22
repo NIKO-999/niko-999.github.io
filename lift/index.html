@@ -152,7 +152,7 @@ svg { display: block; }
 #lfMain { position: relative; z-index: 1; }
 .lf-glow { position: fixed; left: 0; right: 0; top: 0; height: 300px; pointer-events: none; z-index: 0; opacity: 0; transition: opacity .45s var(--ease);
   background: radial-gradient(130% 230px at 18% 0%, color-mix(in srgb, var(--log) 50%, transparent), transparent 75%), radial-gradient(90% 200px at 100% 0%, color-mix(in srgb, var(--log) 22%, transparent), transparent 70%), linear-gradient(to bottom, color-mix(in srgb, var(--log) 12%, transparent), transparent 260px); }
-body.lf-v-home .lf-glow { opacity: 1; }
+/* no glow behind the top of the home screen: the page stays flat black */
 #lfMain > section > .lf-h1, #lfMain > section > .lf-gh { margin-bottom: 0; }
 .lf-row { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; }
 .lf-tap { display: block; width: 100%; text-align: left; transition: transform .15s var(--ease); }
@@ -6658,7 +6658,7 @@ function lfHealthSheet() {
   var b = el('<div id="lfHi"></div>'), s = lfSheet({ title: 'Health insights', body: b, key: 'hi' });
   function tile(lab, fig, unit, v, avg, up, ic) {
     /* NO READING, NO TILE: a figure Health has nothing for (no watch for sleep or heart rate, a zero with no history) is not drawn at all */
-    if (fig === '--' || ((!v) && !(avg > 0))) return null;
+    if (fig === '--' || (v !== null && v !== undefined && !v && !(avg > 0))) return null;
     var t = el('<div class="lf-hi-t"><div class="lf-hi-h"><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + (HK_IC[ic] || '') + '</svg></i><span class="lf-lab"></span></div><div class="lf-hi-f"><b class="lf-num"></b><span></span></div><div class="lf-hi-b"><i></i></div><span class="lf-hi-c"></span></div>');
     $('.lf-lab', t).textContent = lab; $('b', t).textContent = fig; $('.lf-hi-f span', t).textContent = unit || '';
     var has = v !== null && v !== undefined && avg > 0;
