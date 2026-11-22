@@ -1580,6 +1580,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 /* HOME KEEPS ITS ORIGINAL SIZES AND USES LESS ACCENT: the the trained days, the weekly targets once met, and the ring and flame once the goal is hit carry it; the ring and flame before that, the tags such as the streak carry it too (they are met targets), the icons are the ink, so a bright accent colour is a pick rather than the whole screen. */
 #lfHome .lf-pgr-ring .fg { stroke: color-mix(in srgb, var(--ink) 85%, transparent); }
+#lfHome .lf-pgr-ring .tr { stroke: color-mix(in srgb, var(--ink) 16%, transparent); }
 #lfHome .lf-pgr-ring .fl { fill: var(--ink); }
 #lfHome .lf-pgr.is-hit .lf-pgr-ring .fg { stroke: var(--log); }
 #lfHome .lf-pgr.is-hit .lf-pgr-ring .fl { fill: var(--log); }
@@ -2947,7 +2948,8 @@ function lfStreakBest() {
 function lfProgCard() {
   var mon = monday(today()), tk = ymd(today()), done = wkDays(mon), frz = lfFzIn(mon), goal = S.goal > 0 ? S.goal : 0, streak = lfStreakNow();
   /* ONE CARD, ONE PAGE: this week's days, and the flame inside an open loop that fills as the days add up to the goal. Pressing it opens the streak, where the goal is changed. */
-  var r = 21, len = 2 * Math.PI * r, f = goal ? Math.min(1, (done + frz) / goal) : 0;
+  var r = 21, len = 2 * Math.PI * r, /* THE RING IS THE REAL WORKOUTS: 5 of 6 is five sixths of a circle, nearly closed, and 3 is half; a frozen day keeps the streak but does not close the ring */
+  f = goal ? Math.min(1, done / goal) : 0;
   var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><div class="lf-pgr-h"><span>Weekly goal</span><span></span></div><div class="lf-pgr-n"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span><b class="lf-num"></b><i></i></span></div><div class="lf-pgr-w"></div></button>');
   /* GOAL HIT: the ring and the flame take the accent only once the week has reached its goal */
   /* real workouts only: a frozen day fills the ring but is not the target hit */
