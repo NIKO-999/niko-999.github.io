@@ -249,7 +249,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sf-hw b { display: block; font-size: 14px; } .lf-sf-hw span { font-size: 13px; color: var(--dim); }
 .lf-sf-ms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .lf-sf-ms em { font-style: normal; font-size: 12px; padding: 6px 10px; border-radius: 10px; background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--dim); }
-.lf-sf-ms em.is-on { background: var(--log); color: var(--on-log); font-weight: 700; }
+.lf-sf-ms em b { color: var(--log); font-weight: 800; text-shadow: 0 0 8px color-mix(in srgb, var(--log) 70%, transparent), 0 0 18px color-mix(in srgb, var(--log) 40%, transparent); }
+.lf-sf-ms em.is-on { background: color-mix(in srgb, var(--log) 18%, transparent); color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--log) 55%, transparent), 0 0 14px color-mix(in srgb, var(--log) 28%, transparent); }
 .lf-sf-how { display: flex; align-items: center; gap: 12px; width: 100%; margin: 12px 0; text-align: left; }
 .lf-sf-how > i svg { width: 26px; height: 26px; fill: var(--log); }
 .lf-sf-how > div { flex: 1; } .lf-sf-how b { display: block; font-size: 15px; } .lf-sf-how span { font-size: 13px; color: var(--dim); }
@@ -2962,7 +2963,7 @@ function lfStreakSheet(mo0) {
     /* the freezes: what is ready, how they are earned, and the weeks one can still cover */
     var fz = el('<div class="lf-sf-fz"><div class="lf-sf-h"><i>' + FZ_ICE + '</i><div><b>Streak freezes</b><span></span></div></div><p>A freeze covers a week where you miss your weekly goal, so your streak keeps going.</p><div class="lf-sf-use"></div><span class="lf-flab">How you get them</span><div class="lf-sf-hw"><div><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></i><div><b>Every month</b><span>A new freeze at the start of each month. Up to two are kept.</span></div></div><div><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2 4 2 4H6"/></svg></i><div><b>Milestone bonus</b><span>Reach a streak milestone and get more. Reached ones are lit.</span><div class="lf-sf-ms"></div></div></div></div></div>');
     $('.lf-sf-h span', fz).textContent = av + ' ready to use';
-    FZ_MILES.forEach(function (x) { var c = el('<em></em>'); c.textContent = x[0] + ' w +' + x[1]; if (best >= x[0]) c.classList.add('is-on'); $('.lf-sf-ms', fz).appendChild(c); });
+    FZ_MILES.forEach(function (x) { var c = el('<em>' + x[0] + ' w <b>+' + x[1] + '</b></em>'); if (best >= x[0]) c.classList.add('is-on'); $('.lf-sf-ms', fz).appendChild(c); });
     var use = $('.lf-sf-use', fz);
     [[m0, 'this week'], [addDays(m0, -7), 'last week']].forEach(function (w) {
       var wk = w[0], e = addDays(wk, 6), lab = wk.getDate() + ' ' + MON[wk.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
