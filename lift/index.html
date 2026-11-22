@@ -156,6 +156,44 @@ body.lf-v-home .lf-glow { opacity: 1; }
 #lfMain > section > .lf-h1, #lfMain > section > .lf-gh { margin-bottom: 0; }
 .lf-row { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; }
 .lf-tap { display: block; width: 100%; text-align: left; transition: transform .15s var(--ease); }
+/* THE PROGRESS CARD: the weekly streak and the weekly goal, two pages in one card on Home. A swipe or the dots turn the page; each page opens its own sheet. It is a fixed height, so turning it never moves the cards under it. */
+.lf-pgr { padding: 0; overflow: hidden; touch-action: pan-y; }
+.lf-pgr-t { display: flex; transition: transform .32s var(--ease); }
+.lf-pgr-p { flex: 0 0 100%; min-width: 0; min-height: 128px; padding: 14px 16px 8px; background: none; border: 0; color: inherit; font: inherit; text-align: left; display: block; }
+.lf-pgr-h { display: flex; align-items: center; justify-content: space-between; color: var(--dim); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.lf-pgr-h span:last-child { font-weight: 600; letter-spacing: 0; text-transform: none; }
+.lf-pgr-n { display: flex; align-items: center; gap: 8px; margin: 8px 0 12px; font-size: 13px; color: var(--dim); }
+.lf-pgr-n svg { width: 22px; height: 22px; fill: var(--log); flex: none; }
+.lf-pgr-n b { font-size: 26px; color: var(--ink); line-height: 1; letter-spacing: -.02em; }
+.lf-pgr-w { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.lf-pgr-w div { display: grid; gap: 5px; justify-items: center; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--dim); }
+.lf-pgr-w i { display: block; width: 100%; height: 8px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-pgr-w .is-on i { background: var(--log); box-shadow: none; }
+.lf-pgr-w .is-on { color: var(--ink); }
+.lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px var(--log); }
+.lf-pgr-g { display: flex; align-items: center; gap: 16px; }
+.lf-pgr-ring { position: relative; width: 86px; height: 86px; flex: none; display: grid; place-items: center; }
+.lf-pgr-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.lf-pgr-ring circle { fill: none; stroke-width: 8; stroke-linecap: round; }
+.lf-pgr-ring .tr { stroke: var(--dash); }
+.lf-pgr-ring .fg { stroke: var(--log); transition: stroke-dashoffset .5s var(--ease); }
+.lf-pgr-ring b { font-size: 21px; letter-spacing: -.02em; }
+.lf-pgr-ring .lf-ic { width: 26px; height: 26px; }
+.lf-pgr-g strong { display: block; font-size: 18px; font-weight: 800; letter-spacing: -.01em; margin: 3px 0 2px; color: var(--ink); }
+.lf-pgr-g span.lf-pgr-s { color: var(--dim); font-size: 14px; }
+.lf-pgr-d { display: flex; justify-content: center; gap: 2px; padding-bottom: 4px; }
+.lf-pgr-d button { width: 28px; height: 22px; background: none; border: 0; display: grid; place-items: center; }
+.lf-pgr-d button i { display: block; width: 6px; height: 6px; border-radius: 50%; background: var(--dim); transition: width .2s var(--ease), background .2s; }
+.lf-pgr-d button[aria-current="true"] i { width: 16px; border-radius: 4px; background: var(--log); }
+.lf-sk-w { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; margin: 12px 0 8px; }
+.lf-sk-w i { aspect-ratio: 1; border-radius: 6px; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-sk-w i.is-on { background: var(--log); box-shadow: none; }
+.lf-sk-w i.is-now { box-shadow: inset 0 0 0 1.5px var(--log); }
+.lf-sk-big { display: flex; align-items: center; gap: 10px; }
+.lf-sk-big svg { width: 28px; height: 28px; fill: var(--log); }
+.lf-sk-big b { font-size: 34px; letter-spacing: -.02em; line-height: 1; }
+@media (prefers-reduced-motion: reduce) { .lf-pgr-t, .lf-pgr-ring .fg { transition: none; } }
+
 .lf-tap:active { transform: scale(.985); }
 .lf-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .lf-hd .lf-chev { color: var(--quiet); width: 16px; height: 16px; }
@@ -2750,10 +2788,84 @@ function lfToday() {
   return null;
 }
 
+/* THE PROGRESS CARD, a pager of two: the weekly streak, then the weekly goal. */
+var LF_FLAME = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c.6 3.4-1.4 5-3 7-1.4 1.8-2 3.2-2 5.2A7 7 0 0 0 12 21a7 7 0 0 0 7-6.8c0-3.3-1.7-5.3-3.4-7.2C14.6 5.9 13.3 4.6 12 2zm0 10.4c1.5 1.4 2.4 2.5 2.4 4a2.4 2.4 0 1 1-4.8 0c0-1.4 1-2.5 2.4-4z"/></svg>';
+var lfPgrPage = 0;
+/* the weeks in a row that reached the goal: this week counts once it has, otherwise the run is read back from last week, so a run does not drop to nought every Monday */
+function lfStreakNow() {
+  if (!(S.goal > 0)) return 0;
+  var m = monday(today()), q = wkDays(m) >= S.goal ? m : addDays(m, -7), n = 0;
+  for (var g = 0; g < 104 && wkDays(q) >= S.goal; q = addDays(q, -7), g++) n++;
+  return n;
+}
+function lfStreakBest() {
+  if (!(S.goal > 0) || !S.wo.length) return 0;
+  var first = monday(parseYmd(S.wo.reduce(function (a, w) { return !a || w.d < a ? w.d : a; }, ''))), best = 0, run = 0;
+  for (var m = first; m <= today(); m = addDays(m, 7)) { if (wkDays(m) >= S.goal) { run++; if (run > best) best = run; } else if (ymd(addDays(m, 6)) < ymd(today())) run = 0; }
+  return best;
+}
+function lfGoalDone() { return wkDays(monday(today())); }
+function lfProgCard() {
+  var mon = monday(today()), tk = ymd(today()), done = lfGoalDone(), goal = S.goal > 0 ? S.goal : 0, streak = lfStreakNow();
+  var c = el('<div class="lf-card lf-pgr" id="lfPgr"><div class="lf-pgr-t" id="lfPgrT"></div><div class="lf-pgr-d" id="lfPgrD"></div></div>'), t = $('#lfPgrT', c);
+  /* page one: the streak and this week's seven days */
+  var a = el('<button type="button" class="lf-pgr-p" id="lfPgrStreak"><div class="lf-pgr-h"><span>Weekly streak</span><span></span></div><div class="lf-pgr-n">' + LF_FLAME + '<b class="lf-num"></b><span></span></div><div class="lf-pgr-w"></div></button>');
+  var e = addDays(mon, 6);
+  $('.lf-pgr-h span:last-child', a).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
+  $('b', a).textContent = streak; $('.lf-pgr-n span', a).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') : 'set a goal to start one';
+  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', a).appendChild(dv); }
+  a.setAttribute('aria-label', 'Weekly streak, ' + streak + (streak === 1 ? ' week' : ' weeks') + '. Open the history');
+  a.addEventListener('click', function () { lfStreakSheet(); });
+  /* page two: the goal as a ring */
+  var r = 36, len = 2 * Math.PI * r, f = goal ? Math.min(1, done / goal) : 0;
+  var g = el('<button type="button" class="lf-pgr-p" id="lfPgrGoal"><div class="lf-pgr-h"><span>Weekly goal</span><span></span></div><div class="lf-pgr-g"><div class="lf-pgr-ring"><svg viewBox="0 0 86 86" aria-hidden="true"><circle class="tr" cx="43" cy="43" r="' + r + '"/><circle class="fg" cx="43" cy="43" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg></div><div><strong></strong><span class="lf-pgr-s"></span></div></div></button>');
+  $('.lf-pgr-ring', g).appendChild(goal ? el('<b class="lf-num">' + done + '/' + goal + '</b>') : el(IC.dumb));
+  $('.lf-pgr-h span:last-child', g).textContent = goal ? (done >= goal ? 'Goal hit' : '') : '';
+  $('strong', g).textContent = goal ? 'Weekly goal' : 'Choose your goal';
+  $('.lf-pgr-s', g).textContent = goal ? done + ' of ' + goal + ' days this week' : 'Pick the days you train';
+  g.setAttribute('aria-label', goal ? 'Weekly goal, ' + done + ' of ' + goal + ' days. Open goals' : 'Choose your weekly goal');
+  g.addEventListener('click', function () { lfGoalSheet(); });
+  t.appendChild(a); t.appendChild(g);
+  /* the dots turn the page, and so does a swipe; the page that is not showing is out of the tab order */
+  var pages = [a, g], dots = $('#lfPgrD', c);
+  var go = function (n) { lfPgrPage = Math.max(0, Math.min(1, n)); t.style.transform = 'translateX(' + (-lfPgrPage * 100) + '%)'; pages.forEach(function (q, i) { if (i === lfPgrPage) q.removeAttribute('inert'); else q.setAttribute('inert', ''); }); $$('button', dots).forEach(function (q, i) { q.setAttribute('aria-current', i === lfPgrPage ? 'true' : 'false'); }); };
+  ['Weekly streak', 'Weekly goal'].forEach(function (nm, i) { var b = el('<button type="button"><i></i></button>'); b.setAttribute('aria-label', nm); b.addEventListener('click', function () { go(i); }); dots.appendChild(b); });
+  var x0 = null, dx = 0, mv = false;
+  c.addEventListener('pointerdown', function (ev) { x0 = ev.clientX; dx = 0; mv = false; });
+  c.addEventListener('pointermove', function (ev) { if (x0 === null) return; dx = ev.clientX - x0; if (Math.abs(dx) > 10) mv = true; });
+  var end = function () { if (x0 === null) return; if (dx < -36) go(lfPgrPage + 1); else if (dx > 36) go(lfPgrPage - 1); x0 = null; };
+  c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
+  /* a swipe is not a press on the page under it */
+  c.addEventListener('click', function (ev) { if (mv) { ev.stopPropagation(); ev.preventDefault(); mv = false; } }, true);
+  t.style.transition = 'none'; go(lfPgrPage); void t.offsetWidth; t.style.transition = '';
+  return c;
+}
+function lfStreakSheet() {
+  var m0 = monday(today()), streak = lfStreakNow(), best = lfStreakBest(), goal = S.goal > 0 ? S.goal : 0;
+  var b = el('<div><div class="lf-sk-big">' + LF_FLAME + '<b class="lf-num"></b><span class="lf-lab"></span></div><span class="lf-flab">Last 12 weeks</span><div class="lf-sk-w" id="lfSkW"></div><p class="lf-lab" id="lfSkN" style="margin:0"></p></div>');
+  $('b', b).textContent = streak;
+  $('.lf-sk-big .lf-lab', b).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') + (best > streak ? ' · best ' + best : '') : 'set a goal to start one';
+  for (var i = 11; i >= 0; i--) { var m = addDays(m0, -7 * i), sq = el('<i></i>'); if (goal && wkDays(m) >= goal) sq.classList.add('is-on'); else if (i === 0) sq.classList.add('is-now'); sq.setAttribute('title', m.getDate() + ' ' + MON[m.getMonth()].slice(0, 3)); $('#lfSkW', b).appendChild(sq); }
+  $('#lfSkN', b).textContent = goal ? 'A week counts when you train ' + goal + (goal === 1 ? ' day' : ' days') + '. It closes on Sunday.' : '';
+  var ch = el('<button type="button" class="lf-btn is-ink is-full" id="lfSkGoal">' + (goal ? 'Change goal' : 'Set a goal') + '</button>'), s = lfSheet({ title: 'Weekly streak', body: b, foot: [ch] });
+  ch.addEventListener('click', function () { s.close(true); lfGoalSheet(); });
+}
+function lfGoalSheet() {
+  var b = el('<div><span class="lf-flab">Days a week</span><div class="lf-seg" id="lfGsDays" style="--n:7"></div><p class="lf-lab" id="lfGsN" style="margin:8px 0 0"></p></div>');
+  var say = function () { $('#lfGsN', b).textContent = S.goal > 0 ? 'Train ' + S.goal + (S.goal === 1 ? ' day' : ' days') + ' a week to keep the streak.' : 'Pick the days you want to train. Your streak counts the weeks that reach it.'; };
+  for (var i = 1; i <= 7; i++) { var g = el('<button type="button"></button>'); g.textContent = i; g.dataset.g = i; g.setAttribute('aria-pressed', i === S.goal ? 'true' : 'false'); g.setAttribute('aria-label', i + ' a week');
+    g.addEventListener('click', function (ev) { S.goal = +ev.currentTarget.dataset.g; lfSave(); lfRender(); $$('#lfGsDays button', b).forEach(function (q) { q.setAttribute('aria-pressed', +q.dataset.g === S.goal ? 'true' : 'false'); }); say(); });
+    $('#lfGsDays', b).appendChild(g); }
+  say();
+  var foot = [], s;
+  if (!lfNew()) { var mt = el('<button type="button" class="lf-btn is-full" id="lfGsMuscle">Edit muscle targets</button>'); mt.addEventListener('click', function () { s.close(true); lfGo('you'); lfRender(); var r = $('#lfRowFocusRow') || $('#lfRowFocus'); if (r) r.click(); }); foot.push(mt); }
+  s = lfSheet({ title: 'Goals', body: b, foot: foot });
+}
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
   var mvc = lfMoveCard(); if (mvc) root.appendChild(mvc);
   root.appendChild(lfTodayCard());
+  root.appendChild(lfProgCard());
   root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
   /* NO SETS UNTIL THERE IS A SPLIT: a first install has nothing to count against, so the weekly targets only appear once the first split is made */

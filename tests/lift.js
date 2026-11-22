@@ -1537,6 +1537,31 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
+  /* ── THE PROGRESS CARD: the streak and the goal as two pages of one card on Home ── */
+  {
+    const dd = (n) => { const d = new Date(2026, 9, 26 + n); return d.toISOString().slice(0, 10); };
+    const wo = [];  /* two full weeks of three days, goal three: Mon 12 and Mon 19 Oct, plus this week's two days */
+    for (const mon of [-14, -7]) for (const k of [0, 2, 4]) wo.push({ id: 'g' + mon + k, d: dd(mon + k), s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] });
+    for (const k of [0, 1]) wo.push({ id: 'h' + k, d: dd(k), s: 3, e: 4, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] });
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-29T18:00:00');
+    const geo = async () => page.evaluate(() => { const c = document.querySelector('#lfPgr'), r = c.getBoundingClientRect(), n = c.nextElementSibling.getBoundingClientRect(); return { h: Math.round(r.height), gap: Math.round(n.top - r.bottom), pages: c.querySelectorAll('.lf-pgr-p').length, dots: c.querySelectorAll('#lfPgrD button').length, inert: [...c.querySelectorAll('.lf-pgr-p')].map((p) => p.hasAttribute('inert')) }; });
+    const g1 = await geo();
+    ok('Home has a progress card of two pages under Today, with two dots, and only the page in view can be reached', g1.pages === 2 && g1.dots === 2 && g1.inert.join() === 'false,true' && g1.gap > 0 && g1.gap < 20, JSON.stringify(g1));
+    ok('page one is the weekly streak: weeks in a row, this week\'s seven days, the days trained lit', /Weekly streak/.test(await page.textContent('#lfPgrStreak')) && await page.locator('#lfPgrStreak .lf-pgr-w div').count() === 7 && await page.locator('#lfPgrStreak .lf-pgr-w .is-on').count() === 2 && (await page.textContent('#lfPgrStreak .lf-num')) === '2', await page.textContent('#lfPgrStreak .lf-num'));
+    await page.locator('#lfPgrD button').nth(1).click(); await page.waitForTimeout(500);
+    const g2 = await geo();
+    ok('the dots turn the page, and turning it never changes the card\'s height or moves what is under it', g2.inert.join() === 'true,false' && g2.h === g1.h && g2.gap === g1.gap, JSON.stringify([g1, g2]));
+    ok('page two is the weekly goal: the days so far over the goal', /2\/3/.test(await page.textContent('#lfPgrGoal')) && /2 of 3 days this week/.test(await page.textContent('#lfPgrGoal')));
+    await page.click('#lfPgrGoal'); await settle(page);
+    ok('pressing the goal opens the goals sheet with the days a week, the current one pressed', await page.locator('#lfGsDays button').count() === 7 && await page.locator('#lfGsDays button[aria-pressed="true"]').textContent() === '3');
+    await page.locator('#lfGsDays button').nth(4).click(); await page.waitForTimeout(300);
+    ok('choosing five days changes the goal for good, and the card behind follows', (await store(page)).goal === 5 && /2\/5/.test(await page.textContent('#lfPgrGoal')));
+    await page.keyboard.press('Escape'); await settle(page);
+    await page.locator('#lfPgrD button').nth(0).click(); await page.waitForTimeout(400); await page.click('#lfPgrStreak'); await settle(page);
+    ok('pressing the streak opens twelve weeks of history and a way to change the goal', await page.locator('#lfSkW i').count() === 12 && await page.locator('#lfSkGoal').count() === 1);
+    await c.close();
+  }
+
   /* ── REAL SETS, REAL PRs: limits on a set, and two weeks before a PR counts ── */
   {
     const st = (w, r) => ({ w, r });
