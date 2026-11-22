@@ -250,7 +250,8 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sf-hw b { display: block; font-size: 14px; } .lf-sf-hw span { font-size: 13px; color: var(--dim); }
 .lf-sf-ms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .lf-sf-ms em { font-style: normal; font-size: 12px; padding: 6px 10px; border-radius: 10px; background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--dim); }
-.lf-sf-ms em b { color: var(--log); font-weight: 800; text-shadow: 0 0 8px color-mix(in srgb, var(--log) 70%, transparent), 0 0 18px color-mix(in srgb, var(--log) 40%, transparent); }
+.lf-sf-ms em b { color: var(--dim); font-weight: 800; }
+.lf-sf-ms em.is-on b { color: var(--log); text-shadow: 0 0 8px color-mix(in srgb, var(--log) 70%, transparent), 0 0 18px color-mix(in srgb, var(--log) 40%, transparent); }
 .lf-sf-ms em.is-on { background: color-mix(in srgb, var(--log) 18%, transparent); color: var(--ink); font-weight: 700; box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--log) 55%, transparent), 0 0 14px color-mix(in srgb, var(--log) 28%, transparent); }
 .lf-sf-how { display: flex; align-items: center; gap: 12px; width: 100%; margin: 12px 0; text-align: left; }
 .lf-sf-how > i svg { width: 26px; height: 26px; fill: var(--log); }
@@ -9278,7 +9279,7 @@ function lfBadges() {
   ws.forEach(function (w) {
     dayN[w.d] = (dayN[w.d] || 0) + 1; if (dayN[w.d] === 2) won('twice', w.d);
     if (w.d.slice(5) === '01-01') won('newyear', w.d);
-    if (prevZ !== w.d) { var gz = prevZ ? Math.round((parseYmd(w.d) - parseYmd(prevZ)) / 864e5) : 0; zRun = gz === 1 ? zRun + 1 : 1; prevZ = w.d; if (zRun > zBest) zBest = zRun; if (zRun === 14) won('zero', w.d); }
+    if (prevZ !== w.d) { var gz = prevZ ? Math.round((parseYmd(w.d) - parseYmd(prevZ)) / 864e5) : 0; zRun = prevZ ? lfRunStep(prevZ, w.d, zRun) : 1; prevZ = w.d; if (zRun > zBest) zBest = zRun; if (zRun === 14) won('zero', w.d); }
     w.x.forEach(function (e) { var rr = 0; e.sets.forEach(function (q) { rr += +q.r || 0; }); if (rr >= 100) won('century', w.d); });
   });
   /* the rare versus-friends ones */
@@ -10562,11 +10563,11 @@ function bdCoin(b, n) {
 }
 
 /* THE SLAB IS THE STREAK MEDAL: days in a row, weeks on goal, straight runs, and hours. Seven Straight has no number in its id, so it is named here. */
-function bdIsSlab(b) { return /^(d|hr|st|run)\d+$/.test(b.id || '') || (b && b.id === 'seven'); }
+function bdIsSlab(b) { return /^(d|hr|st|run)\d+$/.test(b.id || '') || (b && (b.id === 'seven' || b.id === 'zero')); }
 function bdSlab(b, n) {
   var T = BD3, g = new T.Group(), hi = n > 500, HW = .7, HH = 1.02, DEP = .09, BV = .02, lock = !!b.lock;
   var ch = Math.max(384, Math.min(1024, n * 1.25 | 0)), cw = Math.round(ch * HW / HH), s = ch / 1024;
-  var hrs = /^hr/.test(b.id), num = b.id === 'seven' ? '7' : String(b.id).replace(/^\D+/, ''), HEAD = hrs ? 'HOURS' : /^st/.test(b.id) ? 'WEEKS' : /^run|^seven$/.test(b.id) ? 'DAYS' : 'DAY';
+  var hrs = /^hr/.test(b.id), num = b.id === 'seven' ? '7' : b.id === 'zero' ? '14' : String(b.id).replace(/^\D+/, ''), HEAD = hrs ? 'HOURS' : /^st/.test(b.id) ? 'WEEKS' : /^run|^seven$|^zero$/.test(b.id) ? 'DAYS' : 'DAY';
   function stad(hw, hh) { var sh = new T.Shape(), r = hw; sh.moveTo(-hw, -(hh - r)); sh.lineTo(-hw, hh - r); sh.absarc(0, hh - r, r, Math.PI, 0, true); sh.lineTo(hw, -(hh - r)); sh.absarc(0, -(hh - r), r, 0, Math.PI, true); return sh; }
   function plateGeo(hw, hh) { var gg = new T.ShapeGeometry(stad(hw, hh), 48), pa = gg.attributes.position, uv = gg.attributes.uv; for (var i = 0; i < pa.count; i++) uv.setXY(i, (pa.getX(i) + HW) / (2 * HW), (pa.getY(i) + HH) / (2 * HH)); return gg; }
   function cvs() { var c = document.createElement('canvas'); c.width = cw; c.height = ch; return c; }
