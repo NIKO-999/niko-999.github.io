@@ -1544,21 +1544,18 @@ const freeze = (at) => `(() => {
     for (const mon of [-14, -7]) for (const k of [0, 2, 4]) wo.push({ id: 'g' + mon + k, d: dd(mon + k), s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] });
     for (const k of [0, 1]) wo.push({ id: 'h' + k, d: dd(k), s: 3, e: 4, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] });
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo }, '2026-10-29T18:00:00');
-    const geo = async () => page.evaluate(() => { const c = document.querySelector('#lfPgr'), r = c.getBoundingClientRect(), n = c.nextElementSibling.getBoundingClientRect(); return { h: Math.round(r.height), gap: Math.round(n.top - r.bottom), pages: c.querySelectorAll('.lf-pgr-p').length, dots: c.querySelectorAll('#lfPgrD button').length, inert: [...c.querySelectorAll('.lf-pgr-p')].map((p) => p.hasAttribute('inert')) }; });
-    const g1 = await geo();
-    ok('Home has a progress card of two pages under Today, with two dots, and only the page in view can be reached', g1.pages === 2 && g1.dots === 2 && g1.inert.join() === 'false,true' && g1.gap > 0 && g1.gap < 20, JSON.stringify(g1));
-    ok('page one is the weekly streak: weeks in a row, this week\'s seven days, the days trained lit', /Weekly streak/.test(await page.textContent('#lfPgrStreak')) && await page.locator('#lfPgrStreak .lf-pgr-w div').count() === 7 && await page.locator('#lfPgrStreak .lf-pgr-w .is-on').count() === 2 && (await page.textContent('#lfPgrStreak .lf-num')) === '2', await page.textContent('#lfPgrStreak .lf-num'));
-    await page.locator('#lfPgrD button').nth(1).click(); await page.waitForTimeout(500);
-    const g2 = await geo();
-    ok('the dots turn the page, and turning it never changes the card\'s height or moves what is under it', g2.inert.join() === 'true,false' && g2.h === g1.h && g2.gap === g1.gap, JSON.stringify([g1, g2]));
-    ok('page two is the weekly goal: the days so far over the goal', /2\/3/.test(await page.textContent('#lfPgrGoal')) && /2 of 3 days this week/.test(await page.textContent('#lfPgrGoal')));
-    await page.click('#lfPgrGoal'); await settle(page);
-    ok('pressing the goal opens the goals sheet with the days a week, the current one pressed', await page.locator('#lfGsDays button').count() === 7 && await page.locator('#lfGsDays button[aria-pressed="true"]').textContent() === '3');
+    const g1 = await page.evaluate(() => { const c = document.querySelector('#lfPgr'), r = c.getBoundingClientRect(), n = c.nextElementSibling.getBoundingClientRect(); return { gap: Math.round(n.top - r.bottom), dots: document.querySelectorAll('#lfPgrD').length, pages: document.querySelectorAll('.lf-pgr-p').length, arc: +c.querySelector('.fg').getAttribute('stroke-dashoffset'), len: +c.querySelector('.fg').getAttribute('stroke-dasharray'), fr: c.querySelector('.lf-pgr-fr').textContent }; });
+    ok('Home has ONE progress card under Today: no pages and no dots, the flame in an open loop that is two thirds round, 2/3 beside it', g1.dots === 0 && g1.pages === 0 && g1.gap > 0 && g1.gap < 20 && Math.abs(g1.arc / g1.len - 1 / 3) < .01 && g1.fr === '2/3', JSON.stringify(g1));
+    ok('it shows the weeks in a row and this week\'s seven days, the days trained lit', /Weekly streak/.test(await page.textContent('#lfPgr')) && await page.locator('#lfPgr .lf-pgr-w div').count() === 7 && await page.locator('#lfPgr .lf-pgr-w .is-on').count() === 2 && (await page.textContent('#lfPgr .lf-num')) === '2', await page.textContent('#lfPgr .lf-num'));
+    await page.click('#lfPgr'); await settle(page);
+    ok('pressing it opens the streak: twelve weeks, a month of days, the freezes, and a way to change the goal', await page.locator('#lfSk .lf-sk-w i').count() === 12 && await page.locator('.lf-sf-g span.is-on').count() >= 2 && await page.locator('.lf-sf-fz').count() === 1 && await page.locator('#lfSkGoal').count() === 1);
+    await page.click('#lfSkGoal'); await settle(page);
+    ok('Change goal opens the days a week, the current one pressed', await page.locator('#lfGsDays button').count() === 7 && await page.locator('#lfGsDays button[aria-pressed="true"]').textContent() === '3');
     await page.locator('#lfGsDays button').nth(4).click(); await page.waitForTimeout(300);
-    ok('choosing five days changes the goal for good, and the card behind follows', (await store(page)).goal === 5 && /2\/5/.test(await page.textContent('#lfPgrGoal')));
+    ok('choosing five days changes the goal for good, and the card behind follows', (await store(page)).goal === 5 && (await page.textContent('#lfPgr .lf-pgr-fr')) === '2/5');
     await page.keyboard.press('Escape'); await settle(page);
-    await page.locator('#lfPgrD button').nth(0).click(); await page.waitForTimeout(400); await page.click('#lfPgrStreak'); await settle(page);
-    ok('pressing the streak opens twelve weeks of history and a way to change the goal', await page.locator('#lfSkW i').count() === 12 && await page.locator('#lfSkGoal').count() === 1);
+    await page.click('#lfPgr'); await settle(page);
+    ok('with 2 of 5 days this week a freeze can cover it: using one counts the week in the streak and undoing takes it back', await (async () => { const before = +(await page.textContent('#lfSk .lf-sk-big .lf-num')); await page.locator('.lf-sf-r button').first().click(); await page.waitForTimeout(300); const st = await store(page); const after = +(await page.textContent('#lfSk .lf-sk-big .lf-num')); return st.fz && st.fz.length === 1 && after === before + 1; })());
     await c.close();
   }
 
