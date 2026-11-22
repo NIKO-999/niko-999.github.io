@@ -1590,6 +1590,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-qa-t em { font-style: normal; font-size: 13px; color: var(--dim); grid-column: 2; }
 .lf-qa-t.is-wide span { grid-column: 2; align-self: end; }
 .lf-qa-t span { font-size: 15px; line-height: 1.2; font-weight: 600; }
+.lf-hi-g > .lf-hi-t:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .lf-hi-g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 18px; }
 .lf-hi-t { display: grid; gap: 8px; align-content: start; padding: 14px; border-radius: 22px; background: var(--card2); }
 .lf-hi-h { display: flex; align-items: center; gap: 10px; }
@@ -6603,6 +6604,8 @@ var HK_IC = {
 function lfHealthSheet() {
   var b = el('<div id="lfHi"></div>'), s = lfSheet({ title: 'Health insights', body: b, key: 'hi' });
   function tile(lab, fig, unit, v, avg, up, ic) {
+    /* NO READING, NO TILE: a figure Health has nothing for (no watch for sleep or heart rate, a zero with no history) is not drawn at all */
+    if (fig === '--' || ((!v) && !(avg > 0))) return null;
     var t = el('<div class="lf-hi-t"><div class="lf-hi-h"><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + (HK_IC[ic] || '') + '</svg></i><span class="lf-lab"></span></div><div class="lf-hi-f"><b class="lf-num"></b><span></span></div><div class="lf-hi-b"><i></i></div><span class="lf-hi-c"></span></div>');
     $('.lf-lab', t).textContent = lab; $('b', t).textContent = fig; $('.lf-hi-f span', t).textContent = unit || '';
     var has = v !== null && v !== undefined && avg > 0;
@@ -6617,22 +6620,23 @@ function lfHealthSheet() {
     var parts = [['steps', r.steps, r.stepsAvg], ['energy', r.energy, r.energyAvg], ['exercise', r.exercise, r.exerciseAvg]].filter(function (x) { return x[2] > 0; });
     var act = parts.length ? Math.round(parts.reduce(function (a, x) { return a + Math.min(1, x[1] / x[2]); }, 0) / parts.length * 100) : null;
     var slp = tot > 0 ? Math.min(100, Math.round(tot / 480 * 100)) : null;
-    var sc = el('<div class="lf-hi-g"></div>');
-    sc.appendChild(tile('Activity', act === null ? '--' : act, act === null ? '' : '/ 100', act, act === null ? 0 : 100, null, 'act'));
-    sc.appendChild(tile('Sleep', slp === null ? '--' : slp, slp === null ? '' : '/ 100', slp, slp === null ? 0 : 100, null, 'sleep'));
-    var g1 = el('<div class="lf-hi-g"></div>');
-    g1.appendChild(tile('Steps', lfHkNum(r.steps), '', r.steps, r.stepsAvg, true, 'steps'));
-    g1.appendChild(tile('Active calories', lfHkNum(r.energy), 'kcal', r.energy, r.energyAvg, true, 'cal'));
-    g1.appendChild(tile('Exercise', lfHkNum(r.exercise), 'min', r.exercise, r.exerciseAvg, true, 'time'));
-    g1.appendChild(tile('Distance', lfHkNum(r.distance, 1), 'km', r.distance, r.distanceAvg, true, 'dist'));
-    var g2 = el('<div class="lf-hi-g"></div>');
-    g2.appendChild(tile('Total sleep', tot ? lfHkMin(tot) : '--', '', null, 0, true, 'sleep'));
-    g2.appendChild(tile('Deep sleep', sl.deep ? lfHkMin(sl.deep) : '--', '', null, 0, true, 'deep'));
-    g2.appendChild(tile('REM sleep', sl.rem ? lfHkMin(sl.rem) : '--', '', null, 0, true, 'rem'));
-    g2.appendChild(tile('Awake', sl.awake ? lfHkMin(sl.awake) : '--', '', null, 0, true, 'eye'));
-    g2.appendChild(tile('Resting heart rate', r.rhr ? lfHkNum(r.rhr) : '--', r.rhr ? 'bpm' : '', r.rhr, r.rhrAvg, false, 'heart'));
-    g2.appendChild(tile('Heart rate variability', r.hrv ? lfHkNum(r.hrv) : '--', r.hrv ? 'ms' : '', r.hrv, r.hrvAvg, false, 'hrv'));
-    [['Scores', sc], ['Today\u2019s activity', g1], ['Recovery', g2]].forEach(function (x) { var h = el('<span class="lf-flab"></span>'); h.textContent = x[0]; b.appendChild(h); b.appendChild(x[1]); });
+    function mk() { var g = el('<div class="lf-hi-g"></div>'); g.add = function (t) { if (t) g.appendChild(t); }; return g; }
+    var sc = mk();
+    sc.add(tile('Activity', act === null ? '--' : act, act === null ? '' : '/ 100', act, act === null ? 0 : 100, null, 'act'));
+    sc.add(tile('Sleep', slp === null ? '--' : slp, slp === null ? '' : '/ 100', slp, slp === null ? 0 : 100, null, 'sleep'));
+    var g1 = mk();
+    g1.add(tile('Steps', lfHkNum(r.steps), '', r.steps, r.stepsAvg, true, 'steps'));
+    g1.add(tile('Active calories', lfHkNum(r.energy), 'kcal', r.energy, r.energyAvg, true, 'cal'));
+    g1.add(tile('Exercise', lfHkNum(r.exercise), 'min', r.exercise, r.exerciseAvg, true, 'time'));
+    g1.add(tile('Distance', lfHkNum(r.distance, 1), 'km', r.distance, r.distanceAvg, true, 'dist'));
+    var g2 = mk();
+    g2.add(tile('Total sleep', tot ? lfHkMin(tot) : '--', '', null, 0, true, 'sleep'));
+    g2.add(tile('Deep sleep', sl.deep ? lfHkMin(sl.deep) : '--', '', null, 0, true, 'deep'));
+    g2.add(tile('REM sleep', sl.rem ? lfHkMin(sl.rem) : '--', '', null, 0, true, 'rem'));
+    g2.add(tile('Awake', sl.awake ? lfHkMin(sl.awake) : '--', '', null, 0, true, 'eye'));
+    g2.add(tile('Resting heart rate', r.rhr ? lfHkNum(r.rhr) : '--', r.rhr ? 'bpm' : '', r.rhr, r.rhrAvg, false, 'heart'));
+    g2.add(tile('Heart rate variability', r.hrv ? lfHkNum(r.hrv) : '--', r.hrv ? 'ms' : '', r.hrv, r.hrvAvg, false, 'hrv'));
+    [['Scores', sc], ['Today\u2019s activity', g1], ['Recovery', g2]].forEach(function (x) { if (!x[1].children.length) return; var h = el('<span class="lf-flab"></span>'); h.textContent = x[0]; b.appendChild(h); b.appendChild(x[1]); });
   }
   function load() {
     b.textContent = ''; b.appendChild(el('<p class="lf-lab" style="margin:0">Reading Health</p>'));
