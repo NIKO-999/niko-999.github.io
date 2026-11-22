@@ -227,7 +227,7 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-cell.is-fz .lf-dots { display: flex; justify-content: center; } .lf-cell.is-fz .lf-fzi { width: 13px; height: 13px; }
 .lf-wk.is-fz .lf-fzi { width: 18px; height: 18px; }
 .lf-fz-e { display: grid; justify-items: center; gap: 6px; } .lf-fz-e .lf-fzi { width: 26px; height: 26px; }
-#lfSk { margin: 14px 0 6px; }
+#lfSk { margin: 14px 0 6px; } #lfSkR { margin: 4px 0 0; }
 .lf-sf-fz { margin: 16px 0 0; padding: 14px; border-radius: 18px; background: var(--card2); }
 .lf-sf-h { margin: 0; font: inherit; }
 .lf-sf-t { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font: inherit; text-align: left; padding: 0; }
@@ -2928,10 +2928,10 @@ function lfFzUse(k) {
   S.fz = was.concat([k]).sort(); lfSave(); lfRender();
   lfToast('Freeze used', function () { if (was.length) S.fz = was; else delete S.fz; lfSave(); lfRender(); });
 }
-/* THE STREAK LIVES UNDER THE MONTH on the Calendar tab: the weeks in a row, the freezes, how it works. The month above it is the calendar, so there is not a second one here. The Home card only changes the goal. */
-function lfStreakView(b) {
+/* THE STREAK IS TWO PARTS of the Month view: the weeks in a row above the calendar (part 'top') and the freezes and how it works below it (part 'rest'). THE STREAK LIVES UNDER THE MONTH on the Calendar tab: the weeks in a row, the freezes, how it works. The month above it is the calendar, so there is not a second one here. The Home card only changes the goal. */
+function lfStreakView(b, part) {
   var m0 = monday(today()), goal = S.goal > 0 ? S.goal : 0;
-  b.id = 'lfSk';
+  b.id = part === 'rest' ? 'lfSkR' : 'lfSk';
   var fzOpen = false; try { fzOpen = localStorage.getItem('lift.sf') === '1'; } catch (er) {}
   function paint() {
     var streak = lfStreakNow(), best = lfStreakBest(), av = lfFzAvail(), tk = ymd(today());
@@ -2941,7 +2941,8 @@ function lfStreakView(b) {
     $('.lf-sk-big .lf-lab', top).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') + (best > streak ? ' · best ' + best : '') : 'set a goal to start one';
     for (var i = 11; i >= 0; i--) { var mm = addDays(m0, -7 * i), sq = el('<i></i>'); if (goal && lfWkCount(mm) >= goal) { sq.classList.add(wkDays(mm) >= goal ? 'is-on' : 'is-fz'); if (wkDays(mm) < goal) sq.innerHTML = lfFzI(); } else if (false) sq.classList.add('is-fz'); else if (i === 0) sq.classList.add('is-now'); sq.setAttribute('title', mm.getDate() + ' ' + MON[mm.getMonth()].slice(0, 3)); $('.lf-sk-w', top).appendChild(sq); }
     $('#lfSkN', top).textContent = goal ? 'A week counts when you train ' + goal + (goal === 1 ? ' day' : ' days') + '. It closes on Sunday.' : '';
-    b.appendChild(top);
+    if (part !== 'rest') b.appendChild(top);
+    if (part === 'top') return;
     /* the freezes: what is ready, how they are earned, and the weeks one can still cover */
     /* the freezes fold: shut until you want them, and it stays the way you left it */
     var fz = el('<div class="lf-sf-fz"><h3 class="lf-sf-h"><button type="button" class="lf-sf-t" aria-controls="lfSfBody"><i>' + FZ_ICE + '</i><div><b>Streak freezes</b><span></span></div>' + IC.chev + '</button></h3><div class="lf-sf-body" id="lfSfBody"><p>A freeze covers one day you did not train. It counts toward that week’s goal, so a week one day short keeps your streak going.</p><div class="lf-sf-pk"></div><span class="lf-flab">How you get them</span><div class="lf-sf-hw"><div><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></i><div><b>Every month</b><span>A new freeze at the start of each month. One is kept.</span></div></div><div><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2 4 2 4H6"/></svg></i><div><b>Milestone bonus</b><span>Reach a streak milestone and get more. Reached ones are lit.</span><div class="lf-sf-ms"></div></div></div></div></div></div>');
@@ -5860,7 +5861,7 @@ function lfRenderCal() {
   });
   root.appendChild(seg);
   /* the streak leads the month: the weeks in a row, the freezes, how it works */
-  if (calMode === 'month') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk); }
+  if (calMode === 'month') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk, 'top'); }
   var t = today();
   var from, to, label;
   if (calMode === 'month') { from = new Date(calAt.getFullYear(), calAt.getMonth(), 1); to = new Date(calAt.getFullYear(), calAt.getMonth() + 1, 0); label = MON[from.getMonth()] + ' ' + from.getFullYear(); }
@@ -5937,6 +5938,7 @@ function lfRenderCal() {
     goal.textContent = dayFirst(S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); })).length + ' of ' + S.goal + ' this week';
     root.appendChild(rdl); root.appendChild(sum); root.appendChild(goal);
   }
+  if (calMode === 'month') { var sk2 = el('<div></div>'); root.appendChild(sk2); lfStreakView(sk2, 'rest'); }
   /* Every workout in the range, newest first. */
   var ws2 = S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); }).sort(function (a, b) { return a.d === b.d ? b.s - a.s : (a.d < b.d ? 1 : -1); });
   if (ws2.length && calMode === 'month') {
