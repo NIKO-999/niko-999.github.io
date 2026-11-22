@@ -2935,8 +2935,8 @@ function lfProgCard() {
   $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
   $('b', c).textContent = goal ? done + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') : 'set a goal to start';
   for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
-  c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + done + ' of ' + goal + ' workouts this week' : '') + '. Open the streak and goal');
-  c.addEventListener('click', function () { lfStreakSheet(); });
+  c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + done + ' of ' + goal + ' workouts this week' : '') + '. Change goal');
+  c.addEventListener('click', function () { lfGoalSheet(); });
   return c;
 }
 var FZ_MILES = [[4, 1], [12, 1], [26, 1], [52, 2], [104, 2]];
@@ -2957,9 +2957,10 @@ function lfFzUse(k) {
   S.fz = was.concat([k]).sort(); lfSave(); lfRender();
   lfToast('Freeze used', function () { if (was.length) S.fz = was; else delete S.fz; lfSave(); lfRender(); });
 }
-function lfStreakSheet(mo0) {
-  var m0 = monday(today()), goal = S.goal > 0 ? S.goal : 0, mo = mo0 || new Date(today().getFullYear(), today().getMonth(), 1);
-  var b = el('<div id="lfSk"></div>'), s = lfSheet({ title: 'Weekly streak', body: b, foot: [], key: 'streak' });
+/* THE STREAK LIVES ON THE CALENDAR TAB now, as its third view beside Week and Month: the weeks in a row, the month, the freezes. The Home card only changes the goal. */
+function lfStreakView(b) {
+  var m0 = monday(today()), goal = S.goal > 0 ? S.goal : 0, mo = new Date(today().getFullYear(), today().getMonth(), 1);
+  b.id = 'lfSk';
   var fzOpen = false; try { fzOpen = localStorage.getItem('lift.sf') === '1'; } catch (er) {}
   function paint() {
     var streak = lfStreakNow(), best = lfStreakBest(), av = lfFzAvail(), tk = ymd(today());
@@ -3001,10 +3002,10 @@ function lfStreakSheet(mo0) {
     } else pk.remove();
     b.appendChild(fz);
     var how = el('<button type="button" class="lf-card lf-tap lf-sf-how"><i>' + LF_FLAME + '</i><div><b>How streaks work?</b><span>Keep your weekly streak going.</span></div>' + IC.chev + '</button>');
-    how.addEventListener('click', function () { s.close(true); lfStreakHow(); });
+    how.addEventListener('click', function () { lfStreakHow(); });
     b.appendChild(how);
     var ch = el('<button type="button" class="lf-btn is-full" id="lfSkGoal">' + (goal ? 'Change goal' : 'Set a goal') + '</button>');
-    ch.addEventListener('click', function () { s.close(true); lfGoalSheet(); });
+    ch.addEventListener('click', function () { lfGoalSheet(); });
     b.appendChild(ch);
   }
   paint();
@@ -3018,8 +3019,8 @@ function lfStreakHow() {
    ['Your weekly goal', 'Your goal sets which weeks qualify. Change it from the streak or from Goals.', '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.500"/>']].forEach(function (c) {
     var d = el('<div class="lf-card lf-sf-c"><svg viewBox="0 0 24 24" aria-hidden="true">' + c[2] + '</svg><div><b></b><span></span></div></div>'); $('b', d).textContent = c[0]; $('span', d).textContent = c[1]; b.appendChild(d);
   });
-  var back = el('<button type="button" class="lf-btn is-full">Back to my streak</button>'), s = lfSheet({ title: 'How streaks work', body: b, foot: [back], key: 'streak' });
-  back.addEventListener('click', function () { s.close(true); lfStreakSheet(); });
+  var back = el('<button type="button" class="lf-btn is-full">Done</button>'), s = lfSheet({ title: 'How streaks work', body: b, foot: [back], key: 'streak' });
+  back.addEventListener('click', function () { s.close(); });
 }
 function lfGoalSheet() {
   var b = el('<div><span class="lf-flab">Days a week</span><div class="lf-seg" id="lfGsDays" style="--n:7"></div><p class="lf-lab" id="lfGsN" style="margin:8px 0 0"></p></div>');
@@ -3030,7 +3031,7 @@ function lfGoalSheet() {
   say();
   var foot = [], s;
   if (!lfNew()) { var mt = el('<button type="button" class="lf-btn is-full" id="lfGsMuscle">Edit muscle targets</button>'); mt.addEventListener('click', function () { s.close(true); lfGo('you'); lfRender(); var r = $('#lfRowFocusRow') || $('#lfRowFocus'); if (r) r.click(); }); foot.push(mt); }
-  s = lfSheet({ title: 'Goals', body: b, foot: foot });
+  s = lfSheet({ title: 'Change goal', body: b, foot: foot });
 }
 function lfRenderHome() {
   var root = $('#lfHome'); root.textContent = '';
@@ -5894,12 +5895,13 @@ var calMode = 'month', calAt = today(), calPlayed = '';
 function lfRenderCal() {
   var root = $('#lfCal'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Calendar</h2>'));
-  var seg = el('<div class="lf-seg"><button type="button" data-m="week">Week</button><button type="button" data-m="month">Month</button></div>');
+  var seg = el('<div class="lf-seg" style="--n:3"><button type="button" data-m="week">Week</button><button type="button" data-m="month">Month</button><button type="button" data-m="streak">Streak</button></div>');
   $$('button', seg).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.m === calMode ? 'true' : 'false');
     b.addEventListener('click', function () { calMode = b.dataset.m; calAt = today(); lfRenderCal(); });
   });
   root.appendChild(seg);
+  if (calMode === 'streak') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk); return; }
   var t = today();
   var from, to, label;
   if (calMode === 'month') { from = new Date(calAt.getFullYear(), calAt.getMonth(), 1); to = new Date(calAt.getFullYear(), calAt.getMonth() + 1, 0); label = MON[from.getMonth()] + ' ' + from.getFullYear(); }

@@ -1548,13 +1548,12 @@ const freeze = (at) => `(() => {
     ok('Home has ONE progress card under Today: no pages and no dots, the flame in an open loop that is two thirds round, 2/3 beside it', g1.dots === 0 && g1.pages === 0 && g1.gap > 0 && g1.gap < 20 && Math.abs(g1.arc / g1.len - 1 / 3) < .01 && g1.fr === '2 / 3', JSON.stringify(g1));
     ok('it shows the goal, this week\'s seven days with the days trained lit, and not the weeks in a row', /Weekly goal/.test(await page.textContent('#lfPgr')) && !/in a row/.test(await page.textContent('#lfPgr')) && await page.locator('#lfPgr .lf-pgr-w div').count() === 7 && await page.locator('#lfPgr .lf-pgr-w .is-on').count() === 2 && (await page.textContent('#lfPgr .lf-num')) === '2 / 3', await page.textContent('#lfPgr .lf-num'));
     await page.click('#lfPgr'); await settle(page);
-    ok('pressing it opens the streak: twelve weeks, a month of days, the freezes, and a way to change the goal', await page.locator('#lfSk .lf-sk-w i').count() === 12 && await page.locator('.lf-sf-g span.is-on').count() >= 2 && await page.locator('.lf-sf-fz').count() === 1 && await page.locator('#lfSkGoal').count() === 1);
-    await page.click('#lfSkGoal'); await settle(page);
-    ok('Change goal opens the days a week, the current one pressed', await page.locator('#lfGsDays button').count() === 7 && await page.locator('#lfGsDays button[aria-pressed="true"]').textContent() === '3');
+    ok('pressing the card opens Change goal directly: the days a week, the current one pressed, and no streak page', await page.locator('#lfGsDays button').count() === 7 && await page.locator('#lfGsDays button[aria-pressed="true"]').textContent() === '3' && await page.locator('#lfSk').count() === 0);
     await page.locator('#lfGsDays button').nth(4).click(); await page.waitForTimeout(300);
     ok('choosing five days changes the goal for good, and the card behind follows', (await store(page)).goal === 5 && (await page.textContent('#lfPgr .lf-num')) === '2 / 5');
     await page.keyboard.press('Escape'); await settle(page);
-    await page.click('#lfPgr'); await settle(page);
+    await page.locator('nav button').nth(1).click(); await page.waitForTimeout(500); await page.locator('#lfCal .lf-seg button[data-m="streak"]').click(); await page.waitForTimeout(400);
+    ok('the Calendar tab has the streak as its third view: twelve weeks, a month of days, the freezes, and a way to change the goal', await page.locator('#lfCal .lf-seg button').count() === 3 && await page.locator('#lfSk .lf-sk-w i').count() === 12 && await page.locator('.lf-sf-g span.is-on').count() >= 2 && await page.locator('.lf-sf-fz').count() === 1 && await page.locator('#lfSkGoal').count() === 1);
     ok('the freezes are shut by default and fold open: a button in a heading, aria-expanded', await page.locator('h3.lf-sf-h > button.lf-sf-t[aria-expanded="false"]').count() === 1 && !(await page.locator('#lfSfBody').isVisible()));
     await page.click('.lf-sf-t'); await page.waitForTimeout(200);
     ok('pressing it opens the freezes, and it is remembered', await page.locator('#lfSfBody').isVisible() && await page.evaluate(() => localStorage.getItem('lift.sf')) === '1');
