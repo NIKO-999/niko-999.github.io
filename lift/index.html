@@ -512,6 +512,16 @@ body.lf-v-home .lf-glow { opacity: 1; }
    the width they are told, and the value sits at the left like any field. */
 .lf-field[type="date"], .lf-field[type="time"] { -webkit-appearance: none; appearance: none; box-sizing: border-box; display: block; width: 100%; min-width: 0; max-width: 100%; text-align: left; }
 .lf-field[type="date"]::-webkit-date-and-time-value, .lf-field[type="time"]::-webkit-date-and-time-value { text-align: left; margin: 0; }
+.lf-eg { border-radius: var(--r-s); background: var(--card2); overflow: hidden; }
+.lf-eg label { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 14px; }
+.lf-eg label + label, .lf-eg #lfEdT { border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
+.lf-eg #lfEdT label:first-child { border-top: 0; }
+.lf-eg label > span { flex: none; width: 78px; font-size: 15px; color: var(--dim); }
+.lf-eg .lf-field { flex: 1; min-width: 0; height: 48px; line-height: 46px; padding: 0; background: none; border: 0; border-radius: 0; text-align: right; }
+.lf-eg .lf-field[type="date"], .lf-eg .lf-field[type="time"] { display: flex; align-items: center; justify-content: flex-end; text-align: right; }
+.lf-eg .lf-field[type="date"]::-webkit-date-and-time-value, .lf-eg .lf-field[type="time"]::-webkit-date-and-time-value { text-align: right; margin: 0; min-height: 0; line-height: 46px; }
+.lf-eg .lf-field:focus { border: 0; color: var(--ink); }
+.lf-eg + #lfEdX { margin-top: 4px; }
 .lf-row > label { min-width: 0; }
 .lf-fh { margin: 0; font: inherit; }
 .lf-force { position: fixed; inset: 0; z-index: 9999; background: var(--bg); display: grid; place-items: center; padding: 28px; }
@@ -6025,9 +6035,10 @@ function lfWoSheet(w, editable) {
    so nothing moves until Save; and Delete asks, then offers Undo. */
 function lfWoEdit(w) {
   var c = JSON.parse(JSON.stringify(w));
-  var b = el('<div><label class="lf-flab" for="lfEdN">Name</label><input class="lf-field" id="lfEdN" maxlength="60" autocomplete="off" />'
-    + '<label class="lf-flab" for="lfEdD">Day</label><input class="lf-field" id="lfEdD" type="date" />'
-    + '<div class="lf-row" id="lfEdT" style="--n:2;gap:10px"><label><span class="lf-flab">Started</span><input class="lf-field" id="lfEdS" type="time" /></label><label><span class="lf-flab">Minutes</span><input class="lf-field lf-num" id="lfEdM" inputmode="numeric" maxlength="3" autocomplete="off" /></label></div>'
+  /* ONE GROUP, A ROW EACH: the label at the left and the value at the right, so the four facts line up in a column rather than being four stacked boxes. */
+  var b = el('<div><div class="lf-eg"><label for="lfEdN"><span>Name</span><input class="lf-field" id="lfEdN" maxlength="60" autocomplete="off" /></label>'
+    + '<label for="lfEdD"><span>Day</span><input class="lf-field" id="lfEdD" type="date" /></label>'
+    + '<div id="lfEdT"><label for="lfEdS"><span>Started</span><input class="lf-field" id="lfEdS" type="time" /></label><label for="lfEdM"><span>Minutes</span><input class="lf-field lf-num" id="lfEdM" inputmode="numeric" maxlength="3" autocomplete="off" /></label></div></div>'
     + '<div id="lfEdX"></div></div>');
   $('#lfEdN', b).value = c.n; $('#lfEdD', b).value = c.d; $('#lfEdD', b).max = ymd(today());
   /* HOW LONG IT WAS, mendable: an app left running after the last set
