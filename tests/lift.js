@@ -1555,7 +1555,11 @@ const freeze = (at) => `(() => {
     ok('choosing five days changes the goal for good, and the card behind follows', (await store(page)).goal === 5 && (await page.textContent('#lfPgr .lf-pgr-fr')) === '2/5');
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfPgr'); await settle(page);
-    ok('with 2 of 5 days this week a freeze can cover it: using one counts the week in the streak and undoing takes it back', await (async () => { const before = +(await page.textContent('#lfSk .lf-sk-big .lf-num')); await page.locator('.lf-sf-r button').first().click(); await page.waitForTimeout(300); const st = await store(page); const after = +(await page.textContent('#lfSk .lf-sk-big .lf-num')); return st.fz && st.fz.length === 1 && after === before + 1; })());
+    ok('the freezes are shut by default and fold open: a button in a heading, aria-expanded', await page.locator('h3.lf-sf-h > button.lf-sf-t[aria-expanded="false"]').count() === 1 && !(await page.locator('#lfSfBody').isVisible()));
+    await page.click('.lf-sf-t'); await page.waitForTimeout(200);
+    ok('pressing it opens the freezes, and it is remembered', await page.locator('#lfSfBody').isVisible() && await page.evaluate(() => localStorage.getItem('lift.sf')) === '1');
+    ok('a freeze is for a day: untrained days from the last fortnight are offered, none that were trained', await page.locator('.lf-sf-d').count() >= 5 && await page.evaluate(() => [...document.querySelectorAll('.lf-sf-d')].every((b) => !/^Frozen/.test(b.getAttribute('aria-label')))));
+    ok('freezing a day adds it to the week: the week is one day closer and the record holds that day alone; undo takes it back', await (async () => { const n0 = await page.locator('.lf-sf-d:not(:disabled)').count(); await page.locator('.lf-sf-d:not(:disabled)').last().click(); await page.waitForTimeout(300); const st = await store(page); const ok1 = st.fz && st.fz.length === 1 && /^\d{4}-\d\d-\d\d$/.test(st.fz[0]); return ok1 && await page.locator('.lf-sf-d.is-fz').count() === 1 && n0 > 0; })());
     await c.close();
   }
 
