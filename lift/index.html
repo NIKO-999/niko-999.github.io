@@ -1574,6 +1574,11 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-hh-h { display: flex; align-items: center; gap: 10px; } .lf-hh-h b { flex: 1; font-size: 15px; } .lf-hh-h .lf-lab { flex: 1; }
 .lf-hh-r { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .lf-hh-r div { display: grid; gap: 3px; } .lf-hh-r b { font-size: 22px; line-height: 1; letter-spacing: -.02em; } .lf-hh-r span { font-size: 12px; color: var(--dim); }
+.lf-qa { display: grid; grid-template-columns: repeat(var(--n, 2), 1fr); gap: 10px; margin-bottom: 4px; }
+.lf-qa-t { display: grid; justify-items: center; align-content: start; gap: 10px; padding: 16px 8px 14px; min-height: 112px; border-radius: 22px; background: var(--card); border: 1px solid var(--hair); color: var(--ink); font: inherit; text-align: center; }
+.lf-qa-t i { width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 9%, transparent); }
+.lf-qa-t svg { width: 23px; height: 23px; fill: none; stroke: var(--c); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lf-qa-t span { font-size: 11px; line-height: 1.25; letter-spacing: .06em; text-transform: uppercase; font-weight: 600; }
 .lf-hi-g { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 8px 0 18px; }
 .lf-hi-t { display: grid; gap: 8px; align-content: start; padding: 14px; border-radius: 22px; background: var(--card2); }
 .lf-hi-h { display: flex; align-items: center; gap: 10px; }
@@ -5788,10 +5793,17 @@ function lfRenderLib() {
   var newU = lfNew();
   /* THE TARGETS COME FIRST once there is a split to count against, then Create split with its plus at the end, then Manage and share splits straight under it */
   if (!newU) root.appendChild(lfTgCard());
-  var nr = el('<button type="button" class="lf-add" id="lfNewSplit">Create split' + IC.plus + '</button>');
-  nr.addEventListener('click', function () { lfSplitForm(null); });
-  root.appendChild(nr);
-  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share splits</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
+  /* QUICK ACTIONS: the four things you do from here, each a block with its own mark. The library is one of them, so the screen no longer ends in a wall of exercises. Apple Health is only drawn where Health is signed in. */
+  var QA = [['lfLibOpen', 'Exercise library', '#e6f27a', '<path d="M6 8v8M3.5 10v4M18 8v8M20.5 10v4M6 12h12"/>', function () { lfLibSheet(); }],
+    ['lfNewSplit', 'Create split', '#7ff0b4', '<path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/>', function () { lfSplitForm(null); }]];
+  if (!newU) QA.push(['lfProgMg', 'Manage splits', '#f08ad6', '<rect x="5" y="4" width="14" height="16" rx="2.500"/><path d="M9 9h6M9 13h6M9 17h3"/>', lfProgManage]);
+  if (LF_WGT && LF_WGT.healthReadAuth && lfCaps.health) QA.push(['lfHealthQa', 'Apple Health', '#ff7a8a', HK_IC.heart, lfHealthSheet]);
+  var qg = el('<div class="lf-qa" style="--n:' + (QA.length === 3 ? 3 : 2) + '"></div>');
+  QA.forEach(function (q) {
+    var b = el('<button type="button" class="lf-qa-t" id="' + q[0] + '"><i><svg viewBox="0 0 24 24" aria-hidden="true">' + q[3] + '</svg></i><span>' + q[1] + '</span></button>');
+    b.style.setProperty('--c', q[2]); b.addEventListener('click', q[4]); qg.appendChild(b);
+  });
+  root.appendChild(el('<div class="lf-cap lf-gh">Quick actions</div>')); root.appendChild(qg);
   /* the split, Monday first */
   if (!newU) root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
@@ -5835,7 +5847,14 @@ function lfRenderLib() {
   });
   if (!S.rt.length && !(S.pg || []).length) { var hw = el('<button type="button" class="lf-li" id="lfSetupLink"><div class="lf-li-t"><b>How to add your split</b><span>A short guide</span></div>' + IC.chev + '</button>'); hw.addEventListener('click', lfSetupTour); var hc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>'); $('.lf-list', hc).appendChild(hw); root.appendChild(hc); }
   if (S.rt.length) root.appendChild(rc);
-  /* the library */
+  /* the library lives in its own sheet; the suite's in-place mode keeps it on the page so its checks can reach any exercise */
+  if (window.__lfInline) lfLibBuild(root, true);
+}
+function lfLibSheet() {
+  var host = el('<div></div>'); lfLibBuild(host, false);
+  lfSheet({ title: 'Exercise library', body: host, key: 'lib' });
+}
+function lfLibBuild(root, fold) {
   /* ALL EXERCISES FOLDS. Two hundred and forty names under every other control on the screen was the whole of what made it feel like a wall. It is shut until you open it, and each muscle inside it folds as well; a search opens everything it finds. */
   var all = allEx();
   var hd = el('<h3 class="lf-fold-h lf-gh"><button type="button" class="lf-fold-b" id="lfLibFold" aria-controls="lfLibBody"><span class="lf-cap">All exercises</span><span class="lf-lab lf-num"></span>' + IC.chev + '</button></h3>');
@@ -5843,7 +5862,7 @@ function lfRenderLib() {
   var lb = el('<div id="lfLibBody"></div>');
   function foldLib() { $('#lfLibFold', hd).setAttribute('aria-expanded', libOpen ? 'true' : 'false'); lb.hidden = !libOpen; }
   $('#lfLibFold', hd).addEventListener('click', function () { libOpen = !libOpen; foldLib(); });
-  root.appendChild(hd); root.appendChild(lb); foldLib();
+  if (fold) { root.appendChild(hd); root.appendChild(lb); foldLib(); } else { lb.hidden = false; root.appendChild(lb); }
   var fw = el('<div></div>'); fw.appendChild(lfPplSeg(libG, function (g) { libG = g; paintLib(); })); lb.appendChild(fw);
   if (all.length > 6) {
     var q = el('<input class="lf-field" type="search" placeholder="Search" aria-label="Search exercises" autocomplete="off" />');
