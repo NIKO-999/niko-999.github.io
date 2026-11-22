@@ -1576,8 +1576,11 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-hh-h { display: flex; align-items: center; gap: 10px; } .lf-hh-h b { flex: 1; font-size: 15px; } .lf-hh-h .lf-lab { flex: 1; }
 .lf-hh-r { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; }
 .lf-hh-r > div[hidden] { display: none; }
-.lf-hh-r span { display: flex; align-items: center; gap: 5px; }
-.lf-hh-r span svg { width: 15px; height: 15px; flex: none; fill: none; stroke: var(--log); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lf-hh-r > div { grid-template-columns: auto 1fr; align-items: center; column-gap: 8px; row-gap: 2px; }
+.lf-hh-r .lf-hi-i { grid-row: 1 / 3; width: 30px; height: 30px; }
+.lf-hh-r .lf-hi-i svg { width: 16px; height: 16px; }
+.lf-hh-r b { grid-column: 2; align-self: end; }
+.lf-hh-r span { grid-column: 2; align-self: start; }
 .lf-hh-r div { display: grid; gap: 3px; } .lf-hh-r b { font-size: 22px; line-height: 1; letter-spacing: -.02em; } .lf-hh-r span { font-size: 12px; color: var(--dim); }
 .lf-sd .lf-li { border-top: 0; min-height: 0; padding: 11px 0; }
 .lf-sd .lf-li .lf-chev { display: none; }
@@ -6670,7 +6673,7 @@ function lfHealthHome() {
     c.addEventListener('click', lfHealthSheet);
     return c;
   }
-  c = el('<button type="button" class="lf-card lf-tap lf-hh" id="lfHealthHomeOn"><div class="lf-hh-h">' + ico + '<span class="lf-lab">Apple Health</span>' + IC.chev + '</div><div class="lf-hh-r"><div><b class="lf-num">--</b><span><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.steps + '</svg>steps</span></div><div><b class="lf-num">--</b><span><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.sleep + '</svg>sleep</span></div><div><b class="lf-num">--</b><span><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.cal + '</svg>kcal</span></div></div></button>');
+  c = el('<button type="button" class="lf-card lf-tap lf-hh" id="lfHealthHomeOn"><div class="lf-hh-h">' + ico + '<span class="lf-lab">Apple Health</span>' + IC.chev + '</div><div class="lf-hh-r"><div><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.steps + '</svg></i><b class="lf-num">--</b><span>steps</span></div><div><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.sleep + '</svg></i><b class="lf-num">--</b><span>sleep</span></div><div><i class="lf-hi-i"><svg viewBox="0 0 24 24" aria-hidden="true">' + HK_IC.cal + '</svg></i><b class="lf-num">--</b><span>kcal</span></div></div></button>');
   function paint(r) { var v = c.querySelectorAll('.lf-hh-r b'); v[0].textContent = r.steps > 0 ? lfHkNum(r.steps) : '--'; v[1].textContent = r.sleep && r.sleep.total ? lfHkMin(r.sleep.total) : '--'; v[2].textContent = r.energy > 0 ? lfHkNum(r.energy) : '--'; Array.prototype.forEach.call(v, function (x) { x.parentNode.hidden = x.textContent === '--'; }); }
   if (lfHkCache && Date.now() - lfHkAt < 300000) paint(lfHkCache);
   else LF_WGT.healthDay({}).then(function (r) { if (r && r.ok) { lfHkCache = r; lfHkAt = Date.now(); paint(r); } }, function () {});
