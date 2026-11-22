@@ -222,29 +222,12 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sk-w i.is-fz { background: color-mix(in srgb, var(--log) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-fzi { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--log); flex: none; }
 .lf-pgr-w .is-fz .lf-fzi { width: 13px; height: 13px; margin-top: -1px; }
-.lf-sf-g span { position: relative; }
-.lf-sf-g span .lf-fzi { position: absolute; top: 3px; right: 3px; width: 11px; height: 11px; }
 .lf-sk-w i.is-fz { display: grid; place-items: center; } .lf-sk-w i .lf-fzi { width: 14px; height: 14px; }
 .lf-day.is-fz { display: grid; place-items: center; border-color: var(--log); background: none; } .lf-day.is-fz .lf-fzi { width: 11px; height: 11px; stroke-width: 2.4; }
 .lf-cell.is-fz .lf-dots { display: flex; justify-content: center; } .lf-cell.is-fz .lf-fzi { width: 13px; height: 13px; }
 .lf-wk.is-fz .lf-fzi { width: 18px; height: 18px; }
 .lf-fz-e { display: grid; justify-items: center; gap: 6px; } .lf-fz-e .lf-fzi { width: 26px; height: 26px; }
-.lf-sf-cal { margin: 16px 0 0; padding: 12px; border-radius: 18px; background: var(--card2); }
-.lf-sf-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.lf-sf-nav b { font-size: 15px; font-weight: 700; }
-.lf-sf-nav button { width: 44px; height: 44px; display: grid; place-items: center; color: var(--ink); }
-.lf-sf-nav button:disabled { opacity: .3; }
-.lf-sf-pv svg { transform: rotate(180deg); }
-.lf-sf-dw, .lf-sf-g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
-.lf-sf-dw span { text-align: center; font-size: 11px; color: var(--dim); padding-bottom: 4px; }
-.lf-sf-g span { aspect-ratio: 1; display: grid; place-items: center; border-radius: 9px; background: color-mix(in srgb, var(--ink) 6%, transparent); font-size: 13px; }
-.lf-sf-g span:empty { background: none; }
-.lf-sf-g span.is-on { background: var(--log); color: var(--on-log); font-weight: 700; }
-.lf-sf-g span.is-fz { background: color-mix(in srgb, var(--log) 18%, transparent); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--log) 55%, transparent); }
-.lf-sf-g span.is-now { box-shadow: inset 0 0 0 2px var(--ink); }
-.lf-sf-lg { display: flex; justify-content: center; gap: 16px; margin-top: 10px; font-size: 11px; color: var(--dim); }
-.lf-sf-lg i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
-.lf-sf-lg .on { background: var(--log); } .lf-sf-lg .now { box-shadow: inset 0 0 0 2px var(--ink); } .lf-sf-lg .fz { background: color-mix(in srgb, var(--log) 18%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
+#lfSk { margin-top: 18px; }
 .lf-sf-fz { margin: 16px 0 0; padding: 14px; border-radius: 18px; background: var(--card2); }
 .lf-sf-h { margin: 0; font: inherit; }
 .lf-sf-t { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font: inherit; text-align: left; padding: 0; }
@@ -2969,9 +2952,9 @@ function lfFzUse(k) {
   S.fz = was.concat([k]).sort(); lfSave(); lfRender();
   lfToast('Freeze used', function () { if (was.length) S.fz = was; else delete S.fz; lfSave(); lfRender(); });
 }
-/* THE STREAK LIVES ON THE CALENDAR TAB now, as its third view beside Week and Month: the weeks in a row, the month, the freezes. The Home card only changes the goal. */
+/* THE STREAK LIVES UNDER THE MONTH on the Calendar tab: the weeks in a row, the freezes, how it works. The month above it is the calendar, so there is not a second one here. The Home card only changes the goal. */
 function lfStreakView(b) {
-  var m0 = monday(today()), goal = S.goal > 0 ? S.goal : 0, mo = new Date(today().getFullYear(), today().getMonth(), 1);
+  var m0 = monday(today()), goal = S.goal > 0 ? S.goal : 0;
   b.id = 'lfSk';
   var fzOpen = false; try { fzOpen = localStorage.getItem('lift.sf') === '1'; } catch (er) {}
   function paint() {
@@ -2983,17 +2966,6 @@ function lfStreakView(b) {
     for (var i = 11; i >= 0; i--) { var mm = addDays(m0, -7 * i), sq = el('<i></i>'); if (goal && lfWkCount(mm) >= goal) { sq.classList.add(wkDays(mm) >= goal ? 'is-on' : 'is-fz'); if (wkDays(mm) < goal) sq.innerHTML = lfFzI(); } else if (false) sq.classList.add('is-fz'); else if (i === 0) sq.classList.add('is-now'); sq.setAttribute('title', mm.getDate() + ' ' + MON[mm.getMonth()].slice(0, 3)); $('.lf-sk-w', top).appendChild(sq); }
     $('#lfSkN', top).textContent = goal ? 'A week counts when you train ' + goal + (goal === 1 ? ' day' : ' days') + '. It closes on Sunday.' : '';
     b.appendChild(top);
-    /* the month, a day lit for every day you trained, a frozen week outlined */
-    var cal = el('<div class="lf-sf-cal"><div class="lf-sf-nav"><button type="button" class="lf-sf-pv" aria-label="Previous month">' + IC.chev + '</button><b></b><button type="button" class="lf-sf-nx" aria-label="Next month">' + IC.chev + '</button></div><div class="lf-sf-dw">' + 'MTWTFSS'.split('').map(function (c) { return '<span>' + c + '</span>'; }).join('') + '</div><div class="lf-sf-g"></div><div class="lf-sf-lg"><span><i class="on"></i>Trained</span><span><i class="now"></i>Today</span><span><i class="fz"></i>Frozen</span></div></div>');
-    $('b', cal).textContent = MON[mo.getMonth()] + ' ' + mo.getFullYear();
-    var g = $('.lf-sf-g', cal), lead = (mo.getDay() + 6) % 7, dim = new Date(mo.getFullYear(), mo.getMonth() + 1, 0).getDate();
-    for (var z = 0; z < lead; z++) g.appendChild(el('<span></span>'));
-    for (var d = 1; d <= dim; d++) { var dt = new Date(mo.getFullYear(), mo.getMonth(), d), k = ymd(dt), c = el('<span><b></b></span>'); $('b', c).textContent = d; if (woOn(k).length) c.classList.add('is-on'); else if (lfFz(k)) { c.classList.add('is-fz'); c.insertAdjacentHTML('beforeend', lfFzI()); } if (k === tk) c.classList.add('is-now'); g.appendChild(c); }
-    var nowM = new Date(today().getFullYear(), today().getMonth(), 1);
-    $('.lf-sf-nx', cal).disabled = mo >= nowM;
-    $('.lf-sf-pv', cal).addEventListener('click', function () { mo = new Date(mo.getFullYear(), mo.getMonth() - 1, 1); paint(); });
-    $('.lf-sf-nx', cal).addEventListener('click', function () { mo = new Date(mo.getFullYear(), mo.getMonth() + 1, 1); paint(); });
-    b.appendChild(cal);
     /* the freezes: what is ready, how they are earned, and the weeks one can still cover */
     /* the freezes fold: shut until you want them, and it stays the way you left it */
     var fz = el('<div class="lf-sf-fz"><h3 class="lf-sf-h"><button type="button" class="lf-sf-t" aria-controls="lfSfBody"><i>' + FZ_ICE + '</i><div><b>Streak freezes</b><span></span></div>' + IC.chev + '</button></h3><div class="lf-sf-body" id="lfSfBody"><p>A freeze covers one day you did not train. It counts toward that week’s goal, so a week one day short keeps your streak going.</p><div class="lf-sf-pk"></div><span class="lf-flab">How you get them</span><div class="lf-sf-hw"><div><i><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg></i><div><b>Every month</b><span>A new freeze at the start of each month. One is kept.</span></div></div><div><i><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 21V4M6 5h11l-2 4 2 4H6"/></svg></i><div><b>Milestone bonus</b><span>Reach a streak milestone and get more. Reached ones are lit.</span><div class="lf-sf-ms"></div></div></div></div></div></div>');
@@ -3009,7 +2981,7 @@ function lfStreakView(b) {
       pk.appendChild(el('<span class="lf-flab" style="margin-top:0">Freeze a day</span>'));
       var gr = el('<div class="lf-sf-days"></div>');
       cand.forEach(function (c) { var bt = el('<button type="button" class="lf-sf-d"><i></i><b></b></button>'); $('i', bt).textContent = 'SMTWTFS'[c[0].getDay()]; $('b', bt).textContent = c[0].getDate(); bt.setAttribute('aria-label', (lfFz(c[1]) ? 'Frozen, ' : 'Freeze ') + c[0].getDate() + ' ' + MON[c[0].getMonth()]);
-        if (lfFz(c[1])) { bt.classList.add('is-fz'); bt.disabled = true; } else { bt.disabled = av < 1; bt.addEventListener('click', function () { lfFzUse(c[1]); paint(); }); } gr.appendChild(bt); });
+        if (lfFz(c[1])) { bt.classList.add('is-fz'); bt.disabled = true; } else { bt.disabled = av < 1; bt.addEventListener('click', function () { lfFzUse(c[1]); }); } gr.appendChild(bt); });
       pk.appendChild(gr);
     } else pk.remove();
     b.appendChild(fz);
@@ -5908,13 +5880,12 @@ var calMode = 'month', calAt = today(), calPlayed = '';
 function lfRenderCal() {
   var root = $('#lfCal'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Calendar</h2>'));
-  var seg = el('<div class="lf-seg" style="--n:3"><button type="button" data-m="week">Week</button><button type="button" data-m="month">Month</button><button type="button" data-m="streak">Streak</button></div>');
+  var seg = el('<div class="lf-seg"><button type="button" data-m="week">Week</button><button type="button" data-m="month">Month</button></div>');
   $$('button', seg).forEach(function (b) {
     b.setAttribute('aria-pressed', b.dataset.m === calMode ? 'true' : 'false');
     b.addEventListener('click', function () { calMode = b.dataset.m; calAt = today(); lfRenderCal(); });
   });
   root.appendChild(seg);
-  if (calMode === 'streak') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk); return; }
   var t = today();
   var from, to, label;
   if (calMode === 'month') { from = new Date(calAt.getFullYear(), calAt.getMonth(), 1); to = new Date(calAt.getFullYear(), calAt.getMonth() + 1, 0); label = MON[from.getMonth()] + ' ' + from.getFullYear(); }
@@ -5991,6 +5962,7 @@ function lfRenderCal() {
     goal.textContent = dayFirst(S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); })).length + ' of ' + S.goal + ' this week';
     root.appendChild(rdl); root.appendChild(sum); root.appendChild(goal);
   }
+  if (calMode === 'month') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk); }
   /* Every workout in the range, newest first. */
   var ws2 = S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); }).sort(function (a, b) { return a.d === b.d ? b.s - a.s : (a.d < b.d ? 1 : -1); });
   if (ws2.length && calMode === 'month') {
