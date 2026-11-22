@@ -1549,6 +1549,9 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-tip { background: var(--card2); border-radius: var(--r-s); padding: 12px 14px; margin: 6px 0 10px; }
 .lf-tip > b { display: block; font-size: 14px; line-height: 1.35; font-weight: 600; margin: 4px 0 6px; color: var(--today-ink); }
 .lf-tip ul { margin: 0; padding-left: 16px; display: grid; gap: 6px; }
+.lf-tip-h { display: flex; align-items: center; gap: 6px; }
+.lf-tip-h svg { width: 16px; height: 16px; fill: none; stroke: var(--ink); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lf-tip-n { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 .lf-tip li { font-size: 13px; line-height: 1.4; color: var(--dim); }
 .lf-cdc { background: var(--card); border-radius: var(--r); padding: 14px; margin-top: 12px; }
 .lf-cdc .lf-ex-hd { justify-content: space-between; min-height: 24px; }
@@ -5566,14 +5569,36 @@ function lfUnswap(rt, id, swd, day) {
     lfSave(); u.close(true); if (day) day.close(true); lfRender(); lfDaySpec(rt);
   });
 }
+/* WHAT TO CHANGE, from your own record: for the first three exercises of the day that you have done before, the last top set and the one step up from it. Reached the top of the rep range, so add a little weight and go back to the bottom of it; not there yet, so the same weight and one more rep. Never invented: no history, no line. */
+function lfCoachNext(rt) {
+  var out = [], inc = S.unit === 'lb' ? 2.26796 : 2.5;
+  rt.ex.forEach(function (id) {
+    if (out.length >= 3) return;
+    var sets = lastFor(id), t = rt.tg && rt.tg[id];
+    if (!sets || !t) return;
+    var top = null;
+    sets.forEach(function (q) { if (q && q.r > 0 && (!top || (+q.w || 0) > (+top.w || 0))) top = q; });
+    if (!top) return;
+    var lo = +t[1] || 0, hi = +t[2] || lo, w = +top.w || 0;
+    out.push(exName(id) + ': last ' + fmtWS(w) + ' \u00d7 ' + top.r + '. ' + (hi && top.r >= hi && w > 0 ? 'You reached the top of the range, so add a little weight (' + fmtWS(w + inc) + ') and start again at ' + lo + '.' : 'Same weight, aim for ' + (top.r + 1) + '.'));
+  });
+  return out;
+}
 function lfDaySpec(rt) {
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = DOW_LONG[rt.dow] + ' · ' + rt.sp;
-  var tip = DAY_TIPS[rt.id];
-  if (tip) {
-    var tc = el('<div class="lf-tip" id="lfTip"><div class="lf-cap">Focus</div><b></b><ul></ul></div>');
-    $('b', tc).textContent = tip[0];
-    tip[1].forEach(function (t) { var li = el('<li></li>'); li.textContent = t; $('ul', tc).appendChild(li); });
+  /* THE COACH: what the day is for (from the plan), then what to do differently from last time, worked out from your own sets */
+  var tip = DAY_TIPS[rt.id], nxt = rt.choice ? [] : lfCoachNext(rt);
+  if (tip || nxt.length) {
+    var tc = el('<div class="lf-tip" id="lfTip"><div class="lf-tip-h"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><span class="lf-cap">Coach</span></div><b></b><ul></ul></div>');
+    $('b', tc).textContent = tip ? tip[0] : 'Beat last time';
+    if (!tip) $('b', tc).hidden = false;
+    (tip ? tip[1] : []).forEach(function (t) { var li = el('<li></li>'); li.textContent = t; $('ul', tc).appendChild(li); });
+    if (nxt.length) {
+      var nl = el('<div class="lf-tip-n"><span class="lf-cap">Next time</span><ul></ul></div>');
+      nxt.forEach(function (t) { var li = el('<li></li>'); li.textContent = t; $('ul', nl).appendChild(li); });
+      tc.appendChild(nl);
+    }
     b.insertBefore(tc, $('.lf-list', b));
   }
   if (rt.choice) {
