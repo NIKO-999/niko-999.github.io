@@ -220,6 +220,15 @@ body.lf-v-home .lf-glow { opacity: 1; }
 .lf-sk-w i.is-on { background: var(--log); box-shadow: none; }
 .lf-sk-w i.is-now { box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-sk-w i.is-fz { background: color-mix(in srgb, var(--log) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
+.lf-fzi { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--log); flex: none; }
+.lf-pgr-w .is-fz .lf-fzi { width: 13px; height: 13px; margin-top: -1px; }
+.lf-sf-g span { position: relative; }
+.lf-sf-g span .lf-fzi { position: absolute; top: 3px; right: 3px; width: 11px; height: 11px; }
+.lf-sk-w i.is-fz { display: grid; place-items: center; } .lf-sk-w i .lf-fzi { width: 14px; height: 14px; }
+.lf-day.is-fz { display: grid; place-items: center; border-color: var(--log); background: none; } .lf-day.is-fz .lf-fzi { width: 11px; height: 11px; stroke-width: 2.4; }
+.lf-cell.is-fz .lf-dots { display: flex; justify-content: center; } .lf-cell.is-fz .lf-fzi { width: 13px; height: 13px; }
+.lf-wk.is-fz .lf-fzi { width: 18px; height: 18px; }
+.lf-fz-e { display: grid; justify-items: center; gap: 6px; } .lf-fz-e .lf-fzi { width: 26px; height: 26px; }
 .lf-sf-cal { margin: 16px 0 0; padding: 12px; border-radius: 18px; background: var(--card2); }
 .lf-sf-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .lf-sf-nav b { font-size: 15px; font-weight: 700; }
@@ -2935,11 +2944,13 @@ function lfProgCard() {
   var e = addDays(mon, 6);
   $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
   $('b', c).textContent = goal ? done + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
-  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) dv.classList.add('is-fz'); else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
+  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
   c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + done + ' of ' + goal + ' workouts this week' + (frz ? ', ' + frz + ' frozen' : '') : '') + '. Change goal');
   c.addEventListener('click', function () { lfGoalSheet(); });
   return c;
 }
+/* the snowflake that marks a frozen day wherever a day is drawn */
+function lfFzI() { return FZ_ICE.replace('<svg ', '<svg class="lf-fzi" '); }
 var FZ_MILES = [[4, 1], [12, 1], [26, 1], [52, 2], [104, 2]];
 var FZ_ICE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M3.500 7l17 10M3.500 17l17-10M9 3.500l3 2.500 3-2.500M9 20.500l3-2.500 3 2.500M3 10l3.500 1L5 14.500M21 10l-3.500 1 1.500 3.500"/></svg>';
 /* One a month, kept up to two, and a bonus for every milestone the streak has reached. A freeze used takes from whatever was banked then, so the count is worked out in order rather than stored. */
@@ -2969,7 +2980,7 @@ function lfStreakView(b) {
     var top = el('<div><div class="lf-sk-big">' + LF_FLAME + '<b class="lf-num"></b><span class="lf-lab"></span></div><span class="lf-flab">Last 12 weeks</span><div class="lf-sk-w"></div><p class="lf-lab" id="lfSkN" style="margin:0"></p></div>');
     $('b', top).textContent = streak;
     $('.lf-sk-big .lf-lab', top).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') + (best > streak ? ' · best ' + best : '') : 'set a goal to start one';
-    for (var i = 11; i >= 0; i--) { var mm = addDays(m0, -7 * i), sq = el('<i></i>'); if (goal && lfWkCount(mm) >= goal) sq.classList.add(wkDays(mm) >= goal ? 'is-on' : 'is-fz'); else if (false) sq.classList.add('is-fz'); else if (i === 0) sq.classList.add('is-now'); sq.setAttribute('title', mm.getDate() + ' ' + MON[mm.getMonth()].slice(0, 3)); $('.lf-sk-w', top).appendChild(sq); }
+    for (var i = 11; i >= 0; i--) { var mm = addDays(m0, -7 * i), sq = el('<i></i>'); if (goal && lfWkCount(mm) >= goal) { sq.classList.add(wkDays(mm) >= goal ? 'is-on' : 'is-fz'); if (wkDays(mm) < goal) sq.innerHTML = lfFzI(); } else if (false) sq.classList.add('is-fz'); else if (i === 0) sq.classList.add('is-now'); sq.setAttribute('title', mm.getDate() + ' ' + MON[mm.getMonth()].slice(0, 3)); $('.lf-sk-w', top).appendChild(sq); }
     $('#lfSkN', top).textContent = goal ? 'A week counts when you train ' + goal + (goal === 1 ? ' day' : ' days') + '. It closes on Sunday.' : '';
     b.appendChild(top);
     /* the month, a day lit for every day you trained, a frozen week outlined */
@@ -2977,7 +2988,7 @@ function lfStreakView(b) {
     $('b', cal).textContent = MON[mo.getMonth()] + ' ' + mo.getFullYear();
     var g = $('.lf-sf-g', cal), lead = (mo.getDay() + 6) % 7, dim = new Date(mo.getFullYear(), mo.getMonth() + 1, 0).getDate();
     for (var z = 0; z < lead; z++) g.appendChild(el('<span></span>'));
-    for (var d = 1; d <= dim; d++) { var dt = new Date(mo.getFullYear(), mo.getMonth(), d), k = ymd(dt), c = el('<span><b></b></span>'); $('b', c).textContent = d; if (woOn(k).length) c.classList.add('is-on'); else if (lfFz(k)) c.classList.add('is-fz'); if (k === tk) c.classList.add('is-now'); g.appendChild(c); }
+    for (var d = 1; d <= dim; d++) { var dt = new Date(mo.getFullYear(), mo.getMonth(), d), k = ymd(dt), c = el('<span><b></b></span>'); $('b', c).textContent = d; if (woOn(k).length) c.classList.add('is-on'); else if (lfFz(k)) { c.classList.add('is-fz'); c.insertAdjacentHTML('beforeend', lfFzI()); } if (k === tk) c.classList.add('is-now'); g.appendChild(c); }
     var nowM = new Date(today().getFullYear(), today().getMonth(), 1);
     $('.lf-sf-nx', cal).disabled = mo >= nowM;
     $('.lf-sf-pv', cal).addEventListener('click', function () { mo = new Date(mo.getFullYear(), mo.getMonth() - 1, 1); paint(); });
@@ -3449,6 +3460,7 @@ function lfGridCard() {
   for (var i = 29; i >= 0; i--) {
     var d = ymd(addDays(t, -i)), x = el('<i class="lf-day"></i>');
     if (on[d]) { x.classList.add('is-on'); n++; }
+    else if (lfFz(d)) { x.classList.add('is-fz'); x.innerHTML = lfFzI(); }
     else if (S.rd[d]) x.classList.add('is-rest');
     if (i === 0) x.classList.add('is-now');
     x.dataset.d = d;
@@ -5932,12 +5944,13 @@ function lfRenderCal() {
       var cell = el('<button type="button" class="lf-cell"><span class="lf-num"></span><span class="lf-dots" aria-hidden="true"></span></button>');
       cell.dataset.d = k;
       $('.lf-num', cell).textContent = d;
-      if (ws.length || S.rd[k]) cell.style.setProperty('--i', lit++);
+      if (ws.length || S.rd[k] || lfFz(k)) cell.style.setProperty('--i', lit++);
       if (ws.length) { cell.classList.add('is-on'); ws.slice(0, 3).forEach(function () { $('.lf-dots', cell).appendChild(el('<i></i>')); }); }
+      else if (lfFz(k)) { cell.classList.add('is-fz'); $('.lf-dots', cell).innerHTML = lfFzI(); }
       else if (S.rd[k]) { cell.classList.add('is-rest'); $('.lf-dots', cell).appendChild(el('<i class="is-r"></i>')); }
       if (k === tk) cell.classList.add('is-now');
       if (k > tk) { cell.classList.add('is-ahead'); cell.disabled = true; }
-      cell.setAttribute('aria-label', fmtDay(k) + (ws.length ? ', ' + ws.map(function (w) { return w.n; }).join(', ') : S.rd[k] ? ', rest day taken' : ', nothing logged'));
+      cell.setAttribute('aria-label', fmtDay(k) + (ws.length ? ', ' + ws.map(function (w) { return w.n; }).join(', ') : lfFz(k) ? ', streak freeze' : S.rd[k] ? ', rest day taken' : ', nothing logged'));
       cell.addEventListener('click', (function (k) { return function () { lfDaySheet(k); }; })(k));
       g.appendChild(cell);
     }
@@ -5958,6 +5971,11 @@ function lfRenderCal() {
         $('.lf-wn b', row).textContent = ww.map(function (w) { return w.n; }).join(' + ');
         $('.lf-wn span', row).textContent = ww.reduce(function (a, w) { return a + woSets(w); }, 0) + ' sets · ' + ww.reduce(function (a, w) { return a + w.x.length; }, 0) + ' exercises';
         $('.lf-li-r', row).textContent = fmtBig(toDisp(ww.reduce(function (a, w) { return a + woVol(w); }, 0))) + ' ' + S.unit;
+      } else if (lfFz(kk)) {
+        row.classList.add('is-rest', 'is-fz');
+        $('.lf-wn b', row).textContent = 'Streak freeze';
+        $('.lf-wn span', row).textContent = 'Counts toward the week\u2019s goal';
+        $('.lf-li-r', row).innerHTML = lfFzI();
       } else if (S.rd[kk]) {
         row.classList.add('is-rest', 'is-rd');
         $('.lf-wn b', row).textContent = 'Rest day';
@@ -5995,7 +6013,7 @@ function lfDaySheet(k) {
   var b = el('<div class="lf-list"></div>');
   var dl = lfDlLine(k);
   if (dl) { var dp = el('<p class="lf-lab lf-dl-line" style="margin:0 0 8px"></p>'); dp.textContent = dl; b.appendChild(dp); }
-  if (!ws.length) b.appendChild(S.rd[k] ? el('<div class="lf-empty"><b>Rest day</b>' + (S.rd[k] === 2 ? 'No workout was logged, so it counts as rest.' : 'Taken on purpose. Recovery counts.') + '</div>') : el('<div class="lf-empty"><b>No workout</b>Nothing logged on this day.</div>'));
+  if (!ws.length) b.appendChild(lfFz(k) ? el('<div class="lf-empty lf-fz-e">' + lfFzI() + '<b>Streak freeze</b>No workout was logged. A freeze covers this day, so it counts toward the week\u2019s goal.</div>') : S.rd[k] ? el('<div class="lf-empty"><b>Rest day</b>' + (S.rd[k] === 2 ? 'No workout was logged, so it counts as rest.' : 'Taken on purpose. Recovery counts.') + '</div>') : el('<div class="lf-empty"><b>No workout</b>Nothing logged on this day.</div>'));
   ws.forEach(function (w) { b.appendChild(lfWoRow(w)); });
   lfSheet({ title: fmtDay(k), body: b, key: 'day' });
 }
