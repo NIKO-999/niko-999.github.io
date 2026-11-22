@@ -2965,9 +2965,10 @@ function lfProgCard() {
   if (goal && f >= 1) c.classList.add('is-hit');
   var e = addDays(mon, 6);
   $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
-  $('b', c).textContent = goal ? done + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
+  /* PAST THE GOAL IT STAYS AT THE GOAL: a seventh workout in a six-a-week week still reads 6 / 6 */
+  $('b', c).textContent = goal ? Math.min(done, goal) + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
   for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
-  c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + done + ' of ' + goal + ' workouts this week' + (frz ? ', ' + frz + ' frozen' : '') : '') + '. Change goal');
+  c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + Math.min(done, goal) + ' of ' + goal + ' workouts this week' + (frz ? ', ' + frz + ' frozen' : '') : '') + '. Change goal');
   c.addEventListener('click', function () { lfGoalSheet(); });
   return c;
 }
@@ -6718,7 +6719,7 @@ function lfWidgetSnap() {
   for (var g = 0; g < 104 && lfWkOk(q); q = addDays(q, -7), g++) streak++;
   var got = lfBadgesCache().filter(function (x) { return x.d; }).sort(function (x, y) { return x.d < y.d ? 1 : x.d > y.d ? -1 : 0; })[0];
   return { v: 1, d: ymd(t), accent: (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2', unit: S.unit,
-    today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: days.filter(function (x) { return x === 1; }).length, fz: days.filter(function (x) { return x === 3; }).length, goal: S.goal || 0, days: days }, streak: streak,
+    today: { name: rt ? rt.n : '', sub: rt && rt.sp ? rt.sp : '', done: done, rest: !rt }, week: { n: Math.min(days.filter(function (x) { return x === 1; }).length, S.goal > 0 ? S.goal : 7), fz: days.filter(function (x) { return x === 3; }).length, goal: S.goal || 0, days: days }, streak: streak,
     badge: got ? { name: got.b.n, d: got.d } : null };
 }
 function lfWidgetPush() {
