@@ -3625,7 +3625,10 @@ var ZN = { Chest: 1, Back: 1.15, Shoulders: 1, Quads: 1, Hamstrings: .8, Glutes:
 var ZG = { build: ['Build muscle', 1], strength: ['Get stronger', .75], lean: ['Stay lean', .85], keep: ['Maintain', .55] };
 var ZX = { new: ['New', 8], some: ['1–2 years', 12], adv: ['Experienced', 15] };
 var ZNAME = ['Maintain', 'Build', 'Push'], ZBLURB = ['Hold what you have with the fewest sets.', 'The sweet spot for most people. Steady growth.', 'More volume. Needs good sleep and food.'];
-function zRec(m) { return Math.max(4, Math.min(20, Math.round(ZX[S.xp][1] * ZG[S.gx][1] * (ZN[m] || .8)))); }
+/* a record that has never been through the repair has no goal or experience yet: the defaults answer for it */
+function zg() { return ZG[S.gx] || ZG.build; }
+function zx() { return ZX[S.xp] || ZX.some; }
+function zRec(m) { return Math.max(4, Math.min(20, Math.round(zx()[1] * zg()[1] * (ZN[m] || .8)))); }
 function zLo(m) { return Math.max(3, zRec(m) - 2); }
 function zHi(m) { return Math.min(22, zRec(m) + 3); }
 function zVal(m, z) { return [Math.max(4, Math.round(zRec(m) * .55)), zRec(m), Math.min(20, zRec(m) + 4)][z]; }
@@ -3639,7 +3642,7 @@ function lfZonesSheet() {
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
     + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div><div id="lfZnRows"></div></div>');
   $('.lf-zn-h b', b).textContent = P.n; $('.lf-zn-h span', b).textContent = P.days.filter(function (r) { return !r.choice; }).length + ' days a week';
-  $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(ZG[S.gx][0]) + '</b> · ' + esc(ZX[S.xp][0]);
+  $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(zg()[0]) + '</b> · ' + esc(zx()[0]);
   function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
   function nEd() { return Object.keys(ed).length; }
   var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfZnSave">Save targets</button>'), back = el('<button type="button" class="lf-btn is-full" id="lfZnBack" hidden></button>'), more = el('<button type="button" class="lf-btn is-full" id="lfZnMore">Priorities and muscles</button>');
