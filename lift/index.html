@@ -1570,9 +1570,12 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
 .lf-toast span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
-/* HOME KEEPS ITS ORIGINAL SIZES AND USES LESS ACCENT: the flame in the goal ring and the Health heart carry it; the ring, the filled days, the steps and kcal icons, the streak tag and the met sets are the ink, so a bright accent colour is a pick rather than the whole screen. */
+/* HOME KEEPS ITS ORIGINAL SIZES AND USES LESS ACCENT: the flame and ring once the goal is hit, the trained days' outline and the Health heart carry it; the ring, the filled days, the steps and kcal icons, the streak tag and the met sets are the ink, so a bright accent colour is a pick rather than the whole screen. */
 #lfHome .lf-pgr-ring .fg { stroke: color-mix(in srgb, var(--ink) 85%, transparent); }
-#lfHome .lf-pgr-w .is-on i { background: color-mix(in srgb, var(--ink) 85%, transparent); }
+#lfHome .lf-pgr-w .is-on i { background: color-mix(in srgb, var(--ink) 85%, transparent); box-shadow: 0 0 0 1.5px var(--log); }
+#lfHome .lf-pgr-ring .fl { fill: var(--ink); }
+#lfHome .lf-pgr.is-hit .lf-pgr-ring .fg { stroke: var(--log); }
+#lfHome .lf-pgr.is-hit .lf-pgr-ring .fl { fill: var(--log); }
 #lfHome .lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--ink) 60%, transparent); }
 #lfHome .lf-hh-r .lf-hi-i svg { stroke: var(--ink); }
 #lfHome #lfGrid .lf-tag { color: var(--dim); background: color-mix(in srgb, var(--ink) 9%, transparent); }
@@ -2958,6 +2961,8 @@ function lfProgCard() {
   /* ONE CARD, ONE PAGE: this week's days, and the flame inside an open loop that fills as the days add up to the goal. Pressing it opens the streak, where the goal is changed. */
   var r = 21, len = 2 * Math.PI * r, f = goal ? Math.min(1, (done + frz) / goal) : 0;
   var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><div class="lf-pgr-h"><span>Weekly goal</span><span></span></div><div class="lf-pgr-n"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span><b class="lf-num"></b><i></i></span></div><div class="lf-pgr-w"></div></button>');
+  /* GOAL HIT: the ring and the flame take the accent only once the week has reached its goal */
+  if (goal && f >= 1) c.classList.add('is-hit');
   var e = addDays(mon, 6);
   $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
   $('b', c).textContent = goal ? done + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
