@@ -1562,25 +1562,6 @@ const freeze = (at) => `(() => {
     await c.close();
   }
 
-  /* ── THE LAUNCH INTRO: the mark converges, locks, and fades slowly into the app, only when the app is opened from closed ── */
-  {
-    const c1 = await newCtx(PHONE); const p1 = await c1.newPage(); await p1.goto(URL); await p1.waitForTimeout(400);
-    ok('opening the app plays the intro over it: the three pieces of the mark and a ring, nothing written', await p1.locator('#lfIntro .lfi-p').count() === 3 && await p1.locator('#lfIntro .lfi-r').count() === 1 && !(await p1.textContent('#lfIntro')).trim());
-    await p1.waitForTimeout(1400);
-    ok('it covers the whole screen and blocks presses while it plays', await p1.evaluate(() => { const r = document.querySelector('#lfIntro').getBoundingClientRect(), t = document.elementFromPoint(195, 400); return r.width >= innerWidth && r.height >= innerHeight && !!t.closest('#lfIntro'); }));
-    await p1.waitForTimeout(4300);
-    ok('it is about five seconds long, and is gone from the page after it, not hidden', await p1.locator('#lfIntro').count() === 0);
-    await p1.reload(); await p1.waitForTimeout(500);
-    ok('it does not play again for a reload or a return to the app: only when the app was closed', await p1.locator('#lfIntro').count() === 0);
-    await c1.close();
-    const c2 = await newCtx(PHONE); const p2 = await c2.newPage(); await p2.goto(URL); await p2.waitForTimeout(300); await p2.mouse.click(195, 400); await p2.waitForTimeout(150);
-    ok('a tap skips it at once', await p2.locator('#lfIntro').count() === 0);
-    await c2.close();
-    const c3 = await newCtx({ ...PHONE, reducedMotion: 'reduce' }); const p3 = await c3.newPage(); await p3.goto(URL); await p3.waitForTimeout(300);
-    ok('with Reduce Motion on there is no intro at all', await p3.locator('#lfIntro').count() === 0);
-    await c3.close();
-  }
-
   /* ── ZONES: the weekly sets for each muscle from one choice, on Exercises, Sets this week and the first split ── */
   {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'z1', d: '2026-10-20', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] }] }, '2026-10-29T18:00:00');

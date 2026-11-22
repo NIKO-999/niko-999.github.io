@@ -1581,30 +1581,6 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 </style>
 </head>
 <body>
-<!-- THE LAUNCH INTRO: the three pieces of the mark fly in from three sides, lock together with a ring, hold, and fade slowly into the app. It is built in this file and removed when it ends, never hidden. It runs only when Lift opens from closed (once a session, about five seconds), is skipped by a tap, and is not shown at all with Reduce Motion on. -->
-<style>
-#lfIntro { position: fixed; inset: 0; z-index: 99999; background: #000; display: grid; place-items: center; overflow: hidden; animation: lfiFade 1.6s 3.4s ease-in-out forwards; }
-#lfIntro svg { width: min(70vw, 300px); height: min(70vw, 300px); overflow: visible; animation: lfiScale 1.6s 3.4s ease-in-out forwards; }
-#lfIntro .lfi-p { animation: lfiP 1.9s var(--dl) cubic-bezier(.2, .9, .2, 1.12) both; }
-#lfIntro .lfi-m { animation: lfiLock .8s 1.9s ease-in-out both; }
-#lfIntro .lfi-r { position: absolute; left: 50%; top: 50%; width: min(36vw, 150px); height: min(36vw, 150px); margin: calc(min(36vw, 150px) / -2) 0 0 calc(min(36vw, 150px) / -2); border-radius: 50%; box-shadow: 0 0 0 2px rgba(225, 212, 194, .9); opacity: 0; animation: lfiRing 1.4s 1.9s ease-out both; }
-@keyframes lfiP { from { transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(.6); opacity: 0; } 12% { opacity: 1; } to { transform: none; opacity: 1; } }
-@keyframes lfiLock { 50% { transform: scale(1.08); } }
-@keyframes lfiRing { from { transform: scale(.6); opacity: .9; } to { transform: scale(2.6); opacity: 0; } }
-@keyframes lfiFade { to { opacity: 0; visibility: hidden; } }
-@keyframes lfiScale { to { transform: scale(1.12); } }
-</style>
-<div id="lfIntro" aria-hidden="true"><svg viewBox="-170 -170 340 340" focusable="false"><defs><linearGradient id="lfiG" gradientUnits="userSpaceOnUse" x1="-150" y1="-150" x2="60" y2="60"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#a9a9ad"/><stop offset="1" stop-color="#3a3a3e"/></linearGradient></defs><g class="lfi-m" fill="url(#lfiG)"><g class="lfi-p" style="--x:0px;--y:-560px;--r:-160deg;--dl:0s"><g transform="scale(.9) rotate(60)"><path d="M-18 -150 L-18 -40 L-78 -6 L-132 -37 Q-150 -47 -150 -68 L-150 -68 Q-150 -90 -131 -101 Z"/></g></g><g class="lfi-p" style="--x:485px;--y:280px;--r:160deg;--dl:.1s"><g transform="scale(.9) rotate(180)"><path d="M-18 -150 L-18 -40 L-78 -6 L-132 -37 Q-150 -47 -150 -68 L-150 -68 Q-150 -90 -131 -101 Z"/></g></g><g class="lfi-p" style="--x:-485px;--y:280px;--r:-160deg;--dl:.2s"><g transform="scale(.9) rotate(300)"><path d="M-18 -150 L-18 -40 L-78 -6 L-132 -37 Q-150 -47 -150 -68 L-150 -68 Q-150 -90 -131 -101 Z"/></g></g></g></svg><i class="lfi-r"></i></div>
-<script>
-(function () {
-  var el = document.getElementById('lfIntro'); function kill() { if (el && el.parentNode) el.parentNode.removeChild(el); el = null; }
-  try {
-    if (window.__lfNoIntro || sessionStorage.getItem('lf.intro') === '1' || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) { kill(); return; }
-    sessionStorage.setItem('lf.intro', '1');
-    el.addEventListener('pointerdown', kill); setTimeout(kill, 5200);
-  } catch (e) { kill(); }
-})();
-</script>
 <h1 class="lf-sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Lift</h1>
 <div class="lf-glow" aria-hidden="true"></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs><linearGradient id="lfAccG" x1="0" y1="0" x2="1" y2="1"></linearGradient><linearGradient id="lfAccGF" x1="0" y1="0" x2="1" y2="1"></linearGradient></defs></svg>
