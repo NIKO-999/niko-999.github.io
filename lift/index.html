@@ -1574,6 +1574,10 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-hh-h { display: flex; align-items: center; gap: 10px; } .lf-hh-h b { flex: 1; font-size: 15px; } .lf-hh-h .lf-lab { flex: 1; }
 .lf-hh-r { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .lf-hh-r div { display: grid; gap: 3px; } .lf-hh-r b { font-size: 22px; line-height: 1; letter-spacing: -.02em; } .lf-hh-r span { font-size: 12px; color: var(--dim); }
+.lf-sd .lf-li { border-top: 0; min-height: 0; padding: 11px 0; }
+.lf-sd .lf-li .lf-chev { display: none; }
+.lf-sd .lf-li .lf-li-t b { font-size: 16px; }
+.lf-sd .lf-li .lf-li-t span { font-size: 13px; margin-top: 2px; }
 .lf-sp { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
 .lf-sp button { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 0 14px; border-radius: 999px; background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--dim); font: inherit; font-size: 13px; font-weight: 600; }
 .lf-sp button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
@@ -5867,7 +5871,7 @@ function lfSplitBuild(root, again) {
     $('.lf-list', pc).appendChild(li);
   });
   /* IN THE SHEET THE PROGRAMMES ARE PILLS THAT WRAP, not a grid of equal cells with a star alone on a third row */
-  if (!window.__lfInline) { pg.className = 'lf-sp'; pg.removeAttribute('style'); var mine = pg.querySelector('[data-p="nk"]'); if (mine) pg.insertBefore(mine, pg.firstChild); }
+  if (!window.__lfInline) { pg.className = 'lf-sp'; pg.removeAttribute('style'); var mine = pg.querySelector('[data-p="nk"]'); if (mine) pg.insertBefore(mine, pg.firstChild); pc.className = 'lf-sd'; pc.removeAttribute('style'); }
   root.appendChild(pg); root.appendChild(pc);
 }
 function lfSplitSheet() {
