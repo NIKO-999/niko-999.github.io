@@ -797,7 +797,7 @@ const freeze = (at) => `(() => {
     await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
     ok('a row on Sets this week opens its target and saves it', (await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em')).endsWith('/ 10–12'), await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em'));
     await page.click('#lfTgEdit'); await settle(page);
-    ok('Edit targets goes to the list under You', await page.locator('#lfYou:not([hidden]) #lfFocus').count() === 1);
+    ok('Edit targets opens Zones, and Priorities and muscles goes on to the list', await page.locator('.lf-sheet #lfZn').count() === 1); await page.click('#lfZnMore'); await settle(page); ok('the list is still there for priorities and adding a muscle', await page.locator('.lf-sheet #lfFocus .lf-li').count() > 0 && await page.locator('#lfFocusAdd').count() === 1); await page.keyboard.press('Escape'); await settle(page);
     await c.close();
   }
 
@@ -1088,7 +1088,7 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfTgEdit'); await settle(page);
-    ok('Edit targets on Home opens the muscle targets', await page.locator('.lf-sheet #lfFocus .lf-li').count() > 0);
+    ok('Edit targets on Home opens Zones, a track for every muscle in focus', await page.locator('.lf-sheet #lfZn .lf-zr').count() > 0 && await page.locator('.lf-sheet #lfZnSeg button').count() === 3);
     await c.close();
   }
   /* the trophy case and the monthly medals */
@@ -1559,6 +1559,39 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await settle(page);
     await page.locator('#lfPgrD button').nth(0).click(); await page.waitForTimeout(400); await page.click('#lfPgrStreak'); await settle(page);
     ok('pressing the streak opens twelve weeks of history and a way to change the goal', await page.locator('#lfSkW i').count() === 12 && await page.locator('#lfSkGoal').count() === 1);
+    await c.close();
+  }
+
+  /* ── ZONES: the weekly sets for each muscle from one choice, on Exercises, Sets this week and the first split ── */
+  {
+    const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'z1', d: '2026-10-20', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] }] }, '2026-10-29T18:00:00');
+    await page.click('.lf-bar [data-v="lib"]'); await settle(page);
+    const ord = await page.evaluate(() => { const y = (s) => document.querySelector(s).getBoundingClientRect().top; return [y('#lfTgCard'), y('#lfNewSplit'), y('#lfProgMg'), y('#lfSplit')]; });
+    ok('Exercises runs: the targets card, Create split, Manage and share programs, then your split', ord[0] < ord[1] && ord[1] < ord[2] && ord[2] < ord[3], JSON.stringify(ord));
+    ok('Create split has its plus at the end', await page.evaluate(() => { const b = document.querySelector('#lfNewSplit'); return /^Create split/.test(b.textContent) && b.lastElementChild && b.lastElementChild.tagName.toLowerCase() === 'svg'; }));
+    ok('the card says the weekly total and how many muscles, with Edit targets', /sets a week/.test(await page.textContent('#lfTgCard')) && /muscles/.test(await page.textContent('#lfTgCard')) && /Edit targets/.test(await page.textContent('#lfTgCard')));
+    await page.click('#lfTgCard'); await settle(page);
+    const rowsN = await page.locator('#lfZn .lf-zr').count();
+    ok('it opens Zones: the split, what the numbers are based on, three zones and a track for every muscle', rowsN > 0 && await page.locator('#lfZn .lf-zn-d div').count() === 7 && /Build muscle/.test(await page.textContent('#lfZn .lf-zn-bs')) && await page.locator('#lfZnSeg button[aria-pressed="true"]').textContent() === 'Build');
+    const tot = async () => (await page.textContent('#lfZnSay')).match(/(\d+) sets a week/)[1] | 0;
+    const tb = await tot(); await page.locator('#lfZnSeg button').nth(2).click(); const tp = await tot(); await page.locator('#lfZnSeg button').nth(0).click(); const tm = await tot();
+    ok('Maintain, Build and Push are three different totals, Push the most', tm < tb && tb < tp, [tm, tb, tp]);
+    await page.locator('#lfZnSeg button').nth(1).click();
+    const first = page.locator('#lfZn .lf-zr').first(), before = +(await first.locator('b').textContent());
+    await first.locator('input').fill(String(before + 4)); await first.locator('input').dispatchEvent('input');
+    ok('dragging one muscle changes it, marks it as yours and offers a way back', +(await first.locator('b').textContent()) === before + 4 && await first.evaluate((e) => e.classList.contains('is-ed')) && await page.locator('#lfZnBack').isVisible());
+    await page.click('#lfZnBack');
+    ok('back to the suggestion puts it right', +(await first.locator('b').textContent()) === before && !(await page.locator('#lfZnBack').isVisible()));
+    await page.locator('#lfZnSeg button').nth(2).click(); await page.click('#lfZnSave'); await settle(page);
+    const st = await store(page);
+    ok('saving puts one number on every muscle, and remembers the zone', st.focus.every((f) => f.lo === f.hi) && st.zn === 2, JSON.stringify(st.focus.map((f) => f.m + f.lo)));
+    ok('the card behind follows: Push and the new total', /Push/.test(await page.textContent('#lfTgCard')) && (await page.textContent('#lfTgCard')).includes(String(st.focus.reduce((a, f) => a + f.hi, 0))));
+    await page.locator('.lf-toast button').last().click().catch(() => {}); await settle(page);
+    ok('Undo brings the old targets and the old zone back', (await store(page)).zn === undefined && JSON.stringify((await store(page)).focus) !== JSON.stringify(st.focus));
+    /* the goal changes the numbers */
+    await page.click('#lfTgCard'); await settle(page); const t0 = await tot();
+    await page.click('#lfZnBasis'); await settle(page); await page.locator('#lfZbG button[data-k="keep"]').click(); await page.click('#lfZbDone'); await page.waitForSelector('#lfZn', { timeout: 4000 }).catch(() => {}); await page.waitForTimeout(500);
+    ok('changing the goal to Maintain reopens Zones with fewer sets, and remembers it', await tot() < t0 && (await store(page)).gx === 'keep', [t0, await tot()]);
     await c.close();
   }
 
@@ -2865,7 +2898,7 @@ const freeze = (at) => `(() => {
     ok('a phone with no record has no programme on Today: it says Create split', await page.locator('#lfNewUser').count() === 1 && /Create split/.test(await page.textContent('#lfNewUser .lf-title-box')) && await page.locator('#lfGo').count() === 0, await page.textContent('#lfHome').then((t) => t.slice(0, 80)));
     ok('and no weekly sets are drawn until there is a split', await page.locator('#lfLegs').count() === 0);
     await page.click('.lf-bar [data-v="lib"]'); await page.waitForTimeout(500);
-    ok('Exercises shows no built-in split, only New split at the top', await page.locator('#lfSplit').count() === 0 && await page.locator('#lfProg').count() === 0 && await page.locator('#lfNewSplit').count() === 1);
+    ok('Exercises shows no built-in split, only Create split at the top', await page.locator('#lfSplit').count() === 0 && await page.locator('#lfProg').count() === 0 && await page.locator('#lfNewSplit').count() === 1);
     ok('and there is no way round it: no ready-made split link here either', await page.locator('#lfSplitLink').count() === 0);
     await page.click('.lf-bar [data-v="home"]'); await page.waitForTimeout(300);
     await page.click('#lfCreateSplit'); await page.waitForTimeout(500);

@@ -156,6 +156,43 @@ body.lf-v-home .lf-glow { opacity: 1; }
 #lfMain > section > .lf-h1, #lfMain > section > .lf-gh { margin-bottom: 0; }
 .lf-row { display: grid; grid-template-columns: repeat(var(--n, 2), minmax(0, 1fr)); gap: 12px; align-items: stretch; }
 .lf-tap { display: block; width: 100%; text-align: left; transition: transform .15s var(--ease); }
+/* ZONES */
+.lf-zn-sp { padding: 12px 14px; }
+.lf-zn-h { display: flex; justify-content: space-between; align-items: baseline; }
+.lf-zn-h span { color: var(--dim); font-size: 13px; }
+.lf-zn-d { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 8px; }
+.lf-zn-d div { display: grid; gap: 3px; justify-items: center; font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--dim); }
+.lf-zn-d i { display: grid; place-items: center; width: 100%; height: 26px; border-radius: 8px; background: var(--tick-off); font-style: normal; font-size: 10px; color: var(--ink); letter-spacing: 0; }
+.lf-zn-d .is-off i { background: none; box-shadow: inset 0 0 0 1.5px var(--dash); color: var(--dim); }
+.lf-zn-bs { display: flex; justify-content: space-between; align-items: center; margin: 8px 2px 10px; font-size: 14px; }
+.lf-zn-bs button { background: none; border: 0; color: var(--log); font-weight: 700; padding: 8px 0 8px 12px; }
+.lf-zn-lg { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; margin: 0 0 4px; }
+.lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
+.lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
+.lf-zr:first-child { border-top: 0; }
+.lf-zr-l { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 15px; }
+.lf-zr-l b { font-weight: 800; font-size: 16px; }
+.lf-zr-l em { font-style: normal; color: var(--dim); font-size: 12px; font-weight: 500; }
+.lf-zr.is-ed .lf-zr-l b { color: var(--log); }
+.lf-zt { position: relative; height: 24px; }
+.lf-zt i { position: absolute; display: block; }
+.lf-zt .rl { left: 0; right: 0; top: 10px; height: 4px; border-radius: 3px; background: var(--tick-off); box-shadow: inset 0 0 0 1px var(--dash); }
+.lf-zt .zo { top: 6px; height: 12px; border-radius: 6px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
+.lf-zt .fi { left: 0; top: 10px; height: 4px; border-radius: 3px; background: var(--log); }
+.lf-zt .dt { top: 4px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 3px var(--card, #131316); }
+.lf-zt input { position: absolute; left: 0; right: 0; top: -8px; width: 100%; height: 40px; margin: 0; opacity: 0; }
+.lf-tgo { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; width: 100%; text-align: left; padding: 14px 16px; margin-bottom: 8px; border-radius: 20px; background: var(--card); border: 1.5px solid transparent; color: inherit; font: inherit; }
+.lf-tgo b { font-size: 18px; }
+.lf-tgo span { color: var(--dim); font-size: 14px; }
+.lf-tgo em { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-style: normal; font-size: 13px; color: var(--dim); text-align: right; }
+.lf-tgo[aria-pressed="true"] { border-color: var(--log); }
+.lf-tgc { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; width: 100%; text-align: left; padding: 14px 16px; margin: 0 0 10px; border-radius: var(--r); background: var(--card); box-shadow: var(--card-shadow); border: 0; color: inherit; font: inherit; position: relative; }
+.lf-tgc b { font-size: 19px; letter-spacing: -.01em; }
+.lf-tgc-s { color: var(--dim); font-size: 13px; }
+.lf-tgc-e { grid-row: 1 / span 3; grid-column: 2; align-self: center; font-size: 14px; font-weight: 700; background: var(--tick-off); padding: 9px 14px; border-radius: 999px; }
+.lf-tgc-b { grid-column: 1 / -1; display: flex; gap: 4px; align-items: flex-end; height: 22px; margin-top: 4px; }
+.lf-tgc-b i { flex: 1; max-width: 12px; border-radius: 3px; background: var(--log); opacity: .85; }
+.lf-seg.is-wrap { flex-wrap: wrap; }
 /* THE PROGRESS CARD: the weekly streak and the weekly goal, two pages in one card on Home. A swipe or the dots turn the page; each page opens its own sheet. It is a fixed height, so turning it never moves the cards under it. */
 .lf-pgr { padding: 0; overflow: hidden; touch-action: pan-y; }
 .lf-pgr-t { display: flex; transition: transform .32s var(--ease); }
@@ -2154,6 +2191,8 @@ function lfClean(o) {
   if (!o || typeof o !== 'object') return d;
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
+  /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
+  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn;
   d.bwGoal = num(o.bwGoal);
   if (CARDIO.some(function (c) { return c[0] === o.ck; })) d.ck = o.ck;
   d.ra = o.ra !== false; d.rl = o.rl === true; d.tour = o.tour === true; d.setup = o.setup === true; d.fresh = o.fresh === true;
@@ -3233,7 +3272,7 @@ function lfLegCard() {
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
   /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
-  $('#lfTgEdit', c).addEventListener('click', function () { lfGo('you'); lfRender(); var r = $('#lfRowFocusRow') || $('#lfRowFocus'); if (r) r.click(); });
+  $('#lfTgEdit', c).addEventListener('click', lfZonesSheet);
   var ts = lfTargets(), cdm = 0, a0 = ymd(m), a1 = ymd(addDays(m, 6));
   S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
   if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
@@ -3581,6 +3620,80 @@ function lfAim0(e, last) {
   return { sets: tg ? sets : last, fill: sets, note: 'Try ' + (bw ? 'BW' : fmtWS(sets[0].w)) + ' × ' + sets[0].r };
 }
 function lfRange(a, b) { return a === b ? String(a) : a + '–' + b; }
+/* ZONES: the weekly sets for each muscle, worked out from your goal and how long you have trained, and set by one choice, Maintain, Build or Push. A muscle's track is shaded where it works; drag it anywhere and it stays yours. About ten to twenty hard sets a muscle a week builds, six to eight holds, and past twenty returns shrink; bigger muscles take more. */
+var ZN = { Chest: 1, Back: 1.15, Shoulders: 1, Quads: 1, Hamstrings: .8, Glutes: .7, Biceps: .7, Triceps: .8, Calves: .8, Abs: .7, Core: .7, 'Lower back': .5 };
+var ZG = { build: ['Build muscle', 1], strength: ['Get stronger', .75], lean: ['Stay lean', .85], keep: ['Maintain', .55] };
+var ZX = { new: ['New', 8], some: ['1–2 years', 12], adv: ['Experienced', 15] };
+var ZNAME = ['Maintain', 'Build', 'Push'], ZBLURB = ['Hold what you have with the fewest sets.', 'The sweet spot for most people. Steady growth.', 'More volume. Needs good sleep and food.'];
+function zRec(m) { return Math.max(4, Math.min(20, Math.round(ZX[S.xp][1] * ZG[S.gx][1] * (ZN[m] || .8)))); }
+function zLo(m) { return Math.max(3, zRec(m) - 2); }
+function zHi(m) { return Math.min(22, zRec(m) + 3); }
+function zVal(m, z) { return [Math.max(4, Math.round(zRec(m) * .55)), zRec(m), Math.min(20, zRec(m) + 4)][z]; }
+function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal(t[0], z); }, 0); }
+/* the sheet that opens from Sets this week, from You, from Exercises and from the first split */
+function lfZonesSheet() {
+  var ts = lfTargets(); if (!ts.length) { lfToast('Make a split first'); return; }
+  var zn = S.zn === 0 || S.zn === 2 ? S.zn : 1, ed = {}, now = ts.reduce(function (a, t) { return a + t[2]; }, 0), rows = {};
+  var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
+  var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
+    + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
+    + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div><div id="lfZnRows"></div></div>');
+  $('.lf-zn-h b', b).textContent = P.n; $('.lf-zn-h span', b).textContent = P.days.filter(function (r) { return !r.choice; }).length + ' days a week';
+  $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(ZG[S.gx][0]) + '</b> · ' + esc(ZX[S.xp][0]);
+  function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
+  function nEd() { return Object.keys(ed).length; }
+  var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfZnSave">Save targets</button>'), back = el('<button type="button" class="lf-btn is-full" id="lfZnBack" hidden></button>'), more = el('<button type="button" class="lf-btn is-full" id="lfZnMore">Priorities and muscles</button>');
+  function refresh() {
+    ts.forEach(function (t) {
+      var m = t[0], v = val(m), r = rows[m], pc = function (x) { return Math.min(100, x / 24 * 100); };
+      $('b', r.el).textContent = v; r.el.classList.toggle('is-ed', ed[m] !== undefined);
+      r.zone.style.left = pc(zLo(m)) + '%'; r.zone.style.width = (pc(zHi(m)) - pc(zLo(m))) + '%'; r.fill.style.width = pc(v) + '%'; r.dot.style.left = pc(v) + '%'; r.inp.value = v;
+      r.inp.setAttribute('aria-valuetext', v + ' sets a week');
+    });
+    var tot = ts.reduce(function (a, t) { return a + val(t[0]); }, 0);
+    $$('#lfZnSeg button', b).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.z === zn ? 'true' : 'false'); });
+    $('#lfZnSay', b).textContent = ZBLURB[zn] + ' ' + tot + ' sets a week' + (tot !== now ? ', ' + now + ' now.' : '.');
+    back.hidden = !nEd(); back.textContent = 'Back to the suggestion (' + nEd() + ' changed)';
+  }
+  [0, 1, 2].forEach(function (z) { var x = el('<button type="button"></button>'); x.dataset.z = z; x.textContent = ZNAME[z]; x.addEventListener('click', function () { zn = z; ed = {}; refresh(); }); $('#lfZnSeg', b).appendChild(x); });
+  ts.forEach(function (t) {
+    var m = t[0], r = el('<div class="lf-zr"><div class="lf-zr-l"><span></span><span><b class="lf-num"></b> <em>sets</em></span></div><div class="lf-zt"><i class="rl"></i><i class="zo"></i><i class="fi"></i><i class="dt"></i><input type="range" min="2" max="24" step="1" /></div></div>');
+    $('.lf-zr-l span', r).textContent = m;
+    var inp = $('input', r); inp.setAttribute('aria-label', m + ' sets a week');
+    inp.addEventListener('input', function () { var v = +inp.value; if (v === zVal(m, zn)) delete ed[m]; else ed[m] = v; refresh(); });
+    rows[m] = { el: r, zone: $('.zo', r), fill: $('.fi', r), dot: $('.dt', r), inp: inp }; $('#lfZnRows', b).appendChild(r);
+  });
+  var s = lfSheet({ title: 'Muscle targets', body: b, foot: [save, back, more] });
+  back.addEventListener('click', function () { ed = {}; refresh(); });
+  $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(lfZonesSheet); });
+  more.addEventListener('click', function () { s.close(true); var w = el('<div class="lf-rowbody" id="lfFocusBody"></div>'); w.appendChild(lfFocusBody()); lfRowShown = { id: 'lfRowFocus', w: w }; lfSheet({ title: 'Muscle targets', body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } }); });
+  save.addEventListener('click', function () {
+    var was = JSON.stringify({ f: S.focus, zn: S.zn === undefined ? null : S.zn });
+    S.focus.forEach(function (f) { var v = val(f.m); f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); s.close(true);
+    lfToast('Targets saved', function () { var o = JSON.parse(was); S.focus = o.f; if (o.zn === null) delete S.zn; else S.zn = o.zn; lfSave(); lfRender(); });
+  });
+  refresh();
+}
+/* the two things the numbers depend on, asked in one small sheet */
+function lfZBasis(after) {
+  var b = el('<div><span class="lf-flab" style="margin-top:0">Goal</span><div class="lf-seg is-wrap" id="lfZbG"></div><span class="lf-flab">How long you have trained</span><div class="lf-seg" id="lfZbX" style="--n:3"></div></div>');
+  Object.keys(ZG).forEach(function (k) { var x = el('<button type="button"></button>'); x.dataset.k = k; x.textContent = ZG[k][0]; x.setAttribute('aria-pressed', S.gx === k ? 'true' : 'false'); x.addEventListener('click', function () { S.gx = k; lfSave(); $$('#lfZbG button', b).forEach(function (y) { y.setAttribute('aria-pressed', y === x ? 'true' : 'false'); }); }); $('#lfZbG', b).appendChild(x); });
+  Object.keys(ZX).forEach(function (k) { var x = el('<button type="button"></button>'); x.dataset.k = k; x.textContent = ZX[k][0]; x.setAttribute('aria-pressed', S.xp === k ? 'true' : 'false'); x.addEventListener('click', function () { S.xp = k; lfSave(); $$('#lfZbX button', b).forEach(function (y) { y.setAttribute('aria-pressed', y === x ? 'true' : 'false'); }); }); $('#lfZbX', b).appendChild(x); });
+  var done = el('<button type="button" class="lf-btn is-ink is-full" id="lfZbDone">Done</button>'), s = lfSheet({ title: 'Your goal', body: b, foot: [done] });
+  done.addEventListener('click', function () { s.close(true); if (after) setTimeout(after, 260); });
+}
+/* the card at the top of Exercises: what the week asks of you, and the way into Zones */
+function lfTgCard() {
+  var ts = lfTargets(), tot = ts.reduce(function (a, t) { return a + t[2]; }, 0);
+  var c = el('<button type="button" class="lf-tgc" id="lfTgCard"><span class="lf-lab">Weekly targets</span><b class="lf-num"></b><span class="lf-tgc-s"></span><span class="lf-tgc-e">Edit targets</span><span class="lf-tgc-b" aria-hidden="true"></span></button>');
+  $('b', c).textContent = tot + ' sets a week';
+  $('.lf-tgc-s', c).textContent = (S.zn === 0 || S.zn === 1 || S.zn === 2 ? ZNAME[S.zn] + ' · ' : '') + ts.length + (ts.length === 1 ? ' muscle' : ' muscles');
+  ts.forEach(function (t) { var i = document.createElement('i'); i.style.height = Math.max(8, Math.min(100, t[2] / 20 * 100)) + '%'; $('.lf-tgc-b', c).appendChild(i); });
+  c.setAttribute('aria-label', 'Weekly targets, ' + tot + ' sets a week across ' + ts.length + ' muscles. Edit targets');
+  c.addEventListener('click', lfZonesSheet);
+  return c;
+}
+
 function lfRestTxt(r) { return r.hi <= 120 ? lfRange(r.lo, r.hi) + 's' : lfRange(r.lo / 60, r.hi / 60) + ' min'; }
 
 function lfOpenSession() {
@@ -5409,15 +5522,20 @@ function lfProgUnpack(text) {
 }
 /* THE FIRST SPLIT ASKS WHAT YOUR TARGETS ARE. They are already worked out from the sets the week holds, so the answer is usually Keep these. */
 function lfTargetsAsk() {
-  var b = el('<div><p class="lf-lab" style="margin:0 0 8px">Worked out from the sets in your split. Change any of them, or keep these.</p><div class="lf-list"></div></div>');
-  lfTargets().forEach(function (t) {
-    var li = el('<div class="lf-li"><div class="lf-li-t"><b></b></div><span class="lf-li-r lf-num"></span></div>');
-    $('b', li).textContent = t[0]; $('.lf-li-r', li).textContent = lfRange(t[1], t[2]) + ' sets a week'; $('.lf-list', b).appendChild(li);
+  /* ONE CHOICE OF THREE, with the weekly total each comes to; the numbers per muscle are one press away */
+  var zn = S.zn === 0 || S.zn === 2 ? S.zn : 1;
+  var b = el('<div><p class="lf-lab" style="margin:0 0 10px">Weekly sets for every muscle, worked out from your split. Change any of them later.</p><div id="lfTgOpts"></div></div>');
+  function paint() { $$('#lfTgOpts button', b).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.z === zn ? 'true' : 'false'); }); }
+  [0, 1, 2].forEach(function (z) {
+    var o = el('<button type="button" class="lf-tgo"><b></b><em class="lf-num"></em><span></span></button>'); o.dataset.z = z;
+    $('b', o).textContent = ZNAME[z]; $('em', o).innerHTML = zTotal(z) + '<br>sets a week'; $('span', o).textContent = ZBLURB[z];
+    o.addEventListener('click', function () { zn = z; paint(); }); $('#lfTgOpts', b).appendChild(o);
   });
-  var keep = el('<button type="button" class="lf-btn is-ink is-full" id="lfTgKeep">Keep these</button>'), chg = el('<button type="button" class="lf-btn is-full" id="lfTgChange" style="margin-top:10px">Change them</button>');
-  var sh = lfSheet({ title: 'What are your targets?', body: b, foot: [chg, keep] });
-  keep.addEventListener('click', function () { sh.close(true); });
-  chg.addEventListener('click', function () { sh.close(true); lfGo('you'); lfRender(); var r = $('#lfRowFocusRow') || $('#lfRowFocus'); if (r) r.click(); });
+  paint();
+  var keep = el('<button type="button" class="lf-btn is-ink is-full" id="lfTgKeep">Set targets</button>'), chg = el('<button type="button" class="lf-btn is-full" id="lfTgChange" style="margin-top:10px">See the numbers per muscle</button>');
+  var sh = lfSheet({ title: 'What are your targets?', body: b, foot: [keep, chg] });
+  keep.addEventListener('click', function () { S.focus.forEach(function (f) { var v = zVal(f.m, zn); f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); sh.close(true); });
+  chg.addEventListener('click', function () { S.zn = zn; lfSave(); sh.close(true); setTimeout(lfZonesSheet, 260); });
 }
 function lfProgAdd(pk, name) {
   var wasNew = lfNew(), id; do { id = 'u' + Math.random().toString(36).slice(2, 8); } while (PROGRAMS[id]);
@@ -5537,10 +5655,13 @@ function lfRenderLib() {
   var root = $('#lfLib'); root.textContent = '';
   root.appendChild(el('<h2 class="lf-h1">Exercises</h2>'));
   /* NEW SPLIT IS THE FIRST THING ON THE SCREEN. Reading one from a photo, a PDF or pasted text is not a second control: it is the first thing inside this one. */
-  var nr = el('<button type="button" class="lf-add" id="lfNewSplit">' + IC.plus + 'New split</button>');
+  var newU = lfNew();
+  /* THE TARGETS COME FIRST once there is a split to count against, then Create split with its plus at the end, then Manage and share programs straight under it */
+  if (!newU) root.appendChild(lfTgCard());
+  var nr = el('<button type="button" class="lf-add" id="lfNewSplit">Create split' + IC.plus + '</button>');
   nr.addEventListener('click', function () { lfSplitForm(null); });
   root.appendChild(nr);
-  var newU = lfNew();
+  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
   /* the split, Monday first */
   if (!newU) root.appendChild(el('<div class="lf-cap lf-gh">Your split</div>'));
   /* TWO PROGRAMS, one running. Switching also moves the weekly targets
@@ -5572,7 +5693,6 @@ function lfRenderLib() {
     $('.lf-list', pc).appendChild(li);
   });
   if (!newU) root.appendChild(pc);
-  var pmg = el('<button type="button" class="lf-add" id="lfProgMg">Manage and share programs</button>'); pmg.addEventListener('click', lfProgManage); if (!newU) root.appendChild(pmg);
   /* routines */
   /* SPLITS ARE THE ONLY THING YOU ADD. Routines written before this stay and still edit from here, but the section is only drawn while there are some. */
   var rc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
@@ -5904,7 +6024,7 @@ function lfRenderYou() {
   var goals = el('<div class="lf-card" id="lfTargets"><div class="lf-lab">Goals</div></div>'); goals.appendChild(gb);
   root.appendChild(goals);
   var menu = el('<div class="lf-card lf-menu" id="lfMenu"></div>');
-  menu.appendChild(lfRow('lfRowFocus', 'Muscle targets', S.focus.length + ' muscles', function (bd) { bd.appendChild(lfFocusBody()); }));
+  menu.appendChild(lfRow('lfRowFocus', 'Muscle targets', S.focus.length + ' muscles', function (bd) { bd.appendChild(lfFocusBody()); }, lfZonesSheet));
   menu.appendChild(lfAppearance());
   menu.appendChild(lfBadgeCard());
   menu.appendChild(lfMedalCard());
@@ -6032,12 +6152,13 @@ function lfColourSheet() {
   return s;
 }
 /* A ROW THAT OPENS A SCREEN: the one way a list on You leads anywhere. It names the thing, says in a word what is in it, and a press opens it on a sheet of its own, built the first time it is asked for. */
-function lfRow(id, title, side, fill) {
+function lfRow(id, title, side, fill, open) {
   var b = el('<button type="button" class="lf-li lf-rowl"><div class="lf-li-t"><b></b></div><em class="lf-num"></em>' + IC.chev + '</button>');
   b.id = id; b._fill = fill; $('b', b).textContent = title; $('em', b).textContent = side || '';
   /* THE SUITE DRAWS A ROW'S SCREEN IN PLACE, UNDER ITS ROW, so a check can reach what is on it without a sheet over the page; it sets this before the page runs. Nobody else does. */
   if (window.__lfInline) { var d = el('<div></div>'); d.id = id; b.id = id + 'Row'; var w0 = el('<div class="lf-rowbody"></div>'); w0.id = id + 'Body'; fill(w0); d.appendChild(b); d.appendChild(w0); return d; }
   b.addEventListener('click', function () {
+    if (open) { open(); return; }
     var w = el('<div class="lf-rowbody"></div>'); w.id = id + 'Body'; fill(w);
     lfRowShown = { id: id, w: w };
     lfSheet({ title: title, body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } });
