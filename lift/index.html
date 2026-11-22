@@ -1570,9 +1570,12 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-toast.is-up { opacity: 1; transform: translate(-50%, 0); }
 .lf-toast.is-bare { padding-right: 18px; }
 .lf-toast span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+#lfMoreBody { display: flex; flex-direction: column; gap: 10px; }
+#lfMoreBody[hidden] { display: none; }
 .lf-hh { display: grid; gap: 12px; width: 100%; text-align: left; }
 .lf-hh-h { display: flex; align-items: center; gap: 10px; } .lf-hh-h b { flex: 1; font-size: 15px; } .lf-hh-h .lf-lab { flex: 1; }
-.lf-hh-r { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.lf-hh-r { display: flex; gap: 28px; }
+.lf-hh-r > div[hidden] { display: none; }
 .lf-hh-r div { display: grid; gap: 3px; } .lf-hh-r b { font-size: 22px; line-height: 1; letter-spacing: -.02em; } .lf-hh-r span { font-size: 12px; color: var(--dim); }
 .lf-sd .lf-li { border-top: 0; min-height: 0; padding: 11px 0; }
 .lf-sd .lf-li .lf-chev { display: none; }
@@ -3048,15 +3051,21 @@ function lfRenderHome() {
   root.appendChild(lfTodayCard());
   root.appendChild(lfProgCard());
   var hh = lfHealthHome(); if (hh) root.appendChild(hh);
-  root.appendChild(lfStatRow());
   root.appendChild(lfGridCard());
+  /* THE REST FOLDS. Today, the goal, Health and the month are the screen; the three totals, the weekly targets, the volume and week cards and the two reviews are one press away under More, shut until you open them. The suite's in-place mode keeps them out. */
+  var more = el('<div id="lfMoreBody"></div>'), hd = el('<h3 class="lf-fold-h lf-gh"><button type="button" class="lf-fold-b" id="lfMoreFold" aria-controls="lfMoreBody"><span class="lf-cap">More</span>' + IC.chev + '</button></h3>');
+  function foldMore() { $('#lfMoreFold', hd).setAttribute('aria-expanded', homeMore ? 'true' : 'false'); more.hidden = !homeMore; }
+  $('#lfMoreFold', hd).addEventListener('click', function () { homeMore = !homeMore; foldMore(); });
+  root.appendChild(hd); root.appendChild(more); foldMore();
+  more.appendChild(lfStatRow());
   /* NO SETS UNTIL THERE IS A SPLIT: a first install has nothing to count against, so the weekly targets only appear once the first split is made */
-  if (!lfNew()) root.appendChild(lfLegCard());
+  if (!lfNew()) more.appendChild(lfLegCard());
   var r = el('<div class="lf-row"></div>'); r.appendChild(lfVolCard()); r.appendChild(lfWeekCard()); setTimeout(lfWeekDone, 0);
-  root.appendChild(r);
-  var lw = lfLastWeekBtn(); if (lw) root.appendChild(lw);
-  var lm = lfLastMonthBtn(); if (lm) root.appendChild(lm);
+  more.appendChild(r);
+  var lw = lfLastWeekBtn(); if (lw) more.appendChild(lw);
+  var lm = lfLastMonthBtn(); if (lm) more.appendChild(lm);
 }
+var homeMore = !!window.__lfInline;
 /* LAST WEEK, AGAIN. The week in review comes up once and was then gone for
    good. This opens it whenever you like, for the one week it is about: the
    week just finished. When the next one finishes it takes its place, and
@@ -6660,7 +6669,7 @@ function lfHealthHome() {
     return c;
   }
   c = el('<button type="button" class="lf-card lf-tap lf-hh" id="lfHealthHomeOn"><div class="lf-hh-h">' + ico + '<span class="lf-lab">Apple Health</span>' + IC.chev + '</div><div class="lf-hh-r"><div><b class="lf-num">--</b><span>steps</span></div><div><b class="lf-num">--</b><span>sleep</span></div><div><b class="lf-num">--</b><span>kcal</span></div></div></button>');
-  function paint(r) { var v = c.querySelectorAll('.lf-hh-r b'); v[0].textContent = lfHkNum(r.steps); v[1].textContent = r.sleep && r.sleep.total ? lfHkMin(r.sleep.total) : '--'; v[2].textContent = lfHkNum(r.energy); }
+  function paint(r) { var v = c.querySelectorAll('.lf-hh-r b'); v[0].textContent = r.steps > 0 ? lfHkNum(r.steps) : '--'; v[1].textContent = r.sleep && r.sleep.total ? lfHkMin(r.sleep.total) : '--'; v[2].textContent = r.energy > 0 ? lfHkNum(r.energy) : '--'; Array.prototype.forEach.call(v, function (x) { x.parentNode.hidden = x.textContent === '--'; }); }
   if (lfHkCache && Date.now() - lfHkAt < 300000) paint(lfHkCache);
   else LF_WGT.healthDay({}).then(function (r) { if (r && r.ok) { lfHkCache = r; lfHkAt = Date.now(); paint(r); } }, function () {});
   c.addEventListener('click', lfHealthSheet);
