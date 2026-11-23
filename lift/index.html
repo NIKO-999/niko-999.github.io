@@ -213,6 +213,17 @@ svg { display: block; }
 .lf-pgr-w i { display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
 .lf-pgr-w .is-on i { background: var(--log); box-shadow: none; }
 .lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px var(--log); }
+.lf-sk-w { display: flex; gap: 5px; margin-left: auto; }
+.lf-sk-w i { display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-sk-w i.is-on { background: var(--log); box-shadow: none; }
+.lf-sk-w i.is-now { box-shadow: inset 0 0 0 1.5px var(--log); }
+.lf-sk-w i.is-fz { background: none; box-shadow: none; }
+.lf-sk-w i .lf-fzi { width: 10px; height: 10px; stroke-width: 2.6; }
+.lf-fzi { display: block; width: 10px; height: 10px; margin: 0; stroke-width: 2.6; }
+.lf-pgr-w .is-fz i { background: none; box-shadow: none; width: 10px; }
+.lf-pgr-w i { display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-pgr-w .is-on i { background: var(--log); box-shadow: none; }
+.lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-sk-w { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; margin: 12px 0 8px; }
 .lf-sk-w i { aspect-ratio: 1; border-radius: 6px; box-shadow: inset 0 0 0 1.5px var(--dash); }
 .lf-sk-w i.is-on { background: var(--log); box-shadow: none; }
@@ -224,7 +235,7 @@ svg { display: block; }
 .lf-cell.is-fz .lf-dots { display: flex; justify-content: center; } .lf-cell.is-fz .lf-fzi { width: 13px; height: 13px; }
 .lf-wk.is-fz .lf-fzi { width: 18px; height: 18px; }
 .lf-fz-e { display: grid; justify-items: center; gap: 6px; } .lf-fz-e .lf-fzi { width: 26px; height: 26px; }
-#lfSk { margin: 14px 0 6px; } #lfSkR { margin: 4px 0 0; }
+#lfSk { margin: 0 0 8px; padding: 2px 4px 10px; border-bottom: 1px solid var(--dash); } #lfSkR { margin: 4px 0 0; }
 .lf-sf-fz { margin: 16px 0 0; padding: 14px; border-radius: 18px; background: var(--card2); }
 .lf-sf-h { margin: 0; font: inherit; }
 .lf-sf-t { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; background: none; border: 0; color: inherit; font: inherit; text-align: left; padding: 0; }
@@ -257,9 +268,10 @@ svg { display: block; }
 .lf-sf-c { display: flex; gap: 12px; }
 .lf-sf-c > svg { flex: none; margin-top: 2px; }
 .lf-sf-c b { display: block; font-size: 13px; margin-bottom: 4px; } .lf-sf-c span { font-size: 14px; color: var(--dim); }
-.lf-sk-big { display: flex; align-items: center; gap: 10px; }
-.lf-sk-big svg { width: 28px; height: 28px; fill: var(--log); }
-.lf-sk-big b { font-size: 34px; letter-spacing: -.02em; line-height: 1; }
+.lf-sk-h { display: flex; align-items: center; gap: 8px; }
+.lf-sk-h > svg { width: 14px; height: 14px; fill: var(--log); flex: none; }
+.lf-sk-h b { font-size: 16px; letter-spacing: -.02em; line-height: 1; }
+.lf-sk-h .lf-lab { font-size: 9.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
 @media (prefers-reduced-motion: reduce) { .lf-pgr-ring .fg { transition: none; } }
 
 .lf-tap:active { transform: scale(.985); }
@@ -3152,11 +3164,10 @@ function lfStreakView(b, part) {
   function paint() {
     var streak = lfStreakNow(), best = lfStreakBest(), av = lfFzAvail(), tk = ymd(today());
     b.textContent = '';
-    var top = el('<div><div class="lf-sk-big">' + LF_FLAME + '<b class="lf-num"></b><span class="lf-lab"></span></div><span class="lf-flab">Last 12 weeks</span><div class="lf-sk-w"></div><p class="lf-lab" id="lfSkN" style="margin:0"></p></div>');
+    var top = el('<div class="lf-sk-h">' + LF_FLAME + '<b class="lf-num"></b><span class="lf-lab"></span><span class="lf-sk-w"></span></div>');
     $('b', top).textContent = streak;
-    $('.lf-sk-big .lf-lab', top).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') + (best > streak ? ' · best ' + best : '') : 'set a goal to start one';
+    $('.lf-sk-h .lf-lab', top).textContent = goal ? (streak === 1 ? 'week in a row' : 'weeks in a row') : 'set a goal to start one';
     for (var i = 11; i >= 0; i--) { var mm = addDays(m0, -7 * i), sq = el('<i></i>'); if (goal && lfWkCount(mm) >= goal) { sq.classList.add(wkDays(mm) >= goal ? 'is-on' : 'is-fz'); if (wkDays(mm) < goal) sq.innerHTML = lfFzI(); } else if (false) sq.classList.add('is-fz'); else if (i === 0) sq.classList.add('is-now'); sq.setAttribute('title', mm.getDate() + ' ' + MON[mm.getMonth()].slice(0, 3)); $('.lf-sk-w', top).appendChild(sq); }
-    $('#lfSkN', top).textContent = goal ? 'A week counts when you train ' + goal + (goal === 1 ? ' day' : ' days') + '. It closes on Sunday.' : '';
     if (part !== 'rest') b.appendChild(top);
     if (part === 'top') return;
     /* the freezes: what is ready, how they are earned, and the weeks one can still cover */
@@ -6133,8 +6144,6 @@ function lfRenderCal() {
     b.addEventListener('click', function () { calMode = b.dataset.m; calAt = today(); lfRenderCal(); });
   });
   root.appendChild(seg);
-  /* the streak leads the month: the weeks in a row, the freezes, how it works */
-  if (calMode === 'month') { var sk = el('<div></div>'); root.appendChild(sk); lfStreakView(sk, 'top'); }
   var t = today();
   var from, to, label;
   if (calMode === 'month') { from = new Date(calAt.getFullYear(), calAt.getMonth(), 1); to = new Date(calAt.getFullYear(), calAt.getMonth() + 1, 0); label = MON[from.getMonth()] + ' ' + from.getFullYear(); }
@@ -6156,7 +6165,9 @@ function lfRenderCal() {
   var tk = ymd(t), playK = calMode + ymd(from), play = calPlayed !== playK, lit = 0;
   calPlayed = playK;
   if (calMode === 'month') {
-    var c = el('<div class="lf-card" style="padding:12px"><div class="lf-dows" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="lf-month" id="lfMonth"></div></div>');
+    var c = el('<div class="lf-card" style="padding:12px"><div></div><div class="lf-dows" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div><div class="lf-month" id="lfMonth"></div></div>');
+    /* the streak is the first line of the calendar card: the weeks in a row, and the twelve weeks as dots */
+    lfStreakView(c.firstChild, 'top');
     var g = $('#lfMonth', c), pad = (from.getDay() + 6) % 7;
     for (var p = 0; p < pad; p++) g.appendChild(el('<span class="lf-cell is-pad" aria-hidden="true"></span>'));
     for (var d = 1; d <= to.getDate(); d++) {
