@@ -208,10 +208,10 @@ svg { display: block; }
 .lf-pgr-w { display: flex; gap: 6px; flex: none; }
 .lf-pgr-w div { display: grid; gap: 3px; justify-items: center; font-size: 9.5px; font-weight: 700; line-height: 1; color: var(--dim); }
 .lf-pgr-w .is-on, .lf-pgr-w .is-fz { color: var(--ink); }
-.lf-pgr-w .lf-fzi { display: none; }
-.lf-pgr-w i { display: block; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-pgr-w .lf-fzi { width: 13px; height: 13px; margin: 0; }
+.lf-pgr-w .is-fz i { background: none; box-shadow: none; width: 10px; }
+.lf-pgr-w i { display: grid; place-items: center; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
 .lf-pgr-w .is-on i { background: var(--log); box-shadow: none; }
-.lf-pgr-w .is-fz i { background: color-mix(in srgb, var(--log) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-sk-w { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; margin: 12px 0 8px; }
 .lf-sk-w i { aspect-ratio: 1; border-radius: 6px; box-shadow: inset 0 0 0 1.5px var(--dash); }
@@ -3105,8 +3105,8 @@ function lfProgCard() {
   /* real workouts only: a frozen day fills the ring but is not the target hit */
   if (goal && done >= goal) c.classList.add('is-hit');
   /* PAST THE GOAL IT STAYS AT THE GOAL: a seventh workout in a six-a-week week still reads 6 / 6 */
-  $('b', c).textContent = goal ? Math.min(done, goal) + ' / ' + goal : '0'; $('.lf-pgr-t i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
-  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
+  $('b', c).textContent = goal ? Math.min(done, goal) + ' / ' + goal : '0'; $('.lf-pgr-t i', c).textContent = 'workouts this week';
+  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i>' + lfFzI() + '</i>' + 'MTWTFSS'[j]; } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
   c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + Math.min(done, goal) + ' of ' + goal + ' workouts this week' + (frz ? ', ' + frz + ' frozen' : '') : '') + '. Change goal');
   c.addEventListener('click', function () { lfGoalSheet(); });
   return c;
