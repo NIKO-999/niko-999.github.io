@@ -1564,6 +1564,11 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .lf-cdc b { font-size: 15px; font-weight: 600; }
 .lf-cd { display: grid; gap: 8px; margin-top: 10px; }
 .lf-cd-f { width: 84px; height: 36px; min-height: 36px; padding: 0 12px; border-radius: 999px; font-size: 16px; }
+/* two tidy rows: the kinds share one line equally, and the four lengths and the other-box share the next, all one height and one width */
+.lf-cd { grid-template-columns: minmax(0, 1fr); }
+.lf-cd .lf-pills { flex-wrap: nowrap; gap: 6px; }
+.lf-cd .lf-pill { flex: 1 1 0; min-width: 0; min-height: 40px; padding: 0 6px; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+.lf-cd .lf-cd-f { flex: 1 1 0; width: auto; min-width: 0; height: 40px; min-height: 40px; padding: 0 6px; text-align: center; box-sizing: border-box; }
 .lf-cd-wk { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
 #lfWoCd > div:first-of-type { margin-bottom: 2px; }
 #lfFocus .lf-li em { font-style: normal; font-weight: 600; margin-left: auto; }
