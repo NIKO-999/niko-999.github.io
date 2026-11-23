@@ -1455,8 +1455,69 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .tt-eb .b-s { width: 7px; height: 7px; border-radius: 50%; background: #fdba74; box-shadow: 0 0 8px #fb923c; animation: tt-eb 3.4s ease-in-out infinite; }
 @keyframes tt-eb { 0% { transform: translateY(5px) scale(.7); opacity: .3; } 50%, 75% { transform: translateY(-2px) scale(1.1); opacity: 1; } 100% { transform: translateY(5px) scale(.7); opacity: .3; } }
 .fr-ti .tt-ti em { display: inline-block; color: #e5e7eb; transform-origin: 50% 100%; animation: tt-ti 3.2s ease-in-out infinite; }
+/* A COMET crosses a short sky */
+.tt-cm .c-t { position: relative; width: 22px; height: 2px; overflow: hidden; border-radius: 2px; background: color-mix(in srgb, var(--dim) 25%, transparent); }
+.tt-cm .c-t b { position: absolute; top: 0; left: -12px; width: 12px; height: 2px; background: linear-gradient(90deg, transparent, #7dd3fc 60%, #fff); animation: tt-cm 2.2s cubic-bezier(.5, 0, .7, 1) infinite; }
+@keyframes tt-cm { 0% { left: -12px; } 70%, 100% { left: 22px; } }
+/* a TIDE is a sine that scrolls a whole period and starts again */
+.tt-td svg { width: 24px; height: 8px; overflow: hidden; fill: none; stroke: #38bdf8; stroke-width: 1.5; stroke-linecap: round; }
+.tt-td svg path { animation: tt-td 2.2s linear infinite; }
+@keyframes tt-td { to { transform: translateX(-15px); } }
+.fr-ti .tt-td em { color: #bae6fd; }
+/* an EMBER sends sparks up off the word */
+.fr-ti .tt-em em { color: #fdba74; animation: tt-em-t 2.4s ease-in-out infinite; }
+@keyframes tt-em-t { 0%, 100% { text-shadow: 0 0 4px rgba(249, 115, 22, .35); } 50% { text-shadow: 0 0 9px rgba(249, 115, 22, .8); } }
+.tt-em .m-e { position: relative; width: 14px; height: 12px; }
+.tt-em .m-e b { position: absolute; bottom: 0; width: 2px; height: 2px; border-radius: 50%; background: #fb923c; box-shadow: 0 0 4px #f97316; opacity: 0; animation: tt-em 2.2s ease-out infinite; }
+.tt-em .m-e b:nth-child(1) { left: 1px; } .tt-em .m-e b:nth-child(2) { left: 6px; animation-delay: .7s; } .tt-em .m-e b:nth-child(3) { left: 11px; animation-delay: 1.4s; }
+@keyframes tt-em { 0% { transform: translate(0, 2px); opacity: 0; } 15% { opacity: 1; } 100% { transform: translate(3px, -13px); opacity: 0; } }
+/* VOLTAGE flickers: the bolt strikes and the word jolts with it */
+.tt-vo svg { width: 8px; height: 11px; fill: #facc15; opacity: .35; animation: tt-vo-b 3.4s steps(1) infinite; }
+@keyframes tt-vo-b { 0%, 40%, 49%, 58%, 100% { opacity: .35; filter: none; } 41%, 48% { opacity: 1; filter: drop-shadow(0 0 6px #facc15); } 59%, 62% { opacity: 1; filter: drop-shadow(0 0 6px #facc15); } }
+.fr-ti .tt-vo em { animation: tt-vo 3.4s steps(1) infinite; }
+@keyframes tt-vo { 0%, 40%, 49%, 58%, 100% { transform: none; text-shadow: none; } 41% { transform: translateX(-1.500px); text-shadow: 1.500px 0 #22d3ee, -1.500px 0 #facc15; } 44% { transform: translateX(1.500px); text-shadow: -1.500px 0 #22d3ee, 1.500px 0 #facc15; } 59% { transform: translateX(1px); text-shadow: 1px 0 #22d3ee; } }
+/* FROSTBITE: a flake that turns and sparkles, and a word the colour of ice */
+.tt-fb svg { width: 12px; height: 12px; fill: none; stroke: #bae6fd; stroke-width: 1.8; stroke-linecap: round; animation: tt-fb 6s linear infinite; }
+@keyframes tt-fb { 0% { transform: rotate(0); filter: none; } 50% { filter: drop-shadow(0 0 4px #7dd3fc); } 100% { transform: rotate(180deg); filter: none; } }
+.fr-ti .tt-fb em { color: #e0f2fe; text-shadow: 0 0 8px rgba(125, 211, 252, .55); }
+/* a RADAR sweeps its ring and the blip lights as it passes */
+.tt-rd svg { width: 13px; height: 13px; overflow: visible; }
+.tt-rd .d-r { fill: none; stroke: #4ade80; stroke-width: 1.500; opacity: .6; }
+.tt-rd .d-s { fill: #4ade80; opacity: .45; transform-origin: 12px 12px; animation: tt-spin 2.4s linear infinite; }
+.tt-rd .d-b { fill: #fff; animation: tt-rd 2.4s linear infinite; }
+@keyframes tt-rd { 0%, 12%, 100% { opacity: .1; } 20% { opacity: 1; } 60% { opacity: .1; } }
+.fr-ti .tt-rd em { color: #bbf7d0; }
+/* a METRONOME keeps time */
+.tt-mt .m-p { position: relative; width: 12px; height: 12px; }
+.tt-mt .m-p b { position: absolute; left: 5.500px; top: 0; width: 1.500px; height: 11px; background: var(--dim); transform-origin: 50% 0; animation: tt-mt .9s ease-in-out infinite alternate; }
+.tt-mt .m-p b::after { content: ''; position: absolute; left: -2px; bottom: -1px; width: 5.500px; height: 5.500px; border-radius: 50%; background: #fff; }
+@keyframes tt-mt { from { transform: rotate(-30deg); } to { transform: rotate(30deg); } }
+/* a PRISM splits its light */
+.fr-ti .tt-pr em { color: #fff; animation: tt-pr 3.2s ease-in-out infinite; }
+@keyframes tt-pr { 0%, 100% { text-shadow: 0 0 transparent; } 50% { text-shadow: -2px 0 rgba(34, 211, 238, .85), 2px 0 rgba(244, 114, 182, .85); } }
+/* a SENTINEL keeps watch: a viewfinder that closes in on the word, and a red light that blinks */
+.tt-sn .s-b { position: relative; display: inline-block; padding: 3px 9px; }
+.tt-sn .s-b i { position: absolute; width: 5px; height: 5px; border: 0 solid var(--dim); animation: tt-sn 3s ease-in-out infinite; }
+.tt-sn .s-b i:nth-child(1) { left: 0; top: 0; border-width: 1.500px 0 0 1.500px; } .tt-sn .s-b i:nth-child(2) { right: 0; top: 0; border-width: 1.500px 1.500px 0 0; }
+.tt-sn .s-b i:nth-child(3) { left: 0; bottom: 0; border-width: 0 0 1.500px 1.500px; } .tt-sn .s-b i:nth-child(4) { right: 0; bottom: 0; border-width: 0 1.500px 1.500px 0; }
+@keyframes tt-sn { 0%, 100% { transform: translate(var(--x, 0), var(--y, 0)); border-color: var(--dim); } 50% { transform: translate(0, 0); border-color: #fff; } }
+.tt-sn .s-b i:nth-child(1) { --x: -2px; --y: -2px; } .tt-sn .s-b i:nth-child(2) { --x: 2px; --y: -2px; } .tt-sn .s-b i:nth-child(3) { --x: -2px; --y: 2px; } .tt-sn .s-b i:nth-child(4) { --x: 2px; --y: 2px; }
+.tt-sn .s-b em::after { content: ''; display: inline-block; width: 4px; height: 4px; margin-left: 6px; border-radius: 50%; background: #ef4444; vertical-align: middle; animation: tt-blink 1.2s steps(1) infinite; }
+/* ZENITH rises: each letter comes up out of the dark, one after the next, and then lets go together */
+.tt-zn { gap: 0 !important; } .tt-zn span { display: inline-block; opacity: 0; animation: tt-zn 4.4s ease-out calc(var(--i, 0) * .16s) infinite; }
+@keyframes tt-zn { 0% { opacity: 0; transform: translateY(6px); filter: blur(3px); } 14%, 70% { opacity: 1; transform: none; filter: none; color: #fff; } 90%, 100% { opacity: 0; transform: translateY(-3px); filter: blur(2px); } }
+/* an ANVIL takes a strike and throws sparks */
+.fr-ti .tt-av em { display: inline-block; transform-origin: 50% 100%; animation: tt-av 2.8s ease-in infinite; }
+@keyframes tt-av { 0%, 55%, 100% { transform: none; } 62% { transform: translateY(1.500px) scale(1.04, .86); } 70% { transform: none; } }
+.tt-av .v-k { position: relative; width: 10px; height: 10px; }
+.tt-av .v-k b { position: absolute; left: 4px; bottom: 1px; width: 1.500px; height: 4px; border-radius: 1px; background: #fbbf24; transform-origin: 50% 100%; opacity: 0; animation: tt-av-s 2.8s ease-out infinite; }
+.tt-av .v-k b:nth-child(1) { --a: -60deg; } .tt-av .v-k b:nth-child(2) { --a: -20deg; } .tt-av .v-k b:nth-child(3) { --a: 20deg; } .tt-av .v-k b:nth-child(4) { --a: 60deg; }
+@keyframes tt-av-s { 0%, 60% { opacity: 0; transform: rotate(var(--a)) translateY(0) scaleY(.4); } 64% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-8px) scaleY(1); } }
+/* the AURORA cycles its whole colour */
+.fr-ti .tt-au em { color: #5eead4; text-shadow: 0 0 10px rgba(52, 211, 153, .6); animation: tt-au 7s linear infinite; }
+@keyframes tt-au { to { filter: hue-rotate(360deg); } }
 @keyframes tt-ti { 0%, 78%, 100% { transform: none; text-shadow: none; } 84% { transform: scale(1.06, .9) translateY(1px); text-shadow: 0 2px 0 rgba(255, 255, 255, .25); } 90% { transform: scale(.98, 1.04) translateY(-1px); } 95% { transform: none; text-shadow: 0 0 10px rgba(255, 255, 255, .6); } }
-@media (prefers-reduced-motion: reduce) { .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
+@media (prefers-reduced-motion: reduce) { .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
 .lf-cu-pv { display: flex; flex-direction: column; gap: 4px; padding: 10px 0 12px; }
 .lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .lf-cu-pv .fr-ti { margin: 0; }
@@ -7187,6 +7248,18 @@ var RK = {
     ['nightowl', 'Night Owl', 'Earn Night Owl', function (c) { return !!c.has.owl; }],
     ['earlybird', 'Early Bird', 'Earn Early Bird', function (c) { return !!c.has.early; }],
     ['titan', 'Titan', 'Earn 20,000 kg Day', function (c) { return !!c.has.ton20; }],
+    ['comet', 'Comet', 'Earn Ten Thousand Reps', function (c) { return !!c.has.rp10k; }],
+    ['tidal', 'Tidal', 'Earn Cardio Heart', function (c) { return !!c.has.cardio25; }],
+    ['ember', 'Ember', 'Earn On Fire', function (c) { return !!c.has.onfire; }],
+    ['voltage', 'Voltage', '75 workouts', function (c) { return c.wo >= 75; }],
+    ['frostbite', 'Frostbite', 'Earn Winter Arc', function (c) { return !!c.has.winter; }],
+    ['radar', 'Radar', 'Earn Explorer', function (c) { return !!c.has.explore; }],
+    ['metronome', 'Metronome', 'Earn Seven Straight', function (c) { return !!c.has.seven; }],
+    ['prism', 'Prism', '100 badges', function (c) { return c.bd >= 100; }],
+    ['sentinel', 'Sentinel', '300 workouts', function (c) { return c.wo >= 300; }],
+    ['zenith', 'Zenith', '600 workouts', function (c) { return c.wo >= 600; }],
+    ['anvil', 'Anvil', 'Earn Forged', function (c) { return !!c.has.forge; }],
+    ['aurora', 'Aurora', 'Earn Iron Lungs', function (c) { return !!c.has.lungs; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
@@ -7235,7 +7308,7 @@ var RK = {
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'twice', 'mythic']],
-  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
+  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
 function lfTitleEl(id) {
@@ -7271,7 +7344,19 @@ function lfTitleEl(id) {
     unbroken: ['tt-ub', '<em>Unbroken</em><i class="u-c" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></i>'],
     nightowl: ['tt-nw', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.500A8 8 0 1 1 9.500 4a6.500 6.500 0 0 0 10.500 10.500z"/></svg><em>Night Owl</em><i class="n-s" aria-hidden="true"><b></b><b></b><b></b></i>'],
     earlybird: ['tt-eb', '<i class="b-s" aria-hidden="true"></i><em>Early Bird</em>'],
-    titan: ['tt-ti', '<em>Titan</em>']
+    titan: ['tt-ti', '<em>Titan</em>'],
+    comet: ['tt-cm', '<i class="c-t" aria-hidden="true"><b></b></i><em>Comet</em>'],
+    tidal: ['tt-td', '<svg viewBox="0 0 24 8" aria-hidden="true"><path d="M0 4Q3.750 0 7.500 4T15 4T22.500 4T30 4T37.500 4"/></svg><em>Tidal</em>'],
+    ember: ['tt-em', '<em>Ember</em><i class="m-e" aria-hidden="true"><b></b><b></b><b></b></i>'],
+    voltage: ['tt-vo', '<svg viewBox="0 0 12 16" aria-hidden="true"><path d="M7 0 1 9h4l-1 7 7-10H7z"/></svg><em>Voltage</em>'],
+    frostbite: ['tt-fb', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2v20M3.300 7l17.400 10M3.300 17 20.700 7"/></svg><em>Frostbite</em>'],
+    radar: ['tt-rd', '<svg viewBox="0 0 24 24" aria-hidden="true"><circle class="d-r" cx="12" cy="12" r="10"/><path class="d-s" d="M12 12V2a10 10 0 0 1 10 10z"/><circle class="d-b" cx="17" cy="8" r="1.600"/></svg><em>Radar</em>'],
+    metronome: ['tt-mt', '<i class="m-p" aria-hidden="true"><b></b></i><em>Metronome</em>'],
+    prism: ['tt-pr', '<em>Prism</em>'],
+    sentinel: ['tt-sn', '<span class="s-b"><i></i><i></i><i></i><i></i><em>Sentinel</em></span>'],
+    zenith: ['tt-zn', 'Zenith'.split('').map(function (ch, i) { return '<span style="--i:' + i + '">' + ch + '</span>'; }).join('')],
+    anvil: ['tt-av', '<em>Anvil</em><i class="v-k" aria-hidden="true"><b></b><b></b><b></b><b></b></i>'],
+    aurora: ['tt-au', '<em>Aurora</em>']
   };
   if (T2[id]) { sp.className = 'tt ' + T2[id][0]; sp.innerHTML = T2[id][1]; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
@@ -8952,7 +9037,7 @@ var BD_LAD = [
   ['wn', ['wo25', 'wo75', 'wo150', 'wo200', 'wo300']],
   ['sn', ['sets100', 'sets250', 'sets750', 'sets1500', 'sets3k']],
   ['hn', ['hr10', 'hr50', 'hr75', 'hr150', 'hr200']],
-  ['rn2', ['rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']]
+  ['rq', ['rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']]
 ];
 /* the medals the ladders were missing: id, name, kind, what it says, colour, the metric and the count it is won at, then for an exotic or mythic one the painting and the hue */
 var BD_NEW = [
@@ -9011,23 +9096,23 @@ var BD_NEW = [
   ['wo25', 'Quarter Century', 'start', 'Twenty-five sessions in the book.', '#2f7bff', 'wo', 25],
   ['wo75', 'Seventy-Five', 'start', 'Seventy-five sessions logged.', '#2f7bff', 'wo', 75],
   ['wo150', 'One Fifty', 'start', 'A hundred and fifty sessions logged.', '#2f7bff', 'wo', 150],
-  ['wo200', 'Double Century', 'start', 'Two hundred sessions logged.', '#2f7bff', 'wo', 200],
-  ['wo300', 'Three Hundred', 'start', 'Three hundred sessions logged.', '#2f7bff', 'wo', 300],
+  ['wo200', 'Double Century', 'start', 'Two hundred sessions logged.', '#2f7bff', 'wo', 200, 'chevron', .21],
+  ['wo300', 'Three Hundred', 'start', 'Three hundred sessions logged.', '#2f7bff', 'wo', 300, 'nova', .23],
   ['sets100', 'First Hundred Sets', 'mile', 'A hundred sets logged, all time.', '#0891b2', 'sets', 100],
   ['sets250', 'Set Builder', 'mile', 'Two hundred and fifty sets logged, all time.', '#0891b2', 'sets', 250],
   ['sets750', 'Set Stacker', 'mile', 'Seven hundred and fifty sets logged, all time.', '#0891b2', 'sets', 750],
-  ['sets1500', 'Set Engine', 'mile', 'Fifteen hundred sets logged, all time.', '#0891b2', 'sets', 1500],
-  ['sets3k', 'Set Fortress', 'mile', 'Three thousand sets logged, all time.', '#0891b2', 'sets', 3000],
+  ['sets1500', 'Set Engine', 'mile', 'Fifteen hundred sets logged, all time.', '#0891b2', 'sets', 1500, 'spokes', .31],
+  ['sets3k', 'Set Fortress', 'mile', 'Three thousand sets logged, all time.', '#0891b2', 'sets', 3000, 'plasma', .33],
   ['hr10', 'Ten Hours In', 'mile', 'Ten hours trained, all time.', '#3b82f6', 'min', 600],
   ['hr50', 'Fifty Hours In', 'mile', 'Fifty hours trained, all time.', '#3b82f6', 'min', 3000],
   ['hr75', 'Seventy-Five Hours', 'mile', 'Seventy-five hours trained, all time.', '#3b82f6', 'min', 4500],
-  ['hr150', 'Hundred and Fifty Hours', 'mile', 'A hundred and fifty hours trained, all time.', '#3b82f6', 'min', 9000],
-  ['hr200', 'Two Hundred Hours', 'mile', 'Two hundred hours trained, all time.', '#3b82f6', 'min', 12000],
+  ['hr150', 'Hundred and Fifty Hours', 'mile', 'A hundred and fifty hours trained, all time.', '#3b82f6', 'min', 9000, 'tide', .41],
+  ['hr200', 'Two Hundred Hours', 'mile', 'Two hundred hours trained, all time.', '#3b82f6', 'min', 12000, 'vortex', .43],
   ['rp1k', 'A Thousand Reps', 'mile', 'A thousand reps, all time.', '#f59f00', 'reps', 1000],
   ['rp5k', 'Five Thousand Reps', 'mile', 'Five thousand reps, all time.', '#f59f00', 'reps', 5000],
   ['rp25k', 'Twenty-Five Thousand Reps', 'mile', 'Twenty-five thousand reps, all time.', '#f59f00', 'reps', 25000],
-  ['rp75k', 'Seventy-Five Thousand Reps', 'mile', 'Seventy-five thousand reps, all time.', '#f59f00', 'reps', 75000],
-  ['rp150k', 'A Hundred and Fifty Thousand Reps', 'mile', 'A hundred and fifty thousand reps, all time.', '#f59f00', 'reps', 150000]
+  ['rp75k', 'Seventy-Five Thousand Reps', 'mile', 'Seventy-five thousand reps, all time.', '#f59f00', 'reps', 75000, 'petals', .83],
+  ['rp150k', 'A Hundred and Fifty Thousand Reps', 'mile', 'A hundred and fifty thousand reps, all time.', '#f59f00', 'reps', 150000, 'aurora', .85]
 ];
 /* THE DAY STREAKS: every five days up to two hundred, each with a short line of its own. A day counts if you trained, pressed rest, or the programme had nothing on it; a programme day you missed breaks the run. */
 var BD_DST = [[5, "Rookie", "Motivation or dedication? Time will tell."], [10, "Warmed Up", "Ten days in. The habit is forming."], [15, "Stacking Days", "Showing up is most of the work."], [20, "No Excuses", "You stopped asking if you feel like it."], [25, "Twenty-Five Proof", "Twenty-five days of proof."], [30, "Locked In", "This is now your identity."], [35, "Dialled", "Ordinary days, done extraordinarily well."], [40, "Forty Deep", "Most people quit by now."], [45, "Relentless", "Momentum is doing the heavy lifting."], [50, "Fifty Days", "Fifty days. This is who you are."], [55, "Unmoved", "Tired, busy, you went anyway."], [60, "Two Months", "A routine now, not a project."], [65, "Iron Routine", "The bar does not care how you feel."], [70, "Ten Weeks", "Seventy days of keeping your word."], [75, "Seventy-Five", "Three quarters of a hundred, all earned."], [80, "Compounding", "Discipline, quietly adding up."], [85, "Unbroken", "Not one gap in eighty-five days."], [90, "A Season", "A whole season of showing up."], [95, "Almost There", "Five days from triple digits."], [100, "Centurion", "A hundred days. Few ever get here."], [105, "Past the Hundred", "Still going. Nobody asked you to stop."], [110, "Steady State", "This is just what you do now."], [115, "Second Nature", "It is part of you now."], [120, "Four Months", "A third of a year, every day."], [125, "Quiet Force", "No noise. Just results."], [130, "Layers", "Every day sits on the last."], [135, "Unshakeable", "Nothing knocks this over."], [140, "Twenty Weeks", "Half a year is not far."], [145, "Long Game", "You are playing it right."], [150, "One Fifty", "Half of two hundred. All of you."], [155, "Forged", "Made, not born."], [160, "Iron Will", "Will beats talent when talent rests."], [165, "Beyond Habit", "This is character now."], [170, "Rare Air", "Hardly anyone is up here."], [175, "Legend Territory", "People will hear about this."], [180, "Half a Year", "Six months. The habit never blinked."], [185, "Unstoppable", "What is left to stop you?"], [190, "Nearly There", "Ten days to two hundred."], [195, "Final Stretch", "Five more. You know you will."], [200, "Two Hundred", "Immortal. Keep it going."]], BD_TAG = {};

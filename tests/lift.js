@@ -949,8 +949,8 @@ const freeze = (at) => `(() => {
     const lad = [...src.slice(src.indexOf('var BD_LAD = ['), src.indexOf('var BD_NEW = [')).matchAll(/\['(\w\w)', \[([^\]]+)\]\]/g)].map((m) => [m[1], m[2].split(',').map((x) => x.trim().replace(/'/g, ''))]);
     const rows = [...src.slice(src.indexOf('var BD_NEW = ['), src.indexOf('var BD_NEWBY')).matchAll(/^  \['(\w+)', '[^']+', '(\w+)', '[^']+', '#[0-9a-f]{6}', '(\w+)', (\d+)(?:, '(\w+)', ([0-9.]+))?\]/gm)];
     const all = lad.flatMap((l) => l[1]);
-    ok('thirty-one ladders of five rungs, none sharing a medal with another', lad.length === 31 && lad.every((l) => l[1].length === 5) && new Set(all).size === all.length, lad.length);
-    ok('every rung is a medal: the existing ones are on the shelf and the missing ones are made', all.every((id) => new RegExp("\\['" + id + "', ").test(src)) && rows.length === 52 && rows.every((r) => all.includes(r[1])));
+    ok('thirty-five ladders of five rungs, none sharing a medal with another', lad.length === 35 && lad.every((l) => l[1].length === 5) && new Set(all).size === all.length, lad.length);
+    ok('every rung is a medal: the existing ones are on the shelf and the missing ones are made', all.every((id) => new RegExp("\\['" + id + "', ").test(src)) && rows.length === 72 && rows.every((r) => all.includes(r[1])));
     ok('only the exotic and mythic rungs of the missing ones have a painting, so a first, second or third rung is never a scene', rows.every((r) => { const l = lad.find((x) => x[1].includes(r[1])), rung = l[1].indexOf(r[1]); return rung >= 3 ? !!r[5] : !r[5]; }));
     const hues = rows.filter((r) => r[5]).map((r) => r[5] + r[6]);
     const fxd = (n, id, x, cd) => ({ id, d: n, s: 1, e: 2, n: 'Push', x, cd });
@@ -2321,7 +2321,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     await cuOpen(page); await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
     const heads = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4').length && [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
-    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges,Animated,Moments,Against the creator', heads);
+    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges,Animated,Moments,Signature,Against the creator', heads);
     ok('and nobody else is offered Creator, not even locked', await page.locator('.rk-o[data-id="creator"]').count() === 0);
     await page.keyboard.press('Escape'); await settle(page); await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     ok('or the Prestige frame', await page.locator('.rk-o[data-id="prestige"]').count() === 0 && await page.locator('.rk-o[data-id="neon"]').count() === 1);
@@ -2704,13 +2704,13 @@ const freeze = (at) => `(() => {
     await p7.goto(URL); await p7.waitForTimeout(600);
     const eff = await p7.evaluate(() => {
       const out = {}; const box = document.createElement('div'); box.style.cssText = 'position:fixed;top:0;left:0'; document.body.appendChild(box);
-      ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic', 'rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'curator', 'engine', 'twice', 'ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan'].forEach((id) => {
+      ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic', 'rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'curator', 'engine', 'twice', 'ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan', 'comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora'].forEach((id) => {
         const r = document.createElement('div'); r.className = 'fr-ti'; const te = window.__tt.lfTitleEl(id); if (te) r.appendChild(te); box.appendChild(r);
         out[id] = te ? [...te.querySelectorAll('*'), te].map((n) => [getComputedStyle(n).animationName, getComputedStyle(n, '::before').animationName, getComputedStyle(n, '::after').animationName]).flat().filter((n) => n && n !== 'none') : null;
       });
       return out;
     });
-    const names = ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic', 'rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'curator', 'engine', 'twice', 'ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan'];
+    const names = ['elite', 'veteran', 'master', 'legend', 'relentless', 'mythic', 'rookie', 'regular', 'adept', 'steady', 'grinder', 'lifer', 'collector', 'curator', 'engine', 'twice', 'ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan', 'comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora'];
     ok('every one of the milestone, badge and consistency titles moves', names.every((n) => eff[n] && eff[n].length > 0), eff);
     const sig = names.map((n) => eff[n].slice().sort().join('+'));
     ok('and no two do it the same way', new Set(sig).size === names.length, sig);
