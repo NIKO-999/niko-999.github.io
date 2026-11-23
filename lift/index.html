@@ -864,6 +864,7 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .fr-strip i { height: 6px; border-radius: 2px; background: var(--mark-off); }
 .fr-strip i.is-on { background: var(--rc, var(--ink)); }
 .fr-strip i.is-rest { background: none; box-shadow: inset 0 0 0 1px var(--dim); }
+.fr-strip i.is-fz { background: color-mix(in srgb, var(--log) 40%, transparent); box-shadow: inset 0 0 0 1px var(--log); }
 #frRings .fr-row { grid-template-columns: 12px minmax(0, 1fr) auto auto; align-items: center; }
 #frRings .fr-rg-k { align-self: center; }
 #frRings .fr-strip { grid-column: 2 / -1; margin-top: 2px; }
@@ -6926,7 +6927,7 @@ function frStats() {
   var t = today(), from30 = ymd(addDays(t, -29)), tk = ymd(t), d = '', rest30 = 0;
   for (var i = 29; i >= 0; i--) {
     var k = ymd(addDays(t, -i));
-    if (woOn(k).length) d += '1'; else if (S.rd[k]) { d += 'r'; rest30++; } else d += '0';
+    if (woOn(k).length) d += '1'; else if (lfFz(k)) d += 'f'; else if (S.rd[k]) { d += 'r'; rest30++; } else d += '0';
   }
   var in30 = S.wo.filter(function (w) { return w.d >= from30 && w.d <= tk; });
   /* a PR is a heavier weight than ever on the exercise, as in a workout */
@@ -7231,7 +7232,7 @@ function frAgo(d) {
    On the rings it is lit in that person's colour. */
 function frStrip(dstr) {
   var g = el('<div class="fr-strip" aria-hidden="true"></div>');
-  (dstr || '0'.repeat(30)).split('').forEach(function (ch) { g.appendChild(el('<i class="' + (ch === '1' ? 'is-on' : ch === 'r' ? 'is-rest' : '') + '"></i>')); });
+  (dstr || '0'.repeat(30)).split('').forEach(function (ch) { g.appendChild(el('<i class="' + (ch === '1' ? 'is-on' : ch === 'r' ? 'is-rest' : ch === 'f' ? 'is-fz' : '') + '"></i>')); });
   return g;
 }
 /* YOUR SHOWCASE: up to three badges you have earned, the only ones friends
@@ -8328,7 +8329,7 @@ function frSheet(f) {
   var dstr = st.d || '0'.repeat(30), on = 0;
   dstr.split('').forEach(function (ch, i) {
     var x = el('<i class="lf-day"></i>');
-    if (ch === '1') { x.classList.add('is-on'); on++; } else if (ch === 'r') x.classList.add('is-rest');
+    if (ch === '1') { x.classList.add('is-on'); on++; } else if (ch === 'f') { x.classList.add('is-fz'); x.innerHTML = lfFzI(); } else if (ch === 'r') x.classList.add('is-rest');
     if (i === 29) x.classList.add('is-now');
     $('.lf-days', g).appendChild(x);
   });

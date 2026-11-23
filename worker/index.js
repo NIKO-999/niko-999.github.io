@@ -414,7 +414,7 @@ function liftClean(b) {
   const n = typeof b.n === 'string' ? b.n.replace(/[\u0000-\u001f]/g, '').trim().slice(0, 24) : '';
   const s = {};
   for (const k of LIFT_NUM) { const v = Math.round(+b.s[k]); s[k] = isFinite(v) ? Math.max(0, Math.min(100000, v)) : 0; }
-  s.d = typeof b.s.d === 'string' && /^[01r]{30}$/.test(b.s.d) ? b.s.d : '0'.repeat(30);
+  s.d = typeof b.s.d === 'string' && /^[01rf]{30}$/.test(b.s.d) ? b.s.d : '0'.repeat(30);
   /* This week, by day, and by muscle against the sender's own targets:
      seven counts, and at most sixteen [muscle, sets, target] rows whose
      muscle is one the app knows. */
