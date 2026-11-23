@@ -9083,7 +9083,9 @@ var BD_LAD = [
   ['rq', ['rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']],
   ['ie', ['ice1', 'ice2', 'ice3', 'ice4', 'ice5']],
   ['la', ['lava1', 'lava2', 'lava3', 'lava4', 'lava5']],
-  ['ma', ['marb1', 'marb2', 'marb3', 'marb4', 'marb5']]
+  ['ma', ['marb1', 'marb2', 'marb3', 'marb4', 'marb5']],
+  ['dq', ['duo5', 'duo25', 'duo75', 'duo150', 'duo300']],
+  ['lq', ['lead2', 'lead5', 'lead15', 'lead35', 'lead75']]
 ];
 /* the medals the ladders were missing: id, name, kind, what it says, colour, the metric and the count it is won at, then for an exotic or mythic one the painting and the hue */
 var BD_NEW = [
@@ -9173,7 +9175,17 @@ var BD_NEW = [
   ['marb2', 'Slab', 'start', 'A hundred and seventy-five sessions logged.', '#d6d3d1', 'wo', 175],
   ['marb3', 'Chisel', 'start', 'Two hundred and twenty-five sessions logged.', '#fde68a', 'wo', 225],
   ['marb4', 'Statue', 'start', 'Two hundred and seventy-five sessions logged.', '#f5f5f4', 'wo', 275, 'lattice', .12],
-  ['marb5', 'Monument', 'start', 'Three hundred and fifty sessions logged.', '#fef3c7', 'wo', 350, 'weave', .17]
+  ['marb5', 'Monument', 'start', 'Three hundred and fifty sessions logged.', '#fef3c7', 'wo', 350, 'weave', .17],
+  ['duo5', 'Spotter', 'friends', 'Five sessions in sync with a friend.', '#818cf8', 'duo', 5],
+  ['duo25', 'Rack Mates', 'friends', 'Twenty-five sessions in sync with a friend.', '#6366f1', 'duo', 25],
+  ['duo75', 'Iron Pair', 'friends', 'Seventy-five sessions in sync with a friend.', '#4f46e5', 'duo', 75],
+  ['duo150', 'Ride or Die', 'friends', 'A hundred and fifty sessions in sync with a friend.', '#a5b4fc', 'duo', 150, 'ecg', .61],
+  ['duo300', 'Soul Lifters', 'friends', 'Three hundred sessions in sync with a friend.', '#7c3aed', 'duo', 300, 'rings', .63],
+  ['lead2', 'Repeat Champion', 'friends', 'Two weeks finished in front, all told.', '#38bdf8', 'lead', 2],
+  ['lead5', 'Podium Regular', 'friends', 'Five weeks finished in front, all told.', '#0ea5e9', 'lead', 5],
+  ['lead15', 'Reigning', 'friends', 'Fifteen weeks finished in front, all told.', '#0284c7', 'lead', 15],
+  ['lead35', 'Throne', 'friends', 'Thirty-five weeks finished in front, all told.', '#06b6d4', 'lead', 35, 'drift', .67],
+  ['lead75', 'Immortal Crown', 'friends', 'Seventy-five weeks finished in front, all told.', '#14b8a6', 'lead', 75, 'shatter', .69]
 ];
 /* THE FINISH LADDERS: each rung after the first is that ladder's own finish, chosen rather than dealt */
 ['ice2', 'ice3', 'ice4', 'ice5'].forEach(function (k) { BD_FX[k] = 'ice'; });
@@ -9837,7 +9849,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', wo100: '100', goal: 'i:r
 /* a new rung is a medal, not an object: a shape that reads as a thing (an hourglass, a gear, a drop) is worn as a seal, a scallop, a sun or a plaque instead */
 var BD_MEDAL = { hourglass: 'coin24', gear: 'scallop', drop: 'rosette', compass: 'sun', cross: 'burst', heart: 'scallop', flag: 'trap', tag: 'trap' };
 /* a new rung wears its family's shape, and says its count */
-BD_SHI.wo25 = 'hept'; BD_SHI.sets100 = 'oct'; BD_SHI.hr10 = 'sun'; BD_SHI.rp1k = 'burst'; BD_SHI.ice1 = 'hextall'; BD_SHI.lava1 = 'pent'; BD_SHI.marb1 = 'shield';
+BD_SHI.wo25 = 'hept'; BD_SHI.sets100 = 'oct'; BD_SHI.hr10 = 'sun'; BD_SHI.rp1k = 'burst'; BD_SHI.duo5 = 'crest'; BD_SHI.lead2 = 'trap'; BD_SHI.ice1 = 'hextall'; BD_SHI.lava1 = 'pent'; BD_SHI.marb1 = 'shield';
 BD_LAD.forEach(function (l) {
   var s0 = l[1].filter(function (id) { return BD_SHI[id]; })[0];
   l[1].forEach(function (id) {
@@ -11623,7 +11635,7 @@ var BD_COLL = [
     'arm50', 'arm100', 'arm200', 'leg50', 'leg100', 'leg200', 'post50', 'abs10', 'abs50', 'abs100']],
   ['car', 'Cardio', '#06b6d4', ['ice1', 'ice2', 'ice3', 'ice4', 'ice5', 'stair10', 'stairhr', 'incl10', 'inclhr', 'cardio25', 'cdwk', 'cardio100', 'cdh50', 'summit', 'lungs', 'koipond']],
   ['tec', 'Technique', '#38bdf8', ['ss1', 'ss2', 'ss3', 'ssx', 'ssm', 'ds1', 'ds2', 'ds3', 'dsx', 'dsm', 'wu1', 'wu2', 'wu3', 'wux', 'wum']],
-  ['fri', 'Friends', '#6366f1', ['duo1', 'duo10', 'duo50', 'lead1', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer', 'unbeat']]
+  ['fri', 'Friends', '#6366f1', ['duo1', 'duo5', 'duo10', 'duo25', 'duo50', 'duo75', 'duo150', 'duo300', 'lead1', 'lead2', 'lead5', 'lead15', 'lead35', 'lead75', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer', 'unbeat']]
 ];
 /* the new rungs go into the collection their ladder was already in */
 BD_COLL.push(['dys', 'Day streaks', '#ff7a1a', BD_DST.map(function (r) { return 'd' + r[0]; })]);
@@ -11919,6 +11931,7 @@ else if (!S.bseen.v2) { var BS2 = { goal: 1, tgt1: 1, tgtall: 1, tgt4: 1, quad: 
 /* the monthly medals arrived the same way, and a month won in August is not news either */
 /* and the milestones, which a long record may already hold */
 /* the technique medals and the new rungs: whatever a long record already holds is not news */
+if (S.bseen && !S.bseen.v15) { var BS15 = ['duo5', 'duo25', 'duo75', 'duo150', 'duo300', 'lead2', 'lead5', 'lead15', 'lead35', 'lead75']; lfBadges().forEach(function (x) { if (x.d && BS15.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v15 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v14) { var BS14 = ['ice1', 'ice2', 'ice3', 'ice4', 'ice5', 'lava1', 'lava2', 'lava3', 'lava4', 'lava5', 'marb1', 'marb2', 'marb3', 'marb4', 'marb5']; lfBadges().forEach(function (x) { if (x.d && BS14.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v14 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v13) { var BS13 = ['wo25', 'wo75', 'wo150', 'wo200', 'wo300', 'sets100', 'sets250', 'sets750', 'sets1500', 'sets3k', 'hr10', 'hr50', 'hr75', 'hr150', 'hr200', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']; lfBadges().forEach(function (x) { if (x.d && BS13.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v13 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v11) { var BS11 = {}; BD_NEW.forEach(function (r) { BS11[r[0]] = 1; }); ['ss', 'ds', 'wu'].forEach(function (f) { ['1', '2', '3', 'x', 'm'].forEach(function (k) { BS11[f + k] = 1; }); }); lfBadges().forEach(function (x) { if (x.d && BS11[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v11 = 1; lfSave(); }
