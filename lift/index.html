@@ -198,17 +198,18 @@ svg { display: block; }
 .lf-pgr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .lf-pgr-t { flex: 1; min-width: 0; font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-pgr-t b { font-size: 17px; color: var(--ink); line-height: 1; letter-spacing: -.02em; margin-right: 6px; }
-.lf-pgr-t i { font-style: normal; font-weight: 600; }
+.lf-pgr-t i { font-style: normal; font-weight: 600; font-size: 9.5px; }
 .lf-pgr-ring { position: relative; width: 34px; height: 34px; flex: none; display: grid; place-items: center; }
 .lf-pgr-ring > svg:first-child { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
 .lf-pgr-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
 .lf-pgr-ring .tr { stroke: var(--dash); }
 .lf-pgr-ring .fg { stroke: var(--log); transition: stroke-dashoffset .5s var(--ease); }
 .lf-pgr-ring .fl { width: 14px; height: 14px; fill: var(--log); position: relative; }
-.lf-pgr-w { display: flex; gap: 5px; flex: none; }
-.lf-pgr-w div { display: block; }
+.lf-pgr-w { display: flex; gap: 6px; flex: none; }
+.lf-pgr-w div { display: grid; gap: 3px; justify-items: center; font-size: 9.5px; font-weight: 700; line-height: 1; color: var(--dim); }
+.lf-pgr-w .is-on, .lf-pgr-w .is-fz { color: var(--ink); }
 .lf-pgr-w .lf-fzi { display: none; }
-.lf-pgr-w i { display: block; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-pgr-w i { display: block; width: 10px; height: 10px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
 .lf-pgr-w .is-on i { background: var(--log); box-shadow: none; }
 .lf-pgr-w .is-fz i { background: color-mix(in srgb, var(--log) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px var(--log); }
@@ -3105,7 +3106,7 @@ function lfProgCard() {
   if (goal && done >= goal) c.classList.add('is-hit');
   /* PAST THE GOAL IT STAYS AT THE GOAL: a seventh workout in a six-a-week week still reads 6 / 6 */
   $('b', c).textContent = goal ? Math.min(done, goal) + ' / ' + goal : '0'; $('.lf-pgr-t i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
-  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i></div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
+  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
   c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + Math.min(done, goal) + ' of ' + goal + ' workouts this week' + (frz ? ', ' + frz + ' frozen' : '') : '') + '. Change goal');
   c.addEventListener('click', function () { lfGoalSheet(); });
   return c;
