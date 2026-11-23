@@ -194,26 +194,23 @@ svg { display: block; }
 .lf-tgc-b i { flex: 1; max-width: 12px; border-radius: 3px; background: var(--ink); opacity: .55; }
 .lf-seg.is-wrap { flex-wrap: wrap; }
 /* THE PROGRESS CARD: the weekly streak and the weekly goal, two pages in one card on Home. A swipe or the dots turn the page; each page opens its own sheet. It is a fixed height, so turning it never moves the cards under it. */
-.lf-pgr { display: block; width: 100%; min-height: 128px; padding: 14px 16px 16px; color: inherit; font: inherit; text-align: left; }
-.lf-pgr-h { display: flex; align-items: center; justify-content: space-between; color: var(--dim); font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
-.lf-pgr-h span:last-child { font-weight: 600; letter-spacing: 0; text-transform: none; }
-.lf-pgr-n { display: flex; align-items: center; gap: 12px; margin: 8px 0 12px; font-size: 13px; color: var(--dim); }
-.lf-pgr-n > span:not(.lf-pgr-ring) { flex: 1; }
-.lf-pgr-n b { font-size: 26px; color: var(--ink); line-height: 1; letter-spacing: -.02em; margin-right: 6px; }
-.lf-pgr-fr { font-size: 15px; font-weight: 700; color: var(--ink); }
-.lf-pgr-ring { position: relative; width: 48px; height: 48px; flex: none; display: grid; place-items: center; }
+.lf-pgr { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; color: inherit; font: inherit; text-align: left; }
+.lf-pgr-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.lf-pgr-t { flex: 1; min-width: 0; font-size: 13px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lf-pgr-t b { font-size: 17px; color: var(--ink); line-height: 1; letter-spacing: -.02em; margin-right: 6px; }
+.lf-pgr-t i { font-style: normal; font-weight: 600; }
+.lf-pgr-ring { position: relative; width: 34px; height: 34px; flex: none; display: grid; place-items: center; }
 .lf-pgr-ring > svg:first-child { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.lf-pgr-ring circle { fill: none; stroke-width: 4; stroke-linecap: round; }
+.lf-pgr-ring circle { fill: none; stroke-width: 5; stroke-linecap: round; }
 .lf-pgr-ring .tr { stroke: var(--dash); }
 .lf-pgr-ring .fg { stroke: var(--log); transition: stroke-dashoffset .5s var(--ease); }
-.lf-pgr-ring .fl { width: 20px; height: 20px; fill: var(--log); position: relative; }
-.lf-pgr-w { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-.lf-pgr-w div { display: grid; gap: 5px; justify-items: center; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--dim); }
-.lf-pgr-w i { display: block; width: 100%; height: 8px; border-radius: 4px; box-shadow: inset 0 0 0 1.5px var(--dash); }
+.lf-pgr-ring .fl { width: 14px; height: 14px; fill: var(--log); position: relative; }
+.lf-pgr-w { display: flex; gap: 5px; flex: none; }
+.lf-pgr-w div { display: block; }
+.lf-pgr-w .lf-fzi { display: none; }
+.lf-pgr-w i { display: block; width: 9px; height: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dash); }
 .lf-pgr-w .is-on i { background: var(--log); box-shadow: none; }
-.lf-pgr-w .is-on { color: var(--ink); }
 .lf-pgr-w .is-fz i { background: color-mix(in srgb, var(--log) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
-.lf-pgr-w .is-fz { color: var(--ink); }
 .lf-pgr-w .is-now i { box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-sk-w { display: grid; grid-template-columns: repeat(12, 1fr); gap: 5px; margin: 12px 0 8px; }
 .lf-sk-w i { aspect-ratio: 1; border-radius: 6px; box-shadow: inset 0 0 0 1.5px var(--dash); }
@@ -221,7 +218,6 @@ svg { display: block; }
 .lf-sk-w i.is-now { box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-sk-w i.is-fz { background: color-mix(in srgb, var(--log) 28%, transparent); box-shadow: inset 0 0 0 1.5px var(--log); }
 .lf-fzi { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; color: var(--log); flex: none; }
-.lf-pgr-w .is-fz .lf-fzi { width: 13px; height: 13px; margin-top: -1px; }
 .lf-sk-w i.is-fz { display: grid; place-items: center; } .lf-sk-w i .lf-fzi { width: 14px; height: 14px; }
 .lf-day.is-fz { display: grid; place-items: center; border-color: var(--log); background: none; } .lf-day.is-fz .lf-fzi { width: 11px; height: 11px; stroke-width: 2.4; }
 .lf-cell.is-fz .lf-dots { display: flex; justify-content: center; } .lf-cell.is-fz .lf-fzi { width: 13px; height: 13px; }
@@ -3103,15 +3099,13 @@ function lfProgCard() {
   /* ONE CARD, ONE PAGE: this week's days, and the flame inside an open loop that fills as the days add up to the goal. Pressing it opens the streak, where the goal is changed. */
   var r = 21, len = 2 * Math.PI * r, /* THE RING IS THE REAL WORKOUTS: 5 of 6 is five sixths of a circle, nearly closed, and 3 is half; a frozen day keeps the streak but does not close the ring */
   f = goal ? Math.min(1, done / goal) : 0;
-  var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><div class="lf-pgr-h"><span>Weekly goal</span><span></span></div><div class="lf-pgr-n"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span><b class="lf-num"></b><i></i></span></div><div class="lf-pgr-w"></div></button>');
+  var c = el('<button type="button" class="lf-card lf-pgr lf-tap" id="lfPgr"><span class="lf-pgr-ring"><svg viewBox="0 0 48 48" aria-hidden="true"><circle class="tr" cx="24" cy="24" r="' + r + '"/><circle class="fg" cx="24" cy="24" r="' + r + '" stroke-dasharray="' + len + '" stroke-dashoffset="' + len * (1 - f) + '"/></svg>' + LF_FLAME.replace('<svg ', '<svg class="fl" ') + '</span><span class="lf-pgr-t"><span class="lf-pgr-sr">Weekly goal</span><b class="lf-num"></b><i></i></span><span class="lf-pgr-w"></span></button>');
   /* GOAL HIT: the ring and the flame take the accent only once the week has reached its goal */
   /* real workouts only: a frozen day fills the ring but is not the target hit */
   if (goal && done >= goal) c.classList.add('is-hit');
-  var e = addDays(mon, 6);
-  $('.lf-pgr-h span:last-child', c).textContent = mon.getDate() + ' ' + MON[mon.getMonth()].slice(0, 3) + ' – ' + e.getDate() + ' ' + MON[e.getMonth()].slice(0, 3);
   /* PAST THE GOAL IT STAYS AT THE GOAL: a seventh workout in a six-a-week week still reads 6 / 6 */
-  $('b', c).textContent = goal ? Math.min(done, goal) + ' / ' + goal : '0'; $('.lf-pgr-n i', c).style.fontStyle = 'normal'; $('.lf-pgr-n i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
-  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i>' + 'MTWTFSS'[j] + '</div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
+  $('b', c).textContent = goal ? Math.min(done, goal) + ' / ' + goal : '0'; $('.lf-pgr-t i', c).textContent = goal ? (goal === 1 ? 'workout this week' : 'workouts this week') + (frz ? ' · ' + frz + ' frozen' : '') : 'set a goal to start';
+  for (var j = 0; j < 7; j++) { var dk = ymd(addDays(mon, j)), dv = el('<div><i></i></div>'); if (woOn(dk).length) dv.classList.add('is-on'); else if (lfFz(dk)) { dv.classList.add('is-fz'); dv.innerHTML = '<i></i>' + lfFzI(); } else if (dk === tk) dv.classList.add('is-now'); $('.lf-pgr-w', c).appendChild(dv); }
   c.setAttribute('aria-label', 'Weekly goal' + (goal ? ', ' + Math.min(done, goal) + ' of ' + goal + ' workouts this week' + (frz ? ', ' + frz + ' frozen' : '') : '') + '. Change goal');
   c.addEventListener('click', function () { lfGoalSheet(); });
   return c;
