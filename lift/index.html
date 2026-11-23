@@ -5862,12 +5862,16 @@ function lfRenderLib() {
   if (!newU && !window.__lfInline) QA.unshift(['lfSplitOpen', 'Your split', '#9ad0ff', '<rect x="3.500" y="5" width="17" height="15" rx="3"/><path d="M3.500 10h17M8 3v4M16 3v4M8 14h3"/>', lfSplitSheet, lfProg().n]);
   if (!newU) QA.push(['lfProgMg', 'Manage splits', '#f08ad6', '<rect x="5" y="4" width="14" height="16" rx="2.500"/><path d="M9 9h6M9 13h6M9 17h3"/>', lfProgManage]);
   if (LF_WGT && LF_WGT.healthReadAuth && lfCaps.health) QA.push(['lfHealthQa', 'Apple Health', '#ff7a8a', HK_IC.heart, lfHealthSheet]);
+  /* PREVIOUS WORKOUTS closes the screen: the same wide block as Your split, with a clock mark and how many there are */
+  var prevQ = ['lfPrevOpen', 'Previous workouts', '#c9b6ff', '<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>', lfPrevSheet, S.wo.length + (S.wo.length === 1 ? ' workout' : ' workouts')];
+  var lastPair = -1; QA.forEach(function (q, ix) { if (!q[5]) lastPair = ix; });
+  QA.push(prevQ);
   var qg = el('<div class="lf-qa"></div>');
   QA.forEach(function (q, ix) {
     var b = el('<button type="button" class="lf-qa-t" id="' + q[0] + '"><i><svg viewBox="0 0 24 24" aria-hidden="true">' + q[3] + '</svg></i><span></span></button>');
     $('span', b).textContent = q[1];
     /* the split block is full width and says which programme is running; whatever is left over after the pairs spans two so no block sits beside a gap */
-    var wide = q[5] || (ix === QA.length - 1 && (QA.length - (QA[0][5] ? 1 : 0)) % 2 === 1);
+    var wide = q[5] || (ix === lastPair && QA.filter(function (z) { return !z[5]; }).length % 2 === 1);
     if (q[5]) { b.classList.add('is-wide'); b.appendChild(el('<em></em>')); $('em', b).textContent = q[5]; } else if (wide) b.classList.add('is-wide');
     b.style.setProperty('--c', q[2]); b.addEventListener('click', q[4]); qg.appendChild(b);
   });
@@ -6076,14 +6080,14 @@ function lfRenderCal() {
     root.appendChild(rdl); root.appendChild(sum); root.appendChild(goal);
   }
   if (calMode === 'month') { var sk2 = el('<div></div>'); root.appendChild(sk2); lfStreakView(sk2, 'rest'); }
-  /* Every workout in the range, newest first. */
-  var ws2 = S.wo.filter(function (w) { return w.d >= ymd(from) && w.d <= ymd(to); }).sort(function (a, b) { return a.d === b.d ? b.s - a.s : (a.d < b.d ? 1 : -1); });
-  if (ws2.length && calMode === 'month') {
-    root.appendChild(el('<div class="lf-cap lf-gh">Workouts</div>'));
-    var lc = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
-    ws2.forEach(function (w) { $('.lf-list', lc).appendChild(lfWoRow(w)); });
-    root.appendChild(lc);
-  }
+  /* the list of every workout lives on Exercises now, as the Previous workouts block */
+}
+/* PREVIOUS WORKOUTS: every one you have logged, newest first, in a sheet opened from Exercises. */
+function lfPrevSheet() {
+  var b = el('<div class="lf-card" style="padding:4px 16px"><div class="lf-list"></div></div>');
+  S.wo.slice().sort(function (a, c) { return a.d === c.d ? c.s - a.s : (a.d < c.d ? 1 : -1); }).forEach(function (w) { $('.lf-list', b).appendChild(lfWoRow(w)); });
+  if (!S.wo.length) b = el('<div class="lf-empty"><b>No workouts yet</b>Finish one and it lands here.</div>');
+  lfSheet({ title: 'Previous workouts', body: b, key: 'prev' });
 }
 function lfWoRow(w) {
   var li = el('<button type="button" class="lf-li"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num"></span></button>');
