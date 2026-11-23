@@ -1518,8 +1518,27 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 /* the AURORA cycles its whole colour */
 .fr-ti .tt-au em { color: #5eead4; text-shadow: 0 0 10px rgba(52, 211, 153, .6); animation: tt-au 7s linear infinite; }
 @keyframes tt-au { to { filter: hue-rotate(360deg); } }
+/* THE FINISHES AS TITLES: the word is made of the material */
+.fr-ti .tt-ice em { background: linear-gradient(105deg, #bae6fd 0 38%, #fff 48%, #7dd3fc 58%, #bae6fd 70% 100%) 140% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 5px rgba(125, 211, 252, .55)); animation: tt-ice 3.4s ease-in-out infinite; }
+@keyframes tt-ice { 0%, 30% { background-position: 140% 0; } 100% { background-position: -40% 0; } }
+.fr-ti .tt-lv em { background: linear-gradient(90deg, #7f1d1d, #ef4444 22%, #fb923c 38%, #fde047 50%, #fb923c 62%, #ef4444 78%, #7f1d1d) 0 0 / 220% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-lv 5s linear infinite, tt-lv-g 2.2s ease-in-out infinite alternate; }
+@keyframes tt-lv { to { background-position: -220% 0; } }
+@keyframes tt-lv-g { from { filter: drop-shadow(0 0 3px rgba(239, 68, 68, .5)); } to { filter: drop-shadow(0 0 9px rgba(251, 146, 60, .9)); } }
+.fr-ti .tt-mb em { background: repeating-linear-gradient(112deg, #f8fafc 0 7px, #94a3b8 8px 9px, #f8fafc 10px 19px, #cbd5e1 20px 21px, #f8fafc 22px 34px) 0 0 / 120px 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-mb 9s linear infinite; }
+@keyframes tt-mb { to { background-position: 120px 0; } }
+.fr-ti .tt-ne em { color: #ffd0fa; text-shadow: 0 0 4px #ff3df2, 0 0 12px #ff3df2, 0 0 22px rgba(255, 61, 242, .7); animation: tt-ne 4.2s steps(1) infinite; }
+@keyframes tt-ne { 0%, 18%, 22%, 62%, 66%, 100% { opacity: 1; } 20%, 64% { opacity: .35; text-shadow: none; } 21% { opacity: .9; } }
+.fr-ti .tt-gx em { background: radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 2px) 0 0 / 14px 11px, radial-gradient(circle at 70% 70%, #fff 0 .8px, transparent 1.800px) 0 0 / 9px 13px, linear-gradient(100deg, #6366f1, #a855f7 45%, #38bdf8 80%); -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-gx 6s linear infinite; }
+@keyframes tt-gx { to { background-position: 28px 0, -18px 0, 0 0; } }
+.fr-ti .tt-sr em { background: linear-gradient(90deg, #fdba74, #fb7185 50%, #fde68a) no-repeat 0 0 / 0% 100%; -webkit-text-stroke: .6px #fdba74; color: transparent; -webkit-background-clip: text; background-clip: text; animation: tt-sr 4.4s ease-in-out infinite; }
+@keyframes tt-sr { 0% { background-size: 0% 100%; } 55%, 85% { background-size: 100% 100%; } 100% { background-size: 100% 100%; opacity: .2; } }
+.fr-ti .tt-ed em { position: relative; color: #6ee7b7; text-shadow: 0 0 8px rgba(16, 185, 129, .55); overflow: hidden; }
+.tt-ed em::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: linear-gradient(90deg, transparent, #d1fae5, transparent); animation: tt-ed 2.6s ease-in-out infinite; }
+@keyframes tt-ed { 0% { top: -2px; opacity: 0; } 15%, 85% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+.fr-ti .tt-cb em { background: repeating-linear-gradient(45deg, #1f2937 0 3px, #6b7280 3px 4px, #111827 4px 7px, #4b5563 7px 8px) 0 0 / 16px 16px; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: .5px #9ca3af; filter: drop-shadow(0 0 4px rgba(122, 162, 255, .5)); animation: tt-cb 2.4s linear infinite; }
+@keyframes tt-cb { to { background-position: 16px 0; } }
 @keyframes tt-ti { 0%, 78%, 100% { transform: none; text-shadow: none; } 84% { transform: scale(1.06, .9) translateY(1px); text-shadow: 0 2px 0 rgba(255, 255, 255, .25); } 90% { transform: scale(.98, 1.04) translateY(-1px); } 95% { transform: none; text-shadow: 0 0 10px rgba(255, 255, 255, .6); } }
-@media (prefers-reduced-motion: reduce) { .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
+@media (prefers-reduced-motion: reduce) { .tt-ice em, .tt-lv em, .tt-mb em, .tt-ne em, .tt-gx em, .tt-sr em, .tt-ed em::after, .tt-cb em { animation: none; } .tt-sr em { background-size: 100% 100%; } .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
 .lf-cu-pv { display: flex; flex-direction: column; gap: 4px; padding: 10px 0 12px; }
 .lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .lf-cu-pv .fr-ti { margin: 0; }
@@ -7265,6 +7284,14 @@ var RK = {
     ['zenith', 'Zenith', '600 workouts', function (c) { return c.wo >= 600; }],
     ['anvil', 'Anvil', 'Earn Forged', function (c) { return !!c.has.forge; }],
     ['aurora', 'Aurora', 'Earn Iron Lungs', function (c) { return !!c.has.lungs; }],
+    ['ice', 'Ice', 'Earn Winter Arc', function (c) { return !!c.has.winter; }],
+    ['lava', 'Lava', 'Earn On Fire', function (c) { return !!c.has.onfire; }],
+    ['marble', 'Marble', 'Earn Quarry', function (c) { return !!c.has.marb1; }],
+    ['neon', 'Neon', 'Earn Full Body', function (c) { return !!c.has.fullbody; }],
+    ['galaxy', 'Galaxy', 'Earn Midnight Session', function (c) { return !!c.has.night; }],
+    ['sunrise', 'Sunrise', 'Earn First Light', function (c) { return !!c.has.dawn; }],
+    ['emerald', 'Emerald', 'Earn Two-a-Day', function (c) { return !!c.has.twice; }],
+    ['carbon', 'Carbon', 'Earn Century Set', function (c) { return !!c.has.century; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
@@ -7313,7 +7340,7 @@ var RK = {
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'twice', 'mythic']],
-  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
+  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
 function lfTitleEl(id) {
@@ -7361,7 +7388,15 @@ function lfTitleEl(id) {
     sentinel: ['tt-sn', '<span class="s-b"><i></i><i></i><i></i><i></i><em>Sentinel</em></span>'],
     zenith: ['tt-zn', 'Zenith'.split('').map(function (ch, i) { return '<span style="--i:' + i + '">' + ch + '</span>'; }).join('')],
     anvil: ['tt-av', '<em>Anvil</em><i class="v-k" aria-hidden="true"><b></b><b></b><b></b><b></b></i>'],
-    aurora: ['tt-au', '<em>Aurora</em>']
+    aurora: ['tt-au', '<em>Aurora</em>'],
+    ice: ['tt-ice', '<em>Ice</em>'],
+    lava: ['tt-lv', '<em>Lava</em>'],
+    marble: ['tt-mb', '<em>Marble</em>'],
+    neon: ['tt-ne', '<em>Neon</em>'],
+    galaxy: ['tt-gx', '<em>Galaxy</em>'],
+    sunrise: ['tt-sr', '<em>Sunrise</em>'],
+    emerald: ['tt-ed', '<em>Emerald</em>'],
+    carbon: ['tt-cb', '<em>Carbon</em>']
   };
   if (T2[id]) { sp.className = 'tt ' + T2[id][0]; sp.innerHTML = T2[id][1]; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
@@ -7799,7 +7834,9 @@ function lfRkPick(kind, onPick) {
     var cur = kind === 'ti' ? (S.ti === 'none' ? 'none' : lfRkTitle(c)) : lfRkWorn(kind, c) || '';
     function opt(x) {
       var o = el('<button type="button" class="rk-o"><b></b><span></span></button>');
-      $('b', o).textContent = x.n; $('span', o).textContent = x.ok ? (x.q || '') : 'Locked · ' + x.q;
+      $('b', o).textContent = x.n; $('span', o).textContent = x.ok ? (x.q || '') : 'Locked \u00b7 ' + x.q;
+      /* a title in the list is the title as it is worn, moving */
+      if (kind === 'ti' && x.id && x.id !== 'none') { var tw = lfTitleEl(x.id); if (tw) { var tb = $('b', o); tb.textContent = ''; var tf = el('<span class="fr-ti"></span>'); tf.appendChild(tw); tb.appendChild(tf); tb.classList.add('is-tt'); } }
       if (kind === 'fl' && x.id) { var fe = lfFlairEl(x.id); if (fe) $('b', o).appendChild(fe); }
       o.dataset.k = kind; o.dataset.id = x.id; o.setAttribute('aria-pressed', x.id === cur ? 'true' : 'false');
       if (kind === 'ti' && (x.id === 'owner' || x.id === 'creator')) o.classList.add('is-' + x.id);
@@ -7833,6 +7870,7 @@ function lfRkRows(cb) {
     var c = lfRkCtx(), id = k === 'ti' ? lfRkTitle(c) : lfRkWorn(k, c);
     var b = el('<button type="button" class="lf-btn is-full rk-set"><span></span><b></b></button>'); b.dataset.k = k;
     $('span', b).textContent = RK_HEAD[k]; $('b', b).textContent = id ? lfRkName(k, id) : 'None';
+    if (k === 'ti' && id) { var rw = lfTitleEl(id); if (rw) { var rb = $('b', b); rb.textContent = ''; var rf = el('<span class="fr-ti"></span>'); rf.appendChild(rw); rb.appendChild(rf); } }
     if (k === 'fl' && id) { var fe = lfFlairEl(id); if (fe) $('b', b).appendChild(fe); }
     b.addEventListener('click', function () { lfRkPick(k, function () { var y = $('#lfYou'); if (!y) return; var nw = lfRkRows(cb); w.replaceWith(nw); if (cb) cb(); }); });
     w.appendChild(b);
@@ -9042,7 +9080,10 @@ var BD_LAD = [
   ['wn', ['wo25', 'wo75', 'wo150', 'wo200', 'wo300']],
   ['sn', ['sets100', 'sets250', 'sets750', 'sets1500', 'sets3k']],
   ['hn', ['hr10', 'hr50', 'hr75', 'hr150', 'hr200']],
-  ['rq', ['rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']]
+  ['rq', ['rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']],
+  ['ie', ['ice1', 'ice2', 'ice3', 'ice4', 'ice5']],
+  ['la', ['lava1', 'lava2', 'lava3', 'lava4', 'lava5']],
+  ['ma', ['marb1', 'marb2', 'marb3', 'marb4', 'marb5']]
 ];
 /* the medals the ladders were missing: id, name, kind, what it says, colour, the metric and the count it is won at, then for an exotic or mythic one the painting and the hue */
 var BD_NEW = [
@@ -9117,8 +9158,27 @@ var BD_NEW = [
   ['rp5k', 'Five Thousand Reps', 'mile', 'Five thousand reps, all time.', '#f59f00', 'reps', 5000],
   ['rp25k', 'Twenty-Five Thousand Reps', 'mile', 'Twenty-five thousand reps, all time.', '#f59f00', 'reps', 25000],
   ['rp75k', 'Seventy-Five Thousand Reps', 'mile', 'Seventy-five thousand reps, all time.', '#f59f00', 'reps', 75000, 'petals', .83],
-  ['rp150k', 'A Hundred and Fifty Thousand Reps', 'mile', 'A hundred and fifty thousand reps, all time.', '#f59f00', 'reps', 150000, 'aurora', .85]
+  ['rp150k', 'A Hundred and Fifty Thousand Reps', 'mile', 'A hundred and fifty thousand reps, all time.', '#f59f00', 'reps', 150000, 'aurora', .85],
+  ['ice1', 'Chill', 'cardio', 'Five hours of cardio, all told.', '#7dd3fc', 'cdm', 300],
+  ['ice2', 'Frost', 'cardio', 'Fifteen hours of cardio, all told.', '#38bdf8', 'cdm', 900],
+  ['ice3', 'Glacier', 'cardio', 'Thirty hours of cardio, all told.', '#22d3ee', 'cdm', 1800],
+  ['ice4', 'Permafrost', 'cardio', 'Sixty hours of cardio, all told.', '#67e8f9', 'cdm', 3600, 'rain', .55],
+  ['ice5', 'Absolute Zero', 'cardio', 'A hundred hours of cardio, all told.', '#a5f3fc', 'cdm', 6000, 'tide', .57],
+  ['lava1', 'Kindled', 'mile', 'Four hundred sets logged, all time.', '#f97316', 'sets', 400],
+  ['lava2', 'Smouldering', 'mile', 'Twelve hundred sets logged, all time.', '#ef4444', 'sets', 1200],
+  ['lava3', 'Molten Core', 'mile', 'Twenty-five hundred sets logged, all time.', '#fb923c', 'sets', 2500],
+  ['lava4', 'Magma Chamber', 'mile', 'Four thousand sets logged, all time.', '#f43f5e', 'sets', 4000, 'forgehit', .04],
+  ['lava5', 'Eruption', 'mile', 'Six thousand sets logged, all time.', '#dc2626', 'sets', 6000, 'vortex', .06],
+  ['marb1', 'Quarry', 'start', 'A hundred and twenty-five sessions logged.', '#e5e7eb', 'wo', 125],
+  ['marb2', 'Slab', 'start', 'A hundred and seventy-five sessions logged.', '#d6d3d1', 'wo', 175],
+  ['marb3', 'Chisel', 'start', 'Two hundred and twenty-five sessions logged.', '#fde68a', 'wo', 225],
+  ['marb4', 'Statue', 'start', 'Two hundred and seventy-five sessions logged.', '#f5f5f4', 'wo', 275, 'lattice', .12],
+  ['marb5', 'Monument', 'start', 'Three hundred and fifty sessions logged.', '#fef3c7', 'wo', 350, 'weave', .17]
 ];
+/* THE FINISH LADDERS: each rung after the first is that ladder's own finish, chosen rather than dealt */
+['ice2', 'ice3', 'ice4', 'ice5'].forEach(function (k) { BD_FX[k] = 'ice'; });
+['lava2', 'lava3', 'lava4', 'lava5'].forEach(function (k) { BD_FX[k] = 'lava'; });
+['marb2', 'marb3', 'marb4', 'marb5'].forEach(function (k) { BD_FX[k] = 'marble'; });
 /* THE DAY STREAKS: every five days up to two hundred, each with a short line of its own. A day counts if you trained, pressed rest, or the programme had nothing on it; a programme day you missed breaks the run. */
 var BD_DST = [[5, "Rookie", "Motivation or dedication? Time will tell."], [10, "Warmed Up", "Ten days in. The habit is forming."], [15, "Stacking Days", "Showing up is most of the work."], [20, "No Excuses", "You stopped asking if you feel like it."], [25, "Twenty-Five Proof", "Twenty-five days of proof."], [30, "Locked In", "This is now your identity."], [35, "Dialled", "Ordinary days, done extraordinarily well."], [40, "Forty Deep", "Most people quit by now."], [45, "Relentless", "Momentum is doing the heavy lifting."], [50, "Fifty Days", "Fifty days. This is who you are."], [55, "Unmoved", "Tired, busy, you went anyway."], [60, "Two Months", "A routine now, not a project."], [65, "Iron Routine", "The bar does not care how you feel."], [70, "Ten Weeks", "Seventy days of keeping your word."], [75, "Seventy-Five", "Three quarters of a hundred, all earned."], [80, "Compounding", "Discipline, quietly adding up."], [85, "Unbroken", "Not one gap in eighty-five days."], [90, "A Season", "A whole season of showing up."], [95, "Almost There", "Five days from triple digits."], [100, "Centurion", "A hundred days. Few ever get here."], [105, "Past the Hundred", "Still going. Nobody asked you to stop."], [110, "Steady State", "This is just what you do now."], [115, "Second Nature", "It is part of you now."], [120, "Four Months", "A third of a year, every day."], [125, "Quiet Force", "No noise. Just results."], [130, "Layers", "Every day sits on the last."], [135, "Unshakeable", "Nothing knocks this over."], [140, "Twenty Weeks", "Half a year is not far."], [145, "Long Game", "You are playing it right."], [150, "One Fifty", "Half of two hundred. All of you."], [155, "Forged", "Made, not born."], [160, "Iron Will", "Will beats talent when talent rests."], [165, "Beyond Habit", "This is character now."], [170, "Rare Air", "Hardly anyone is up here."], [175, "Legend Territory", "People will hear about this."], [180, "Half a Year", "Six months. The habit never blinked."], [185, "Unstoppable", "What is left to stop you?"], [190, "Nearly There", "Ten days to two hundred."], [195, "Final Stretch", "Five more. You know you will."], [200, "Two Hundred", "Immortal. Keep it going."]], BD_TAG = {};
 (function () {
@@ -9777,7 +9837,7 @@ var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', wo100: '100', goal: 'i:r
 /* a new rung is a medal, not an object: a shape that reads as a thing (an hourglass, a gear, a drop) is worn as a seal, a scallop, a sun or a plaque instead */
 var BD_MEDAL = { hourglass: 'coin24', gear: 'scallop', drop: 'rosette', compass: 'sun', cross: 'burst', heart: 'scallop', flag: 'trap', tag: 'trap' };
 /* a new rung wears its family's shape, and says its count */
-BD_SHI.wo25 = 'hept'; BD_SHI.sets100 = 'oct'; BD_SHI.hr10 = 'sun'; BD_SHI.rp1k = 'burst';
+BD_SHI.wo25 = 'hept'; BD_SHI.sets100 = 'oct'; BD_SHI.hr10 = 'sun'; BD_SHI.rp1k = 'burst'; BD_SHI.ice1 = 'hextall'; BD_SHI.lava1 = 'pent'; BD_SHI.marb1 = 'shield';
 BD_LAD.forEach(function (l) {
   var s0 = l[1].filter(function (id) { return BD_SHI[id]; })[0];
   l[1].forEach(function (id) {
@@ -11553,15 +11613,15 @@ function lfMedalCard() {
    badge left out of every list still shows, in the last */
 var BD_COLL = [
   ['own', 'One of one', '#ff5a1f', ['owner', 'creator']],
-  ['ses', 'Sessions', '#2f7bff', ['first', 'wo10', 'wo25', 'wo50', 'wo75', 'wo100', 'wo150', 'wo200', 'wo250', 'wo300', 'wo365', 'wo500', 'hr10', 'hr50', 'hr75', 'hr150', 'hr200', 'mon20', 'mo3', 'mo6', 'mo12', 'year', 'hr25', 'hr100', 'hr250', 'sands', 'long', 'ironwk', 'twice', 'drakefire']],
+  ['ses', 'Sessions', '#2f7bff', ['first', 'wo10', 'wo25', 'wo50', 'wo75', 'wo100', 'wo150', 'wo200', 'wo250', 'wo300', 'wo365', 'wo500', 'hr10', 'hr50', 'hr75', 'hr150', 'hr200', 'marb1', 'marb2', 'marb3', 'marb4', 'marb5', 'mon20', 'mo3', 'mo6', 'mo12', 'year', 'hr25', 'hr100', 'hr250', 'sands', 'long', 'ironwk', 'twice', 'drakefire']],
   ['con', 'Consistency', '#8b5cf6', ['goal', 'st4', 'st12', 'st26', 'st52', 'week', 'dontmiss', 'seven', 'zero', 'wkend', 'back', 'early', 'owl', 'night', 'dawn', 'winter', 'newyear', 'dec31', 'friday13', 'leap', 'phoenix', 'ouroboros', 'eclipse', 'moonrise']],
   ['vol', 'Volume', '#ff8a1c', ['v100k', 'v500k', 'v1m', 'v5m', 'v10m', 'stormc', 'ton10', 'ton15', 'ton20', 'ton25', 'wkvol', 'leviathan', 'colossus']],
-  ['set', 'Sets & reps', '#0891b2', ['sets30', 'sets40', 'setwk100', 'sets100', 'sets250', 'sets500', 'sets750', 'sets1500', 'sets3k', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k', 'sets2k', 'sets5k', 'forge', 'rep300', 'rep1k', 'rep2k', 'rp10k', 'rp50k', 'rp100k', 'century']],
+  ['set', 'Sets & reps', '#0891b2', ['sets30', 'sets40', 'setwk100', 'sets100', 'sets250', 'sets500', 'sets750', 'sets1500', 'sets3k', 'lava1', 'lava2', 'lava3', 'lava4', 'lava5', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k', 'sets2k', 'sets5k', 'forge', 'rep300', 'rep1k', 'rep2k', 'rp10k', 'rp50k', 'rp100k', 'century']],
   ['str', 'Strength', '#ef3b2d', ['pr', 'pr3', 'pr10', 'pr25', 'pr50', 'pr100', 'vein', 'onfire', 'plate3', 'plate4', 'atlas']],
   ['exr', 'Exercises', '#eab308', ['ex15', 'explore', 'ex80', 'wayf', 'sig50', 'sig100', 'fullbody']],
   ['bod', 'Body parts', '#10b981', ['tgt1', 'tgtall', 'tgt4', 'tgt12', 'quad', 'allmus', 'allmus4', 'zodiac', 'chest50', 'chest100', 'chest200', 'bk50', 'bk100', 'bk200', 'sh50', 'sh100', 'sh200',
     'arm50', 'arm100', 'arm200', 'leg50', 'leg100', 'leg200', 'post50', 'abs10', 'abs50', 'abs100']],
-  ['car', 'Cardio', '#06b6d4', ['stair10', 'stairhr', 'incl10', 'inclhr', 'cardio25', 'cdwk', 'cardio100', 'cdh50', 'summit', 'lungs', 'koipond']],
+  ['car', 'Cardio', '#06b6d4', ['ice1', 'ice2', 'ice3', 'ice4', 'ice5', 'stair10', 'stairhr', 'incl10', 'inclhr', 'cardio25', 'cdwk', 'cardio100', 'cdh50', 'summit', 'lungs', 'koipond']],
   ['tec', 'Technique', '#38bdf8', ['ss1', 'ss2', 'ss3', 'ssx', 'ssm', 'ds1', 'ds2', 'ds3', 'dsx', 'dsm', 'wu1', 'wu2', 'wu3', 'wux', 'wum']],
   ['fri', 'Friends', '#6366f1', ['duo1', 'duo10', 'duo50', 'lead1', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer', 'unbeat']]
 ];
@@ -11859,6 +11919,7 @@ else if (!S.bseen.v2) { var BS2 = { goal: 1, tgt1: 1, tgtall: 1, tgt4: 1, quad: 
 /* the monthly medals arrived the same way, and a month won in August is not news either */
 /* and the milestones, which a long record may already hold */
 /* the technique medals and the new rungs: whatever a long record already holds is not news */
+if (S.bseen && !S.bseen.v14) { var BS14 = ['ice1', 'ice2', 'ice3', 'ice4', 'ice5', 'lava1', 'lava2', 'lava3', 'lava4', 'lava5', 'marb1', 'marb2', 'marb3', 'marb4', 'marb5']; lfBadges().forEach(function (x) { if (x.d && BS14.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v14 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v13) { var BS13 = ['wo25', 'wo75', 'wo150', 'wo200', 'wo300', 'sets100', 'sets250', 'sets750', 'sets1500', 'sets3k', 'hr10', 'hr50', 'hr75', 'hr150', 'hr200', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']; lfBadges().forEach(function (x) { if (x.d && BS13.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v13 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v11) { var BS11 = {}; BD_NEW.forEach(function (r) { BS11[r[0]] = 1; }); ['ss', 'ds', 'wu'].forEach(function (f) { ['1', '2', '3', 'x', 'm'].forEach(function (k) { BS11[f + k] = 1; }); }); lfBadges().forEach(function (x) { if (x.d && BS11[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v11 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v12) { var BS12 = lfBadges(); BS12.forEach(function (x) { if (x.d && BD_TAG[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v12 = 1; lfSave(); }
