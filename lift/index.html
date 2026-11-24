@@ -186,12 +186,12 @@ svg { display: block; }
 .lf-tgo span { color: var(--dim); font-size: 14px; }
 .lf-tgo em { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-style: normal; font-size: 13px; color: var(--dim); text-align: right; }
 .lf-tgo[aria-pressed="true"] { border-color: var(--log); }
-.lf-tgc { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 4px 12px; width: 100%; text-align: left; padding: 14px 16px; margin: 0 0 10px; border-radius: var(--r); background: var(--card); box-shadow: var(--card-shadow); border: 0; color: inherit; font: inherit; position: relative; }
-.lf-tgc b { font-size: 19px; letter-spacing: -.01em; }
-.lf-tgc-s { color: var(--dim); font-size: 13px; }
-.lf-tgc-e { grid-row: 1 / span 3; grid-column: 2; align-self: center; font-size: 14px; font-weight: 700; background: var(--tick-off); padding: 9px 14px; border-radius: 999px; }
-.lf-tgc-b { grid-column: 1 / -1; display: flex; gap: 4px; align-items: flex-end; height: 22px; margin-top: 4px; }
-.lf-tgc-b i { flex: 1; max-width: 12px; border-radius: 3px; background: var(--ink); opacity: .55; }
+.lf-tgc { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 12px 16px; margin: 0 0 10px; border-radius: var(--r); background: var(--card); box-shadow: var(--card-shadow); border: 0; color: inherit; font: inherit; position: relative; }
+.lf-tgc b { font-size: 17px; letter-spacing: -.02em; }
+.lf-tgc-s { color: var(--dim); font-size: 9.5px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; flex: 1; }
+.lf-tgc-b { display: flex; gap: 3px; align-items: flex-end; height: 18px; }
+.lf-tgc-b i { width: 5px; border-radius: 2px; background: var(--ink); opacity: .55; }
+.lf-tgc-c { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--dim); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .lf-seg.is-wrap { flex-wrap: wrap; }
 /* THE PROGRESS CARD: the weekly streak and the weekly goal, two pages in one card on Home. A swipe or the dots turn the page; each page opens its own sheet. It is a fixed height, so turning it never moves the cards under it. */
 .lf-pgr { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 16px; color: inherit; font: inherit; text-align: left; }
@@ -4084,11 +4084,10 @@ function lfZBasis(after) {
 /* the card at the top of Exercises: what the week asks of you, and the way into Zones */
 function lfTgCard() {
   var ts = lfTargets(), tot = ts.reduce(function (a, t) { return a + t[2]; }, 0);
-  var c = el('<button type="button" class="lf-tgc" id="lfTgCard"><span class="lf-lab">Weekly targets</span><b class="lf-num"></b><span class="lf-tgc-s"></span><span class="lf-tgc-e">Edit targets</span><span class="lf-tgc-b" aria-hidden="true"></span></button>');
-  $('b', c).textContent = tot + ' sets a week';
-  $('.lf-tgc-s', c).textContent = (S.zn === 0 || S.zn === 1 || S.zn === 2 ? ZNAME[S.zn] + ' · ' : '') + ts.length + (ts.length === 1 ? ' muscle' : ' muscles');
+  var c = el('<button type="button" class="lf-tgc" id="lfTgCard"><b class="lf-num"></b><span class="lf-tgc-s">sets a week</span><span class="lf-tgc-b" aria-hidden="true"></span><svg class="lf-tgc-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>');
+  $('b', c).textContent = tot;
   ts.forEach(function (t) { var i = document.createElement('i'); i.style.height = Math.max(8, Math.min(100, t[2] / 20 * 100)) + '%'; $('.lf-tgc-b', c).appendChild(i); });
-  c.setAttribute('aria-label', 'Weekly targets, ' + tot + ' sets a week across ' + ts.length + ' muscles. Edit targets');
+  c.setAttribute('aria-label', 'Weekly targets, ' + (S.zn === 0 || S.zn === 1 || S.zn === 2 ? ZNAME[S.zn] + ', ' : '') + tot + ' sets a week across ' + ts.length + ' muscles. Edit targets');
   c.addEventListener('click', lfZonesSheet);
   return c;
 }

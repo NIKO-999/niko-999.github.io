@@ -1648,7 +1648,7 @@ const freeze = (at) => `(() => {
     const ord = await page.evaluate(() => { const y = (s) => document.querySelector(s).getBoundingClientRect().top; return [y('#lfTgCard'), y('#lfNewSplit'), y('#lfProgMg'), y('#lfSplit')]; });
     ok('Exercises runs: the targets card, Create split, Manage and share splits, then your split', ord[0] < ord[1] && ord[1] <= ord[2] && ord[2] < ord[3], JSON.stringify(ord));
     ok('Create split is a Quick-actions tile with its icon', await page.evaluate(() => { const b = document.querySelector('#lfNewSplit'); return /Create split/.test(b.textContent) && !!b.querySelector('svg'); }));
-    ok('the card says the weekly total and how many muscles, with Edit targets', /sets a week/.test(await page.textContent('#lfTgCard')) && /muscles/.test(await page.textContent('#lfTgCard')) && /Edit targets/.test(await page.textContent('#lfTgCard')));
+    ok('the slim row says the weekly total, and its label names the muscles and Edit targets', /sets a week/.test(await page.textContent('#lfTgCard')) && /muscles/.test(await page.getAttribute('#lfTgCard', 'aria-label')) && /Edit targets/.test(await page.getAttribute('#lfTgCard', 'aria-label')));
     await page.click('#lfTgCard'); await settle(page);
     const rowsN = await page.locator('#lfZn .lf-zr').count();
     ok('it opens Zones: the split, what the numbers are based on, three zones and a track for every muscle', rowsN > 0 && await page.locator('#lfZn .lf-zn-d div').count() === 7 && /Build muscle/.test(await page.textContent('#lfZn .lf-zn-bs')) && await page.locator('#lfZnSeg button[aria-pressed="true"]').textContent() === 'Build');
@@ -1664,7 +1664,7 @@ const freeze = (at) => `(() => {
     await page.locator('#lfZnSeg button').nth(2).click(); await page.click('#lfZnSave'); await settle(page);
     const st = await store(page);
     ok('saving puts one number on every muscle, and remembers the zone', st.focus.every((f) => f.lo === f.hi) && st.zn === 2, JSON.stringify(st.focus.map((f) => f.m + f.lo)));
-    ok('the card behind follows: Push and the new total', /Push/.test(await page.textContent('#lfTgCard')) && (await page.textContent('#lfTgCard')).includes(String(st.focus.reduce((a, f) => a + f.hi, 0))));
+    ok('the card behind follows: Push and the new total', /Push/.test(await page.getAttribute('#lfTgCard', 'aria-label')) && (await page.textContent('#lfTgCard')).includes(String(st.focus.reduce((a, f) => a + f.hi, 0))));
     await page.locator('.lf-toast button').last().click().catch(() => {}); await settle(page);
     ok('Undo brings the old targets and the old zone back', (await store(page)).zn === undefined && JSON.stringify((await store(page)).focus) !== JSON.stringify(st.focus));
     /* the goal changes the numbers */
