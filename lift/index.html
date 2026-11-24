@@ -400,7 +400,7 @@ svg { display: block; }
 
 /* ── 30-day grid ── */
 .lf-days { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px 6px; margin-top: 14px; }
-/* soft squares: an untrained day is a quiet filled square, a trained one is lit, a rest day is a dashed outline */
+/* soft squares: an untrained day is a quiet filled square, a trained one is lit, a rest day is half lit */
 .lf-day { height: 20px; border-radius: 6px; border: 1.5px solid transparent; background: var(--mark-off); }
 .lf-day.is-on { background: var(--mark-on); border-color: var(--mark-on); }
 .lf-day.is-now { border-color: var(--ink); border-width: 2.5px; }
