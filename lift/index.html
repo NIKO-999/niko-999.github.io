@@ -4547,8 +4547,9 @@ function lfSsMenu(g, btn) {
 }
 /* SUPERSET WITH…: pick the partner from a list, then make it. The pairing itself is the same two steps the link button always did. */
 function lfSsPick(e) {
-  var cand = act.x.filter(function (q) { return q !== e && !(q.ss && q.ss === e.ss); });
-  if (!cand.length) { lfToast('Add another exercise to superset with'); return; }
+  /* a finished exercise has no sets left to alternate with, so only the ones with a set still to do are offered */
+  var cand = act.x.filter(function (q) { return q !== e && !(q.ss && q.ss === e.ss) && q.sets.some(function (z) { return !z.ok; }); });
+  if (!cand.length) { lfToast('No unfinished exercise to superset with'); return; }
   var pick = cand[0], b = el('<div></div>'), list = el('<div class="lf-sspk" role="radiogroup"></div>');
   b.appendChild(el('<p class="lf-sspk-n">Pick one. You alternate sets, and rest after both.</p>')); b.appendChild(list);
   var go = el('<button type="button" class="lf-btn is-log is-full" id="lfSsMake">Make superset</button>');
