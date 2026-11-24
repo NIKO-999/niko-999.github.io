@@ -1932,8 +1932,6 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes fl-frw { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px) scale(1.08); } }
 .lf-fl[data-fl="fsquat"] { transform-origin: 50% 100%; animation: fl-fsq 2.2s ease-in-out infinite; }
 @keyframes fl-fsq { 0%, 100% { transform: scaleY(1); } 45%, 60% { transform: scaleY(.72) scaleX(1.08); } }
-.lf-fl[data-fl^="fic"] { animation: fl-fic 2.4s ease-in-out infinite; }
-@keyframes fl-fic { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px #fbbf24); } 45% { transform: scale(1.2) rotate(-5deg); filter: drop-shadow(0 0 10px #fbbf24) brightness(1.4); } 55% { transform: scale(1.2) rotate(5deg); } }
 @media (prefers-reduced-motion: reduce) { .tt-s1 em, .tt-s2 em, .tt-s3 em, .tt-s4 em, .lf-fl[data-fl^="f"] { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .lf-fl, .lf-fl[data-fl] { animation: none; } }
 .fr-ban-av[class*="is-fm-"] { position: relative; }
@@ -8289,13 +8287,9 @@ var RK = {
     ['backbuild', 'Row 80', 'Barbell Row, Intermediate', function (c) { return !!c.has.rw2; }],
     ['rowmaster', 'Row 100', 'Barbell Row, Advanced', function (c) { return !!c.has.rw3; }],
     ['cobraback', 'Row 120', 'Barbell Row, Elite', function (c) { return !!c.has.rw4; }],
-    ['bench225', 'The 100', 'The iconic The 100', function (c) { return !!c.has.icb; }],
-    ['incl225', 'The 100 Incline', 'The iconic The 100 Incline', function (c) { return !!c.has.ici; }],
-    ['squat315', 'The 143', 'The iconic The 143', function (c) { return !!c.has.ics; }],
-    ['dead405', 'The 184', 'The iconic The 184', function (c) { return !!c.has.icd; }],
-    ['ohp225', 'The 102 Press', 'The iconic The 102 Press', function (c) { return !!c.has.ico; }],
     ['sqrookie', 'Squat 80', 'Back Squat, Beginner', function (c) { return !!c.has.sq1; }],
     ['deepdiver', 'Squat 120', 'Back Squat, Intermediate', function (c) { return !!c.has.sq2; }],
+    ['threefif', 'Squat 143', 'Back Squat, Advanced', function (c) { return !!c.has.sq3; }],
     ['sqboss', 'Squat 160', 'Back Squat, Advanced+', function (c) { return !!c.has.sq4; }],
     ['quadkill', 'Squat 200', 'Back Squat, Elite', function (c) { return !!c.has.sq5; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
@@ -8346,17 +8340,12 @@ var RK = {
     ['planet', 'Planet', 'Earn 25 PRs', function (c) { return !!c.has.pr25; }, 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM3 17c-1-3 4-8 12-10M21 7c1 3-4 8-12 10', '#c084fc', 1],
     ['hourglass', 'Hourglass', 'Earn One Year In', function (c) { return !!c.has.year; }, 'M6 3h12M6 21h12M7 3c0 6 5 6 5 9s-5 3-5 9M17 3c0 6-5 6-5 9s5 3 5 9', '#fbbf24', 1],
     ['diamond', 'Diamond', 'Earn 1M moved', function (c) { return !!c.has.v1m; }, 'M6 3h12l4 6-10 12L2 9zM2 9h20M9 3l3 6 3-6', '#67e8f9', 1],
-    ['fbench', 'Flat Press', 'Flat bench, Advanced', function (c) { return !!c.has.fb3; }, 'M3 15h18M6 15v4M18 15v4M7 11h10M5 9v4M19 9v4', '#ef3b2d', 1],
-    ['fincline', 'Incline Press', 'Incline bench, Advanced', function (c) { return !!c.has.ib3; }, 'M4 19L17 12M6.500 9v7M19 9v6M3 12h18', '#ff7a1a', 1],
-    ['fpress', 'Overhead', 'Shoulder press, Advanced', function (c) { return !!c.has.oh3; }, 'M12 4v11M6 6h12M4 5v2M20 5v2M12 15l-3 6M12 15l3 6', '#eab308', 1],
-    ['fdead', 'Deadlift', 'Deadlift, Advanced', function (c) { return !!c.has.dl3; }, 'M3 19h18M6 13v6M18 13v6M4 11v8M20 11v8M6 16h12', '#8b5cf6', 1],
+    ['fbench', 'Flat Press', 'The iconic bench', function (c) { return !!c.has.fb2; }, 'M3 15h18M6 15v4M18 15v4M7 11h10M5 9v4M19 9v4', '#ef3b2d', 1],
+    ['fincline', 'Incline Press', 'The iconic incline', function (c) { return !!c.has.ib3; }, 'M4 19L17 12M6.500 9v7M19 9v6M3 12h18', '#ff7a1a', 1],
+    ['fpress', 'Overhead', 'The iconic press', function (c) { return !!c.has.oh4; }, 'M12 4v11M6 6h12M4 5v2M20 5v2M12 15l-3 6M12 15l3 6', '#eab308', 1],
+    ['fdead', 'Deadlift', 'The iconic deadlift', function (c) { return !!c.has.dl3; }, 'M3 19h18M6 13v6M18 13v6M4 11v8M20 11v8M6 16h12', '#8b5cf6', 1],
     ['frow', 'Row', 'Barbell row, Advanced', function (c) { return !!c.has.rw3; }, 'M5 12h14M3 10v4M21 10v4M8 6l4 4 4-4', '#22b8cf', 1],
-    ['fsquat', 'Squat', 'Back squat, Advanced', function (c) { return !!c.has.sq3; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#3b82f6', 1],
-    ['ficb', 'Iconic Bench', 'The 225 Club', function (c) { return !!c.has.icb; }, 'M3 15h18M6 15v4M18 15v4M7 11h10M5 9v4M19 9v4', '#fbbf24', 1],
-    ['fici', 'Iconic Incline', 'Incline 225', function (c) { return !!c.has.ici; }, 'M4 19L17 12M6.500 9v7M19 9v6M3 12h18', '#fbbf24', 1],
-    ['fics', 'Iconic Squat', 'The 315', function (c) { return !!c.has.ics; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#fbbf24', 1],
-    ['ficd', 'Iconic Deadlift', 'The 405', function (c) { return !!c.has.icd; }, 'M3 19h18M6 13v6M18 13v6M4 11v8M20 11v8M6 16h12', '#fbbf24', 1],
-    ['fico', 'Iconic Press', 'Press 225', function (c) { return !!c.has.ico; }, 'M12 4v11M6 6h12M4 5v2M20 5v2M12 15l-3 6M12 15l3 6', '#fbbf24', 1]],
+    ['fsquat', 'Squat', 'The iconic squat', function (c) { return !!c.has.sq3; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#3b82f6', 1]],
   fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
     ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
     ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
@@ -8478,13 +8467,9 @@ function lfTitleEl(id) {
     backbuild: ['tt-s2 lc-rw', '<em>Row 80</em>'],
     rowmaster: ['tt-s3 lc-rw', '<em>Row 100</em>'],
     cobraback: ['tt-s4 lc-rw', '<em>Row 120</em>'],
-    bench225: ['tt-s4 lc-fb', '<em>The 100</em>'],
-    incl225: ['tt-s4 lc-ib', '<em>The 100 Incline</em>'],
-    squat315: ['tt-s4 lc-sq', '<em>The 143</em>'],
-    dead405: ['tt-s4 lc-dl', '<em>The 184</em>'],
-    ohp225: ['tt-s4 lc-oh', '<em>The 102 Press</em>'],
     sqrookie: ['tt-s1 lc-sq', '<em>Squat 80</em>'],
     deepdiver: ['tt-s2 lc-sq', '<em>Squat 120</em>'],
+    threefif: ['tt-s3 lc-sq', '<em>The 315</em>'],
     sqboss: ['tt-s3 lc-sq', '<em>Squat 160</em>'],
     quadkill: ['tt-s4 lc-sq', '<em>Squat 200</em>']
   };
@@ -10313,7 +10298,7 @@ var BD_LIFT = [
   { f: 'oh', n: 'Shoulder Press', d: 'a standing barbell overhead press', ex: ['ohp'], c: '#eab308', sh: 'pent', kg: [40, 60, 80, 100], lb: [95, 135, 175, 225], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 3 },
   { f: 'dl', n: 'Deadlift', d: 'a barbell deadlift', ex: ['deadlift'], c: '#8b5cf6', sh: 'hex', kg: [100, 140, 180, 220], lb: [225, 315, 405, 495], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 2 },
   { f: 'rw', n: 'Barbell Row', d: 'a barbell row', ex: ['bbrow'], c: '#22b8cf', sh: 'shield', kg: [60, 80, 100, 120], lb: [135, 175, 225, 265], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: -1 },
-  { f: 'sq', n: 'Back Squat', d: 'a barbell back squat', ex: ['squat'], c: '#3b82f6', sh: 'crest', kg: [80, 120, 160, 200], lb: [185, 275, 365, 445], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: -1 }
+  { f: 'sq', n: 'Back Squat', d: 'a barbell back squat', ex: ['squat'], c: '#3b82f6', sh: 'crest', kg: [80, 120, 143, 160, 200], lb: [185, 275, 315, 365, 445], lab: ['Beginner', 'Intermediate', 'Advanced', 'Advanced+', 'Elite'], ic: 2 }
 ];
 var BD_LIFTID = {};
 BD_LIFT.forEach(function (L) {
@@ -10321,44 +10306,27 @@ BD_LIFT.forEach(function (L) {
   L.ids.forEach(function (id, i) { BD_LIFTID[id] = 1; BD_NEW.push([id, L.n + ' ' + L.kg[i] + ' kg', 'pr', L.d + ' of ' + L.kg[i] + ' kg or more. ' + L.lab[i] + '.', L.c, 'lift', L.kg[i]]); });
   BD_LAD.push(['lf' + L.f, L.ids.slice()]);
 });
-/* THE ICONIC ONES, each its own badge and not a rung: the lifts every gym knows. 225 lb on the bench (100 kg), the same on the incline, 315 lb on the squat (143 kg), 405 lb on the deadlift (184 kg) and 225 lb overhead (102 kg). Earned only by that exact lift, in the unit you train in. */
-var BD_ICON = [
-  { id: 'icb', n: 'Bench', d: 'a flat barbell bench press', ex: ['bench'], c: '#ef3b2d', sh: 'burst', fx: 'plasma', kg: 100, lb: 225 },
-  { id: 'ici', n: 'Incline', d: 'an incline barbell bench press', ex: ['inclbb'], c: '#ff7a1a', sh: 'star5', fx: 'holo', kg: 100, lb: 225 },
-  { id: 'ics', n: 'Squat', d: 'a barbell back squat', ex: ['squat'], c: '#3b82f6', sh: 'sun', fx: 'crystal', kg: 143, lb: 315 },
-  { id: 'icd', n: 'Deadlift', d: 'a barbell deadlift', ex: ['deadlift'], c: '#8b5cf6', sh: 'scallop', fx: 'obsidian', kg: 184, lb: 405 },
-  { id: 'ico', n: 'Press', d: 'a standing barbell overhead press', ex: ['ohp'], c: '#eab308', sh: 'trap', fx: 'molten', kg: 102, lb: 225 }
-];
-BD_ICON.forEach(function (I) {
-  BD_LIFTID[I.id] = 1; BD_FX[I.id] = I.fx; BD_HALO[I.id] = 1;
-  BD_NEW.push([I.id, 'The ' + I.lb + ' ' + I.n, 'pr', 'The classic: ' + I.d + ' of ' + I.lb + ' lb or more.', I.c, 'lift', I.kg]);
-});
-function lfIconTh(I) { return S.unit === 'lb' ? I.lb * LB : I.kg; }
 /* THE LIFT TITLES ARE NUMBERS, in the unit you train in: Bench 225, Squat 315, The 405. The catalogue holds the kg names and these put the right ones in at the start. */
 var LF_TIN = {};
 (function () {
-  var T = { fb: ['benchbud', 'twoplates', 'benchboss', 'benchking'], ib: ['incstart', 'incpro', 'incbeast', 'incking'], oh: ['pressrook', 'ohpro', 'boulder', 'skypush'], dl: ['pullstart', 'floormove', 'fourplate', 'deadlord'], rw: ['rowrookie', 'backbuild', 'rowmaster', 'cobraback'], sq: ['sqrookie', 'deepdiver', 'sqboss', 'quadkill'] };
+  var T = { fb: ['benchbud', 'twoplates', 'benchboss', 'benchking'], ib: ['incstart', 'incpro', 'incbeast', 'incking'], oh: ['pressrook', 'ohpro', 'boulder', 'skypush'], dl: ['pullstart', 'floormove', 'fourplate', 'deadlord'], rw: ['rowrookie', 'backbuild', 'rowmaster', 'cobraback'], sq: ['sqrookie', 'deepdiver', 'threefif', 'sqboss', 'quadkill'] };
   var S2 = { fb: 'Bench', ib: 'Incline', oh: 'Press', dl: 'Deadlift', rw: 'Row', sq: 'Squat' };
-  BD_LIFT.forEach(function (L) { T[L.f].forEach(function (id, i) { LF_TIN[id] = function (lb) { return S2[L.f] + ' ' + (lb ? L.lb[i] : L.kg[i]); }; }); });
-  var IC = { bench225: ['icb', ''], incl225: ['ici', ' Incline'], squat315: ['ics', ''], dead405: ['icd', ''], ohp225: ['ico', ' Press'] };
-  Object.keys(IC).forEach(function (id) { var I = BD_ICON.filter(function (x) { return x.id === IC[id][0]; })[0]; LF_TIN[id] = function (lb) { return 'The ' + (lb ? I.lb : I.kg) + IC[id][1]; }; });
+  var SUF = { fb: '', ib: ' Incline', oh: ' Press', dl: '', rw: '', sq: '' };
+  BD_LIFT.forEach(function (L) { T[L.f].forEach(function (id, i) { LF_TIN[id] = function (lb) { var v = lb ? L.lb[i] : L.kg[i]; return L.ic === i ? 'The ' + v + SUF[L.f] : S2[L.f] + ' ' + v; }; }); });
 })();
 function lfLiftTitleName(id) { var f = LF_TIN[id]; return f ? f(S.unit === 'lb') : ''; }
 function lfLiftTh(L) { return S.unit === 'lb' ? L.lb.map(function (v) { return v * LB; }) : L.kg.slice(); }
 /* the name, the words and the mark on a lift badge follow the unit you train in */
+var SHORTN = { fb: 'Bench', ib: 'Incline', oh: 'Press', dl: 'Deadlift', rw: 'Row', sq: 'Squat' };
 function lfLiftRefresh() {
   BD_LIFT.forEach(function (L) {
     L.ids.forEach(function (id, i) {
       var b = BADGE[id]; if (!b) return; var v = S.unit === 'lb' ? L.lb[i] : L.kg[i];
-      b.n = L.n + ' ' + v + ' ' + S.unit; b.d = L.d.charAt(0).toUpperCase() + L.d.slice(1) + ' of ' + v + ' ' + S.unit + ' or more. ' + L.lab[i] + (L.ic === i ? '. The one everybody chases.' : '.');
+      b.n = L.ic === i ? 'The ' + v + ' ' + SHORTN[L.f] : L.n + ' ' + v + ' ' + S.unit; b.d = L.d.charAt(0).toUpperCase() + L.d.slice(1) + ' of ' + v + ' ' + S.unit + ' or more. ' + L.lab[i] + (L.ic === i ? '. The one everybody chases.' : '.');
       BD_GL[id] = String(v);
     });
   });
   RK.ti.forEach(function (r) { if (LF_TIN[r[0]]) r[1] = lfLiftTitleName(r[0]); });
-  BD_ICON.forEach(function (I) {
-    var b = BADGE[I.id]; if (!b) return; var v = S.unit === 'lb' ? I.lb : I.kg;
-    b.n = 'The ' + v + ' ' + I.n; b.d = 'The classic: ' + I.d + ' of ' + v + ' ' + S.unit + ' or more.'; BD_GL[I.id] = String(v);
-  });
 }
 var BD_NEWBY = {}; BD_NEW.forEach(function (r) { BD_NEWBY[r[0]] = r; });
 /* a rung's finish, where a badge that is being moved to it has none */
@@ -10812,14 +10780,6 @@ function lfBadges() {
     }); });
     L.top = top;
   });
-  BD_ICON.forEach(function (I) {
-    var th = lfIconTh(I), top = 0;
-    ws.forEach(function (w) { w.x.forEach(function (e) {
-      if (I.ex.indexOf(e.id) < 0) return;
-      e.sets.forEach(function (q) { var v = +q.w || 0; if (q.r > 0 && v > top) { top = v; if (top >= th - .05) won(I.id, w.d); } });
-    }); });
-    I.top = top;
-  });
   var own = lfOwner(); if (own) { won('owner', own); won('creator', own); }
   if (S.slay) won('slayer', S.slay);
   if (vol >= 1e7 * uk) { var vv = 0; ws.some(function (w) { vv += woVol(w); if (vv >= 1e7 * uk) { won('v10m', w.d); return true; } return false; }); }
@@ -10874,7 +10834,6 @@ function lfBadges() {
     prog[r[0]] = hrs ? [Math.min(Math.floor(val / 60), th / 60), th / 60] : [Math.min(val, th), th];
   });
   BD_LIFT.forEach(function (L) { var th = lfLiftTh(L); L.ids.forEach(function (id, i) { prog[id] = [Math.min(L.top || 0, th[i]), th[i]]; }); });
-  BD_ICON.forEach(function (I) { var th = lfIconTh(I); prog[I.id] = [Math.min(I.top || 0, th), th]; });
   prog.drakefire = [Math.min(ws.length, 750), 750]; prog.phoenix = [Math.min(phBest, 10), 10]; prog.leviathan = [Math.min(Math.round(vol / uk), 25e6), 25e6]; prog.ouroboros = [Math.min(stBest, 104), 104];
   prog.eclipse = [Math.min(earlyN, 100), 100]; prog.moonrise = [Math.min(owlN, 100), 100]; prog.colossus = [0, 1]; prog.atlas = [0, 1];
   ['allmus', 'dec31', 'friday13', 'leap', 'ironwk', 'plate4', 'ton25', 'sets40'].forEach(function (k) { prog[k] = [0, 1]; });
@@ -11024,7 +10983,6 @@ var BD_GL = { plan1: 'i:cal', first: 'i:check', wo10: '10', wo50: '50', wo100: '
 var BD_MEDAL = { hourglass: 'coin24', gear: 'scallop', drop: 'rosette', compass: 'sun', cross: 'burst', heart: 'scallop', flag: 'trap', tag: 'trap' };
 /* the lift ladders: one shape and colour a lift, and the number on the face */
 BD_LIFT.forEach(function (L) { BD_SHI[L.ids[0]] = L.sh; L.ids.forEach(function (id, i) { BD_GL[id] = String(L.kg[i]); }); });
-BD_ICON.forEach(function (I) { BD_SHI[I.id] = I.sh; BD_GL[I.id] = String(I.kg); });
 /* a new rung wears its family's shape, and says its count */
 BD_SHI.wo25 = 'hept'; BD_SHI.sets100 = 'oct'; BD_SHI.hr10 = 'sun'; BD_SHI.rp1k = 'burst'; BD_SHI.duo5 = 'crest'; BD_SHI.lead2 = 'trap'; BD_SHI.ice1 = 'hextall'; BD_SHI.lava1 = 'pent'; BD_SHI.marb1 = 'shield';
 BD_LAD.forEach(function (l) {
@@ -12480,7 +12438,7 @@ function bdDbPut(k, v) { bdDb().then(function (db) { if (db) try { db.transactio
 /* Don't Miss changed its look after phones had saved a picture of it: the suffix is its look's version, so only it is drawn again */
 function bdKey(x) { return x.b.id + (BD_LIFTID[x.b.id] ? ':' + S.unit : '') + (x.b.id === 'dontmiss' ? ':tm4' : '') + (x.d ? ':' + x.d : ':lock') + (x.b.gl ? ':' + x.b.gl : '') + (x.p && x.b.k === 'month' ? ':' + x.p.join('/') : ''); }
 /* THE SHELF'S PICTURES ARE FILES, made ahead of time with the same code that draws the badge when it is opened (tools/make-badge-stills.py). Drawing 247 of them on each phone, one at a time, left most of the shelf as blank discs for a while, and the blank ones all looked alike until you opened one. A badge with a file shows it at once; one without (a month's medal, which carries its progress) is still drawn live, as it was. */
-var BD_STATIC = /*BD_STATIC*/["abs10","abs100","abs200","abs400","abs50","allmus","allmus2","allmus3","allmus4","arm100","arm200","arm400","arm50","arm800","atlas","back","bk100","bk200","bk400","bk50","bk800","cardio100","cardio200","cardio25","cardio400","cardio50","cdh10","cdh25","cdh50","cdh75","cdwk","century","chest100","chest200","chest400","chest50","chest800","colossus","d10","d100","d105","d110","d115","d120","d125","d130","d135","d140","d145","d15","d150","d155","d160","d165","d170","d175","d180","d185","d190","d195","d20","d200","d25","d30","d35","d40","d45","d5","d50","d55","d60","d65","d70","d75","d80","d85","d90","d95","dawn","dec31","dontmiss","drakefire","ds1","ds2","ds3","dsm","dsx","duo1","duo10","duo100","duo200","duo50","early","early25","early50","early75","eclipse","ex100","ex15","ex80","explore","first","forge","friday13","fullbody","goal","hr100","hr1000","hr25","hr250","hr500","incl10","inclhr","ironwk","koipond","landslide","lead1","lead10","lead25","lead3","lead52","leap","leg100","leg200","leg400","leg50","leg800","leviathan","long","lungs","mo12","mo18","mo24","mo3","mo6","mon20","moonrise","newyear","night","onfire","ouroboros","owl","owl25","owl50","owl75","pack","phoenix","photo","plate200","plate210","plate3","plate4","post100","post200","post400","post50","post800","pr","pr10","pr100","pr25","pr3","pr50","quad","rep1k","rep2k","rep300","rp100k","rp10k","rp250k","rp500k","rp50k","run21","run30","run60","sands","sets10k","sets20k","sets2k","sets30","sets40","sets500","sets5k","setwk100","seven","sh100","sh200","sh400","sh50","sh800","sig100","sig200","sig25","sig400","sig50","squad","ss1","ss2","ss3","ssm","ssx","st12","st26","st4","st52","stair10","stairhr","stormc","summit","tgt1","tgt12","tgt26","tgt4","tgtall","ton10","ton15","ton20","ton25","trio","twice","unbeat","v100k","v10m","v1m","v500k","v5m","vein","wave","wayf","week","winter","wkend","wkvol","wo10","wo100","wo250","wo365","wo50","wo500","wu1","wu2","wu3","wum","wux","year","zero","zodiac"]/*END*/, bdStaticSet = null;
+var BD_STATIC = /*BD_STATIC*/["abs10","abs100","abs200","abs400","abs50","allmus","allmus2","allmus3","allmus4","arm100","arm200","arm400","arm50","arm800","atlas","back","bk100","bk200","bk400","bk50","bk800","cardio100","cardio200","cardio25","cardio400","cardio50","cdh10","cdh25","cdh50","cdh75","cdwk","century","chest100","chest200","chest400","chest50","chest800","colossus","d10","d100","d105","d110","d115","d120","d125","d130","d135","d140","d145","d15","d150","d155","d160","d165","d170","d175","d180","d185","d190","d195","d20","d200","d25","d30","d35","d40","d45","d5","d50","d55","d60","d65","d70","d75","d80","d85","d90","d95","dawn","dec31","dl1","dl2","dl3","dl4","dontmiss","drakefire","ds1","ds2","ds3","dsm","dsx","duo1","duo10","duo100","duo200","duo50","early","early25","early50","early75","eclipse","ex100","ex15","ex80","explore","fb1","fb2","fb3","fb4","first","forge","friday13","fullbody","goal","hr100","hr1000","hr25","hr250","hr500","ib1","ib2","ib3","ib4","incl10","inclhr","ironwk","koipond","landslide","lead1","lead10","lead25","lead3","lead52","leap","leg100","leg200","leg400","leg50","leg800","leviathan","long","lungs","mo12","mo18","mo24","mo3","mo6","mon20","moonrise","newyear","night","oh1","oh2","oh3","oh4","onfire","ouroboros","owl","owl25","owl50","owl75","pack","phoenix","photo","plate200","plate210","plate3","plate4","post100","post200","post400","post50","post800","pr","pr10","pr100","pr25","pr3","pr50","quad","rep1k","rep2k","rep300","rp100k","rp10k","rp250k","rp500k","rp50k","run21","run30","run60","rw1","rw2","rw3","rw4","sands","sets10k","sets20k","sets2k","sets30","sets40","sets500","sets5k","setwk100","seven","sh100","sh200","sh400","sh50","sh800","sig100","sig200","sig25","sig400","sig50","sq1","sq2","sq3","sq4","sq5","squad","ss1","ss2","ss3","ssm","ssx","st12","st26","st4","st52","stair10","stairhr","stormc","summit","tgt1","tgt12","tgt26","tgt4","tgtall","ton10","ton15","ton20","ton25","trio","twice","unbeat","v100k","v10m","v1m","v500k","v5m","vein","wave","wayf","week","winter","wkend","wkvol","wo10","wo100","wo250","wo365","wo50","wo500","wu1","wu2","wu3","wum","wux","year","zero","zodiac"]/*END*/, bdStaticSet = null;
 function bdStaticUrl(x) {
   if (!bdStaticSet) { bdStaticSet = {}; BD_STATIC.forEach(function (k) { bdStaticSet[k] = 1; }); }
   /* the lift badges say their number in your unit, and the pictures were made in kg: a lb phone draws its own */
@@ -12814,7 +12772,7 @@ var BD_COLL = [
   ['con', 'Consistency', '#8b5cf6', ['goal', 'st4', 'st12', 'st26', 'st52', 'week', 'dontmiss', 'seven', 'zero', 'wkend', 'back', 'early', 'owl', 'night', 'dawn', 'winter', 'newyear', 'dec31', 'friday13', 'leap', 'phoenix', 'ouroboros', 'eclipse', 'moonrise']],
   ['vol', 'Volume', '#ff8a1c', ['v100k', 'v500k', 'v1m', 'v5m', 'v10m', 'stormc', 'ton10', 'ton15', 'ton20', 'ton25', 'wkvol', 'leviathan', 'colossus']],
   ['set', 'Sets & reps', '#0891b2', ['sets30', 'sets40', 'setwk100', 'sets100', 'sets250', 'sets500', 'sets750', 'sets1500', 'sets3k', 'lava1', 'lava2', 'lava3', 'lava4', 'lava5', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k', 'sets2k', 'sets5k', 'forge', 'rep300', 'rep1k', 'rep2k', 'rp10k', 'rp50k', 'rp100k', 'century']],
-  ['str', 'Strength', '#ef3b2d', ['pr', 'pr3', 'pr10', 'pr25', 'pr50', 'pr100', 'vein', 'onfire', 'plate3', 'plate4', 'atlas'].concat(BD_LIFT.reduce(function (a, L) { return a.concat(L.ids); }, []), BD_ICON.map(function (I) { return I.id; }))],
+  ['str', 'Strength', '#ef3b2d', ['pr', 'pr3', 'pr10', 'pr25', 'pr50', 'pr100', 'vein', 'onfire', 'plate3', 'plate4', 'atlas'].concat(BD_LIFT.reduce(function (a, L) { return a.concat(L.ids); }, []))],
   ['exr', 'Exercises', '#eab308', ['ex15', 'explore', 'ex80', 'wayf', 'sig50', 'sig100', 'fullbody']],
   ['bod', 'Body parts', '#10b981', ['tgt1', 'tgtall', 'tgt4', 'tgt12', 'quad', 'allmus', 'allmus4', 'zodiac', 'chest50', 'chest100', 'chest200', 'bk50', 'bk100', 'bk200', 'sh50', 'sh100', 'sh200',
     'arm50', 'arm100', 'arm200', 'leg50', 'leg100', 'leg200', 'post50', 'abs10', 'abs50', 'abs100']],
