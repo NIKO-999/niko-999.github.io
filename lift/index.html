@@ -369,6 +369,13 @@ svg { display: block; }
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 40px;
 }
 .lf-sub { color: var(--dim); font-size: 12.5px; margin: 2px 0 12px; }
+/* A REST DAY IS A QUIET, CENTRED CARD: a moon on a soft disc, the day's name, one sentence and the way back to training */
+.lf-today.is-rest { text-align: center; padding-top: 22px; }
+.lf-rd-moon { display: grid; place-items: center; width: 64px; height: 64px; margin: 0 auto 10px; border-radius: 50%; background: var(--card2); color: #c9b6ff; }
+:root[data-mode="light"] .lf-rd-moon { color: #7a55e0; }
+.lf-rd-moon .lf-ic { width: 30px; height: 30px; stroke-width: 1.8; }
+.lf-today.is-rest .lf-title-box { text-align: center; margin-top: 2px; }
+.lf-today.is-rest .lf-sub { margin: 2px 12px 18px; font-size: 14px; line-height: 1.35; }
 .lf-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .lf-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 10px; border-radius: 999px; background: var(--card2); color: var(--dim); font-size: 12px; font-weight: 500; }
 .lf-chip .lf-ic { width: 13px; height: 13px; }
@@ -3388,6 +3395,7 @@ function lfTodayCard() {
      the one control is the way back to training. */
   if (!act && !trained && lfIsRest()) {
     c.classList.add('is-rest'); c.id = 'lfRestDay';
+    c.insertBefore(el('<span class="lf-rd-moon" aria-hidden="true">' + IC.moon + '</span>'), c.firstChild);
     $('#lfPick', c).textContent = 'Rest day';
     $('#lfPick', c).setAttribute('aria-label', 'Today: rest day. Choose a routine');
     $('#lfPick', c).addEventListener('click', lfRoutinePicker);
