@@ -10278,7 +10278,7 @@ var BD_NEW = [
 var BD_DST = [[5, "Rookie", "Motivation or dedication? Time will tell."], [10, "Warmed Up", "Ten days in. The habit is forming."], [15, "Stacking Days", "Showing up is most of the work."], [20, "No Excuses", "You stopped asking if you feel like it."], [25, "Twenty-Five Proof", "Twenty-five days of proof."], [30, "Locked In", "This is now your identity."], [35, "Dialled", "Ordinary days, done extraordinarily well."], [40, "Forty Deep", "Most people quit by now."], [45, "Relentless", "Momentum is doing the heavy lifting."], [50, "Fifty Days", "Fifty days. This is who you are."], [55, "Unmoved", "Tired, busy, you went anyway."], [60, "Two Months", "A routine now, not a project."], [65, "Iron Routine", "The bar does not care how you feel."], [70, "Ten Weeks", "Seventy days of keeping your word."], [75, "Seventy-Five", "Three quarters of a hundred, all earned."], [80, "Compounding", "Discipline, quietly adding up."], [85, "Unbroken", "Not one gap in eighty-five days."], [90, "A Season", "A whole season of showing up."], [95, "Almost There", "Five days from triple digits."], [100, "Centurion", "A hundred days. Few ever get here."], [105, "Past the Hundred", "Still going. Nobody asked you to stop."], [110, "Steady State", "This is just what you do now."], [115, "Second Nature", "It is part of you now."], [120, "Four Months", "A third of a year, every day."], [125, "Quiet Force", "No noise. Just results."], [130, "Layers", "Every day sits on the last."], [135, "Unshakeable", "Nothing knocks this over."], [140, "Twenty Weeks", "Half a year is not far."], [145, "Long Game", "You are playing it right."], [150, "One Fifty", "Half of two hundred. All of you."], [155, "Forged", "Made, not born."], [160, "Iron Will", "Will beats talent when talent rests."], [165, "Beyond Habit", "This is character now."], [170, "Rare Air", "Hardly anyone is up here."], [175, "Legend Territory", "People will hear about this."], [180, "Half a Year", "Six months. The habit never blinked."], [185, "Unstoppable", "What is left to stop you?"], [190, "Nearly There", "Ten days to two hundred."], [195, "Final Stretch", "Five more. You know you will."], [200, "Two Hundred", "Immortal. Keep it going."]], BD_TAG = {};
 (function () {
   var ids = [];
-  BD_DST.forEach(function (r, ri) { var id = 'd' + r[0]; ids.push(id); if (ri % 5) BD_FX[id] = ['', 'ice', 'carbon', 'lava', 'galaxy'][ri % 5]; BD_TAG[id] = r[2]; BD_NEW.push([id, r[1], 'streak', r[0] + ' days in a row, every one trained or a planned rest.', '#ff7a1a', 'dst', r[0]]); });
+  BD_DST.forEach(function (r, ri) { var id = 'd' + r[0]; ids.push(id); if (ri % 5) BD_FX[id] = ['', 'ice', 'carbon', 'lava', 'galaxy'][ri % 5]; BD_TAG[id] = r[2]; BD_NEW.push([id, r[1], 'streak', r[0] + ' days tracked, trained or a planned rest, in a row or not.', '#ff7a1a', 'dst', r[0]]); });
   for (var i = 0; i < ids.length; i += 5) BD_LAD.push(['dd' + i, ids.slice(i, i + 5)]);
 })();
 function lfDayRun() {
@@ -10286,8 +10286,9 @@ function lfDayRun() {
   if (!ws.length) return out;
   ws.forEach(function (w) { on[w.d] = 1; }); lfProg().days.forEach(function (x) { dows[x.dow] = 1; });
   for (var d = parseYmd(ws[0].d), g = 0; ymd(d) <= tk && g < 2000; d = addDays(d, 1), g++) {
-    var k = ymd(d), ok = on[k] || S.rd[k] === 1 || lfFz(k) || !dows[d.getDay()];
-    if (ok) { run++; if (!out.hit[run]) out.hit[run] = k; if (run > out.best) out.best = run; } else if (k < tk) run = 0;
+    /* THESE COUNT DAYS TRACKED, NOT DAYS IN A ROW: a day you trained, a planned rest day or a frozen one, however many days apart. Days off the plan are not tracked, so they add nothing. */
+    var k = ymd(d), ok = on[k] || S.rd[k] === 1 || lfFz(k);
+    if (ok) { run++; if (!out.hit[run]) out.hit[run] = k; if (run > out.best) out.best = run; }
   }
   return out;
 }
@@ -12834,7 +12835,7 @@ var BD_COLL = [
 ];
 /* the new rungs go into the collection their ladder was already in */
 BD_COLL.push(['pln', 'Training plans', '#ff8a2a', ['plan1', 'plan4', 'plan12', 'plan26', 'plan52']]);
-BD_COLL.push(['dys', 'Day streaks', '#ff7a1a', BD_DST.map(function (r) { return 'd' + r[0]; })]);
+BD_COLL.push(['dys', 'Days tracked', '#ff7a1a', BD_DST.map(function (r) { return 'd' + r[0]; })]);
 (function () {
   var home = {}; BD_COLL.forEach(function (c) { c[3].forEach(function (id) { home[id] = c; }); });
   BD_LAD.forEach(function (l) { var c = l[1].map(function (id) { return home[id]; }).filter(Boolean)[0]; if (!c) return; l[1].forEach(function (id) { if (!home[id] && c[3].indexOf(id) < 0) c[3].push(id); }); });

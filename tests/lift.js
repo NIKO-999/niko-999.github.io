@@ -1860,7 +1860,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'k0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 5 }] }] }] });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const cols = await page.$$eval('#lfBadges .lf-bcol h4', (x) => x.map((e) => e.textContent));
-    ok('the badges are in collections', cols.join('|') === 'Sessions|Consistency|Volume|Sets & reps|Strength|Exercises|Body parts|Cardio|Technique|Friends|Day streaks', cols.join('|'));
+    ok('the badges are in collections', cols.join('|') === 'Sessions|Consistency|Volume|Sets & reps|Strength|Exercises|Body parts|Cardio|Technique|Friends|Days tracked', cols.join('|'));
     ok('each says how much of it is earned', /^\d+ \/ \d+$/.test(await page.textContent('#lfBadges .lf-bcol[data-col="vol"] .lf-bcol-t span')));
     const src = require('fs').readFileSync(require('path').join(__dirname, '../lift/index.html'), 'utf8');
     const mythS = (src.match(/var BD_MYTH = \{([^}]*)\}/) || [])[1] || '', haloS = (src.match(/var BD_HALO = \{([^}]*)\}/) || [])[1] || '';
