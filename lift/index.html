@@ -779,14 +779,15 @@ svg { display: block; }
 /* drawn small, pressed at the usual 44 */
 .lf-more::before { content: ''; position: absolute; inset: -8px; }
 .lf-more svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-.lf-ex-sum { display: none; font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
+.lf-ex-sum { display: none; font-size: 12px; color: var(--dim); margin: -6px 0 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-ex.is-fold { cursor: pointer; padding: 4px 14px; border-radius: 16px; }
 .lf-ex.is-fold .lf-ex-sum:not(:empty) { display: block; }
 .lf-ex.is-fold > :not(.lf-ex-hd):not(.lf-ex-sum) { display: none; }
 /* the three dots open this */
-.lf-xmenu { position: fixed; z-index: 95; width: 236px; padding: 6px; border-radius: 20px; background: var(--card3, #232327); box-shadow: 0 18px 50px rgba(0,0,0,.55); }
+.lf-xmenu { position: fixed; z-index: 95; min-width: 236px; max-width: calc(100vw - 16px); padding: 6px; border-radius: 20px; background: var(--card3, #232327); box-shadow: 0 18px 50px rgba(0,0,0,.55); }
 .lf-xm-i { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 0 12px; border-radius: 12px; text-align: left; font-size: 15px; font-weight: 600; color: var(--ink); }
 .lf-xm-i svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; opacity: .8; }
+.lf-xm-i span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .lf-xm-i:disabled { opacity: .35; }
 .lf-xm-i.is-bad { color: var(--bad); }
 .lf-xm-sep { height: 1px; margin: 4px 8px; background: var(--line, rgba(255,255,255,.08)); }
@@ -1167,6 +1168,23 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-cdc .lf-cdc-f:focus { border-color: var(--focus); }
 .lf-session .lf-add { min-height: 44px; margin-top: 4px; background: none; color: var(--dim); justify-content: flex-start; padding: 0 4px; font-size: 14px; }
 .lf-ex-ft { display: flex; gap: 18px; margin-top: 2px; }
+/* THE SUPERSET CARD: a line down the left through numbered rounds, a row for each exercise, one tall tick a round */
+.lf-ssc-ic { width: 16px; height: 16px; flex: none; margin-right: -2px; fill: none; stroke: var(--quiet); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.lf-ssc-rs { margin-top: 6px; }
+.lf-ssr { position: relative; display: flex; align-items: center; gap: 8px; padding-left: 30px; margin-bottom: 10px; }
+.lf-ssr::before { content: ''; position: absolute; left: 10px; top: 14px; bottom: 14px; width: 2px; background: var(--mark-off); }
+.lf-ssr-n { position: absolute; left: 0; top: 50%; margin-top: -11px; width: 22px; height: 22px; border-radius: 50%; background: var(--card2); color: var(--dim); display: grid; place-items: center; font-size: 12px; font-weight: 700; z-index: 1; }
+.lf-ssr.is-done .lf-ssr-n { background: var(--ink); color: var(--on-ink); }
+.lf-ssr-rows { flex: 1; min-width: 0; display: grid; gap: 6px; }
+.lf-ssr-r { display: grid; grid-template-columns: 92px minmax(0, 1fr) minmax(0, 1fr); gap: 8px; align-items: center; }
+.lf-ssr-t { font-size: 11.5px; line-height: 1.15; font-weight: 600; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.lf-ssr-r input { width: 100%; height: 34px; border-radius: 10px; background: color-mix(in srgb, var(--bg) 55%, transparent); border: 1px solid transparent; text-align: center; font-size: 16px; font-weight: 600; outline: none; font-variant-numeric: tabular-nums; -moz-appearance: textfield; }
+.lf-ssr-r input::placeholder { color: var(--ph); font-weight: 500; }
+.lf-ssr-r input:focus { border-color: var(--focus); }
+.lf-ssr-r input::-webkit-inner-spin-button, .lf-ssr-r input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.lf-ssr-chk { align-self: stretch; width: 40px; height: auto; flex: none; }
+.lf-session .lf-ssr-chk span { width: 32px; height: 100%; max-height: 78px; border-radius: 16px; }
+.lf-ssr.is-done .lf-ssr-chk span { background: var(--log-g, var(--log)); color: var(--on-log); }
 /* the three ways to add a set are quiet text, the same for all three */
 .lf-ex-ft button, .lf-ex-ft button.lf-wu-add, .lf-ex-ft button.lf-drop-add, :root[data-mode="light"] .lf-ex-ft button.lf-wu-add { background: none !important; box-shadow: none !important; color: var(--dim) !important; min-height: 44px; padding: 0 2px; font-size: 13px; font-weight: 600; }
 .lf-ex-ft button { flex: none; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
@@ -4268,7 +4286,7 @@ function lfResumeEx() {
 function lfScrollCur(smooth) {
   var list = $('#lfExList'), bd = list && list.closest('.lf-sh-bd'); if (!bd) return;
   var cards = $$('.lf-ex', list), cur = null;
-  var openSet = function (c) { return $('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', c); };
+  var openSet = function (c) { return $('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop):not(.is-done)', c) || $('.lf-ssr:not(.is-done)', c); };
   /* the exercise you were just on keeps you while it has a set left, and on coming back it is the one the work says */
   var pin = act && act.cur && cards.some(function (c) { return c.dataset.ex === act.cur && openSet(c); }) ? act.cur : '';
   /* in a superset the partner that owes its set still takes you across, pinned or not */
@@ -4417,20 +4435,9 @@ function lfExRemove(e) {
   if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
 }
 /* THE THREE DOTS: what you can do to the exercise itself. The three ways to add a set stay on the card, because those are the ones you reach for mid-workout. */
-function lfExMenu(e, btn) {
-  var old = $('#lfExMenu'); if (old) { var was = old.dataset.for; old.remove(); if (was === e.id) return; }
-  var m = el('<div class="lf-xmenu" id="lfExMenu" role="menu"></div>'); m.dataset.for = e.id;
-  var ss = e.ss && lfSsGroup(e).length > 1, o = lfOrd || act.x, ix = o.indexOf(e);
-  var I = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
-  var rows = [
-    ['Swap exercise', I('M7 7h11l-3-3M17 17H6l3 3'), function () { lfSwap(e); }],
-    [ss ? 'Take out of the superset' : 'Superset with…', I(ss ? 'M9 15l-3 3a3 3 0 0 1-4-4l3-3M15 9l3-3a3 3 0 0 1 4 4l-3 3M4 4l16 16' : 'M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1'), function () { if (ss) lfSsToggle(e); else lfSsPick(e); }],
-    null,
-    ['Move up', I('M12 19V5M6 11l6-6 6 6'), function () { if (lfMoveEx(e, ix - 1)) { buzz(8); lfPaintSession(); } }, ix <= 0],
-    ['Move down', I('M12 5v14M6 13l6 6 6-6'), function () { if (lfMoveEx(e, ix + 1)) { buzz(8); lfPaintSession(); } }, ix >= o.length - 1],
-    null,
-    ['Remove exercise', I('M6 6l12 12M18 6L6 18'), function () { lfExRemove(e); }, false, 'is-bad']
-  ];
+function lfMenuPop(key, btn, rows) {
+  var old = $('#lfExMenu'); if (old) { var was = old.dataset.for; old.remove(); if (was === key) return; }
+  var m = el('<div class="lf-xmenu" id="lfExMenu" role="menu"></div>'); m.dataset.for = key;
   rows.forEach(function (r) {
     if (!r) { m.appendChild(el('<div class="lf-xm-sep"></div>')); return; }
     var b = el('<button type="button" class="lf-xm-i" role="menuitem">' + r[1] + '<span></span></button>'); $('span', b).textContent = r[0];
@@ -4444,6 +4451,43 @@ function lfExMenu(e, btn) {
   m.style.top = top + 'px'; m.style.right = Math.max(8, window.innerWidth - rc.right) + 'px';
   var off = function (ev) { if (ev && ev.type === 'keydown' && ev.key !== 'Escape') return; if (ev && ev.type === 'pointerdown' && m.contains(ev.target)) return; m.remove(); document.removeEventListener('pointerdown', off, true); document.removeEventListener('keydown', off, true); };
   setTimeout(function () { document.addEventListener('pointerdown', off, true); document.addEventListener('keydown', off, true); }, 0);
+}
+var LF_MI = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
+function lfExMenu(e, btn) {
+  var ss = e.ss && lfSsGroup(e).length > 1, o = lfOrd || act.x, ix = o.indexOf(e), I = LF_MI;
+  lfMenuPop(e.id, btn, [
+    ['Swap exercise', I('M7 7h11l-3-3M17 17H6l3 3'), function () { lfSwap(e); }],
+    [ss ? 'Take out of the superset' : 'Superset with…', I(ss ? 'M9 15l-3 3a3 3 0 0 1-4-4l3-3M15 9l3-3a3 3 0 0 1 4 4l-3 3M4 4l16 16' : 'M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1'), function () { if (ss) lfSsToggle(e); else lfSsPick(e); }],
+    null,
+    ['Move up', I('M12 19V5M6 11l6-6 6 6'), function () { if (lfMoveEx(e, ix - 1)) { buzz(8); lfPaintSession(); } }, ix <= 0],
+    ['Move down', I('M12 5v14M6 13l6 6 6-6'), function () { if (lfMoveEx(e, ix + 1)) { buzz(8); lfPaintSession(); } }, ix >= o.length - 1],
+    null,
+    ['Remove exercise', I('M6 6l12 12M18 6L6 18'), function () { lfExRemove(e); }, false, 'is-bad']
+  ]);
+}
+/* A SUPERSET'S OWN MENU: take it apart, swap either exercise, move the pair, or remove both */
+function lfSsUnlink(g) { var id = g[0].ss; act.x.forEach(function (q) { if (q.ss === id) delete q.ss; }); lfSaveAct(); lfPaintSession(); }
+function lfMoveGroup(g, d) {
+  var o = lfOrd || act.x, ix = g.map(function (m) { return o.indexOf(m); }), first = Math.min.apply(null, ix), last = Math.max.apply(null, ix), nb;
+  if (d < 0) { if (first <= 0) return false; nb = o[first - 1]; o.splice(first - 1, 1); o.splice(last, 0, nb); }
+  else { if (last >= o.length - 1) return false; nb = o[last + 1]; o.splice(last + 1, 1); o.splice(first, 0, nb); }
+  if (lfOrd) act.x.sort(function (a, b) { return lfOrd.indexOf(a) - lfOrd.indexOf(b); });
+  lfSaveAct(); return true;
+}
+function lfSsRemove(g) {
+  var go = function () { act.x = act.x.filter(function (q) { return g.indexOf(q) < 0; }); lfSaveAct(); lfPaintSession(); };
+  if (g.some(function (m) { return m.sets.some(function (q) { return q.ok; }); })) lfAsk('Remove this superset?', 'Every set logged in it goes with it.', 'Remove', go); else go();
+}
+function lfSsMenu(g, btn) {
+  var o = lfOrd || act.x, ix = g.map(function (m) { return o.indexOf(m); }), I = LF_MI;
+  var rows = [['Take out of the superset', I('M9 15l-3 3a3 3 0 0 1-4-4l3-3M15 9l3-3a3 3 0 0 1 4 4l-3 3M4 4l16 16'), function () { lfSsUnlink(g); }]];
+  g.forEach(function (m) { rows.push(['Swap ' + m.n, I('M7 7h11l-3-3M17 17H6l3 3'), function () { lfSwap(m); }]); });
+  rows.push(null,
+    ['Move superset up', I('M12 19V5M6 11l6-6 6 6'), function () { if (lfMoveGroup(g, -1)) { buzz(8); lfPaintSession(); } }, Math.min.apply(null, ix) <= 0],
+    ['Move superset down', I('M12 5v14M6 13l6 6 6-6'), function () { if (lfMoveGroup(g, 1)) { buzz(8); lfPaintSession(); } }, Math.max.apply(null, ix) >= o.length - 1],
+    null,
+    ['Remove superset', I('M6 6l12 12M18 6L6 18'), function () { lfSsRemove(g); }, false, 'is-bad']);
+  lfMenuPop('ss' + g[0].ss, btn, rows);
 }
 /* SUPERSET WITH…: pick the partner from a list, then make it. The pairing itself is the same two steps the link button always did. */
 function lfSsPick(e) {
@@ -4466,6 +4510,85 @@ function lfSsPick(e) {
   paint();
   go.addEventListener('click', function () { s.close(); lfSsPend = e; lfSsToggle(pick); lfToast('Superset made'); });
 }
+/* A SUPERSET IS ONE CARD: rounds down it, a row per exercise in each, and ONE tick a round that logs both. The rest after a round is the longest of the exercises' own, so the heavier lift is never cut short. */
+function lfSsNextOut(g) {
+  var o = lfOrd || act.x, und = function (q) { return g.indexOf(q) < 0 && q.sets.some(function (z) { return !z.ok; }); };
+  return o.slice(o.indexOf(g[g.length - 1]) + 1).filter(und)[0] || o.filter(und)[0] || null;
+}
+function lfSsCard(g, openG) {
+  var n = Math.max.apply(null, g.map(function (m) { return m.sets.length; })) || 1;
+  var rdone = function (i) { return g.some(function (m) { return m.sets[i]; }) && g.every(function (m) { return !m.sets[i] || m.sets[i].ok; }); };
+  var nDone = 0; for (var i0 = 0; i0 < n; i0++) if (rdone(i0)) nDone++;
+  var aims = {}; g.forEach(function (m) { aims[m.id] = lfAim(m); });
+  var longest = g.slice().sort(function (a, b) { return lfRestOf(b.id).lo - lfRestOf(a.id).lo; })[0];
+  var card = el('<div class="lf-ex is-ssc"><div class="lf-ex-hd"><svg class="lf-ssc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg><button type="button" class="lf-ex-n"></button><span class="lf-ex-dots" aria-hidden="true"></span><button type="button" class="lf-more" aria-haspopup="menu">' + LF_MORE + '</button></div><div class="lf-ex-sum"></div><div class="lf-tg"></div></div>');
+  card.dataset.ex = g[0].id; card.dataset.ss = g[0].ss; card.setAttribute('data-done', nDone + '/' + n);
+  $('.lf-ex-n', card).textContent = 'Superset'; var ssNames = g.map(function (m) { return m.n; }).join(' + ');
+  var dEl = $('.lf-ex-dots', card);
+  if (nDone === n) dEl.insertAdjacentHTML('beforeend', LF_TICK);
+  for (var r0 = 0; r0 < n; r0++) { var dd = document.createElement('i'); if (rdone(r0)) dd.className = 'on'; dEl.appendChild(dd); }
+  $('.lf-tg', card).textContent = n + (n === 1 ? ' round' : ' rounds') + ' · rest ' + lfRestTxt(lfRestOf(longest.id));
+  $('.lf-more', card).setAttribute('aria-label', 'More for this superset');
+  $('.lf-more', card).addEventListener('click', function (ev) { ev.stopPropagation(); lfSsMenu(g, ev.currentTarget); });
+  var rounds = el('<div class="lf-ssc-rs"></div>');
+  for (var i = 0; i < n; i++) (function (i) {
+    var rd = el('<div class="lf-ssr"><b class="lf-ssr-n"></b><div class="lf-ssr-rows"></div><button type="button" class="lf-chk lf-ssr-chk"><span>' + IC.check + '</span></button></div>');
+    var done = rdone(i); rd.classList.toggle('is-done', done); $('.lf-ssr-n', rd).textContent = i + 1;
+    var rows = $('.lf-ssr-rows', rd), chk = $('.lf-ssr-chk', rd);
+    g.forEach(function (m) {
+      var st = m.sets[i]; if (!st) return;
+      var row = el('<div class="lf-ssr-r"><span class="lf-ssr-t"></span><input type="text" inputmode="decimal" autocomplete="off" /><input type="text" inputmode="numeric" autocomplete="off" /></div>');
+      $('.lf-ssr-t', row).textContent = m.n;
+      var wi = $$('input', row)[0], ri = $$('input', row)[1], gg = aims[m.id].sets[i] || aims[m.id].sets[aims[m.id].sets.length - 1], bw = exById(m.id) && exById(m.id).t === 'bw';
+      wi.dataset.m = ri.dataset.m = m.id;
+      wi.setAttribute('aria-label', m.n + ' round ' + (i + 1) + ' weight in ' + S.unit); ri.setAttribute('aria-label', m.n + ' round ' + (i + 1) + ' reps');
+      wi.placeholder = gg ? fmtWS(gg.w) : bw ? 'BW' : S.unit; ri.placeholder = gg ? String(gg.r) : (m.tg ? lfRange(m.tg[1], m.tg[2]) : 'reps');
+      if (st.w !== '' && st.w != null) wi.value = st.w === 0 && bw ? 'BW' : fmtWS(st.w);
+      if (st.r !== '' && st.r != null) ri.value = st.r;
+      wi.addEventListener('focus', function () { if (wi.value === 'BW') wi.select(); });
+      wi.addEventListener('blur', function () { if (st.w === 0 && bw) wi.value = 'BW'; });
+      wi.addEventListener('input', function () { lfCapIn(wi, Math.floor(toDisp(W_MAX))); var v = parseFloat(wi.value); st.w = isFinite(v) && v >= 0 ? capW(fromDisp(v)) : ''; lfSaveAct(); });
+      ri.addEventListener('input', function () { lfCapIn(ri, REP_MAX); var v = parseInt(ri.value, 10); st.r = isFinite(v) && v >= 0 ? capR(v) : ''; lfSaveAct(); });
+      rows.appendChild(row);
+    });
+    chk.setAttribute('aria-pressed', done ? 'true' : 'false'); chk.setAttribute('aria-label', 'Log round ' + (i + 1));
+    chk.addEventListener('click', function () {
+      if (rdone(i)) { g.forEach(function (m) { var q = m.sets[i]; if (q) { q.ok = 0; q.pr = 0; q.rp = 0; } }); lfSaveAct(); lfPaintSession(); return; }
+      /* an empty field takes the aim, as it does on a single set */
+      var bad = null;
+      g.forEach(function (m) {
+        var q = m.sets[i]; if (!q || q.ok) return;
+        var a = aims[m.id], gg = a.sets[i] || a.sets[a.sets.length - 1], bw = exById(m.id) && exById(m.id).t === 'bw';
+        if (q.w === '' || q.w == null) q.w = gg ? gg.w : (bw ? 0 : '');
+        if (q.r === '' || q.r == null) q.r = gg ? gg.r : '';
+        if ((q.w === '' || q.r === '' || !(q.r > 0)) && !bad) bad = m;
+      });
+      if (bad) {
+        lfToast('Put in the weight and reps first'); lfSaveAct();
+        var ins = $$('input', rd).filter(function (x) { return x.dataset.m === bad.id; }); (ins.filter(function (x) { return !x.value; })[0] || ins[0]).focus(); return;
+      }
+      var at = rd.getBoundingClientRect(), cheer = null;
+      g.forEach(function (m) { var q = m.sets[i]; if (q && !q.ok) { q.ok = 1; lfJudge(m, i, q); if (q.pr || q.rp) cheer = q; } });
+      act.rest = Date.now(); act.restEx = longest.id; act.rang = 0; lfRestPush(); lfLockStart();
+      var all = g.every(function (m) { return m.sets.every(function (q) { return q.ok; }); }), nx = all ? lfSsNextOut(g) : null;
+      lfKeep = lfKeep.filter(function (id) { return !g.some(function (m) { return m.id === id; }); });
+      lfOpenEx = nx ? nx.id : g[0].id; lfCurExId = lfOpenEx; lfCurGo = 1; lfPopAt = ''; lfSaveAct(); if (!cheer) buzz(14);
+      lfPaintSession(); lfTick(); if (cheer) lfCheer(cheer, at);
+    });
+    rounds.appendChild(rd);
+  })(i);
+  card.appendChild(rounds);
+  var ft = el('<div class="lf-ex-ft"><button type="button" aria-label="Add a round">+ Round</button></div>');
+  $('button', ft).addEventListener('click', function () { g.forEach(function (m) { var l = m.sets[m.sets.length - 1]; m.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); }); lfSaveAct(); lfPaintSession(); lfTick(); });
+  card.appendChild(ft);
+  if (!g.some(function (m) { return openG.indexOf(m) >= 0; })) {
+    card.classList.add('is-fold');
+    $('.lf-ex-sum', card).textContent = ssNames + (nDone ? ' · ' + nDone + ' of ' + n : '');
+    $('.lf-ex-n', card).addEventListener('click', function () { lfOpenAt(g[0]); });
+    card.addEventListener('click', function (ev) { if (!ev.target.closest('.lf-more')) lfOpenAt(g[0]); });
+  }
+  return card;
+}
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
   /* THE LIST IS REBUILT, AND A REBUILT LIST HAS NO HEIGHT FOR A MOMENT, so the
@@ -4483,7 +4606,9 @@ function lfPaintSession() {
   var openId = lfOpenId(), openE = act.x.filter(function (q) { return q.id === openId; })[0], openG = openE ? lfSsGroup(openE).slice() : [];
   lfKeep = lfKeep.filter(function (id) { return act.x.some(function (q) { return q.id === id && lfStarted(q) && q.sets.some(function (z) { return !z.ok; }); }); });
   lfKeep.forEach(function (id) { var k = act.x.filter(function (q) { return q.id === id; })[0]; if (k) lfSsGroup(k).forEach(function (m) { if (openG.indexOf(m) < 0) openG.push(m); }); });
+  var ssSeen = {};
   ord.forEach(function (e) {
+    if (e.ss && lfSsGroup(e).length > 1) { if (!ssSeen[e.ss]) { ssSeen[e.ss] = 1; list.appendChild(lfSsCard(lfSsGroup(e), openG)); } return; }
     var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
     var aim = lfAim(e);
