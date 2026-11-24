@@ -1736,6 +1736,34 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes tt-sv { 0%, 100% { text-shadow: 0 0 4px #fbbf24, 0 0 10px rgba(251, 191, 36, .5); transform: none; } 50% { text-shadow: 0 0 6px #fff, 0 0 16px #fbbf24, 0 0 30px rgba(249, 115, 22, .8); transform: scale(1.04); } }
 .fr-ti .tt-gd em { background: linear-gradient(100deg, #a16207 0 30%, #fde68a 45%, #fff7d6 50%, #fde68a 55%, #a16207 70% 100%) 0 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 3px rgba(250, 204, 21, .5)); animation: tt-gd 3.6s ease-in-out infinite; }
 @keyframes tt-gd { 0%, 15% { background-position: 120% 0; } 85%, 100% { background-position: -20% 0; } }
+/* NICKNAMES THAT TALK YOU UP: Ruthless, Gym Rat, Apex, Savage, Beast Mode, The Machine, Predator, Iron Will, Unstoppable, Juggernaut. A slash, a lifted bar, a rising light, claw marks, a rumble, a status light, watching eyes, heated iron, a speed trail and a slam. */
+.fr-ti .tt-ru em { position: relative; display: inline-block; overflow: hidden; color: #f87171; text-shadow: 0 0 6px rgba(239, 68, 68, .55); }
+.tt-ru em::after { content: ''; position: absolute; top: -20%; bottom: -20%; width: 5px; left: -10px; background: linear-gradient(90deg, transparent, #fff, transparent); transform: skewX(-24deg); animation: tt-ru 3s ease-in infinite; }
+@keyframes tt-ru { 0%, 55% { left: -10px; opacity: 0; } 58% { opacity: 1; } 78% { left: 105%; opacity: 1; } 100% { left: 105%; opacity: 0; } }
+.fr-ti .tt-gy svg { width: 22px; height: 11px; margin-right: 4px; overflow: visible; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; animation: tt-gy 2.4s ease-in-out infinite; }
+@keyframes tt-gy { 0%, 100% { transform: none; } 35% { transform: translateY(-3px); } 55% { transform: translateY(-3px); } 70% { transform: translateY(1px); } }
+.fr-ti .tt-ax em { background: linear-gradient(0deg, #38bdf8, #e0f2fe 55%, #fff) 0 0 / 100% 300%; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 5px rgba(125, 211, 252, .6)); animation: tt-ax 2.6s ease-in-out infinite alternate; }
+@keyframes tt-ax { from { background-position: 0 100%; } to { background-position: 0 0; } }
+.fr-ti .tt-sg svg { width: 13px; height: 13px; margin-right: 4px; fill: none; stroke: #fb923c; stroke-width: 2; stroke-linecap: round; stroke-dasharray: 100; animation: tt-sg 2.8s ease-out infinite; }
+.fr-ti .tt-sg em { color: #fdba74; }
+@keyframes tt-sg { 0% { stroke-dashoffset: 100; opacity: 1; } 35%, 80% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+.fr-ti .tt-bm em { display: inline-block; color: #fb923c; text-shadow: 0 0 6px rgba(249, 115, 22, .6); animation: tt-bm .5s steps(1) infinite; }
+@keyframes tt-bm { 0% { transform: translate(0, 0); } 25% { transform: translate(.8px, -.8px); } 50% { transform: translate(-.8px, .6px); text-shadow: 0 0 10px rgba(251, 146, 60, .9); } 75% { transform: translate(.6px, .8px); } }
+.fr-ti .tt-mc em { color: #cbd5e1; animation: tt-mc 6s steps(1) infinite; }
+.tt-mc .m-d { display: inline-block; width: 6px; height: 6px; margin-right: 6px; border-radius: 50%; background: #4ade80; box-shadow: 0 0 6px #4ade80; vertical-align: middle; animation: tt-mc-d 1.2s steps(1) infinite; }
+@keyframes tt-mc-d { 0%, 60% { opacity: 1; } 61%, 100% { opacity: .25; } }
+@keyframes tt-mc { 0%, 94%, 100% { opacity: 1; } 95%, 97% { opacity: .5; } 96% { opacity: 1; } }
+.fr-ti .tt-pd em { color: #b91c1c; text-shadow: 0 0 6px rgba(220, 38, 38, .5); }
+.tt-pd .p-e { display: inline-flex; gap: 3px; margin-right: 6px; vertical-align: middle; }
+.tt-pd .p-e b { width: 5px; height: 3px; border-radius: 50%; background: #fbbf24; box-shadow: 0 0 6px #f59e0b; animation: tt-pd 4s ease-in-out infinite; }
+@keyframes tt-pd { 0%, 42%, 50%, 100% { transform: scaleY(1); opacity: 1; } 46% { transform: scaleY(.1); opacity: .5; } }
+.fr-ti .tt-iw em { color: transparent; -webkit-text-stroke: .8px #94a3b8; animation: tt-iw 3.6s ease-in-out infinite; }
+@keyframes tt-iw { 0%, 100% { -webkit-text-stroke-color: #94a3b8; filter: none; } 55% { -webkit-text-stroke-color: #fb923c; filter: drop-shadow(0 0 5px rgba(251, 146, 60, .8)); } }
+.fr-ti .tt-us em { display: inline-block; font-style: italic; color: #fff; animation: tt-us 1.8s ease-in-out infinite; }
+@keyframes tt-us { 0%, 100% { text-shadow: -2px 0 3px rgba(255, 255, 255, .15); transform: translateX(0); } 50% { text-shadow: -10px 0 6px rgba(255, 255, 255, .35), -20px 0 8px rgba(255, 255, 255, .15); transform: translateX(2px); } }
+.fr-ti .tt-jg em { display: inline-block; color: #e5e7eb; animation: tt-jg 3.2s cubic-bezier(.5, 0, .9, .4) infinite; }
+@keyframes tt-jg { 0%, 60% { transform: translateY(0) scale(1); text-shadow: none; } 66% { transform: translateY(-4px) scale(1.04); } 70% { transform: translateY(0) scale(1.08, .86); text-shadow: 0 3px 0 rgba(255, 255, 255, .25); } 74% { transform: translateY(-1px) scale(.98, 1.03); } 80%, 100% { transform: none; text-shadow: none; } }
+@media (prefers-reduced-motion: reduce) { .tt-ru em::after, .tt-gy svg, .tt-ax em, .tt-sg svg, .tt-bm em, .tt-mc em, .tt-mc .m-d, .tt-pd .p-e b, .tt-iw em, .tt-us em, .tt-jg em { animation: none; } .tt-sg svg { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .tt-sc em, .tt-gl em, .tt-ph em, .tt-vn em, .tt-rp span, .tt-hg em, .tt-hg em::after, .tt-pl em, .tt-ch em, .tt-tp em, .tt-ob em, .tt-sv em, .tt-gd em { animation: none; } }
 @keyframes tt-ti { 0%, 78%, 100% { transform: none; text-shadow: none; } 84% { transform: scale(1.06, .9) translateY(1px); text-shadow: 0 2px 0 rgba(255, 255, 255, .25); } 90% { transform: scale(.98, 1.04) translateY(-1px); } 95% { transform: none; text-shadow: 0 0 10px rgba(255, 255, 255, .6); } }
 @media (prefers-reduced-motion: reduce) { .tt-ice em, .tt-lv em, .tt-mb em, .tt-ne em, .tt-gx em, .tt-sr em, .tt-ed em::after, .tt-cb em { animation: none; } .tt-sr em { background-size: 100% 100%; } .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
@@ -8060,6 +8088,16 @@ var RK = {
     ['obsidian', 'Obsidian', '225 workouts', function (c) { return c.wo >= 225; }],
     ['supernova', 'Supernova', '350 workouts', function (c) { return c.wo >= 350; }],
     ['gilded', 'Gilded', '450 workouts', function (c) { return c.wo >= 450; }],
+    ['ruthless', 'Ruthless', '12 workouts', function (c) { return c.wo >= 12; }],
+    ['gymrat', 'Gym Rat', '18 workouts', function (c) { return c.wo >= 18; }],
+    ['apex', 'Apex', '35 workouts', function (c) { return c.wo >= 35; }],
+    ['savage', 'Savage', '45 workouts', function (c) { return c.wo >= 45; }],
+    ['beastmode', 'Beast Mode', '55 workouts', function (c) { return c.wo >= 55; }],
+    ['machine', 'The Machine', '70 workouts', function (c) { return c.wo >= 70; }],
+    ['predator', 'Predator', '95 workouts', function (c) { return c.wo >= 95; }],
+    ['ironwill', 'Iron Will', '110 workouts', function (c) { return c.wo >= 110; }],
+    ['unstop', 'Unstoppable', '135 workouts', function (c) { return c.wo >= 135; }],
+    ['juggernaut', 'Juggernaut', '260 workouts', function (c) { return c.wo >= 260; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
@@ -8176,7 +8214,17 @@ function lfTitleEl(id) {
     tempest: ['tt-tp', '<em>Tempest</em>'],
     obsidian: ['tt-ob', '<em>Obsidian</em>'],
     supernova: ['tt-sv', '<em>Supernova</em>'],
-    gilded: ['tt-gd', '<em>Gilded</em>']
+    gilded: ['tt-gd', '<em>Gilded</em>'],
+    ruthless: ['tt-ru', '<em>Ruthless</em>'],
+    gymrat: ['tt-gy', '<svg viewBox="0 0 24 12" aria-hidden="true"><path d="M5 2.500v7M8 1v10M16 1v10M19 2.500v7M8 6h8"/></svg><em>Gym Rat</em>'],
+    apex: ['tt-ax', '<em>Apex</em>'],
+    savage: ['tt-sg', '<svg viewBox="0 0 16 16" aria-hidden="true"><path pathLength="100" d="M3 2l5 12M7 1l5.500 13M11 1l4 11"/></svg><em>Savage</em>'],
+    beastmode: ['tt-bm', '<em>Beast Mode</em>'],
+    machine: ['tt-mc', '<i class="m-d" aria-hidden="true"></i><em>The Machine</em>'],
+    predator: ['tt-pd', '<i class="p-e" aria-hidden="true"><b></b><b></b></i><em>Predator</em>'],
+    ironwill: ['tt-iw', '<em>Iron Will</em>'],
+    unstop: ['tt-us', '<em>Unstoppable</em>'],
+    juggernaut: ['tt-jg', '<em>Juggernaut</em>']
   };
   if (T2[id]) { sp.className = 'tt ' + T2[id][0]; sp.innerHTML = T2[id][1]; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
