@@ -772,7 +772,13 @@ svg { display: block; }
 /* the card header: the name, one dot a set, and the three dots */
 .lf-ex-dots { display: flex; align-items: center; gap: 5px; flex: none; }
 .lf-ex-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--mark-off); }
-.lf-ex-dots i.on { background: var(--log); }
+.lf-ex-dots i.on { background: var(--log); box-shadow: 0 0 6px color-mix(in srgb, var(--log) 50%, transparent); }
+.lf-ex-dots i.pop { animation: lf-dotglow .9s ease-out; }
+@keyframes lf-dotglow { 0% { transform: scale(1.7); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 55%, transparent); } 40% { transform: scale(1); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--log) 45%, transparent); } 100% { transform: scale(1); box-shadow: 0 0 6px color-mix(in srgb, var(--log) 50%, transparent); } }
+.lf-ssr.is-pop { animation: lf-rowglow .9s ease-out; border-radius: 14px; }
+.lf-ssr.is-pop .lf-ssr-n { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1); }
+.lf-ssr.is-pop .lf-ssr-chk span { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1); }
+@media (prefers-reduced-motion: reduce) { .lf-ex-dots i.pop, .lf-ssr.is-pop, .lf-ssr.is-pop .lf-ssr-n, .lf-ssr.is-pop .lf-ssr-chk span { animation: none; } }
 .lf-ex-tk { width: 15px; height: 15px; margin-right: 3px; fill: none; stroke: var(--log); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 /* the exercise's options: one round sliders icon, so the card does not read as a row of dots */
 .lf-more { position: relative; width: 28px; height: 28px; margin-right: 2px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; color: var(--ink); flex: none; }
@@ -4511,14 +4517,14 @@ function lfSsCard(g, openG) {
   $('.lf-ex-n', card).textContent = 'Superset'; var ssNames = g.map(function (m) { return m.n; }).join(' + ');
   var dEl = $('.lf-ex-dots', card);
   if (nDone === n) dEl.insertAdjacentHTML('beforeend', LF_TICK);
-  for (var r0 = 0; r0 < n; r0++) { var dd = document.createElement('i'); if (rdone(r0)) dd.className = 'on'; dEl.appendChild(dd); }
+  for (var r0 = 0; r0 < n; r0++) { var dd = document.createElement('i'); if (rdone(r0)) dd.className = lfPopAt === 'ss:' + g[0].id + ':' + r0 ? 'on pop' : 'on'; dEl.appendChild(dd); }
   $('.lf-tg', card).textContent = n + (n === 1 ? ' round' : ' rounds') + ' · rest ' + lfRestTxt(lfRestOf(longest.id));
   $('.lf-more', card).setAttribute('aria-label', 'More for this superset');
   $('.lf-more', card).addEventListener('click', function (ev) { ev.stopPropagation(); lfSsMenu(g, ev.currentTarget); });
   var rounds = el('<div class="lf-ssc-rs"></div>');
   for (var i = 0; i < n; i++) (function (i) {
     var rd = el('<div class="lf-ssr"><b class="lf-ssr-n"></b><div class="lf-ssr-rows"></div><button type="button" class="lf-chk lf-ssr-chk"><span>' + IC.check + '</span></button></div>');
-    var done = rdone(i); rd.classList.toggle('is-done', done); $('.lf-ssr-n', rd).textContent = i + 1;
+    var done = rdone(i); rd.classList.toggle('is-done', done); if (done && lfPopAt === 'ss:' + g[0].id + ':' + i) rd.classList.add('is-pop'); $('.lf-ssr-n', rd).textContent = i + 1;
     var rows = $('.lf-ssr-rows', rd), chk = $('.lf-ssr-chk', rd);
     g.forEach(function (m) {
       var st = m.sets[i]; if (!st) return;
@@ -4557,12 +4563,12 @@ function lfSsCard(g, openG) {
       act.rest = Date.now(); act.restEx = longest.id; act.rang = 0; lfRestPush(); lfLockStart();
       var all = g.every(function (m) { return m.sets.every(function (q) { return q.ok; }); }), nx = all ? lfSsNextOut(g) : null;
       lfKeep = lfKeep.filter(function (id) { return !g.some(function (m) { return m.id === id; }); });
-      lfOpenEx = nx ? nx.id : g[0].id; lfCurExId = lfOpenEx; lfCurGo = 1; lfPopAt = ''; lfSaveAct(); if (!cheer) buzz(14);
+      lfOpenEx = nx ? nx.id : g[0].id; lfCurExId = lfOpenEx; lfCurGo = 1; lfPopAt = 'ss:' + g[0].id + ':' + i; lfSaveAct(); if (!cheer) buzz(14);
       lfPaintSession(); lfTick(); if (cheer) lfCheer(cheer, at);
     });
     rounds.appendChild(rd);
   })(i);
-  card.appendChild(rounds);
+  card.appendChild(rounds); if (/^ss:/.test(lfPopAt)) lfPopAt = '';
   var ft = el('<div class="lf-ex-ft"><button type="button" aria-label="Add a round">+ Round</button></div>');
   $('button', ft).addEventListener('click', function () { g.forEach(function (m) { var l = m.sets[m.sets.length - 1]; m.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); }); lfSaveAct(); lfPaintSession(); lfTick(); });
   card.appendChild(ft);
@@ -4613,7 +4619,7 @@ function lfPaintSession() {
     /* THE DOTS ARE THE SETS: one a working set, lit as each is ticked. Warm-ups and drops are not counted. */
     var nOk = e.sets.filter(function (q) { return q.ok; }).length, dEl = $('.lf-ex-dots', card), allOk = e.sets.length > 0 && nOk === e.sets.length;
     if (allOk) dEl.insertAdjacentHTML('beforeend', LF_TICK);
-    e.sets.forEach(function (q) { var d = document.createElement('i'); if (q.ok) d.className = 'on'; dEl.appendChild(d); });
+    e.sets.forEach(function (q, qi) { var d = document.createElement('i'); if (q.ok) d.className = lfPopAt === ei + ':' + qi ? 'on pop' : 'on'; dEl.appendChild(d); });
     card.setAttribute('data-done', nOk + '/' + e.sets.length);
     var rs = lfRestOf(e.id);
     /* The plan's target where the day has one, the recommended dose
