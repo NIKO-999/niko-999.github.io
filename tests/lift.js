@@ -1101,8 +1101,8 @@ const freeze = (at) => `(() => {
     ok('and counts what it had already won as seen', seen && seen.first === 1 && seen.wo10 === 1 && seen.pr === 1 && !seen.st4, seen);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     const shelf = await page.$$eval('#lfBadges .lf-bdi', (x) => x.map((e) => e.querySelector('b').textContent + ':' + e.querySelector('span').textContent));
-    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 297 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
-    ok('and counts them', /4 of 297/.test(await page.textContent('#lfBadgesRow')));
+    ok('the shelf shows every badge, with the day it was won or how far along', shelf.length === 322 && shelf.includes('First workout:5 Oct') && shelf.includes('Week goal hit:9 Oct') && shelf.includes('10 workouts:26 Oct') && shelf.includes('First PR:26 Oct') && shelf.includes('4-week streak:3 / 4') && shelf.includes('50 workouts:10 / 50'), shelf);
+    ok('and counts them', /4 of 322/.test(await page.textContent('#lfBadgesRow')));
     ok('a badge not yet won carries its progress ring', await page.locator('#lfBadges .lf-coin[data-b="wo50"] .lf-bdr').count() === 1 && await page.locator('#lfBadges .lf-coin[data-b="first"] .lf-bdr').count() === 0);
     await page.click('#lfBadges .lf-coin[data-b="wo10"]'); await page.waitForTimeout(60);
     ok('it opens at once, its picture holding the stage while the live award is built', await page.locator('.lf-cv .lf-cv-ph, .lf-cv canvas.is-on').count() >= 1);
@@ -1146,9 +1146,9 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('nothing on You folds open and shut', await page.locator('#lfYou .lf-fold, #lfYou button[aria-expanded]').count() === 0);
     ok('it is goals and one list of five rows, with no body weight on it', await page.locator('#lfBw').count() === 0 && await page.locator('#lfTargets').count() === 1 && (await page.locator('#lfMenu .lf-rowl b').allTextContents()).join() === 'Muscle targets,Appearance,Badges,Monthly medals,Settings');
-    ok('a shelf builds nothing until its row is pressed', await page.locator('.lf-coin').count() === 0 && /of 297/.test(await page.textContent('#lfBadges')));
+    ok('a shelf builds nothing until its row is pressed', await page.locator('.lf-coin').count() === 0 && /of 322/.test(await page.textContent('#lfBadges')));
     await page.click('#lfBadges'); await settle(page);
-    ok('pressing a row opens its screen', await page.locator('.lf-sheet #lfBadgesBody .lf-coin').count() === 297);
+    ok('pressing a row opens its screen', await page.locator('.lf-sheet #lfBadgesBody .lf-coin').count() === 322);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('#lfSet'); await settle(page);
     await page.click('#lfUnit [data-u="lb"]'); await settle(page);
@@ -1919,7 +1919,7 @@ const freeze = (at) => `(() => {
     const wo = [{ id: 'o0', d: '2026-10-05', s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Squat', sets: [{ w: 100, r: 10 }] }] }];
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
-    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 297);
+    ok('without the link there is no owner badge on the shelf', await page.locator('#lfBadges .lf-coin[data-b="owner"]').count() === 0 && await page.locator('#lfBadges .lf-coin').count() === 322);
     await page.goto(URL + '#owner-k7q4x9lz'); await page.waitForTimeout(1500);
     ok('the link is spent: the hash leaves the address bar', await page.waitForFunction(() => location.hash === '' && /^\d{4}-\d\d-\d\d$/.test(localStorage.getItem('lift.owner.v1') || ''), null, { timeout: 10000 }).then(() => true, () => false));
     await page.click('.lf-bar [data-v="you"]'); await settle(page);

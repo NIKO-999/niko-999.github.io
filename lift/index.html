@@ -1909,6 +1909,30 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes fl-hrg { 0%, 60% { transform: rotate(0); } 80%, 100% { transform: rotate(180deg); } }
 .lf-fl[data-fl="diamond"] { animation: fl-dia 2.4s ease-in-out infinite; }
 @keyframes fl-dia { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px var(--fc)); } 45% { transform: scale(1.18) rotate(-6deg); filter: drop-shadow(0 0 10px var(--fc)) brightness(1.5); } 55% { transform: scale(1.18) rotate(6deg); } }
+/* THE LIFT TITLES AND FLAIRS wear their lift's colour, and the rung they are on decides how hard they move: a slow breath, a glow, a light sweeping through, and for the elite one a shimmer and a lift. */
+.lc-fb { --lc: #ef3b2d; } .lc-ib { --lc: #ff7a1a; } .lc-oh { --lc: #eab308; } .lc-dl { --lc: #8b5cf6; } .lc-rw { --lc: #22b8cf; } .lc-sq { --lc: #3b82f6; }
+.fr-ti .tt-s1 em { color: color-mix(in srgb, var(--lc) 70%, #fff); animation: tt-s1 3.2s ease-in-out infinite; }
+@keyframes tt-s1 { 0%, 100% { opacity: .75; } 50% { opacity: 1; } }
+.fr-ti .tt-s2 em { color: color-mix(in srgb, var(--lc) 60%, #fff); animation: tt-s2 2.4s ease-in-out infinite; }
+@keyframes tt-s2 { 0%, 100% { text-shadow: 0 0 3px color-mix(in srgb, var(--lc) 40%, transparent); } 50% { text-shadow: 0 0 10px var(--lc), 0 0 18px color-mix(in srgb, var(--lc) 60%, transparent); } }
+.fr-ti .tt-s3 em { background: linear-gradient(100deg, var(--lc) 0 35%, #fff 50%, var(--lc) 65% 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; animation: tt-s3 3s linear infinite; }
+@keyframes tt-s3 { to { background-position: -250% 0; } }
+.fr-ti .tt-s4 em { display: inline-block; background: linear-gradient(100deg, #fde68a 0 30%, #fff 45%, var(--lc) 60%, #fde68a 75% 100%) 0 0 / 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 0 5px var(--lc)); animation: tt-s4 2.6s linear infinite, tt-s4-l 2.6s ease-in-out infinite; }
+@keyframes tt-s4 { to { background-position: -250% 0; } }
+@keyframes tt-s4-l { 0%, 100% { transform: none; } 50% { transform: translateY(-1px) scale(1.04); } }
+.lf-fl[data-fl="fbench"] { animation: fl-fbench 2.2s ease-in-out infinite; }
+@keyframes fl-fbench { 0%, 100% { transform: translateY(2px); } 40%, 60% { transform: translateY(-3px) scale(1.1); } }
+.lf-fl[data-fl="fincline"] { transform-origin: 20% 90%; animation: fl-finc 2.2s ease-in-out infinite; }
+@keyframes fl-finc { 0%, 100% { transform: rotate(0); } 45%, 60% { transform: rotate(-14deg) scale(1.08); } }
+.lf-fl[data-fl="fpress"] { animation: fl-fpr 2s ease-in-out infinite; }
+@keyframes fl-fpr { 0%, 100% { transform: translateY(2px) scale(.95); } 40%, 60% { transform: translateY(-4px) scale(1.12); } }
+.lf-fl[data-fl="fdead"] { transform-origin: 50% 100%; animation: fl-fdl 2.4s ease-in-out infinite; }
+@keyframes fl-fdl { 0%, 100% { transform: translateY(0) scaleY(1); } 40%, 60% { transform: translateY(-4px) scaleY(1.12); } }
+.lf-fl[data-fl="frow"] { animation: fl-frw 1.8s ease-in-out infinite; }
+@keyframes fl-frw { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px) scale(1.08); } }
+.lf-fl[data-fl="fsquat"] { transform-origin: 50% 100%; animation: fl-fsq 2.2s ease-in-out infinite; }
+@keyframes fl-fsq { 0%, 100% { transform: scaleY(1); } 45%, 60% { transform: scaleY(.72) scaleX(1.08); } }
+@media (prefers-reduced-motion: reduce) { .tt-s1 em, .tt-s2 em, .tt-s3 em, .tt-s4 em, .lf-fl[data-fl^="f"] { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .lf-fl, .lf-fl[data-fl] { animation: none; } }
 .fr-ban-av[class*="is-fm-"] { position: relative; }
 .fr-ban-av[class*="is-fm-"]::before { content: ''; position: absolute; inset: -7px; border-radius: 50%; background: var(--fm); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); pointer-events: none; }
@@ -8242,6 +8266,31 @@ var RK = {
     ['dragon', 'Dragon Slayer', 'Earn Leg Hero', function (c) { return !!c.has.leg100; }],
     ['irongiant', 'Iron Giant', 'Earn Iron Week', function (c) { return !!c.has.ironwk; }],
     ['mountain', 'Mountain Mover', 'Earn Mountain Goat', function (c) { return !!c.has.inclhr; }],
+    ['benchbud', 'Bench Buddy', 'Flat Bench, Beginner', function (c) { return !!c.has.fb1; }],
+    ['twoplates', 'Two Plates', 'Flat Bench, Intermediate', function (c) { return !!c.has.fb2; }],
+    ['benchboss', 'Bench Boss', 'Flat Bench, Advanced', function (c) { return !!c.has.fb3; }],
+    ['benchking', 'Bench King', 'Flat Bench, Elite', function (c) { return !!c.has.fb4; }],
+    ['incstart', 'Incline Starter', 'Incline Bench, Beginner', function (c) { return !!c.has.ib1; }],
+    ['incpro', 'Incline Pro', 'Incline Bench, Intermediate', function (c) { return !!c.has.ib2; }],
+    ['incbeast', 'Incline Beast', 'Incline Bench, Advanced', function (c) { return !!c.has.ib3; }],
+    ['incking', 'Incline King', 'Incline Bench, Elite', function (c) { return !!c.has.ib4; }],
+    ['pressrook', 'Press Rookie', 'Shoulder Press, Beginner', function (c) { return !!c.has.oh1; }],
+    ['ohpro', 'Overhead Pro', 'Shoulder Press, Intermediate', function (c) { return !!c.has.oh2; }],
+    ['boulder', 'Boulder Shoulders', 'Shoulder Press, Advanced', function (c) { return !!c.has.oh3; }],
+    ['skypush', 'Sky Pusher', 'Shoulder Press, Elite', function (c) { return !!c.has.oh4; }],
+    ['pullstart', 'Pull Starter', 'Deadlift, Beginner', function (c) { return !!c.has.dl1; }],
+    ['floormove', 'Floor Mover', 'Deadlift, Intermediate', function (c) { return !!c.has.dl2; }],
+    ['fourplate', 'Four Plates', 'Deadlift, Advanced', function (c) { return !!c.has.dl3; }],
+    ['deadlord', 'Dead Lord', 'Deadlift, Elite', function (c) { return !!c.has.dl4; }],
+    ['rowrookie', 'Row Rookie', 'Barbell Row, Beginner', function (c) { return !!c.has.rw1; }],
+    ['backbuild', 'Back Builder', 'Barbell Row, Intermediate', function (c) { return !!c.has.rw2; }],
+    ['rowmaster', 'Row Master', 'Barbell Row, Advanced', function (c) { return !!c.has.rw3; }],
+    ['cobraback', 'Cobra Back', 'Barbell Row, Elite', function (c) { return !!c.has.rw4; }],
+    ['sqrookie', 'Squat Rookie', 'Back Squat, Beginner', function (c) { return !!c.has.sq1; }],
+    ['deepdiver', 'Deep Diver', 'Back Squat, Intermediate', function (c) { return !!c.has.sq2; }],
+    ['threefif', 'The 315', 'Back Squat, Advanced', function (c) { return !!c.has.sq3; }],
+    ['sqboss', 'Squat Boss', 'Back Squat, Advanced+', function (c) { return !!c.has.sq4; }],
+    ['quadkill', 'Quad Killer', 'Back Squat, Elite', function (c) { return !!c.has.sq5; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
@@ -8289,7 +8338,13 @@ var RK = {
     ['swords', 'Crossed', 'Earn Back to Back', function (c) { return !!c.has.ss1; }, 'M4 4l16 16M20 4L4 20M4 4h4M4 4v4M20 4h-4M20 4v4', '#f87171', 1],
     ['planet', 'Planet', 'Earn 25 PRs', function (c) { return !!c.has.pr25; }, 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM3 17c-1-3 4-8 12-10M21 7c1 3-4 8-12 10', '#c084fc', 1],
     ['hourglass', 'Hourglass', 'Earn One Year In', function (c) { return !!c.has.year; }, 'M6 3h12M6 21h12M7 3c0 6 5 6 5 9s-5 3-5 9M17 3c0 6-5 6-5 9s5 3 5 9', '#fbbf24', 1],
-    ['diamond', 'Diamond', 'Earn 1M moved', function (c) { return !!c.has.v1m; }, 'M6 3h12l4 6-10 12L2 9zM2 9h20M9 3l3 6 3-6', '#67e8f9', 1]],
+    ['diamond', 'Diamond', 'Earn 1M moved', function (c) { return !!c.has.v1m; }, 'M6 3h12l4 6-10 12L2 9zM2 9h20M9 3l3 6 3-6', '#67e8f9', 1],
+    ['fbench', 'Flat Press', 'Flat bench, Advanced', function (c) { return !!c.has.fb3; }, 'M3 15h18M6 15v4M18 15v4M7 11h10M5 9v4M19 9v4', '#ef3b2d', 1],
+    ['fincline', 'Incline Press', 'Incline bench, Advanced', function (c) { return !!c.has.ib3; }, 'M4 19L17 12M6.500 9v7M19 9v6M3 12h18', '#ff7a1a', 1],
+    ['fpress', 'Overhead', 'Shoulder press, Advanced', function (c) { return !!c.has.oh3; }, 'M12 4v11M6 6h12M4 5v2M20 5v2M12 15l-3 6M12 15l3 6', '#eab308', 1],
+    ['fdead', 'Deadlift', 'Deadlift, Advanced', function (c) { return !!c.has.dl3; }, 'M3 19h18M6 13v6M18 13v6M4 11v8M20 11v8M6 16h12', '#8b5cf6', 1],
+    ['frow', 'Row', 'Barbell row, Advanced', function (c) { return !!c.has.rw3; }, 'M5 12h14M3 10v4M21 10v4M8 6l4 4 4-4', '#22b8cf', 1],
+    ['fsquat', 'Squat', 'Back squat, Advanced', function (c) { return !!c.has.sq4; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#3b82f6', 1]],
   fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
     ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
     ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
@@ -8390,7 +8445,32 @@ function lfTitleEl(id) {
     gravity: ['tt-gv', '<em>Gravity Defier</em>'],
     dragon: ['tt-dg', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5M14 5h5v5M7.500 16.500l-2 2"/></svg><em>Dragon Slayer</em>'],
     irongiant: ['tt-ig', '<em>Iron Giant</em>'],
-    mountain: ['tt-mv', '<svg viewBox="0 0 28 14" aria-hidden="true"><path pathLength="100" d="M1 13L9 3l5 6 4-5 9 9z"/></svg><em>Mountain Mover</em>']
+    mountain: ['tt-mv', '<svg viewBox="0 0 28 14" aria-hidden="true"><path pathLength="100" d="M1 13L9 3l5 6 4-5 9 9z"/></svg><em>Mountain Mover</em>'],
+    benchbud: ['tt-s1 lc-fb', '<em>Bench Buddy</em>'],
+    twoplates: ['tt-s2 lc-fb', '<em>Two Plates</em>'],
+    benchboss: ['tt-s3 lc-fb', '<em>Bench Boss</em>'],
+    benchking: ['tt-s4 lc-fb', '<em>Bench King</em>'],
+    incstart: ['tt-s1 lc-ib', '<em>Incline Starter</em>'],
+    incpro: ['tt-s2 lc-ib', '<em>Incline Pro</em>'],
+    incbeast: ['tt-s3 lc-ib', '<em>Incline Beast</em>'],
+    incking: ['tt-s4 lc-ib', '<em>Incline King</em>'],
+    pressrook: ['tt-s1 lc-oh', '<em>Press Rookie</em>'],
+    ohpro: ['tt-s2 lc-oh', '<em>Overhead Pro</em>'],
+    boulder: ['tt-s3 lc-oh', '<em>Boulder Shoulders</em>'],
+    skypush: ['tt-s4 lc-oh', '<em>Sky Pusher</em>'],
+    pullstart: ['tt-s1 lc-dl', '<em>Pull Starter</em>'],
+    floormove: ['tt-s2 lc-dl', '<em>Floor Mover</em>'],
+    fourplate: ['tt-s3 lc-dl', '<em>Four Plates</em>'],
+    deadlord: ['tt-s4 lc-dl', '<em>Dead Lord</em>'],
+    rowrookie: ['tt-s1 lc-rw', '<em>Row Rookie</em>'],
+    backbuild: ['tt-s2 lc-rw', '<em>Back Builder</em>'],
+    rowmaster: ['tt-s3 lc-rw', '<em>Row Master</em>'],
+    cobraback: ['tt-s4 lc-rw', '<em>Cobra Back</em>'],
+    sqrookie: ['tt-s1 lc-sq', '<em>Squat Rookie</em>'],
+    deepdiver: ['tt-s2 lc-sq', '<em>Deep Diver</em>'],
+    threefif: ['tt-s3 lc-sq', '<em>The 315</em>'],
+    sqboss: ['tt-s3 lc-sq', '<em>Squat Boss</em>'],
+    quadkill: ['tt-s4 lc-sq', '<em>Quad Killer</em>']
   };
   if (T2[id]) { sp.className = 'tt ' + T2[id][0]; sp.innerHTML = T2[id][1]; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
@@ -10209,6 +10289,32 @@ function lfDayRun() {
   }
   return out;
 }
+/* THE LIFT MILESTONES, one ladder a lift: a beginner, an intermediate, an advanced and an elite, from the strength tables. Each is earned ONLY by that exact barbell lift (the flat bench does not count for the incline, a dumbbell press does not count for the overhead press) and by a set with a rep in it. The iconic ones sit on the ladder where they fall: the 225 lb / 100 kg bench, the 315 lb squat, the 405 lb deadlift and the 225 lb overhead press. Tiers come in both units, so a lb phone chases 225 and a kg phone chases 100; the badge says its own number. */
+var BD_LIFT = [
+  { f: 'fb', n: 'Flat Bench', d: 'a flat barbell bench press', ex: ['bench'], c: '#ef3b2d', sh: 'hept', kg: [60, 100, 120, 140], lb: [135, 225, 265, 315], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 1 },
+  { f: 'ib', n: 'Incline Bench', d: 'an incline barbell bench press', ex: ['inclbb'], c: '#ff7a1a', sh: 'oct', kg: [50, 80, 100, 120], lb: [115, 185, 225, 265], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 2 },
+  { f: 'oh', n: 'Shoulder Press', d: 'a standing barbell overhead press', ex: ['ohp'], c: '#eab308', sh: 'pent', kg: [40, 60, 80, 100], lb: [95, 135, 175, 225], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 3 },
+  { f: 'dl', n: 'Deadlift', d: 'a barbell deadlift', ex: ['deadlift'], c: '#8b5cf6', sh: 'hex', kg: [100, 140, 180, 220], lb: [225, 315, 405, 495], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 2 },
+  { f: 'rw', n: 'Barbell Row', d: 'a barbell row', ex: ['bbrow'], c: '#22b8cf', sh: 'shield', kg: [60, 80, 100, 120], lb: [135, 175, 225, 265], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: -1 },
+  { f: 'sq', n: 'Back Squat', d: 'a barbell back squat', ex: ['squat'], c: '#3b82f6', sh: 'crest', kg: [80, 120, 143, 160, 200], lb: [185, 275, 315, 365, 445], lab: ['Beginner', 'Intermediate', 'Advanced', 'Advanced+', 'Elite'], ic: 2 }
+];
+var BD_LIFTID = {};
+BD_LIFT.forEach(function (L) {
+  L.ids = L.kg.map(function (k, i) { return L.f + (i + 1); });
+  L.ids.forEach(function (id, i) { BD_LIFTID[id] = 1; BD_NEW.push([id, L.n + ' ' + L.kg[i] + ' kg', 'pr', L.d + ' of ' + L.kg[i] + ' kg or more. ' + L.lab[i] + '.', L.c, 'lift', L.kg[i]]); });
+  BD_LAD.push(['lf' + L.f, L.ids.slice()]);
+});
+function lfLiftTh(L) { return S.unit === 'lb' ? L.lb.map(function (v) { return v * LB; }) : L.kg.slice(); }
+/* the name, the words and the mark on a lift badge follow the unit you train in */
+function lfLiftRefresh() {
+  BD_LIFT.forEach(function (L) {
+    L.ids.forEach(function (id, i) {
+      var b = BADGE[id]; if (!b) return; var v = S.unit === 'lb' ? L.lb[i] : L.kg[i];
+      b.n = L.n + ' ' + v + ' ' + S.unit; b.d = L.d.charAt(0).toUpperCase() + L.d.slice(1) + ' of ' + v + ' ' + S.unit + ' or more. ' + L.lab[i] + (L.ic === i ? '. The one everybody chases.' : '.');
+      BD_GL[id] = String(v);
+    });
+  });
+}
 var BD_NEWBY = {}; BD_NEW.forEach(function (r) { BD_NEWBY[r[0]] = r; });
 /* a rung's finish, where a badge that is being moved to it has none */
 var BD_RUNGFX = ['', 'ice', 'aurora', 'opal', 'prism'];
@@ -10436,6 +10542,7 @@ function lfLadderMetrics(ws) {
 }
 var BD_PREVIEW = true;
 function lfBadges() {
+  lfLiftRefresh();
   var ws = woSorted(), out = {}, uk = S.unit === 'lb' ? LB : 1;
   function won(id, d) { if (!out[id]) out[id] = { d: d }; }
   ws.forEach(function (w, i) { var n = i + 1; if (n === 1) won('first', w.d); if (n === 10) won('wo10', w.d); if (n === 50) won('wo50', w.d); if (n === 100) won('wo100', w.d); });
@@ -10652,6 +10759,14 @@ function lfBadges() {
     if (!(m in lm.last)) return;
     for (var q = 0; q < lm.snaps.length; q++) if (lm.snaps[q][1][m] >= th) { won(r[0], lm.snaps[q][0]); break; }
   });
+  BD_LIFT.forEach(function (L) {
+    var th = lfLiftTh(L), top = 0;
+    ws.forEach(function (w) { w.x.forEach(function (e) {
+      if (L.ex.indexOf(e.id) < 0) return;
+      e.sets.forEach(function (q) { var v = +q.w || 0; if (q.r > 0 && v > top) { top = v; th.forEach(function (x, i) { if (top >= x - .05) won(L.ids[i], w.d); }); } });
+    }); });
+    L.top = top;
+  });
   var own = lfOwner(); if (own) { won('owner', own); won('creator', own); }
   if (S.slay) won('slayer', S.slay);
   if (vol >= 1e7 * uk) { var vv = 0; ws.some(function (w) { vv += woVol(w); if (vv >= 1e7 * uk) { won('v10m', w.d); return true; } return false; }); }
@@ -10705,6 +10820,7 @@ function lfBadges() {
     var m = r[5], th = r[6], val = m === 'dst' ? dr.best : m === 'duo' ? synD.length : m === 'lead' ? leadD.length : m === 'amrun' ? amBest : m === 'tstreak' ? tStreak : lm.last[m] || 0, hrs = m === 'min' || m === 'cdm';
     prog[r[0]] = hrs ? [Math.min(Math.floor(val / 60), th / 60), th / 60] : [Math.min(val, th), th];
   });
+  BD_LIFT.forEach(function (L) { var th = lfLiftTh(L); L.ids.forEach(function (id, i) { prog[id] = [Math.min(L.top || 0, th[i]), th[i]]; }); });
   prog.drakefire = [Math.min(ws.length, 750), 750]; prog.phoenix = [Math.min(phBest, 10), 10]; prog.leviathan = [Math.min(Math.round(vol / uk), 25e6), 25e6]; prog.ouroboros = [Math.min(stBest, 104), 104];
   prog.eclipse = [Math.min(earlyN, 100), 100]; prog.moonrise = [Math.min(owlN, 100), 100]; prog.colossus = [0, 1]; prog.atlas = [0, 1];
   ['allmus', 'dec31', 'friday13', 'leap', 'ironwk', 'plate4', 'ton25', 'sets40'].forEach(function (k) { prog[k] = [0, 1]; });
@@ -10719,6 +10835,7 @@ function lfBadges() {
 }
 function lfBadgeProg(x) {
   var p = x.p; if (!p || p[1] === 1) return 'Locked';
+  if (BD_LIFTID[x.b.id]) return fmtW(p[0]) + ' / ' + fmtW(p[1]) + ' ' + S.unit;
   if (x.b.id === 'v500k' || x.b.id === 'wkvol' || x.b.id === 'v100k' || x.b.id === 'v1m' || x.b.id === 'v5m' || x.b.id === 'v10m' || x.b.id === 'rep1k' || x.b.id === 'rep2k' || /^rp|^sets/.test(x.b.id)) return fmtBig(p[0]) + ' / ' + fmtBig(p[1]);
   if (x.b.id === 'stormc' || x.b.id === 'leviathan') return fmtBig(p[0]) + ' / ' + fmtBig(p[1]);
   if (x.b.id === 'sands' || x.b.id === 'summit') return Math.min(p[0], p[1]) + ' / ' + p[1] + ' h';
@@ -10851,6 +10968,8 @@ var BD_GL = { plan1: 'i:cal', first: 'i:check', wo10: '10', wo50: '50', wo100: '
   sig50: '50', sig100: '100', tgt12: '12', allmus4: '4×', post50: '50', cdwk: '5', cardio100: '100', cdh50: '50h' };
 /* a new rung is a medal, not an object: a shape that reads as a thing (an hourglass, a gear, a drop) is worn as a seal, a scallop, a sun or a plaque instead */
 var BD_MEDAL = { hourglass: 'coin24', gear: 'scallop', drop: 'rosette', compass: 'sun', cross: 'burst', heart: 'scallop', flag: 'trap', tag: 'trap' };
+/* the lift ladders: one shape and colour a lift, and the number on the face */
+BD_LIFT.forEach(function (L) { BD_SHI[L.ids[0]] = L.sh; L.ids.forEach(function (id, i) { BD_GL[id] = String(L.kg[i]); }); });
 /* a new rung wears its family's shape, and says its count */
 BD_SHI.wo25 = 'hept'; BD_SHI.sets100 = 'oct'; BD_SHI.hr10 = 'sun'; BD_SHI.rp1k = 'burst'; BD_SHI.duo5 = 'crest'; BD_SHI.lead2 = 'trap'; BD_SHI.ice1 = 'hextall'; BD_SHI.lava1 = 'pent'; BD_SHI.marb1 = 'shield';
 BD_LAD.forEach(function (l) {
@@ -12639,7 +12758,7 @@ var BD_COLL = [
   ['con', 'Consistency', '#8b5cf6', ['goal', 'st4', 'st12', 'st26', 'st52', 'week', 'dontmiss', 'seven', 'zero', 'wkend', 'back', 'early', 'owl', 'night', 'dawn', 'winter', 'newyear', 'dec31', 'friday13', 'leap', 'phoenix', 'ouroboros', 'eclipse', 'moonrise']],
   ['vol', 'Volume', '#ff8a1c', ['v100k', 'v500k', 'v1m', 'v5m', 'v10m', 'stormc', 'ton10', 'ton15', 'ton20', 'ton25', 'wkvol', 'leviathan', 'colossus']],
   ['set', 'Sets & reps', '#0891b2', ['sets30', 'sets40', 'setwk100', 'sets100', 'sets250', 'sets500', 'sets750', 'sets1500', 'sets3k', 'lava1', 'lava2', 'lava3', 'lava4', 'lava5', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k', 'sets2k', 'sets5k', 'forge', 'rep300', 'rep1k', 'rep2k', 'rp10k', 'rp50k', 'rp100k', 'century']],
-  ['str', 'Strength', '#ef3b2d', ['pr', 'pr3', 'pr10', 'pr25', 'pr50', 'pr100', 'vein', 'onfire', 'plate3', 'plate4', 'atlas']],
+  ['str', 'Strength', '#ef3b2d', ['pr', 'pr3', 'pr10', 'pr25', 'pr50', 'pr100', 'vein', 'onfire', 'plate3', 'plate4', 'atlas'].concat(BD_LIFT.reduce(function (a, L) { return a.concat(L.ids); }, []))],
   ['exr', 'Exercises', '#eab308', ['ex15', 'explore', 'ex80', 'wayf', 'sig50', 'sig100', 'fullbody']],
   ['bod', 'Body parts', '#10b981', ['tgt1', 'tgtall', 'tgt4', 'tgt12', 'quad', 'allmus', 'allmus4', 'zodiac', 'chest50', 'chest100', 'chest200', 'bk50', 'bk100', 'bk200', 'sh50', 'sh100', 'sh200',
     'arm50', 'arm100', 'arm200', 'leg50', 'leg100', 'leg200', 'post50', 'abs10', 'abs50', 'abs100']],
@@ -12989,6 +13108,7 @@ if (S.bseen && !S.bseen.v15) { var BS15 = ['duo5', 'duo25', 'duo75', 'duo150', '
 if (S.bseen && !S.bseen.v14) { var BS14 = ['ice1', 'ice2', 'ice3', 'ice4', 'ice5', 'lava1', 'lava2', 'lava3', 'lava4', 'lava5', 'marb1', 'marb2', 'marb3', 'marb4', 'marb5']; lfBadges().forEach(function (x) { if (x.d && BS14.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v14 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v13) { var BS13 = ['wo25', 'wo75', 'wo150', 'wo200', 'wo300', 'sets100', 'sets250', 'sets750', 'sets1500', 'sets3k', 'hr10', 'hr50', 'hr75', 'hr150', 'hr200', 'rp1k', 'rp5k', 'rp25k', 'rp75k', 'rp150k']; lfBadges().forEach(function (x) { if (x.d && BS13.indexOf(x.b.id) >= 0) S.bseen[x.b.id] = 1; }); S.bseen.v13 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v11) { var BS11 = {}; BD_NEW.forEach(function (r) { BS11[r[0]] = 1; }); ['ss', 'ds', 'wu'].forEach(function (f) { ['1', '2', '3', 'x', 'm'].forEach(function (k) { BS11[f + k] = 1; }); }); lfBadges().forEach(function (x) { if (x.d && BS11[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v11 = 1; lfSave(); }
+if (S.bseen && !S.bseen.v13) { lfBadges().forEach(function (x) { if (x.d && BD_LIFTID[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v13 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v12) { var BS12 = lfBadges(); BS12.forEach(function (x) { if (x.d && BD_TAG[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v12 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v10) { var BS10 = { wo250: 1, wo500: 1, v500k: 1, ton25: 1, wkvol: 1, sets40: 1, setwk100: 1, pr25: 1, pr50: 1, ex15: 1, ex80: 1, sig50: 1, sig100: 1, tgt12: 1, allmus4: 1, post50: 1, cdwk: 1, cardio100: 1, cdh50: 1 }; lfBadges().forEach(function (x) { if (x.d && BS10[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v10 = 1; lfSave(); }
 if (S.bseen && !S.bseen.v9) { var BS9 = { allmus: 1, dec31: 1, friday13: 1, leap: 1, ironwk: 1, plate4: 1, wo365: 1, st52: 1, v10m: 1 }; ['sets500', 'sets2k', 'sets5k', 'hr25', 'hr100', 'hr250', 'rp10k', 'rp50k', 'rp100k', 'mo3', 'mo6', 'mo12'].forEach(function (k) { BS9[k] = 1; }); lfBadges().forEach(function (x) { if (x.d && BS9[x.b.id]) S.bseen[x.b.id] = 1; }); S.bseen.v9 = 1; lfSave(); }
