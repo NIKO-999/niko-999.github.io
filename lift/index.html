@@ -1884,6 +1884,31 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes fl-gem { 0%, 100% { transform: scaleX(1); filter: drop-shadow(0 0 2px var(--fc)); } 40% { transform: scaleX(.35); } 70% { transform: scaleX(1); filter: drop-shadow(0 0 10px var(--fc)) brightness(1.5); } }
 .lf-fl[data-fl="barbell"] { animation: fl-barbell 2s ease-in-out infinite; }
 @keyframes fl-barbell { 0%, 100% { transform: translateY(2px); } 40%, 60% { transform: translateY(-4px) scale(1.1); } }
+/* MORE FLAIRS, each with a motion of its own: a spinning clover, flapping wings, a floating ghost, a swinging anchor, a jingling key, a turning snowflake, a rising summit, a spinning tornado, crossed blades that clash, a tilting planet, a turning hourglass and a flashing diamond. */
+.lf-fl[data-fl="clover"] { animation: fl-clv 3.4s ease-in-out infinite; }
+@keyframes fl-clv { 0%, 100% { transform: rotate(0) scale(1); } 50% { transform: rotate(90deg) scale(1.18); } }
+.lf-fl[data-fl="butterfly"] { animation: fl-btf .9s ease-in-out infinite; }
+@keyframes fl-btf { 0%, 100% { transform: scaleX(1) translateY(0); } 50% { transform: scaleX(.45) translateY(-1.5px); } }
+.lf-fl[data-fl="ghost"] { animation: fl-gh 3s ease-in-out infinite; }
+@keyframes fl-gh { 0%, 100% { transform: translateY(1px); opacity: .75; } 50% { transform: translateY(-3px); opacity: 1; } }
+.lf-fl[data-fl="anchor"] { transform-origin: 50% 0; animation: fl-anc 3s ease-in-out infinite; }
+@keyframes fl-anc { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
+.lf-fl[data-fl="key"] { transform-origin: 70% 30%; animation: fl-key 2s ease-in-out infinite; }
+@keyframes fl-key { 0%, 60%, 100% { transform: rotate(0); } 68% { transform: rotate(-20deg); } 78% { transform: rotate(16deg); } 88% { transform: rotate(-8deg); } }
+.lf-fl[data-fl="snow"] { animation: fl-snw 6s linear infinite; }
+@keyframes fl-snw { to { transform: rotate(360deg); } }
+.lf-fl[data-fl="mountain"] { transform-origin: 50% 100%; animation: fl-mtn 3s ease-in-out infinite; }
+@keyframes fl-mtn { 0%, 100% { transform: scaleY(.85); } 50% { transform: scaleY(1.12); filter: drop-shadow(0 0 7px var(--fc)); } }
+.lf-fl[data-fl="tornado"] { animation: fl-tor 1.6s ease-in-out infinite; }
+@keyframes fl-tor { 0%, 100% { transform: skewX(-16deg); } 50% { transform: skewX(16deg); } }
+.lf-fl[data-fl="swords"] { animation: fl-swd 2.2s ease-in-out infinite; }
+@keyframes fl-swd { 0%, 55%, 100% { transform: scale(1) rotate(0); } 62% { transform: scale(.7) rotate(-8deg); } 70% { transform: scale(1.25) rotate(6deg); filter: drop-shadow(0 0 9px var(--fc)); } 82% { transform: scale(1); } }
+.lf-fl[data-fl="planet"] { animation: fl-pln 4s ease-in-out infinite; }
+@keyframes fl-pln { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg) scale(1.1); } }
+.lf-fl[data-fl="hourglass"] { animation: fl-hrg 3s ease-in-out infinite; }
+@keyframes fl-hrg { 0%, 60% { transform: rotate(0); } 80%, 100% { transform: rotate(180deg); } }
+.lf-fl[data-fl="diamond"] { animation: fl-dia 2.4s ease-in-out infinite; }
+@keyframes fl-dia { 0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px var(--fc)); } 45% { transform: scale(1.18) rotate(-6deg); filter: drop-shadow(0 0 10px var(--fc)) brightness(1.5); } 55% { transform: scale(1.18) rotate(6deg); } }
 @media (prefers-reduced-motion: reduce) { .lf-fl, .lf-fl[data-fl] { animation: none; } }
 .fr-ban-av[class*="is-fm-"] { position: relative; }
 .fr-ban-av[class*="is-fm-"]::before { content: ''; position: absolute; inset: -7px; border-radius: 50%; background: var(--fm); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); mask: radial-gradient(farthest-side, transparent calc(100% - 3.5px), #000 calc(100% - 3px)); pointer-events: none; }
@@ -8252,7 +8277,19 @@ var RK = {
     ['watch', 'Stopwatch', 'Earn Fifty Hours', function (c) { return !!c.has.cdh50; }, 'M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 9v4l2.5 1.5M9.5 2h5', '#38bdf8', 1],
     ['wind', 'Wind', 'Earn Iron Lungs', function (c) { return !!c.has.lungs; }, 'M3 8h10a3 3 0 1 0-3-3M3 12h15a3 3 0 1 1-3 3M3 16h7', '#67e8f9', 1],
     ['gem', 'Gem', 'Earn a mythic badge', function (c) { return c.myth; }, 'M6.5 3.5h11l4 6L12 21 2.5 9.5z', '#a78bfa'],
-    ['barbell', 'Barbell', 'One of one', function (c) { return c.own; }, 'M3 9v6M6.5 6.5v11M17.5 6.5v11M21 9v6M6.5 12h11', '#ff7a1a', 1]],
+    ['barbell', 'Barbell', 'One of one', function (c) { return c.own; }, 'M3 9v6M6.5 6.5v11M17.5 6.5v11M21 9v6M6.5 12h11', '#ff7a1a', 1],
+    ['clover', 'Clover', '10 workouts', function (c) { return c.wo >= 10; }, 'M12 12c-3-3-3-7 0-7s3 4 0 7zM12 12c3-3 7-3 7 0s-4 3-7 0zM12 12c3 3 3 7 0 7s-3-4 0-7zM12 12c-3 3-7 3-7 0s4-3 7 0zM12 12l3 8', '#34d399'],
+    ['butterfly', 'Butterfly', '25 workouts', function (c) { return c.wo >= 25; }, 'M12 12c-3-6-9-6-9-1s5 7 9 1zM12 12c3-6 9-6 9-1s-5 7-9 1zM12 7v10', '#f472b6'],
+    ['ghost', 'Ghost', '30 workouts', function (c) { return c.wo >= 30; }, 'M5 21V11a7 7 0 0 1 14 0v10l-3-2-2 2-2-2-2 2-2-2z', '#e5e7eb'],
+    ['anchor', 'Anchor', '35 workouts', function (c) { return c.wo >= 35; }, 'M12 2a2.500 2.500 0 1 0 0 5 2.500 2.500 0 0 0 0-5zM12 7v14M5 12H3a9 9 0 0 0 18 0h-2M8 9h8', '#38bdf8', 1],
+    ['key', 'Key', '50 workouts', function (c) { return c.wo >= 50; }, 'M14 4a5 5 0 1 0 0 8 5 5 0 0 0 0-8zM10.500 10.500L3 18v3h3l1-1v-2h2l1-1v-2', '#fbbf24', 1],
+    ['snow', 'Snowflake', '60 workouts', function (c) { return c.wo >= 60; }, 'M12 2v20M4 7l16 10M4 17L20 7M9 4l3 2 3-2M9 20l3-2 3 2', '#bae6fd', 1],
+    ['mountain', 'Summit', '85 workouts', function (c) { return c.wo >= 85; }, 'M2 20L9 7l4 6 3-4 6 11z', '#94a3b8'],
+    ['tornado', 'Tornado', '110 workouts', function (c) { return c.wo >= 110; }, 'M3 5h18M5 9h14M7 13h10M9 17h6M11 21h2', '#a5b4fc', 1],
+    ['swords', 'Crossed', '140 workouts', function (c) { return c.wo >= 140; }, 'M4 4l16 16M20 4L4 20M4 4h4M4 4v4M20 4h-4M20 4v4', '#f87171', 1],
+    ['planet', 'Planet', '175 workouts', function (c) { return c.wo >= 175; }, 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM3 17c-1-3 4-8 12-10M21 7c1 3-4 8-12 10', '#c084fc', 1],
+    ['hourglass', 'Hourglass', '225 workouts', function (c) { return c.wo >= 225; }, 'M6 3h12M6 21h12M7 3c0 6 5 6 5 9s-5 3-5 9M17 3c0 6-5 6-5 9s5 3 5 9', '#fbbf24', 1],
+    ['diamond', 'Diamond', '350 workouts', function (c) { return c.wo >= 350; }, 'M6 3h12l4 6-10 12L2 9zM2 9h20M9 3l3 6 3-6', '#67e8f9', 1]],
   fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
     ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
     ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
