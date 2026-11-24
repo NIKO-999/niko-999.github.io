@@ -6363,6 +6363,9 @@ function lfRenderLib() {
   /* PREVIOUS WORKOUTS closes the screen: a small block with no count, paired with Apple Health when Health is on; it runs full width only when it is the odd one out. */
   var prevQ = ['lfPrevOpen', 'Previous workouts', '#c9b6ff', '<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>', lfPrevSheet];
   QA.push(prevQ);
+  /* splits first (Create, Manage), then the library and the plans; a stable sort so the rest keep their order */
+  var QO = { lfSplitOpen: 0, lfNewSplit: 1, lfProgMg: 2, lfLibOpen: 3, lfPlansOpen: 4 };
+  QA = QA.map(function (q, ix) { return [q, ix]; }).sort(function (a, b) { var x = QO[a[0][0]], y = QO[b[0][0]]; x = x === undefined ? 5 : x; y = y === undefined ? 5 : y; return x - y || a[1] - b[1]; }).map(function (z) { return z[0]; });
   var lastPair = -1; QA.forEach(function (q, ix) { if (!q[5]) lastPair = ix; });
   var qg = el('<div class="lf-qa"></div>');
   QA.forEach(function (q, ix) {
