@@ -1646,7 +1646,7 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo: [{ id: 'z1', d: '2026-10-20', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: [{ w: 50, r: 8 }] }] }] }, '2026-10-29T18:00:00');
     await page.click('.lf-bar [data-v="lib"]'); await settle(page);
     const ord = await page.evaluate(() => { const y = (s) => document.querySelector(s).getBoundingClientRect().top; return [y('#lfTgCard'), y('#lfNewSplit'), y('#lfProgMg'), y('#lfSplit')]; });
-    ok('Exercises runs: the targets card, Create split, Manage and share splits, then your split', ord[0] < ord[1] && ord[1] < ord[2] && ord[2] < ord[3], JSON.stringify(ord));
+    ok('Exercises runs: the targets card, Create split, Manage and share splits, then your split', ord[0] < ord[1] && ord[1] <= ord[2] && ord[2] < ord[3], JSON.stringify(ord));
     ok('Create split is a Quick-actions tile with its icon', await page.evaluate(() => { const b = document.querySelector('#lfNewSplit'); return /Create split/.test(b.textContent) && !!b.querySelector('svg'); }));
     ok('the card says the weekly total and how many muscles, with Edit targets', /sets a week/.test(await page.textContent('#lfTgCard')) && /muscles/.test(await page.textContent('#lfTgCard')) && /Edit targets/.test(await page.textContent('#lfTgCard')));
     await page.click('#lfTgCard'); await settle(page);

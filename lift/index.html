@@ -6356,8 +6356,8 @@ function lfRenderLib() {
   if (!newU) root.appendChild(lfTgCard());
   /* QUICK ACTIONS: the four things you do from here, each a block with its own mark. The library is one of them, so the screen no longer ends in a wall of exercises. Apple Health is only drawn where Health is signed in. */
   var QA = [['lfLibOpen', 'Exercise library', '#e6f27a', '<path d="M6 8v8M3.5 10v4M18 8v8M20.5 10v4M6 12h12"/>', function () { lfLibSheet(); }],
-    ['lfNewSplit', 'Create split', '#7ff0b4', '<path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/>', function () { lfSplitForm(null); }],
-    ['lfPlansOpen', 'Training plans', '#ffcf70', '<rect x="3.500" y="7" width="11" height="14" rx="2.500"/><path d="M8 4h9.500a3 3 0 0 1 3 3v10M7 12h4M7 16h4"/>', lfPlansSheet]];
+    ['lfPlansOpen', 'Training plans', '#ffcf70', '<rect x="3.500" y="7" width="11" height="14" rx="2.500"/><path d="M8 4h9.500a3 3 0 0 1 3 3v10M7 12h4M7 16h4"/>', lfPlansSheet],
+    ['lfNewSplit', 'Create split', '#7ff0b4', '<path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/>', function () { lfSplitForm(null); }]];
   if (!newU && !window.__lfInline) QA.unshift(['lfSplitOpen', 'Your split', '#9ad0ff', '<rect x="3.500" y="5" width="17" height="15" rx="3"/><path d="M3.500 10h17M8 3v4M16 3v4M8 14h3"/>', lfSplitSheet, lfProg().n]);
   if (!newU) QA.push(['lfProgMg', 'Manage splits', '#f08ad6', '<rect x="5" y="4" width="14" height="16" rx="2.500"/><path d="M9 9h6M9 13h6M9 17h3"/>', lfProgManage]);
   if (LF_WGT && LF_WGT.healthReadAuth && lfCaps.health) QA.push(['lfHealthQa', 'Apple Health', '#ff7a8a', HK_IC.heart, lfHealthSheet]);
