@@ -15,12 +15,12 @@ const mode = process.argv[2] || 'earned'; // earned | locked
     r.fulfill({ body: t, contentType: 'text/html' });
   });
   await p.goto('http://localhost:8977/lift/index.html'); await p.waitForTimeout(1500);
-  const ids = await p.evaluate((mode) => {
-    const all = __t.lfBadges();
+  const ids = await p.evaluate(([mode, ONLY]) => {
+    const all = __t.lfBadges().filter((x) => !ONLY || new RegExp(ONLY).test(x.b.id));
     window.__imgs = {};
     all.forEach((x) => { if (mode === 'earned') x.d = __t.ymd(__t.today()); else x.d = ''; const im = new Image(); im.alt = x.b.id; window.__imgs[x.b.id] = { im, x }; __t.bdStill(x, im); });
     return all.map((x) => x.b.id);
-  }, mode);
+  }, [mode, process.env.ONLY || '']);
   console.log('badges', ids.length);
   const t0 = Date.now();
   for (let i = 0; i < 900; i++) {

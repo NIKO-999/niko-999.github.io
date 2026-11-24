@@ -27,9 +27,13 @@ for mode, suffix in (('earned', ''), ('locked', '-l')):
         im.save(os.path.join(out, k + suffix + '.webp'), 'WEBP', quality=82, method=6)
         if suffix == '':
             ids.append(k)
-ids.sort()
 p = os.path.join(root, 'index.html')
 s = open(p).read()
+# MERGE=1 keeps the ids already on the list, for a run over a few new badges (ONLY=<regex> on the render)
+if os.environ.get('MERGE'):
+    m = re.search(r"/\*BD_STATIC\*/(\[[^\]]*\])/\*END\*/", s)
+    ids = sorted(set(ids) | set(json.loads(m.group(1))))
+ids.sort()
 s = re.sub(r"/\*BD_STATIC\*/\[[^\]]*\]/\*END\*/", "/*BD_STATIC*/" + json.dumps(ids, separators=(',', ':')) + "/*END*/", s)
 open(p, 'w').write(s)
 print(len(ids), 'badges,', sum(os.path.getsize(os.path.join(out, f)) for f in os.listdir(out)) // 1024, 'KB')
