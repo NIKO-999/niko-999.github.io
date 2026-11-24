@@ -1144,6 +1144,15 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-rpb .lf-wave { animation-duration: .55s; }
 .lf-rpb b { font-size: 12px; padding: 2px 9px; top: -30px; }
 .lf-rpb i { width: 6px; height: 6px; left: -3px; top: -3px; }
+/* THE WORKOUT PAGE IS FLAT: the sheet and its cards were glass, so the accent haze from the page behind showed through them and everything read muddier than it is. Solid page, solid cards, round ticks, the add-exercise row as quiet text. */
+.lf-sheet.lf-session { background: var(--bg) !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
+.lf-sheet.lf-session .lf-ex, .lf-sheet.lf-session .lf-cdc { background: var(--card) !important; box-shadow: none !important; }
+.lf-sheet.lf-session .lf-ex .lf-set:not(.is-done) input { background: color-mix(in srgb, var(--bg) 55%, transparent); }
+.lf-session .lf-ex-hd button.lf-ex-n { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.lf-session .lf-set input { font-weight: 600; }
+.lf-session .lf-ex.is-fold .lf-ex-hd button.lf-ex-n { font-size: 15px; font-weight: 600; }
+.lf-session .lf-chk span { width: 30px; height: 30px; border-radius: 50%; }
+.lf-session .lf-add { min-height: 44px; margin-top: 4px; background: none; color: var(--dim); justify-content: flex-start; padding: 0 4px; font-size: 14px; }
 .lf-ex-ft { display: flex; gap: 18px; margin-top: 2px; }
 /* the three ways to add a set are quiet text, the same for all three */
 .lf-ex-ft button, .lf-ex-ft button.lf-wu-add, .lf-ex-ft button.lf-drop-add, :root[data-mode="light"] .lf-ex-ft button.lf-wu-add { background: none !important; box-shadow: none !important; color: var(--dim) !important; min-height: 44px; padding: 0 2px; font-size: 13px; font-weight: 600; }
