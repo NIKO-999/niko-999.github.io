@@ -769,8 +769,10 @@ svg { display: block; }
 .lf-ex-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--mark-off); }
 .lf-ex-dots i.on { background: var(--log); }
 .lf-ex-tk { width: 15px; height: 15px; margin-right: 3px; fill: none; stroke: var(--log); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
-.lf-more { width: 40px; height: 36px; margin-right: -10px; display: grid; place-items: center; color: var(--dim); flex: none; }
-.lf-more svg { width: 22px; height: 22px; fill: currentColor; }
+/* the exercise's options: one round sliders icon, so the card does not read as a row of dots */
+.lf-more { width: 34px; height: 34px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; color: var(--ink); flex: none; }
+.lf-more::before { content: ''; position: absolute; }
+.lf-more svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .lf-ex-sum { display: none; font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
 .lf-ex.is-fold { cursor: pointer; padding: 4px 14px; border-radius: 16px; }
 .lf-ex.is-fold .lf-ex-sum:not(:empty) { display: block; }
@@ -4361,7 +4363,7 @@ function lfGripWire(gp, card, e) {
   });
 }
 /* THREE DOTS AND A TICK, drawn here so the card template stays one line */
-var LF_MORE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+var LF_MORE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h10M18 8h2M4 16h2M10 16h10"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg>';
 var LF_TICK = '<svg class="lf-ex-tk" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg>';
 /* WHICH EXERCISE IS OPEN: the one you chose, else the one you pinned, else the one the work says, else the first with a set left. A finished workout has none open. */
 function lfOpenId() {
