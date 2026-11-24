@@ -534,37 +534,67 @@ const freeze = (at) => `(() => {
     ok('no exercise name in a normal Monday is cut off', names.every((q) => !q[0] && !q[1]), names);
     await c.close();
   }
-  /* ── SUPERSETS: linked from a card or by the plan, round by round, in a darker accent ── */
+  /* ── SUPERSETS: one card, rounds down it, one tick a round that logs the whole round ── */
   {
     const srcSS = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
-    ok('a superset wears the accent, darker, and no other colour', /\.lf-ex \{ --ss: color-mix\(in srgb, var\(--log\) 55%, #000\); \}/.test(srcSS) && /\.lf-ex\.is-ss \.lf-set\.is-done \.lf-chk span \{ background: var\(--ss\)/.test(srcSS));
+    ok('a superset is drawn as one card with a numbered round and one tall tick each, and the rest is the longest of the exercises\' own', /function lfSsCard\(g, openG\)/.test(srcSS) && /\.lf-ssr-chk \{ align-self: stretch/.test(srcSS) && /act\.restEx = longest\.id/.test(srcSS) && /lfRestOf\(b\.id\)\.lo - lfRestOf\(a\.id\)\.lo/.test(srcSS));
     const { c, page } = await ctx({ unit: 'kg', prog: 'sx', pick: { d: '2026-11-02', id: 's-mon' } }, '2026-11-02T07:00:00');
     await page.click('#lfGo'); await settle(page);
-    ok('the plan links its own superset block: Push A opens with five exercises in one group', await page.locator('.lf-ex.is-ss').count() === 5 && /5 exercises/.test(await page.locator('.lf-ss-l').first().textContent()));
-    const tick = async (n, v) => { const row = page.locator('.lf-ex').nth(n).locator('.lf-set:not(.is-hd):not(.is-wu):not(.is-drop)').first(); await row.scrollIntoViewIfNeeded(); await row.locator('input').nth(0).fill('50'); await row.locator('input').nth(1).fill('8'); await row.locator('.lf-chk').click(); await page.waitForTimeout(350); };
-    await tick(0); 
-    ok('ticking a set in a superset sends you to the next one and starts no rest', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')));
-    for (const k of [1, 2, 3]) await tick(k);
-    ok('and still none while the round is unfinished', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')));
-    await tick(4);
-    ok('the rest starts when the last of the round is ticked', await page.evaluate(() => !document.querySelector('#lfRest').classList.contains('is-idle')));
+    ok('the plan links its own superset block: Push A opens with its five exercises in ONE card', await page.locator('.lf-ex.is-ssc').count() === 1 && await page.locator('.lf-ssr').first().locator('.lf-ssr-r').count() === 5 && !(await page.locator('.lf-ex.is-ss').count()));
+    const round = page.locator('.lf-ssr').first();
+    const rowsN = await round.locator('.lf-ssr-r').count();
+    for (let k = 0; k < rowsN; k++) { await round.locator('.lf-ssr-r').nth(k).locator('input').nth(0).fill('50'); await round.locator('.lf-ssr-r').nth(k).locator('input').nth(1).fill('8'); }
+    ok('typing in a round starts no rest', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')));
+    await round.locator('.lf-ssr-chk').click(); await settle(page);
+    ok('ONE tick logs the whole round: every exercise in it has its first set done, and the rest starts', await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); const g = a.x.filter((e) => e.ss); return g.length === 5 && g.every((e) => e.sets[0].ok === 1 && e.sets[1].ok !== 1) && a.rest > 0 && !document.querySelector('#lfRest').classList.contains('is-idle'); }));
+    ok('the round is marked done, and the card\'s first dot is lit', await page.locator('.lf-ssr').first().evaluate((e) => e.classList.contains('is-done')) && await page.locator('.lf-ex.is-ssc .lf-ex-dots i.on').count() === 1);
+    await page.locator('.lf-ssr').first().locator('.lf-ssr-chk').click(); await settle(page);
+    ok('pressing it again takes the whole round back', await page.evaluate(() => { const a = JSON.parse(localStorage.getItem('lift.active.v1')); return a.x.filter((e) => e.ss).every((e) => e.sets[0].ok !== 1); }));
     await c.close();
   }
   {
-    /* linking by hand, and taking it out again */
+    /* linking by hand from the menu, and taking it out again */
     const { c, page } = await ctx(null, '2026-11-02T07:00:00');
     await page.click('#lfGo'); await settle(page);
-    ok('no exercise is linked to start with', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb').count() >= 3);
-    await page.locator('.lf-ssb').first().click(); await settle(page);
-    ok('the first press only picks it: nothing is linked yet, it is lit, and the others offer themselves', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb.is-pend').count() === 1 && await page.locator('.lf-ssb.is-pick').count() >= 2);
-    await page.locator('.lf-ssb').nth(2).click(); await settle(page);
-    const ids = await page.$$eval('.lf-ex', (x) => x.map((e) => e.classList.contains('is-ss')));
-    ok('the second press joins it to THAT exercise, and the partner moves to sit right under the first: the two are the first two cards', JSON.stringify(ids.slice(0, 3)) === '[true,true,false]' && await page.locator('.lf-ssb.is-pend').count() === 0 && /Superset with/.test(await page.locator('.lf-ss-l').first().textContent()), ids);
-    await page.locator('.lf-ssb').first().click(); await settle(page);
-    ok('pressing the first and then the same one again lets go without linking anything', await page.locator('.lf-ex.is-ss').count() === 0 && await page.locator('.lf-ssb.is-pend').count() === 0);
-    await page.locator('.lf-ssb').first().click(); await settle(page); await page.locator('.lf-ssb').nth(1).click(); await settle(page);
-    await page.locator('.lf-ssb').first().click(); await settle(page);
-    ok('pressed again it takes them out, and neither is left linked to nothing', await page.locator('.lf-ex.is-ss').count() === 0);
+    ok('no exercise is linked to start with, and the old link buttons are gone', await page.locator('.lf-ex.is-ssc').count() === 0 && await page.locator('.lf-ssb').count() === 0);
+    await page.locator('.lf-session .lf-ex .lf-more').first().click(); await settle(page);
+    ok('the exercise menu holds swap, superset, move up and down, and remove, with move up shut on the first', JSON.stringify(await page.$$eval('#lfExMenu .lf-xm-i', (x) => x.map((b) => b.textContent + (b.disabled ? '!' : '')))) === '["Swap exercise","Superset with…","Move up!","Move down","Remove exercise"]');
+    await page.locator('#lfExMenu .lf-xm-i', { hasText: 'Superset with' }).click(); await settle(page);
+    ok('Superset with… lists the other exercises to pair it with, and Make superset waits for you', await page.locator('.lf-sspk-i').count() >= 3 && await page.locator('#lfSsMake').count() === 1);
+    await page.locator('.lf-sspk-i').nth(1).click(); await page.locator('#lfSsMake').click(); await settle(page);
+    const names = await page.$$eval('.lf-ex.is-ssc .lf-ssr:first-child .lf-ssr-t', (x) => x.map((e) => e.textContent));
+    ok('making it joins THAT exercise to the first in one card, the pair\'s names on its first round', await page.locator('.lf-ex.is-ssc').count() === 1 && names.length === 2 && names[0] !== names[1], names);
+    await page.locator('.lf-ex.is-ssc .lf-more').click(); await settle(page);
+    ok('a superset\'s menu takes it out, swaps either, moves the pair and removes it', JSON.stringify(await page.$$eval('#lfExMenu .lf-xm-i', (x) => x.map((b) => b.textContent.replace(/ [A-Z].*$/, '')))).indexOf('Take out of the superset') > 0 && await page.locator('#lfExMenu .lf-xm-i', { hasText: 'Remove superset' }).count() === 1);
+    await page.locator('#lfExMenu .lf-xm-i', { hasText: 'Take out' }).click(); await settle(page);
+    ok('taking it out leaves two plain exercises, neither linked to nothing', await page.locator('.lf-ex.is-ssc').count() === 0 && await page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x.every((e) => !e.ss)));
+    await c.close();
+  }
+  /* ── THE WORKOUT PAGE: one exercise open, the rest folded to a row with dots ── */
+  {
+    const { c, page } = await ctx(null, '2026-11-02T07:00:00');
+    await page.evaluate(() => { window.__lfNoFold = 0; });
+    await page.click('#lfGo'); await settle(page);
+    const st = () => page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.classList.contains('is-fold') ? 'F' : 'O').join(''));
+    ok('the first exercise is open and every other is folded to a row', (await st()) === 'OFFFF');
+    ok('each exercise has one dot a working set, none lit yet, and a sliders button instead of the grip, swap, link and cross', await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-dots i').count() === 4 && await page.locator('.lf-session .lf-ex-dots i.on').count() === 0 && await page.locator('.lf-grip, .lf-swp, .lf-ssb').count() === 0 && await page.locator('.lf-session .lf-more').count() === 5);
+    ok('a folded row is a slim row, not a card', await page.locator('.lf-session .lf-ex.is-fold').first().evaluate((e) => e.getBoundingClientRect().height < 56));
+    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(0).click(); await settle(page);
+    ok('opening the second folds the first, which has nothing in it', (await st()) === 'FOFFF');
+    await page.locator('.lf-session .lf-ex:not(.is-fold) .lf-set input').first().fill('40'); await settle(page);
+    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(1).click(); await settle(page);
+    ok('once you have typed in the second, opening the third leaves it open', (await st()) === 'FOOFF');
+    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(1).click(); await settle(page);
+    ok('and opening a fourth folds the third, which you have not started, and keeps the second', (await st()) === 'FOFOF');
+    const open = page.locator('.lf-session .lf-ex:not(.is-fold)').first();
+    const nSets = await open.locator('.lf-set:not(.is-wu):not(.is-drop)').count();
+    for (let i = 0; i < nSets; i++) { const row = open.locator('.lf-set:not(.is-wu):not(.is-drop)').nth(i); await row.locator('input').nth(0).fill('40'); await row.locator('input').nth(1).fill('10'); await row.locator('.lf-chk').click(); await page.waitForTimeout(400); }
+    await settle(page);
+    ok('a finished exercise folds with a tick, all its dots lit and its best set in words', await page.locator('.lf-session .lf-ex.is-fold .lf-ex-tk').count() >= 1 && /sets? · top set/.test(await page.locator('.lf-session .lf-ex.is-fold .lf-ex-sum:not(:empty)').first().textContent()));
+    await page.locator('.lf-session .lf-ex.is-fold .lf-more').first().click(); await settle(page);
+    ok('the menu opens from a folded row too', await page.locator('#lfExMenu').count() === 1);
+    await page.keyboard.press('Escape'); await settle(page);
+    ok('and Escape puts it away', await page.locator('#lfExMenu').count() === 0);
     await c.close();
   }
   /* ── HOW ARE YOU RECOVERING: every training day asks, and the answer changes the day ── */
@@ -575,7 +605,7 @@ const freeze = (at) => `(() => {
     const n = await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.querySelector('.lf-ex-n').textContent + ':' + e.querySelectorAll('.lf-set:not(.is-hd)').length));
     ok('coming back to the app places you on the set you are on, even with a field focused, and on a long card the set itself is placed', /\[120, 500\]\.forEach\(function \(t\) \{ setTimeout\(function \(\) \{ lfScrollCur\(false\)/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /THE SET YOU ARE ON, NOT ONLY ITS EXERCISE/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     const srcS = require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8');
-    ok('a repaint keeps where you were and the exercise you ticked keeps you, and the W and the drop arrow are centred in their boxes', /if \(bdK && keepTop\) bdK\.scrollTop = keepTop;/.test(srcS) && /lfCurExId = ssn \? ssn\.id : e\.id; lfCurGo = 1;/.test(srcS) && /\.lf-set\.is-wu \.lf-wu-n, \.lf-set\.is-drop \.lf-dr-n \{ display: inline-flex; align-items: center; justify-content: center/.test(srcS) && !/<span class="lf-sn lf-dr-n">↳/.test(srcS));
+    ok('a repaint keeps where you were and the exercise you ticked keeps you, and the W and the drop arrow are centred in their boxes', /if \(bdK && keepTop\) bdK\.scrollTop = keepTop;/.test(srcS) && /lfCurExId = ssn \? ssn\.id : nxE \? nxE\.id : e\.id; lfCurGo = 1;/.test(srcS) && /\.lf-set\.is-wu \.lf-wu-n, \.lf-set\.is-drop \.lf-dr-n \{ display: inline-flex; align-items: center; justify-content: center/.test(srcS) && !/<span class="lf-sn lf-dr-n">↳/.test(srcS));
     ok('and the day starts at full volume', n.join() === 'Hack squat:4,Leg extensions:4,Bulgarian split squats:2,Linear hack calf raises:5,Cable crunches:4', n);
     /* THE REST ALERT, once, the moment the rest is up. */
     const set0 = page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd)').first();
@@ -2263,9 +2293,10 @@ const freeze = (at) => `(() => {
     const { c, page } = await ctx({ unit: 'kg', goal: 3, wo });
     await page.click('#lfGo'); await settle(page);
     const first = () => page.locator('.lf-session .lf-ex').first();
+    const swapOpen = async () => { await first().locator('.lf-more').click(); await page.locator('#lfExMenu .lf-xm-i', { hasText: 'Swap exercise' }).click(); };
     const orig = await first().getAttribute('data-ex');
     ok('the day starts on its own first exercise', orig === 'pendulum', orig);
-    await first().locator('.lf-swp').click(); await page.waitForTimeout(500);
+    await swapOpen(); await page.waitForTimeout(500);
     await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: /^Front squat/ }).first().click(); await page.waitForTimeout(600);
     ok('swapping puts the other exercise in its place, with the same number of sets', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-set:not(.is-hd)').count() >= 3);
     ok('and says what it stands in for, with the way back', /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()));
@@ -2276,11 +2307,11 @@ const freeze = (at) => `(() => {
     await page.click('.lf-session .lf-btn:has-text("Discard")'); await page.waitForTimeout(400); await page.locator('.lf-sheet').last().locator('.lf-btn.is-log').click(); await settle(page);
     await page.click('#lfGo'); await settle(page);
     ok('so the next time the day starts with it, with no asking', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-from').count() === 1);
-    ok('a second swap of the same slot keeps pointing at the original', await (async () => { await first().locator('.lf-swp').click(); await page.waitForTimeout(500); await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Goblet squat' }).first().click(); await page.waitForTimeout(500); const q = await store(page); return q.sw[rid].pendulum === 'gobletsq' && /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()); })());
+    ok('a second swap of the same slot keeps pointing at the original', await (async () => { await swapOpen(); await page.waitForTimeout(500); await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Goblet squat' }).first().click(); await page.waitForTimeout(500); const q = await store(page); return q.sw[rid].pendulum === 'gobletsq' && /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()); })());
     await first().locator('.lf-from').click(); await page.waitForTimeout(500);
     st = await store(page);
     ok('back to the original is one press, and puts the day back as it was', await first().getAttribute('data-ex') === 'pendulum' && !st.sw && await first().locator('.lf-from').count() === 0, st.sw);
-    await first().locator('.lf-swp').click(); await page.waitForTimeout(500);
+    await swapOpen(); await page.waitForTimeout(500);
     await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: /^Front squat/ }).first().click(); await page.waitForTimeout(500);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
@@ -2425,8 +2456,8 @@ const freeze = (at) => `(() => {
     ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
     await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);
     ok('the drop scene hangs a drop row off the first set', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[1].classList.contains('is-drop'); }));
-    await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(3800);
-    ok('the superset scene links both cards', await page.locator('.lf-tr-stage .lf-ex.is-ss').count() === 2);
+    await page.click('.lf-tr-segs button:nth-child(1)'); await page.waitForTimeout(5000);
+    ok('the superset scene merges both into one card, through the menu', await page.locator('.lf-tr-stage .lf-ex.is-ssc').count() === 1 && await page.locator('.lf-tr-stage .lf-ssb, .lf-tr-stage .lf-swp, .lf-tr-stage .lf-ex-pb').count() === 0);
     await page.evaluate(() => document.querySelector('.lf-sheet:not(.lf-session) .lf-x').click()); await page.waitForTimeout(500);
     ok('the guide is a button in the workout head beside the name, in the accent, a 44px target', await page.evaluate(() => { const g = document.querySelector('.lf-session #lfGuide'), n = document.querySelector('.lf-session .lf-ss-name'); if (!g || !n) return false; const a = g.getBoundingClientRect(), b = n.getBoundingClientRect(); return getComputedStyle(g).position === 'static' && a.height >= 44 && Math.abs((a.top + a.height / 2) - (b.top + b.height / 2)) < 6 && a.left >= b.right - 1 && getComputedStyle(g).color !== getComputedStyle(n).color; }));
     await page.evaluate(() => document.querySelector('.lf-session #lfGuide').click()); await page.waitForTimeout(500);
@@ -2825,18 +2856,12 @@ const freeze = (at) => `(() => {
     await g.page.click('#lfGo'); await settle(g.page);
     const names = () => g.page.$$eval('.lf-ex .lf-ex-n', (n) => n.map((x) => x.textContent.trim()));
     const before = await names();
-    ok('every exercise has a grip to move it by', before.length > 1 && await g.page.locator('.lf-ex .lf-grip').count() === before.length);
-    await g.page.locator('.lf-ex .lf-grip').first().focus(); await g.page.keyboard.press('ArrowDown'); await settle(g.page);
+    ok('every exercise has a menu to move it by, and the grip is gone', before.length > 1 && await g.page.locator('.lf-ex .lf-more').count() === before.length && await g.page.locator('.lf-grip').count() === 0);
+    await g.page.locator('.lf-ex .lf-more').first().click(); await g.page.locator('#lfExMenu .lf-xm-i', { hasText: 'Move down' }).click(); await settle(g.page);
     const after = await names();
-    ok('the arrows move an exercise down one place', after[1] === before[0] && after[0] === before[1], { before, after });
-    await g.page.locator('.lf-ex .lf-grip').nth(1).focus(); await g.page.keyboard.press('ArrowUp'); await settle(g.page);
-    ok('and up again', (await names()).join() === before.join());
-    const bb = await g.page.locator('.lf-ex .lf-grip').first().boundingBox();
-    const b2 = await g.page.locator('.lf-ex').nth(1).boundingBox();
-    await g.page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await g.page.mouse.down();
-    await g.page.mouse.move(bb.x + bb.width / 2, b2.y + b2.height - 4, { steps: 8 }); await g.page.mouse.up(); await settle(g.page);
-    const dr = await names();
-    ok('dragging by the grip drops it where you let go', dr[0] === before[1] && dr[1] === before[0], { before, dr });
+    ok('Move down moves an exercise down one place', after[1] === before[0] && after[0] === before[1], { before, after });
+    await g.page.locator('.lf-ex .lf-more').nth(1).click(); await g.page.locator('#lfExMenu .lf-xm-i', { hasText: 'Move up' }).click(); await settle(g.page);
+    ok('and Move up puts it back', (await names()).join() === before.join());
     await g.c.close();
   }
 
