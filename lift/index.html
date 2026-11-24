@@ -4581,7 +4581,7 @@ function lfSsCard(g, openG) {
   var ft = el('<div class="lf-ex-ft"><button type="button" aria-label="Add a round">+ Round</button></div>');
   $('button', ft).addEventListener('click', function () { g.forEach(function (m) { var l = m.sets[m.sets.length - 1]; m.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); }); lfSaveAct(); lfPaintSession(); lfTick(); });
   card.appendChild(ft);
-  if (!g.some(function (m) { return openG.indexOf(m) >= 0; })) {
+  if (!g.some(function (m) { return openG.indexOf(m) >= 0; }) && !window.__lfNoFold) {
     card.classList.add('is-fold');
     $('.lf-ex-sum', card).textContent = ssNames + (nDone ? ' · ' + nDone + ' of ' + n : '');
     $('.lf-ex-n', card).addEventListener('click', function () { lfOpenAt(g[0]); });
@@ -4774,7 +4774,7 @@ function lfPaintSession() {
     bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); lfTick(); });
     card.appendChild(ft);
     /* ONE EXERCISE IS OPEN, with its superset partners; every other folds to its name, its dots and, once it has sets in, the best of them */
-    if (openG.indexOf(e) < 0) {
+    if (openG.indexOf(e) < 0 && !window.__lfNoFold) {
       card.classList.add('is-fold');
       if (nOk) { var tp = null; e.sets.forEach(function (q) { if (q.ok && (!tp || +q.w > +tp.w)) tp = q; }); $('.lf-ex-sum', card).textContent = nOk + (nOk === 1 ? ' set' : ' sets') + (tp ? ' · top set ' + fmtWS(tp.w) + ' × ' + tp.r : ''); }
     }
