@@ -8193,6 +8193,7 @@ function lfBadgesCache() { var k = S.wo.length + ':' + (S.wo.length ? S.wo[S.wo.
    backdrop behind the page, each earned from what you have done and worn
    from Settings. Friends see what you chose. Never anything about weight. */
 function lfRkCtx() {
+  lfLiftRefresh();
   var got = lfBadgesCache().filter(function (x) { return x.d; });
   var has = {}; got.forEach(function (x) { has[x.b.id] = 1; });
   return { has: has, wo: S.wo.length, run: lfGoalRun(), bd: got.length, myth: got.some(function (x) { return x.b.t === 4; }), own: !!lfOwner(), slay: !!S.slay };
@@ -8268,36 +8269,35 @@ var RK = {
     ['dragon', 'Dragon Slayer', 'Earn Leg Hero', function (c) { return !!c.has.leg100; }],
     ['irongiant', 'Iron Giant', 'Earn Iron Week', function (c) { return !!c.has.ironwk; }],
     ['mountain', 'Mountain Mover', 'Earn Mountain Goat', function (c) { return !!c.has.inclhr; }],
-    ['benchbud', 'Bench Buddy', 'Flat Bench, Beginner', function (c) { return !!c.has.fb1; }],
-    ['twoplates', 'Two Plates', 'Flat Bench, Intermediate', function (c) { return !!c.has.fb2; }],
-    ['benchboss', 'Bench Boss', 'Flat Bench, Advanced', function (c) { return !!c.has.fb3; }],
-    ['benchking', 'Bench King', 'Flat Bench, Elite', function (c) { return !!c.has.fb4; }],
-    ['incstart', 'Incline Starter', 'Incline Bench, Beginner', function (c) { return !!c.has.ib1; }],
-    ['incpro', 'Incline Pro', 'Incline Bench, Intermediate', function (c) { return !!c.has.ib2; }],
-    ['incbeast', 'Incline Beast', 'Incline Bench, Advanced', function (c) { return !!c.has.ib3; }],
-    ['incking', 'Incline King', 'Incline Bench, Elite', function (c) { return !!c.has.ib4; }],
-    ['pressrook', 'Press Rookie', 'Shoulder Press, Beginner', function (c) { return !!c.has.oh1; }],
-    ['ohpro', 'Overhead Pro', 'Shoulder Press, Intermediate', function (c) { return !!c.has.oh2; }],
-    ['boulder', 'Boulder Shoulders', 'Shoulder Press, Advanced', function (c) { return !!c.has.oh3; }],
-    ['skypush', 'Sky Pusher', 'Shoulder Press, Elite', function (c) { return !!c.has.oh4; }],
-    ['pullstart', 'Pull Starter', 'Deadlift, Beginner', function (c) { return !!c.has.dl1; }],
-    ['floormove', 'Floor Mover', 'Deadlift, Intermediate', function (c) { return !!c.has.dl2; }],
-    ['fourplate', 'Four Plates', 'Deadlift, Advanced', function (c) { return !!c.has.dl3; }],
-    ['deadlord', 'Dead Lord', 'Deadlift, Elite', function (c) { return !!c.has.dl4; }],
-    ['rowrookie', 'Row Rookie', 'Barbell Row, Beginner', function (c) { return !!c.has.rw1; }],
-    ['backbuild', 'Back Builder', 'Barbell Row, Intermediate', function (c) { return !!c.has.rw2; }],
-    ['rowmaster', 'Row Master', 'Barbell Row, Advanced', function (c) { return !!c.has.rw3; }],
-    ['cobraback', 'Cobra Back', 'Barbell Row, Elite', function (c) { return !!c.has.rw4; }],
-    ['bench225', 'The 225 Club', 'The iconic The 225 Club', function (c) { return !!c.has.icb; }],
-    ['incl225', 'Incline 225', 'The iconic Incline 225', function (c) { return !!c.has.ici; }],
-    ['squat315', 'The 315', 'The iconic The 315', function (c) { return !!c.has.ics; }],
-    ['dead405', 'The 405', 'The iconic The 405', function (c) { return !!c.has.icd; }],
-    ['ohp225', 'Press 225', 'The iconic Press 225', function (c) { return !!c.has.ico; }],
-    ['sqrookie', 'Squat Rookie', 'Back Squat, Beginner', function (c) { return !!c.has.sq1; }],
-    ['deepdiver', 'Deep Diver', 'Back Squat, Intermediate', function (c) { return !!c.has.sq2; }],
-    ['threefif', 'Squat Pro', 'Back Squat, Advanced', function (c) { return !!c.has.sq3; }],
-    ['sqboss', 'Squat Boss', 'Back Squat, Advanced+', function (c) { return !!c.has.sq4; }],
-    ['quadkill', 'Quad Killer', 'Back Squat, Elite', function (c) { return !!c.has.sq5; }],
+    ['benchbud', 'Bench 60', 'Flat Bench, Beginner', function (c) { return !!c.has.fb1; }],
+    ['twoplates', 'Bench 100', 'Flat Bench, Intermediate', function (c) { return !!c.has.fb2; }],
+    ['benchboss', 'Bench 120', 'Flat Bench, Advanced', function (c) { return !!c.has.fb3; }],
+    ['benchking', 'Bench 140', 'Flat Bench, Elite', function (c) { return !!c.has.fb4; }],
+    ['incstart', 'Incline 50', 'Incline Bench, Beginner', function (c) { return !!c.has.ib1; }],
+    ['incpro', 'Incline 80', 'Incline Bench, Intermediate', function (c) { return !!c.has.ib2; }],
+    ['incbeast', 'Incline 100', 'Incline Bench, Advanced', function (c) { return !!c.has.ib3; }],
+    ['incking', 'Incline 120', 'Incline Bench, Elite', function (c) { return !!c.has.ib4; }],
+    ['pressrook', 'Press 40', 'Shoulder Press, Beginner', function (c) { return !!c.has.oh1; }],
+    ['ohpro', 'Press 60', 'Shoulder Press, Intermediate', function (c) { return !!c.has.oh2; }],
+    ['boulder', 'Press 80', 'Shoulder Press, Advanced', function (c) { return !!c.has.oh3; }],
+    ['skypush', 'Press 100', 'Shoulder Press, Elite', function (c) { return !!c.has.oh4; }],
+    ['pullstart', 'Deadlift 100', 'Deadlift, Beginner', function (c) { return !!c.has.dl1; }],
+    ['floormove', 'Deadlift 140', 'Deadlift, Intermediate', function (c) { return !!c.has.dl2; }],
+    ['fourplate', 'Deadlift 180', 'Deadlift, Advanced', function (c) { return !!c.has.dl3; }],
+    ['deadlord', 'Deadlift 220', 'Deadlift, Elite', function (c) { return !!c.has.dl4; }],
+    ['rowrookie', 'Row 60', 'Barbell Row, Beginner', function (c) { return !!c.has.rw1; }],
+    ['backbuild', 'Row 80', 'Barbell Row, Intermediate', function (c) { return !!c.has.rw2; }],
+    ['rowmaster', 'Row 100', 'Barbell Row, Advanced', function (c) { return !!c.has.rw3; }],
+    ['cobraback', 'Row 120', 'Barbell Row, Elite', function (c) { return !!c.has.rw4; }],
+    ['bench225', 'The 100', 'The iconic The 100', function (c) { return !!c.has.icb; }],
+    ['incl225', 'The 100 Incline', 'The iconic The 100 Incline', function (c) { return !!c.has.ici; }],
+    ['squat315', 'The 143', 'The iconic The 143', function (c) { return !!c.has.ics; }],
+    ['dead405', 'The 184', 'The iconic The 184', function (c) { return !!c.has.icd; }],
+    ['ohp225', 'The 102 Press', 'The iconic The 102 Press', function (c) { return !!c.has.ico; }],
+    ['sqrookie', 'Squat 80', 'Back Squat, Beginner', function (c) { return !!c.has.sq1; }],
+    ['deepdiver', 'Squat 120', 'Back Squat, Intermediate', function (c) { return !!c.has.sq2; }],
+    ['sqboss', 'Squat 160', 'Back Squat, Advanced+', function (c) { return !!c.has.sq4; }],
+    ['quadkill', 'Squat 200', 'Back Squat, Elite', function (c) { return !!c.has.sq5; }],
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
@@ -8351,7 +8351,7 @@ var RK = {
     ['fpress', 'Overhead', 'Shoulder press, Advanced', function (c) { return !!c.has.oh3; }, 'M12 4v11M6 6h12M4 5v2M20 5v2M12 15l-3 6M12 15l3 6', '#eab308', 1],
     ['fdead', 'Deadlift', 'Deadlift, Advanced', function (c) { return !!c.has.dl3; }, 'M3 19h18M6 13v6M18 13v6M4 11v8M20 11v8M6 16h12', '#8b5cf6', 1],
     ['frow', 'Row', 'Barbell row, Advanced', function (c) { return !!c.has.rw3; }, 'M5 12h14M3 10v4M21 10v4M8 6l4 4 4-4', '#22b8cf', 1],
-    ['fsquat', 'Squat', 'Back squat, Advanced', function (c) { return !!c.has.sq4; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#3b82f6', 1],
+    ['fsquat', 'Squat', 'Back squat, Advanced', function (c) { return !!c.has.sq3; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#3b82f6', 1],
     ['ficb', 'Iconic Bench', 'The 225 Club', function (c) { return !!c.has.icb; }, 'M3 15h18M6 15v4M18 15v4M7 11h10M5 9v4M19 9v4', '#fbbf24', 1],
     ['fici', 'Iconic Incline', 'Incline 225', function (c) { return !!c.has.ici; }, 'M4 19L17 12M6.500 9v7M19 9v6M3 12h18', '#fbbf24', 1],
     ['fics', 'Iconic Squat', 'The 315', function (c) { return !!c.has.ics; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#fbbf24', 1],
@@ -8458,37 +8458,37 @@ function lfTitleEl(id) {
     dragon: ['tt-dg', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19L19 5M14 5h5v5M7.500 16.500l-2 2"/></svg><em>Dragon Slayer</em>'],
     irongiant: ['tt-ig', '<em>Iron Giant</em>'],
     mountain: ['tt-mv', '<svg viewBox="0 0 28 14" aria-hidden="true"><path pathLength="100" d="M1 13L9 3l5 6 4-5 9 9z"/></svg><em>Mountain Mover</em>'],
-    benchbud: ['tt-s1 lc-fb', '<em>Bench Buddy</em>'],
-    twoplates: ['tt-s2 lc-fb', '<em>Two Plates</em>'],
-    benchboss: ['tt-s3 lc-fb', '<em>Bench Boss</em>'],
-    benchking: ['tt-s4 lc-fb', '<em>Bench King</em>'],
-    incstart: ['tt-s1 lc-ib', '<em>Incline Starter</em>'],
-    incpro: ['tt-s2 lc-ib', '<em>Incline Pro</em>'],
-    incbeast: ['tt-s3 lc-ib', '<em>Incline Beast</em>'],
-    incking: ['tt-s4 lc-ib', '<em>Incline King</em>'],
-    pressrook: ['tt-s1 lc-oh', '<em>Press Rookie</em>'],
-    ohpro: ['tt-s2 lc-oh', '<em>Overhead Pro</em>'],
-    boulder: ['tt-s3 lc-oh', '<em>Boulder Shoulders</em>'],
-    skypush: ['tt-s4 lc-oh', '<em>Sky Pusher</em>'],
-    pullstart: ['tt-s1 lc-dl', '<em>Pull Starter</em>'],
-    floormove: ['tt-s2 lc-dl', '<em>Floor Mover</em>'],
-    fourplate: ['tt-s3 lc-dl', '<em>Four Plates</em>'],
-    deadlord: ['tt-s4 lc-dl', '<em>Dead Lord</em>'],
-    rowrookie: ['tt-s1 lc-rw', '<em>Row Rookie</em>'],
-    backbuild: ['tt-s2 lc-rw', '<em>Back Builder</em>'],
-    rowmaster: ['tt-s3 lc-rw', '<em>Row Master</em>'],
-    cobraback: ['tt-s4 lc-rw', '<em>Cobra Back</em>'],
-    bench225: ['tt-s4 lc-fb', '<em>The 225 Club</em>'],
-    incl225: ['tt-s4 lc-ib', '<em>Incline 225</em>'],
-    squat315: ['tt-s4 lc-sq', '<em>The 315</em>'],
-    dead405: ['tt-s4 lc-dl', '<em>The 405</em>'],
-    ohp225: ['tt-s4 lc-oh', '<em>Press 225</em>'],
-    sqrookie: ['tt-s1 lc-sq', '<em>Squat Rookie</em>'],
-    deepdiver: ['tt-s2 lc-sq', '<em>Deep Diver</em>'],
-    threefif: ['tt-s3 lc-sq', '<em>Squat Pro</em>'],
-    sqboss: ['tt-s3 lc-sq', '<em>Squat Boss</em>'],
-    quadkill: ['tt-s4 lc-sq', '<em>Quad Killer</em>']
+    benchbud: ['tt-s1 lc-fb', '<em>Bench 60</em>'],
+    twoplates: ['tt-s2 lc-fb', '<em>Bench 100</em>'],
+    benchboss: ['tt-s3 lc-fb', '<em>Bench 120</em>'],
+    benchking: ['tt-s4 lc-fb', '<em>Bench 140</em>'],
+    incstart: ['tt-s1 lc-ib', '<em>Incline 50</em>'],
+    incpro: ['tt-s2 lc-ib', '<em>Incline 80</em>'],
+    incbeast: ['tt-s3 lc-ib', '<em>Incline 100</em>'],
+    incking: ['tt-s4 lc-ib', '<em>Incline 120</em>'],
+    pressrook: ['tt-s1 lc-oh', '<em>Press 40</em>'],
+    ohpro: ['tt-s2 lc-oh', '<em>Press 60</em>'],
+    boulder: ['tt-s3 lc-oh', '<em>Press 80</em>'],
+    skypush: ['tt-s4 lc-oh', '<em>Press 100</em>'],
+    pullstart: ['tt-s1 lc-dl', '<em>Deadlift 100</em>'],
+    floormove: ['tt-s2 lc-dl', '<em>Deadlift 140</em>'],
+    fourplate: ['tt-s3 lc-dl', '<em>Deadlift 180</em>'],
+    deadlord: ['tt-s4 lc-dl', '<em>Deadlift 220</em>'],
+    rowrookie: ['tt-s1 lc-rw', '<em>Row 60</em>'],
+    backbuild: ['tt-s2 lc-rw', '<em>Row 80</em>'],
+    rowmaster: ['tt-s3 lc-rw', '<em>Row 100</em>'],
+    cobraback: ['tt-s4 lc-rw', '<em>Row 120</em>'],
+    bench225: ['tt-s4 lc-fb', '<em>The 100</em>'],
+    incl225: ['tt-s4 lc-ib', '<em>The 100 Incline</em>'],
+    squat315: ['tt-s4 lc-sq', '<em>The 143</em>'],
+    dead405: ['tt-s4 lc-dl', '<em>The 184</em>'],
+    ohp225: ['tt-s4 lc-oh', '<em>The 102 Press</em>'],
+    sqrookie: ['tt-s1 lc-sq', '<em>Squat 80</em>'],
+    deepdiver: ['tt-s2 lc-sq', '<em>Squat 120</em>'],
+    sqboss: ['tt-s3 lc-sq', '<em>Squat 160</em>'],
+    quadkill: ['tt-s4 lc-sq', '<em>Squat 200</em>']
   };
+  if (T2[id] && LF_TIN[id]) { sp.className = 'tt ' + T2[id][0]; sp.innerHTML = '<em>' + lfLiftTitleName(id) + '</em>'; return sp; }
   if (T2[id]) { sp.className = 'tt ' + T2[id][0]; sp.innerHTML = T2[id][1]; return sp; }
   /* THE EYE: it looks about, it blinks, and it says what it is doing. The owner's alone. */
   if (id === 'eye') {
@@ -8868,7 +8868,7 @@ function lfEmblem3(kind, colStr) {
 }
 var RK_HEAD = { ti: 'Title', fl: 'Flair', fm: 'Frame' };
 function lfRkItem(kind, id) { return (RK[kind] || []).filter(function (x) { return x[0] === id; })[0] || null; }
-function lfRkName(kind, id) { var x = lfRkItem(kind, id); return x ? x[1] : ''; }
+function lfRkName(kind, id) { if (kind === 'ti' && LF_TIN[id]) return lfLiftTitleName(id); var x = lfRkItem(kind, id); return x ? x[1] : ''; }
 function lfRkHas(kind, id) { return !!lfRkItem(kind, id); }
 function lfRkOk(kind, id, c) { var x = lfRkItem(kind, id); return !!x && !!x[3](c || lfRkCtx()); }
 /* the title worn: the one picked if it is still earned, else the best earned */
@@ -10313,7 +10313,7 @@ var BD_LIFT = [
   { f: 'oh', n: 'Shoulder Press', d: 'a standing barbell overhead press', ex: ['ohp'], c: '#eab308', sh: 'pent', kg: [40, 60, 80, 100], lb: [95, 135, 175, 225], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 3 },
   { f: 'dl', n: 'Deadlift', d: 'a barbell deadlift', ex: ['deadlift'], c: '#8b5cf6', sh: 'hex', kg: [100, 140, 180, 220], lb: [225, 315, 405, 495], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: 2 },
   { f: 'rw', n: 'Barbell Row', d: 'a barbell row', ex: ['bbrow'], c: '#22b8cf', sh: 'shield', kg: [60, 80, 100, 120], lb: [135, 175, 225, 265], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: -1 },
-  { f: 'sq', n: 'Back Squat', d: 'a barbell back squat', ex: ['squat'], c: '#3b82f6', sh: 'crest', kg: [80, 120, 143, 160, 200], lb: [185, 275, 315, 365, 445], lab: ['Beginner', 'Intermediate', 'Advanced', 'Advanced+', 'Elite'], ic: 2 }
+  { f: 'sq', n: 'Back Squat', d: 'a barbell back squat', ex: ['squat'], c: '#3b82f6', sh: 'crest', kg: [80, 120, 160, 200], lb: [185, 275, 365, 445], lab: ['Beginner', 'Intermediate', 'Advanced', 'Elite'], ic: -1 }
 ];
 var BD_LIFTID = {};
 BD_LIFT.forEach(function (L) {
@@ -10334,6 +10334,16 @@ BD_ICON.forEach(function (I) {
   BD_NEW.push([I.id, 'The ' + I.lb + ' ' + I.n, 'pr', 'The classic: ' + I.d + ' of ' + I.lb + ' lb or more.', I.c, 'lift', I.kg]);
 });
 function lfIconTh(I) { return S.unit === 'lb' ? I.lb * LB : I.kg; }
+/* THE LIFT TITLES ARE NUMBERS, in the unit you train in: Bench 225, Squat 315, The 405. The catalogue holds the kg names and these put the right ones in at the start. */
+var LF_TIN = {};
+(function () {
+  var T = { fb: ['benchbud', 'twoplates', 'benchboss', 'benchking'], ib: ['incstart', 'incpro', 'incbeast', 'incking'], oh: ['pressrook', 'ohpro', 'boulder', 'skypush'], dl: ['pullstart', 'floormove', 'fourplate', 'deadlord'], rw: ['rowrookie', 'backbuild', 'rowmaster', 'cobraback'], sq: ['sqrookie', 'deepdiver', 'sqboss', 'quadkill'] };
+  var S2 = { fb: 'Bench', ib: 'Incline', oh: 'Press', dl: 'Deadlift', rw: 'Row', sq: 'Squat' };
+  BD_LIFT.forEach(function (L) { T[L.f].forEach(function (id, i) { LF_TIN[id] = function (lb) { return S2[L.f] + ' ' + (lb ? L.lb[i] : L.kg[i]); }; }); });
+  var IC = { bench225: ['icb', ''], incl225: ['ici', ' Incline'], squat315: ['ics', ''], dead405: ['icd', ''], ohp225: ['ico', ' Press'] };
+  Object.keys(IC).forEach(function (id) { var I = BD_ICON.filter(function (x) { return x.id === IC[id][0]; })[0]; LF_TIN[id] = function (lb) { return 'The ' + (lb ? I.lb : I.kg) + IC[id][1]; }; });
+})();
+function lfLiftTitleName(id) { var f = LF_TIN[id]; return f ? f(S.unit === 'lb') : ''; }
 function lfLiftTh(L) { return S.unit === 'lb' ? L.lb.map(function (v) { return v * LB; }) : L.kg.slice(); }
 /* the name, the words and the mark on a lift badge follow the unit you train in */
 function lfLiftRefresh() {
@@ -10344,6 +10354,7 @@ function lfLiftRefresh() {
       BD_GL[id] = String(v);
     });
   });
+  RK.ti.forEach(function (r) { if (LF_TIN[r[0]]) r[1] = lfLiftTitleName(r[0]); });
   BD_ICON.forEach(function (I) {
     var b = BADGE[I.id]; if (!b) return; var v = S.unit === 'lb' ? I.lb : I.kg;
     b.n = 'The ' + v + ' ' + I.n; b.d = 'The classic: ' + I.d + ' of ' + v + ' ' + S.unit + ' or more.'; BD_GL[I.id] = String(v);
