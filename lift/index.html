@@ -1158,17 +1158,13 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-session .lf-set input { font-weight: 600; }
 .lf-session .lf-ex.is-fold .lf-ex-hd button.lf-ex-n { font-size: 15px; font-weight: 600; }
 .lf-session .lf-chk span { width: 30px; height: 30px; border-radius: 50%; }
-/* cardio after: one row, opens to its choices */
-.lf-session .lf-cdc { padding: 4px 14px; border-radius: 16px; margin-top: 8px; }
-.lf-cdc-h { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 36px; text-align: left; }
-.lf-cdc-h b { font-size: 15px; font-weight: 600; flex: 1; }
-.lf-cdc-h .lf-cd-sum { font-size: 13px; color: var(--dim); }
-.lf-cdc-h svg { width: 16px; height: 16px; flex: none; fill: none; stroke: var(--dim); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: transform .2s; }
-.lf-cdc.is-open .lf-cdc-h svg { transform: rotate(180deg); }
-.lf-cdc-b { padding: 6px 0 12px; }
-.lf-cdc-b .lf-cd .lf-pill { height: 34px; min-height: 34px; font-size: 13px; }
-.lf-cdc-b .lf-cd .lf-cd-f { height: 34px; min-height: 34px; }
-.lf-cdc-b[hidden] { display: none; }
+/* cardio: one row, its name and the minutes typed */
+.lf-session .lf-cdc { display: flex; align-items: center; gap: 8px; padding: 4px 14px; border-radius: 16px; margin-top: 8px; min-height: 44px; }
+.lf-cdc b { flex: 1; font-size: 15px; font-weight: 600; }
+.lf-cdc span { color: var(--dim); font-size: 13px; }
+.lf-cdc .lf-cdc-f { width: 64px; height: 34px; border-radius: 10px; background: color-mix(in srgb, var(--bg) 55%, transparent); border: 1px solid transparent; text-align: center; font-size: 16px; font-weight: 600; outline: none; }
+.lf-cdc .lf-cdc-f::placeholder { color: var(--ph); font-weight: 500; }
+.lf-cdc .lf-cdc-f:focus { border-color: var(--focus); }
 .lf-session .lf-add { min-height: 44px; margin-top: 4px; background: none; color: var(--dim); justify-content: flex-start; padding: 0 4px; font-size: 14px; }
 .lf-ex-ft { display: flex; gap: 18px; margin-top: 2px; }
 /* the three ways to add a set are quiet text, the same for all three */
@@ -3988,7 +3984,7 @@ function lfStart(rt) {
   var nToday = act ? 0 : woOn(ymd(today())).length;
   if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
-  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfCdOpen = false; lfSsPend = null;
+  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfSsPend = null;
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() >= 1 && !!rt, half = lfRc() >= 2;
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -4244,7 +4240,7 @@ function lfTick() {
    it rather than on the first card; ticked off, the next one comes up to
    take its place, so the set you are about to do is never down by the
    rest timer at the foot */
-var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '', lfCdOpen = false;
+var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '';
 /* THE ORDER CARDS ARE DRAWN IN. Set when the workout opens: what is not
    finished first, in its order, so the exercise you are on leads, and
    what is done after it. It holds still while you work, so a card never
@@ -4650,15 +4646,14 @@ function lfPaintSession() {
   var add = el('<button type="button" class="lf-add" id="lfAddEx">' + IC.plus + 'Add exercise</button>');
   add.addEventListener('click', function () { lfPicker(function (id) { lfAddEx(id); lfSaveAct(); lfCurGo = 3; lfPaintSession(); }); });
   list.appendChild(add);
-  /* CARDIO AFTER IS A ROW LIKE THE EXERCISES: its name and what is set, and pressing it opens the choices underneath */
-  var cc = el('<div class="lf-cdc" id="lfCardio"><button type="button" class="lf-cdc-h" aria-expanded="false" aria-controls="lfCardioB"><b>Cardio after</b><span class="lf-cd-sum"></span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><div class="lf-cdc-b" id="lfCardioB"></div></div>');
-  var sum = function () { $('.lf-cd-sum', cc).textContent = act.cd ? lfCdTxt(act.cd) : 'optional'; };
-  var cdB = $('.lf-cdc-b', cc), cdH = $('.lf-cdc-h', cc);
-  cdB.appendChild(lfCardioPick(act.cd, function (c) { act.cd = c; lfSaveAct(); sum(); }));
-  var cdShow = function (on) { lfCdOpen = on; cc.classList.toggle('is-open', on); cdH.setAttribute('aria-expanded', on ? 'true' : 'false'); cdB.hidden = !on; };
-  cdH.addEventListener('click', function () { cdShow(!lfCdOpen); });
-  cdShow(lfCdOpen);
-  sum(); list.appendChild(cc);
+  /* CARDIO IS ONE ROW: its name and the minutes you did, typed. The machine is whichever you used last, so there is nothing to pick. */
+  var cc = el('<label class="lf-cdc" id="lfCardio"><b>Cardio</b><input class="lf-cdc-f lf-num" inputmode="numeric" placeholder="0" aria-label="Cardio minutes" autocomplete="off" /><span>min</span></label>');
+  var cdI = $('input', cc); if (act.cd && act.cd.m > 0) cdI.value = act.cd.m;
+  cdI.addEventListener('input', function () {
+    lfCapIn(cdI, 600); var v = parseInt(cdI.value, 10), k = act.cd ? act.cd.k : (CARDIO.some(function (c) { return c[0] === S.ck; }) ? S.ck : CARDIO[0][0]);
+    act.cd = v > 0 ? { k: k, m: Math.min(600, v) } : null; lfSaveAct();
+  });
+  list.appendChild(cc);
   if (!act.x.length) list.insertBefore(el('<div class="lf-empty"><b>Nothing in this workout yet</b>Add the first exercise and start logging sets.</div>'), add);
   if (bdK && keepTop) bdK.scrollTop = keepTop;
   /* OPENING GOES STRAIGHT TO THE CURRENT SET, in this same task and before the first frame, so the list is never seen at the top first; the later passes only correct for fonts and the sheet settling */
