@@ -1043,6 +1043,7 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-quiet { display: block; margin: 8px auto 0; }
 .lf-quiet:disabled { opacity: .35; }
 .lf-wh-cap { margin: 10px 0 0; text-align: center; font-size: 14px; font-weight: 700; color: var(--dim); }
+.lf-swg[hidden], .lf-thg[hidden] { display: none; }
 .lf-swg { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px 10px; padding: 4px 4px 0; }
 .lf-sw { display: block; aspect-ratio: 1; border-radius: 50%; padding: 0; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
 .lf-sw[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 3px; }
@@ -7188,8 +7189,8 @@ function lfThemeBody() {
       + '<span class="lf-flab">Colour</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span><i class="lf-wh-nk"></i></div>'
       + '<p class="lf-wh-cap" id="lfWhCap"></p>'
       + '<span class="lf-flab">Colours</span><div class="lf-swg" id="lfHues"></div>'
-      + '<span class="lf-flab">Shades</span><div class="lf-swg" id="lfShades"></div>'
-      + '<span class="lf-flab">Earned colours</span><div class="lf-thg" id="lfThemes"></div>'
+      + '<h3 class="lf-fold-h"><button type="button" class="lf-fold-b" aria-expanded="false" aria-controls="lfShades"><span class="lf-cap">Shades</span>' + IC.chev + '</button></h3><div class="lf-swg" id="lfShades" hidden></div>'
+      + '<h3 class="lf-fold-h"><button type="button" class="lf-fold-b" aria-expanded="false" aria-controls="lfThemes"><span class="lf-cap">Earned colours</span>' + IC.chev + '</button></h3><div class="lf-thg" id="lfThemes" hidden></div>'
       + '<button type="button" class="lf-quiet" id="lfAccReset">Back to cream</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
       b.setAttribute('aria-pressed', b.dataset.m === lfMode() ? 'true' : 'false');
@@ -7224,6 +7225,13 @@ function lfThemeBody() {
       if (i < NN) return;
       var b = el('<button type="button" class="lf-sw"></button>'); b.dataset.h = 1000 + i; b.style.background = dk ? n.d : n.l;
       b.setAttribute('aria-label', n.n); b.addEventListener('click', function () { buzz(8); lfAccentSet(1000 + i, true); show(1000 + i); lfRender(); }); sg.appendChild(b);
+    });
+    /* SHADES AND EARNED COLOURS ARE FOLDED: the wheel and the row of colours are the whole of what most people use. The fold holding the colour you are on starts open, so its ring is never hidden. */
+    $$('.lf-fold-b', c).forEach(function (b) {
+      var body = $('#' + b.getAttribute('aria-controls'), c);
+      function set(o) { b.setAttribute('aria-expanded', o ? 'true' : 'false'); body.hidden = !o; }
+      b.addEventListener('click', function () { set(b.getAttribute('aria-expanded') !== 'true'); });
+      var cur = lfAccent(); set(body.id === 'lfThemes' ? !!lfTheme(cur) : typeof cur === 'number' && cur >= 1000 + NN && cur < 1200);
     });
     function show(hu) {
       var nu = lfNeu(hu), tt = lfTheme(hu), a = hu === null || nu || tt ? LIME_H : hu;
