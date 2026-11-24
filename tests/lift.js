@@ -339,7 +339,7 @@ const freeze = (at) => `(() => {
   ok('then is gone, out of the way', await page.locator('.lf-burst').count() === 0);
   /* AN EXTRA REP AT THE SAME WEIGHT IS A REP RECORD, its own smaller
      celebration, and never a PR or a badge's count — typed in after the tick */
-  await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-ft button', { hasText: 'Add set' }).click(); await settle(page);
+  await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-ft button').first().click(); await settle(page);
   await set(0, 2).locator('input').nth(0).fill('60'); await set(0, 2).locator('input').nth(1).fill('8');
   await set(0, 2).locator('.lf-chk').click(); await settle(page);
   ok('the same weight for the same reps again is not a record', (await set(0, 2).locator('.lf-sn').textContent()) === '3');
@@ -1859,7 +1859,7 @@ const freeze = (at) => `(() => {
     ok('ticked off, the cards hold still and the next one comes up to take its place', Math.abs(await topOf(1)) <= 12 && (await page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => e.dataset.ex).join())) === 'ohp,dipmach,ohdb,bench', await topOf(1));
     /* SWIPE LEFT TO REMOVE: no Remove set button, the footer is add set, drop set and warm-up */
     const ft = await page.locator('.lf-session .lf-ex').nth(3).locator('.lf-ex-ft button').allTextContents();
-    ok('the footer is + Add set, + Drop set and + Warm-up, with no Remove set', ft.join('|') === '+ Add set|+ Drop set|+ Warm-up', ft.join('|'));
+    ok('the footer is + Set, + Drop and + Warm-up, with no Remove set', ft.join('|') === '+ Set|+ Drop|+ Warm-up', ft.join('|'));
     const swipe = async (ex, i, d) => { const b = await page.locator('.lf-session .lf-ex').nth(ex).locator('.lf-set:not(.is-hd)').nth(i).boundingBox(); await page.mouse.move(b.x + b.width - 30, b.y + b.height / 2); await page.mouse.down(); await page.mouse.move(b.x + b.width - 30 - d, b.y + b.height / 2 + 3, { steps: 10 }); await page.mouse.up(); };
     const n3 = () => page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).x[0].sets.length);
     await page.locator('.lf-session .lf-ex').nth(3).scrollIntoViewIfNeeded();
@@ -2903,7 +2903,7 @@ const freeze = (at) => `(() => {
     await last.locator('.lf-chk').click(); await page.waitForTimeout(800);
     ok('tick the last one and the bar is Finish workout, and the rest clock is gone', await page.locator('#lfFinishBar').isVisible() && await page.locator('#lfRest').isHidden() && (await page.textContent('#lfFinishBar')).trim() === 'Finish workout');
     ok('and no rest was left running behind it', JSON.parse(await page.evaluate(() => localStorage.getItem('lift.active.v1'))).rest === 0);
-    await page.locator('.lf-session .lf-ex').first().getByText('+ Add set').click(); await page.waitForTimeout(600);
+    await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-ft button').first().click(); await page.waitForTimeout(600);
     ok('add a set and the rest clock comes back', await page.locator('#lfFinishBar').isHidden() && await page.locator('#lfRest').isVisible());
     await c.close();
   }
