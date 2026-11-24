@@ -771,6 +771,14 @@ svg { display: block; }
 .lf-ex { background: var(--card); border-radius: 18px; padding: 10px 14px 6px; margin-top: 8px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
 /* the card header: the name, one dot a set, and the three dots */
+.lf-pin { position: relative; width: 28px; height: 28px; margin-right: 2px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; color: var(--dim); flex: none; }
+.lf-pin::before { content: ''; position: absolute; inset: -8px -3px -8px -8px; }
+.lf-pin svg { width: 15px; height: 15px; }
+.lf-pin[aria-pressed="true"] { color: var(--log); background: color-mix(in srgb, var(--log) 18%, transparent); }
+.lf-pin[aria-pressed="true"] svg { fill: currentColor; }
+.lf-ex.is-fold .lf-pin { display: none; }
+.lf-ex.is-lock { opacity: .4; }
+.lf-ex.is-lock > * { pointer-events: none; }
 .lf-ex-dots { display: flex; align-items: center; gap: 5px; flex: none; }
 .lf-ex-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--mark-off); }
 .lf-ex-dots i.on { background: var(--log); box-shadow: 0 0 6px color-mix(in srgb, var(--log) 50%, transparent); }
@@ -4428,15 +4436,32 @@ function lfStarted(e) {
   var typed = function (q) { return (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null); };
   return e.sets.some(function (q) { return q.ok || typed(q) || (q.ds || []).some(function (d) { return d.ok || typed(d); }); }) || (e.wu || []).some(function (q) { return q.ok || typed(q); });
 }
+/* THE PIN: press it on the exercise you are on and every other card is locked until you finish that one or press it again. It lives in act.cur, so it survives a reload, and a finished exercise lets go of it in the paint. Pinning is never carried to the next exercise: it locks only when you ask. */
+var LF_PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4h6l-1 6 3 3H7l3-3-1-6zM12 13v7"/></svg>';
+function lfPinned() { return act && act.cur ? act.x.filter(function (q) { return q.id === act.cur; })[0] || null : null; }
+function lfPinBtn(card, lead) {
+  var pe = lfPinned(), on = !!pe && lfSsGroup(pe).indexOf(lead) >= 0;
+  var b = el('<button type="button" class="lf-pin">' + LF_PIN + '</button>');
+  b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.setAttribute('aria-label', on ? 'Unpin this exercise' : 'Pin this exercise, locking the others');
+  b.addEventListener('click', function (ev) { ev.stopPropagation(); act.cur = on ? '' : lead.id; lfSaveAct(); buzz(8); lfCurGo = 0; lfPaintSession(); });
+  var m = $('.lf-more', card); m.parentNode.insertBefore(b, m);
+}
+function lfLockCard(card, group) {
+  var pe = lfPinned(); if (!pe || group.indexOf(pe) >= 0) return;
+  card.classList.add('is-lock');
+  card.addEventListener('click', function (ev) { ev.stopPropagation(); ev.preventDefault(); lfToast('Finish ' + pe.n + ' or unpin to switch'); }, true);
+}
 /* AN EXERCISE ONLY FOLDS WHEN IT IS FINISHED, or when you press its name again. Opening another never closes the one you are on, so a mis-tap costs nothing: the one you left stays open, unfinished, until you finish it or fold it yourself. */
 function lfUnshut(e) { lfSsGroup(e).forEach(function (m) { lfShut = lfShut.filter(function (id) { return id !== m.id; }); }); }
 function lfOpenAt(e) {
+  var pe0 = lfPinned(); if (pe0 && lfSsGroup(pe0).indexOf(e) < 0) { lfToast('Finish ' + pe0.n + ' or unpin to switch'); return; }
   var cur = lfOpenId(), curE = act.x.filter(function (q) { return q.id === cur; })[0];
   if (curE && lfSsGroup(curE).indexOf(e) < 0 && lfShut.indexOf(curE.id) < 0) lfSsGroup(curE).forEach(function (q) { if (lfKeep.indexOf(q.id) < 0) lfKeep.push(q.id); });
   lfKeep = lfKeep.filter(function (id) { return id !== e.id; });
   lfUnshut(e); lfOpenEx = e.id; lfCurExId = e.id; lfCurGo = 1; lfPaintSession();
 }
 function lfFoldAt(e) {
+  var pe1 = lfPinned(); if (pe1 && lfSsGroup(e).indexOf(pe1) >= 0) { act.cur = ''; lfSaveAct(); }
   lfSsGroup(e).forEach(function (q) { lfKeep = lfKeep.filter(function (id) { return id !== q.id; }); if (lfShut.indexOf(q.id) < 0) lfShut.push(q.id); });
   lfCurGo = 0; lfPaintSession();
 }
@@ -4534,6 +4559,7 @@ function lfSsCard(g, openG) {
   var longest = g.slice().sort(function (a, b) { return lfRestOf(b.id).lo - lfRestOf(a.id).lo; })[0];
   var card = el('<div class="lf-ex is-ssc"><div class="lf-ex-hd"><svg class="lf-ssc-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg><button type="button" class="lf-ex-n"></button><span class="lf-ex-dots" aria-hidden="true"></span><button type="button" class="lf-more" aria-haspopup="menu">' + LF_MORE + '</button></div><div class="lf-ex-sum"></div><div class="lf-tg"></div></div>');
   card.dataset.ex = g[0].id; card.dataset.ss = g[0].ss; card.setAttribute('data-done', nDone + '/' + n);
+  lfPinBtn(card, g[0]); lfLockCard(card, g);
   $('.lf-ex-n', card).textContent = 'Superset'; var ssNames = g.map(function (m) { return m.n; }).join(' + ');
   var dEl = $('.lf-ex-dots', card);
   if (nDone === n) dEl.insertAdjacentHTML('beforeend', LF_TICK);
@@ -4644,6 +4670,7 @@ function lfPaintSession() {
     if (allOk) dEl.insertAdjacentHTML('beforeend', LF_TICK);
     e.sets.forEach(function (q, qi) { var d = document.createElement('i'); if (q.ok) d.className = lfPopAt === ei + ':' + qi ? 'on pop' : 'on'; dEl.appendChild(d); });
     card.setAttribute('data-done', nOk + '/' + e.sets.length);
+    lfPinBtn(card, e); lfLockCard(card, [e]);
     var rs = lfRestOf(e.id);
     /* The plan's target where the day has one, the recommended dose
        for what the exercise is everywhere else. */

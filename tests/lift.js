@@ -596,6 +596,15 @@ const freeze = (at) => `(() => {
     ok('the menu opens from a folded row too', await page.locator('#lfExMenu').count() === 1);
     await page.keyboard.press('Escape'); await settle(page);
     ok('and Escape puts it away', await page.locator('#lfExMenu').count() === 0);
+    /* THE PIN: locks every other card until the pinned one is finished or unpinned */
+    const stL = () => page.$$eval('.lf-session .lf-ex', (x) => x.map((e) => (e.classList.contains('is-fold') ? 'F' : 'O') + (e.classList.contains('is-lock') ? 'L' : '')).join(' '));
+    await page.locator('.lf-session .lf-ex:not(.is-fold):not(.is-lock) .lf-pin').first().click(); await settle(page);
+    const pinned = await stL();
+    ok('pinning locks every other card, and the pin is lit', /L/.test(pinned) && !/^\S*L/.test(pinned.split(' ').filter((s) => !/L/.test(s) || true)[0]) && await page.locator('.lf-session .lf-pin[aria-pressed="true"]').count() === 1, pinned);
+    await page.locator('.lf-session .lf-ex.is-lock').first().click({ force: true }); await page.waitForTimeout(300);
+    ok('pressing a locked card says what to do and opens nothing', (await stL()) === pinned && /unpin to switch/.test(await page.locator('.lf-toast').last().textContent()));
+    await page.locator('.lf-session .lf-pin[aria-pressed="true"]').click(); await settle(page);
+    ok('pressing the pin again unlocks everything', !/L/.test(await stL()) && await page.evaluate(() => !JSON.parse(localStorage.getItem('lift.active.v1')).cur));
     await c.close();
   }
   /* ── HOW ARE YOU RECOVERING: every training day asks, and the answer changes the day ── */
