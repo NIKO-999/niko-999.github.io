@@ -241,21 +241,19 @@ const freeze = (at) => `(() => {
   ok('its red dot is a dot', Math.abs(dot[0] - dot[1]) < 1 && dot[0] < 12, dot);
   ok('the start button says resume', (await page.textContent('#lfGo')).includes('Resume'));
   await page.click('#lfLive'); await settle(page);
-  /* CARDIO AFTER: a kind and the minutes, one press each. */
-  const cd = page.locator('#lfCardio');
-  ok('only the two kinds you use are offered', (await cd.locator('.lf-pill[data-k]').allTextContents()).join() === 'Incline treadmill,Stairmaster');
-  ok('the session ends on an optional cardio card', (await cd.locator('.lf-cd-sum').textContent()) === 'optional');
-  await cd.locator('.lf-pill[data-k="stairs"]').click(); await cd.locator('.lf-pill[data-m="15"]').click();
-  ok('picking it says what it is', (await cd.locator('.lf-cd-sum').textContent()) === '15 min stairmaster');
-  await cd.locator('.lf-pill[data-m="15"]').click();
-  ok('the same minutes pressed again clears it', (await cd.locator('.lf-cd-sum').textContent()) === 'optional');
-  await cd.locator('.lf-cd-f').fill('12'); await cd.locator('.lf-cd-f').press('Tab');
-  ok('minutes off the ladder go in the field', (await page.locator('#lfCardio .lf-cd-sum').textContent()) === '12 min stairmaster');
+  /* CARDIO IS ONE ROW: its name and the minutes typed. The machine is the one used last. */
+  const cd = page.locator('#lfCardio'), cdAct = () => page.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')).cd);
+  ok('the session ends on a cardio row: its name and a minutes field, and no picker', (await cd.locator('b').textContent()) === 'Cardio' && await cd.locator('input.lf-cdc-f').count() === 1 && await cd.locator('.lf-pill').count() === 0);
+  await cd.locator('input.lf-cdc-f').fill('15');
+  ok('typing minutes sets it', (await cdAct()).m === 15);
+  await cd.locator('input.lf-cdc-f').fill('');
+  ok('clearing the minutes clears it', (await cdAct()) === null);
+  await cd.locator('input.lf-cdc-f').fill('12');
   await page.click('#lfFinish'); await page.waitForTimeout(800);
   ok('finishing sets off the celebration: one full-screen canvas that never takes a press, with rings', await page.evaluate(() => window.lfCels) === 1 && await page.evaluate(() => { const w = document.querySelector('.lf-cel-w'); return !!w && getComputedStyle(w).pointerEvents === 'none' && !!w.querySelector('canvas') && w.querySelectorAll('.lf-cel-ring').length >= 2 && w.getBoundingClientRect().width === innerWidth; }));
   s = await store(page);
-  ok('the workout carries its cardio', JSON.stringify(s.wo[0].cd) === '{"k":"stairs","m":12}' && s.ck === 'stairs', s.wo[0].cd);
-  ok('the summary says it', /\+ 12 min stairmaster/.test(await top(page).textContent()));
+  ok('the workout carries its cardio', !!s.wo[0].cd && s.wo[0].cd.m === 12 && typeof s.wo[0].cd.k === 'string', s.wo[0].cd);
+  ok('the summary says it', /\+ 12 min /.test(await top(page).textContent()));
   ok('finishing files only the ticked sets', s.wo.length === 1 && s.wo[0].x.map((e) => e.sets.length).join() === '2,1' && s.wo[0].d === '2026-10-30', s.wo);
   ok('weights are stored as entered', s.wo[0].x[0].sets[0].w === 60 && s.wo[0].x[0].sets[1].r === 7);
   ok('a summary comes up', (await top(page).textContent()).includes('Workout logged'));
