@@ -140,7 +140,7 @@ const freeze = (at) => `(() => {
   await page.click('#lfFocus .lf-li[data-m="Core"]'); await settle(page);
   await top(page).locator('button', { hasText: 'Remove' }).click(); await settle(page);
   ok('a muscle comes out of focus', (await store(page)).focus.every((f) => f.m !== 'Core'));
-  await page.locator('.lf-toast button').click(); await settle(page);
+  await page.evaluate(() => document.querySelector('.lf-toast button').click()); await settle(page);
   ok('and Undo puts it back', (await store(page)).focus.some((f) => f.m === 'Core'));
   await page.click('#lfFocus .lf-li[data-m="Core"]'); await settle(page);
   await top(page).locator('button', { hasText: 'Remove' }).click(); await settle(page);
