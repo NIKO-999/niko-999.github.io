@@ -1722,8 +1722,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-rxs { font-size: 13px; margin-left: auto; padding-left: 8px; white-space: nowrap; }
 .fr-ago { margin: 0; }
 .fr-dash .lf-stat .lf-ic { margin-top: 4px; }
-.lf-day.is-rest { border-style: dashed; background: none; }
-.lf-day.is-rest:not(.is-now) { border-color: var(--dim); }
+/* a rest day is a half-lit square: part of the way to a trained one, never a miss */
+.lf-day.is-rest { background: color-mix(in srgb, var(--mark-on) 38%, transparent); }
 .lf-dots i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--ink); }
 /* A rest day reads at a glance: a dashed ring inside the cell, which
    stacks with today's red one rather than replacing it. */
