@@ -12008,6 +12008,30 @@ function bdCoin(b, n) {
 }
 
 /* THE SLAB IS THE STREAK MEDAL: days in a row, weeks on goal, straight runs, and hours. Seven Straight has no number in its id, so it is named here. */
+/* THE NUMBER ON A GOOD LIFT BADGE IS ALIVE IN ITS OWN FINISH: lava flows up through the digits, a galaxy turns with stars in it, ice glints, aurora waves, neon cycles. Each finish is a seamless ring of colours scrolled through the digit shapes, with an overlay (blobs, stars, a glint) where the finish has one. x draws with source-in first, so only the digits take it. */
+var BD_LFX = {
+  lava: [['#ffe27a', '#ff7a1a', '#a81800', '#ff7a1a', '#ffe27a'], .07, 'blob', '#ff5a1f'], molten: [['#fff0b0', '#ffb42a', '#b45a00', '#ffb42a', '#fff0b0'], .06, 'blob', '#ffa21f'],
+  inferno: [['#ffe27a', '#ff5a1a', '#8a0f00', '#ff5a1a', '#ffe27a'], .08, 'blob', '#ff4d1a'], magma: [['#ffd27a', '#ff6a2a', '#7a1200', '#ff6a2a', '#ffd27a'], .06, 'blob', '#ff5a1f'],
+  galaxy: [['#1d0f6e', '#6a35e0', '#d065ff', '#6a35e0', '#1d0f6e'], .05, 'star', '#8a5bff'], nebula: [['#2a0f6e', '#7a35e0', '#ff7ae0', '#7a35e0', '#2a0f6e'], .05, 'star', '#a855f7'], void: [['#2a0a3a', '#7a2ad0', '#ff8a2a', '#7a2ad0', '#2a0a3a'], .05, 'star', '#ff8a2a'],
+  ice: [['#f2fdff', '#8fdcff', '#2f8fe0', '#8fdcff', '#f2fdff'], .05, 'glint', '#6fe0ff'], crystal: [['#ffffff', '#c7f0ff', '#7fc4ff', '#c7f0ff', '#ffffff'], .05, 'glint', '#c7f0ff'],
+  aurora: [['#2dffb0', '#2ee6ff', '#8a5cff', '#2ee6ff', '#2dffb0'], .09, '', '#3bffb0'], neon: [['#ff3df0', '#3df0ff', '#8a3dff', '#3df0ff', '#ff3df0'], .12, '', '#ff3df0'], plasma: [['#ff6af0', '#8a5cff', '#3df0ff', '#8a5cff', '#ff6af0'], .12, '', '#c06cff'],
+  opal: [['#ffd1f2', '#c1f0ff', '#d9ffd6', '#fff2b8', '#ffd1f2'], .06, 'glint', '#ffd0f0'], holo: [['#bfe8ff', '#ffc4f2', '#d4ffd9', '#fff0b0', '#bfe8ff'], .1, 'glint', '#aee8ff'], prism: [['#ff9ab0', '#ffe27a', '#8affb0', '#8ac8ff', '#ff9ab0'], .1, 'glint', '#e48bff'],
+  emerald: [['#b8ffd9', '#2fe08a', '#0a7a47', '#2fe08a', '#b8ffd9'], .06, 'glint', '#2fe08a'], sunrise: [['#ffe08a', '#ff8a4a', '#ff4f8a', '#ff8a4a', '#ffe08a'], .07, '', '#ff9a4a'],
+  carbon: [['#f4f6fa', '#8e93a0', '#3b3e48', '#8e93a0', '#f4f6fa'], .05, 'glint', '#c8ccd6'], obsidian: [['#ffe9b0', '#a07a30', '#2a2418', '#a07a30', '#ffe9b0'], .05, 'glint', '#ffd27a'], jet: [['#e6e9f2', '#7d8394', '#2d3039', '#7d8394', '#e6e9f2'], .05, 'glint', '#8d93a6']
+};
+var BD_LFXD = [['#ff5a5a', '#ffd23a', '#5aff8a', '#3ab8ff', '#c05aff', '#ff5a5a'], .08, '', '#ffb23a'];
+function bdLiftFx(fx) { return BD_LFX[fx] || BD_LFXD; }
+function bdLiftFxPaint(x, w, h, t, d) {
+  var st = d[0], P = h * 1.2, off = (t * d[1] * P) % P, y0, gd, i;
+  x.fillStyle = st[0]; x.fillRect(0, 0, w, h); x.globalCompositeOperation = 'source-atop';
+  for (y0 = off - P; y0 < h; y0 += P) {
+    gd = x.createLinearGradient(0, y0, w * .35, y0 + P); st.forEach(function (c, k) { gd.addColorStop(k / (st.length - 1), c); });
+    x.fillStyle = gd; x.fillRect(0, y0, w, P + 1); x.globalCompositeOperation = 'source-atop';
+  }
+  if (d[2] === 'blob') for (i = 0; i < 9; i++) { var yy = h - ((t * .1 + i / 9) % 1) * h * 1.3 + h * .1, xx = w * (.5 + .38 * Math.sin(t * .8 + i * 2.1)), r = h * (.07 + .05 * ((i * 37) % 5) / 5), rg = x.createRadialGradient(xx, yy, 0, xx, yy, r); rg.addColorStop(0, 'rgba(255,240,150,.85)'); rg.addColorStop(1, 'rgba(255,120,20,0)'); x.fillStyle = rg; x.fillRect(xx - r, yy - r, 2 * r, 2 * r); }
+  if (d[2] === 'star') for (i = 0; i < 46; i++) { var sx = ((i * 97) % 100) / 100 * w, sy = (((i * 53) % 100) / 100 * h + t * h * .03 * (1 + i % 3)) % h, a = .35 + .65 * Math.abs(Math.sin(t * 1.6 + i)); x.fillStyle = 'rgba(255,255,255,' + a + ')'; x.beginPath(); x.arc(sx, sy, (1 + (i % 3)) * h / 600, 0, 6.3); x.fill(); }
+  if (d[2] === 'glint') { var gx = ((t * .22) % 1.6 - .3) * w * 1.6 - w * .3, lg = x.createLinearGradient(gx, 0, gx + w * .35, h * .25); lg.addColorStop(0, 'rgba(255,255,255,0)'); lg.addColorStop(.5, 'rgba(255,255,255,.7)'); lg.addColorStop(1, 'rgba(255,255,255,0)'); x.fillStyle = lg; x.fillRect(0, 0, w, h); }
+}
 function bdIsSlab(b) { return /^(d|hr|st|run)\d+$/.test(b.id || '') || (b && (b.id === 'seven' || b.id === 'zero' || BD_LIFTID[b.id])); }
 function bdSlab(b, n) {
   var T = BD3, g = new T.Group(), hi = n > 500, HW = .7, HH = 1.02, DEP = .09, BV = .02, lock = !!b.lock;
@@ -12097,7 +12121,13 @@ function bdSlab(b, n) {
     var pl = new T.Mesh(new T.PlaneGeometry(2 * HW, 2 * HH), new T.MeshBasicMaterial({ map: tex(c, true), transparent: true, depthWrite: false, toneMapped: false }));
     pl.position.z = zf + .006 + li * .0075; pl.renderOrder = 5 + li; g.add(pl); layers.push(pl);
   }
-  var glow = null, lt = null;
+  var fxP = null, fxD = bdLiftFx(BD_FX[b.id] || '');
+  if (anim) {
+    var mask = numCv('#ffffff'), fc = cvs(), fxx = fc.getContext('2d'), topL = layers[LN - 1];
+    topL.material.map = tex(fc, true); topL.material.color.set(0xffffff);
+    fxP = function (tt) { fxx.globalCompositeOperation = 'source-over'; fxx.clearRect(0, 0, cw, ch); fxx.drawImage(mask, 0, 0); fxx.globalCompositeOperation = 'source-in'; bdLiftFxPaint(fxx, cw, ch, tt, fxD); topL.material.map.needsUpdate = true; };
+  }
+  var glow = null, lt = null, lastP = -9;
   if (!lock) {
     var gm = new T.MeshBasicMaterial({ map: tex(numCv(anim ? '#ffffff' : hrs ? '#ff4a3a' : '#ffb23a', hi ? 70 : 40), true), transparent: true, opacity: .8, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
     glow = new T.Mesh(new T.PlaneGeometry(2 * HW, 2 * HH), gm); glow.position.z = zf + .004; glow.renderOrder = 4; g.add(glow);
@@ -12109,7 +12139,7 @@ function bdSlab(b, n) {
       glow.material.opacity = .62 + Math.sin(t * 1.5) * .22; lt.intensity = 1 + Math.sin(t * 1.5) * .35;
       /* the gold breathes: the layers behind slide a hair against the front */
       for (var k = 0; k < LN - 1; k++) layers[k].position.x = Math.sin(t * .6) * .0015 * (LN - k);
-      if (anim) { var hu = (t * .07) % 1; for (var j = 0; j < LN; j++) layers[j].material.color.setHSL(hu, .95, j === LN - 1 ? .62 : .3 + j * .04); glow.material.color.setHSL(hu, 1, .55); lt.color.setHSL(hu, 1, .6); }
+      if (fxP && (t - lastP > .09 || t < lastP)) { lastP = t; fxP(t); glow.material.color.set(fxD[3]); lt.color.set(fxD[3]); }
     };
     g.userData.cr(1.2);
   }
