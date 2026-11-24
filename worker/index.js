@@ -443,7 +443,7 @@ function liftClean(b) {
     s.tr = { m: typeof tr.m === 'string' && /^\d{4}-\d\d-\d\d$/.test(tr.m) ? tr.m : '', w8: tr.w8.map(q4), c30: q4(tr.c30), p30: q4(tr.p30), cw: q4(tr.cw), pw: q4(tr.pw), hv: isFinite(hv) ? Math.max(0, Math.min(2000, hv)) : 0 };
   }
   /* the accent they chose, a hue on the wheel, or none for lime */
-  if (Number.isInteger(b.s.ac) && ((b.s.ac >= 0 && b.s.ac < 360) || (b.s.ac >= 1000 && b.s.ac < 1040) || (b.s.ac >= 1200 && b.s.ac < 1240) || b.s.ac === 1299)) s.ac = b.s.ac; /* a hue, a neutral (1000 up), or an earned colour (1200 up, the owner's 1299) */
+  if (Number.isInteger(b.s.ac) && ((b.s.ac >= 0 && b.s.ac < 360) || (b.s.ac >= 1000 && b.s.ac < 1100) || (b.s.ac >= 1200 && b.s.ac < 1240) || b.s.ac === 1299)) s.ac = b.s.ac; /* a hue, a neutral (1000 up), or an earned colour (1200 up, the owner's 1299) */
   /* what they wear: a title, a flair, a frame: ids, nothing else */
   for (const k of ['ti', 'fl', 'fm']) if (typeof b.s[k] === 'string' && /^[a-z0-9]{2,10}$/.test(b.s[k])) s[k] = b.s[k];
   /* training now: when the workout in progress started, a time in ms */

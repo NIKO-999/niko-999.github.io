@@ -7353,8 +7353,8 @@ function lfThemeBody() {
     var c = el('<div><span class="lf-flab" style="margin-top:0">Mode</span><div class="lf-seg" id="lfMode" style="--n:3"><button type="button" data-m="auto">Auto</button><button type="button" data-m="light">Light</button><button type="button" data-m="dark">Dark</button></div>'
       + '<span class="lf-flab">Colour</span><div class="lf-wheel" id="lfWheel" role="slider" tabindex="0" aria-label="Accent colour" aria-valuemin="0" aria-valuemax="359"><i class="lf-wh-k"></i><span class="lf-wh-m"></span><i class="lf-wh-nk"></i></div>'
       + '<p class="lf-wh-cap" id="lfWhCap"></p>'
-      + '<div class="lf-seg lf-pal" id="lfPal" style="--n:3"><button type="button" data-t="lfHues">Colours</button><button type="button" data-t="lfShades">Shades</button><button type="button" data-t="lfThemes">Earned</button></div>'
-      + '<div class="lf-swg" id="lfHues"></div><div class="lf-swg" id="lfShades" hidden></div>'
+      + '<div class="lf-seg lf-pal" id="lfPal" style="--n:4"><button type="button" data-t="lfHues">Colours</button><button type="button" data-t="lfShades">Shades</button><button type="button" data-t="lfSpecial">Special</button><button type="button" data-t="lfThemes">Earned</button></div>'
+      + '<div class="lf-swg" id="lfHues"></div><div class="lf-swg" id="lfShades" hidden></div><div class="lf-swg" id="lfSpecial" hidden></div>'
       + '<div class="lf-thg" id="lfThemes" hidden></div>'
       + '<button type="button" class="lf-quiet" id="lfAccReset">Back to cream</button></div>');
     $$('#lfMode button', c).forEach(function (b) {
@@ -7381,7 +7381,7 @@ function lfThemeBody() {
       });
       thg.appendChild(tb);
     });
-    var hg = $('#lfHues', c), sg = $('#lfShades', c);
+    var hg = $('#lfHues', c), sg = $('#lfShades', c), spg = $('#lfSpecial', c);
     for (var hq = 0; hq < 360; hq += 15) (function (hv) {
       var b = el('<button type="button" class="lf-sw"></button>'); b.dataset.h = hv; b.style.background = 'hsl(' + hv + ' 82% ' + (dk ? 60 : 46) + '%)';
       b.setAttribute('aria-label', lfHueName(hv)); b.addEventListener('click', function () { buzz(8); lfAccentSet(hv, true); show(hv); lfRender(); }); hg.appendChild(b);
@@ -7389,16 +7389,16 @@ function lfThemeBody() {
     NEUTRALS.forEach(function (n, i) {
       if (i < NN) return;
       var b = el('<button type="button" class="lf-sw"></button>'); b.dataset.h = 1000 + i; b.style.background = dk ? n.d : n.l;
-      b.setAttribute('aria-label', n.n); b.addEventListener('click', function () { buzz(8); lfAccentSet(1000 + i, true); show(1000 + i); lfRender(); }); sg.appendChild(b);
+      b.setAttribute('aria-label', n.n); b.addEventListener('click', function () { buzz(8); lfAccentSet(1000 + i, true); show(1000 + i); lfRender(); }); (i < NSHADE ? sg : spg).appendChild(b);
     });
     /* ONE PALETTE AT A TIME: Colours, Shades and Earned are three tabs over one grid, so the sheet is one screen rather than three lists. It opens on the tab holding the colour you are wearing, so its ring is never hidden. */
     var pal = $('#lfPal', c), cur0 = lfAccent();
     function tab(id) {
       $$('button', pal).forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.t === id ? 'true' : 'false'); });
-      ['lfHues', 'lfShades', 'lfThemes'].forEach(function (k) { $('#' + k, c).hidden = k !== id; });
+      ['lfHues', 'lfShades', 'lfSpecial', 'lfThemes'].forEach(function (k) { $('#' + k, c).hidden = k !== id; });
     }
     $$('button', pal).forEach(function (x) { x.addEventListener('click', function () { tab(x.dataset.t); }); });
-    tab(lfTheme(cur0) ? 'lfThemes' : typeof cur0 === 'number' && cur0 >= 1000 + NN && cur0 < 1200 ? 'lfShades' : 'lfHues');
+    tab(lfTheme(cur0) ? 'lfThemes' : typeof cur0 === 'number' && cur0 >= 1000 + NSHADE && cur0 < 1200 ? 'lfSpecial' : typeof cur0 === 'number' && cur0 >= 1000 + NN && cur0 < 1200 ? 'lfShades' : 'lfHues');
     function show(hu) {
       var nu = lfNeu(hu), tt = lfTheme(hu), a = hu === null || nu || tt ? LIME_H : hu;
       knob.style.transform = 'rotate(' + a + 'deg)'; wh.classList.toggle('is-neu', !!(nu || tt)); wh.classList.toggle('is-nk', !!nu && hu - 1000 < NN);
@@ -12713,9 +12713,31 @@ var NEUTRALS = [
   { n: 'Brick', d: '#b5524a', l: '#7a2a24', di: '#d17a72', li: '#7a2a24' },
   { n: 'Honey', d: '#d9a441', l: '#9a6a12', di: '#e6bc6a', li: '#7a5410' },
   { n: 'Lilac', d: '#a99bd0', l: '#6b5aa3', di: '#bcb0de', li: '#54458a' },
-  { n: 'Blush', d: '#d99aa6', l: '#a85a6a', di: '#e6b3bc', li: '#86424f' }
+  { n: 'Blush', d: '#d99aa6', l: '#a85a6a', di: '#e6b3bc', li: '#86424f' },
+  /* THE SPECIAL ONES, from NSHADE up: colours the wheel cannot make, because it only ever gives a full-strength hue. Pastels, jewel tones and metals. Appended at the end like every other, so nothing already chosen moves. */
+  { n: 'Peach', d: '#ffb59a', l: '#c8664a', di: '#ffc9b5', li: '#a8503a' },
+  { n: 'Apricot', d: '#ffd0a6', l: '#c98a4a', di: '#ffdcba', li: '#a06a30' },
+  { n: 'Butter', d: '#fff0a6', l: '#b8a030', di: '#fff4bd', li: '#8a7a1c' },
+  { n: 'Mint', d: '#b6f0c8', l: '#3f9a63', di: '#c9f5d7', li: '#2f7a4e' },
+  { n: 'Sky', d: '#a8dcff', l: '#3f8fc8', di: '#bfe5ff', li: '#2f70a0' },
+  { n: 'Periwinkle', d: '#b6bcff', l: '#5a64d8', di: '#c9cdff', li: '#4650b8' },
+  { n: 'Orchid', d: '#e0b8ff', l: '#9a52d8', di: '#e8ccff', li: '#7a3cb0' },
+  { n: 'Bubblegum', d: '#ffb8dc', l: '#d8529a', di: '#ffcce6', li: '#b03c7c' },
+  { n: 'Ruby', d: '#e0284f', l: '#a8123a', di: '#ee5a7a', li: '#a8123a' },
+  { n: 'Sapphire', d: '#3a6df0', l: '#1d46b8', di: '#6a90f5', li: '#1d46b8' },
+  { n: 'Amethyst', d: '#9a4fe0', l: '#6a28b0', di: '#b27af0', li: '#6a28b0' },
+  { n: 'Topaz', d: '#f09a1a', l: '#b06800', di: '#f5b04a', li: '#8a5200' },
+  { n: 'Turquoise', d: '#22c4d0', l: '#0e8a96', di: '#5ad8e2', li: '#0a6e78' },
+  { n: 'Coral', d: '#ff7a68', l: '#c8402e', di: '#ff9a8a', li: '#a03020' },
+  { n: 'Gold', d: '#d4af37', l: '#8a6e10', di: '#e2c45a', li: '#6e570c' },
+  { n: 'Rose Gold', d: '#e0a899', l: '#a8645a', di: '#eabdb0', li: '#864a42' },
+  { n: 'Bronze', d: '#cd7f32', l: '#8a4e12', di: '#dc9a58', li: '#6e3c0c' },
+  { n: 'Copper', d: '#b87333', l: '#7a4412', di: '#cc9058', li: '#5e340c' },
+  { n: 'Platinum', d: '#e5e4e2', l: '#8a8a88', di: '#e5e4e2', li: '#5e5e5c' },
+  { n: 'Champagne', d: '#f7e7ce', l: '#b89a6a', di: '#f7e7ce', li: '#8a6e44' },
+  { n: 'Gunmetal', d: '#8a929c', l: '#3a4048', di: '#a2aab4', li: '#2e343a' }
 ];
-var NRING = 19;
+var NRING = 19, NSHADE = 37;
 /* THE THEMES THAT ARE EARNED: an accent that is a GRADIENT, deep and
    swept through with a lighter band, and never an effect. Each opens with
    a badge, the way a badge opens; the owner's is one of one. Stored from
