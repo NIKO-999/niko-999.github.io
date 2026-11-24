@@ -393,7 +393,8 @@ svg { display: block; }
 
 /* ── 30-day grid ── */
 .lf-days { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 8px 6px; margin-top: 14px; }
-.lf-day { height: 18px; border-radius: 999px; border: 1.5px solid var(--mark-off); }
+/* soft squares: an untrained day is a quiet filled square, a trained one is lit, a rest day is a dashed outline */
+.lf-day { height: 20px; border-radius: 6px; border: 1.5px solid transparent; background: var(--mark-off); }
 .lf-day.is-on { background: var(--mark-on); border-color: var(--mark-on); }
 .lf-day.is-now { border-color: var(--ink); border-width: 2.5px; }
 .lf-day.is-now.is-on { box-shadow: inset 0 0 0 2px var(--card); }
@@ -1714,7 +1715,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-rxs { font-size: 13px; margin-left: auto; padding-left: 8px; white-space: nowrap; }
 .fr-ago { margin: 0; }
 .fr-dash .lf-stat .lf-ic { margin-top: 4px; }
-.lf-day.is-rest { border-style: dashed; }
+.lf-day.is-rest { border-style: dashed; background: none; }
 .lf-day.is-rest:not(.is-now) { border-color: var(--dim); }
 .lf-dots i.is-r { background: none; box-shadow: inset 0 0 0 1.5px var(--ink); }
 /* A rest day reads at a glance: a dashed ring inside the cell, which
