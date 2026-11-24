@@ -775,10 +775,14 @@ svg { display: block; }
 .lf-ex-dots i.on { background: var(--log); box-shadow: 0 0 6px color-mix(in srgb, var(--log) 50%, transparent); }
 .lf-ex-dots i.pop { animation: lf-dotglow .9s ease-out; }
 @keyframes lf-dotglow { 0% { transform: scale(1.7); box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 55%, transparent); } 40% { transform: scale(1); box-shadow: 0 0 12px 3px color-mix(in srgb, var(--log) 45%, transparent); } 100% { transform: scale(1); box-shadow: 0 0 6px color-mix(in srgb, var(--log) 50%, transparent); } }
-.lf-ssr.is-pop { animation: lf-rowglow .9s ease-out; border-radius: 14px; }
-.lf-ssr.is-pop .lf-ssr-n { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1); }
-.lf-ssr.is-pop .lf-ssr-chk span { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1); }
-@media (prefers-reduced-motion: reduce) { .lf-ex-dots i.pop, .lf-ssr.is-pop, .lf-ssr.is-pop .lf-ssr-n, .lf-ssr.is-pop .lf-ssr-chk span { animation: none; } }
+.lf-ssr.is-done::before { background: var(--log); box-shadow: 0 0 6px color-mix(in srgb, var(--log) 55%, transparent); }
+.lf-ssr.is-done .lf-ssr-n { box-shadow: 0 0 9px color-mix(in srgb, var(--log) 55%, transparent); }
+.lf-ssr.is-done .lf-ssr-chk span { box-shadow: 0 0 10px color-mix(in srgb, var(--log) 45%, transparent); }
+.lf-ssr.is-pop .lf-ssr-n, .lf-ssr.is-pop .lf-ssr-chk span { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1), lf-nglow .9s ease-out; }
+.lf-ssr.is-pop::before { animation: lf-lineglow .9s ease-out; }
+@keyframes lf-nglow { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--log) 60%, transparent); } 40% { box-shadow: 0 0 18px 4px color-mix(in srgb, var(--log) 50%, transparent); } }
+@keyframes lf-lineglow { 0% { box-shadow: 0 0 0 0 transparent; } 40% { box-shadow: 0 0 14px 3px color-mix(in srgb, var(--log) 55%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .lf-ex-dots i.pop, .lf-ssr.is-pop::before, .lf-ssr.is-pop .lf-ssr-n, .lf-ssr.is-pop .lf-ssr-chk span { animation: none; } }
 .lf-ex-tk { width: 15px; height: 15px; margin-right: 3px; fill: none; stroke: var(--log); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 /* the exercise's options: one round sliders icon, so the card does not read as a row of dots */
 .lf-more { position: relative; width: 28px; height: 28px; margin-right: 2px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; color: var(--ink); flex: none; }
