@@ -12056,7 +12056,7 @@ function bdIsSlab(b) { return /^(d|hr|st|run)\d+$/.test(b.id || '') || (b && (b.
 function bdSlab(b, n) {
   var T = BD3, g = new T.Group(), hi = n > 500, HW = .7, HH = 1.02, DEP = .09, BV = .02, lock = !!b.lock;
   var ch = Math.max(384, Math.min(1024, n * 1.25 | 0)), cw = Math.round(ch * HW / HH), s = ch / 1024;
-  var lift = !!BD_LIFTID[b.id], LNAME = lift ? ({ fb: 'FLAT BENCH', ib: 'INCLINE BENCH', oh: 'SHOULDER PRESS', dl: 'DEADLIFT', rw: 'BARBELL ROW', sq: 'SQUAT' })[String(b.id).slice(0, 2)] || '' : '', LSHORT = lift ? ({ fb: 'BENCH', ib: 'INCLINE', oh: 'PRESS', dl: 'DEADLIFT', rw: 'ROW', sq: 'SQUAT' })[String(b.id).slice(0, 2)] || 'LIFT' : 'LIFT', hrs = /^hr/.test(b.id), num = lift ? String(BD_GL[b.id] || '') : b.id === 'seven' ? '7' : b.id === 'zero' ? '14' : String(b.id).replace(/^\D+/, ''), anim = lift && !lock && (+String(b.id).slice(2) >= 3), LC = lift ? (BD_NEWBY[b.id] || [])[4] : '', HEAD = lift ? S.unit.toUpperCase() : hrs ? 'HOURS' : /^st/.test(b.id) ? 'WEEKS' : /^run|^seven$|^zero$/.test(b.id) ? 'DAYS' : 'DAY';
+  var lift = !!BD_LIFTID[b.id], LNAME = lift ? ({ fb: 'FLAT BENCH', ib: 'INCLINE BENCH', oh: 'SHOULDER PRESS', dl: 'DEADLIFT', rw: 'BARBELL ROW', sq: 'SQUAT' })[String(b.id).slice(0, 2)] || '' : '', LSHORT = lift ? ({ fb: 'BENCH', ib: 'INCLINE', oh: 'PRESS', dl: 'DEADLIFT', rw: 'ROW', sq: 'SQUAT' })[String(b.id).slice(0, 2)] || 'LIFT' : 'LIFT', hrs = /^hr/.test(b.id), num = lift ? String(BD_GL[b.id] || '') : b.id === 'seven' ? '7' : b.id === 'zero' ? '14' : String(b.id).replace(/^\D+/, ''), anim = lift && !lock && (+String(b.id).slice(2) >= 3), LC = lift ? (BD_NEWBY[b.id] || [])[4] : '', HEAD = lift ? (({ fb: 'BENCH', ib: 'INCLINE', oh: 'PRESS', dl: 'DEADLIFT', rw: 'ROW', sq: 'SQUAT' })[String(b.id).slice(0, 2)] || 'LIFT') : hrs ? 'HOURS' : /^st/.test(b.id) ? 'WEEKS' : /^run|^seven$|^zero$/.test(b.id) ? 'DAYS' : 'DAY';
   function stad(hw, hh) { var sh = new T.Shape(), r = hw; sh.moveTo(-hw, -(hh - r)); sh.lineTo(-hw, hh - r); sh.absarc(0, hh - r, r, Math.PI, 0, true); sh.lineTo(hw, -(hh - r)); sh.absarc(0, -(hh - r), r, 0, Math.PI, true); return sh; }
   function plateGeo(hw, hh) { var gg = new T.ShapeGeometry(stad(hw, hh), 48), pa = gg.attributes.position, uv = gg.attributes.uv; for (var i = 0; i < pa.count; i++) uv.setXY(i, (pa.getX(i) + HW) / (2 * HW), (pa.getY(i) + HH) / (2 * HH)); return gg; }
   function cvs() { var c = document.createElement('canvas'); c.width = cw; c.height = ch; return c; }
@@ -12090,7 +12090,7 @@ function bdSlab(b, n) {
   }
   var col = cvs(), cx0 = col.getContext('2d'); base(cx0);
   press(cx0, HEAD, ch * .19, ch * (hrs ? .07 : .085), ch * .018, 'rgba(4,4,5,.97)', 'rgba(255,255,255,.14)');
-  press(cx0, LSHORT, ch * .875, ch * .03, ch * .01, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.4)');
+  press(cx0, lift ? '' : 'LIFT', ch * .875, ch * .03, ch * .01, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.4)');
   /* roughness (green) and metal (blue): scuffs are shinier than the plate */
   var orm = cvs(), ox = orm.getContext('2d'); ox.fillStyle = 'rgb(255,150,170)'; ox.fillRect(0, 0, cw, ch);
   SC.forEach(function (c) { ox.beginPath(); ox.moveTo(c.x, c.y); ox.lineTo(c.x + Math.cos(c.a) * c.l, c.y + Math.sin(c.a) * c.l); ox.lineWidth = c.w * 1.4; ox.strokeStyle = 'rgba(255,' + (70 + c.k * 40 | 0) + ',215,.9)'; ox.stroke(); });
@@ -12118,7 +12118,7 @@ function bdSlab(b, n) {
   /* the back: the same plate, a different engraving */
   var bcol = cvs(), bq = bcol.getContext('2d'); base(bq);
   bq.textAlign = 'center'; bq.textBaseline = 'middle';
-  [[LNAME, ch * .33, ch * .046, '900'], [HEAD + ' ' + num, ch * .44, ch * .06, '900'], [lock ? 'NOT YET EARNED' : 'EARNED ON', ch * .53, ch * .028, '700'], [lock ? '' : String(b.at || '').toUpperCase(), ch * .575, ch * .034, '800']].forEach(function (L) {
+  [[LNAME, ch * .33, ch * .046, '900'], [lift ? num + ' ' + S.unit.toUpperCase() : HEAD + ' ' + num, ch * .44, ch * .06, '900'], [lock ? 'NOT YET EARNED' : 'EARNED ON', ch * .53, ch * .028, '700'], [lock ? '' : String(b.at || '').toUpperCase(), ch * .575, ch * .034, '800']].forEach(function (L) {
     if (!L[0]) return; bq.font = L[3] + ' ' + L[2] + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif'; bq.fillStyle = 'rgba(255,255,255,.11)'; bq.fillText(L[0], cw / 2, L[1] + 2 * s * 2); bq.fillStyle = 'rgba(8,8,10,.9)'; bq.fillText(L[0], cw / 2, L[1]);
   });
   var bk = new T.Mesh(plateGeo(HW - .002, HH - .002), new T.MeshPhysicalMaterial({ color: 0xffffff, map: tex(bcol, true), metalness: 1, roughness: 1, metalnessMap: tex(orm), roughnessMap: tex(orm), normalMap: tex(nm), envMapIntensity: .9 }));
