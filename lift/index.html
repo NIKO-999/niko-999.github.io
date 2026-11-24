@@ -737,9 +737,11 @@ svg { display: block; }
 /* ── the session ── */
 .lf-ss-hd { display: flex; align-items: center; gap: 10px; }
 .lf-ss-name { flex: 1; min-width: 0; background: none; border: 0; outline: none; font-size: 18px; font-weight: 700; letter-spacing: -.01em; padding: 0; height: 44px; text-overflow: ellipsis; }
-/* the guide is the icon alone, so the name has the room: "Chest & shoulders" was cut at its last letter on a 390 screen and by 34px on a 360 one */
-.lf-ss-hd .lf-howto { padding: 0 2px; }
-.lf-ss-hd .lf-howto span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+/* the header's room goes to the name: tighter gaps, a 36px chevron and a 17px title, so "Chest & shoulders" is whole beside the word Guide; a longer name ends in an ellipsis rather than being cut mid-letter */
+.lf-ss-hd { gap: 6px; }
+.lf-ss-hd .lf-ss-name { font-size: 17px; }
+.lf-ss-hd .lf-howto { padding: 0 2px; gap: 4px; }
+.lf-ss-hd .lf-x { width: 36px; margin-right: -6px; }
 .lf-ss-time { font-variant-numeric: tabular-nums; color: var(--dim); font-size: 13px; font-weight: 600; }
 .lf-session .lf-sh-ft { flex-wrap: wrap; }
 .lf-session .lf-sh-ft > .lf-ss-rest { flex: 0 0 100%; }
