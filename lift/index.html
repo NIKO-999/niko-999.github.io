@@ -1117,6 +1117,12 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-tr-stage .lf-ex { position: relative; }
 .lf-tr-stage .tr-menu { position: absolute; right: 8px; top: 44px; z-index: 2; min-width: 200px; padding: 4px; }
 .lf-tr-stage .tr-menu .lf-xm-i { min-height: 38px; font-size: 14px; }
+.lf-tr-stage .tr-pk { position: absolute; inset: 0; z-index: 2; padding: 12px 12px 0; background: var(--card3, #232327); border-radius: 20px; }
+.lf-tr-stage .tr-pk .lf-sspk-i { min-height: 54px; margin-bottom: 6px; }
+.lf-tr-stage .tr-pk .lf-sspk-n { margin: 0 0 8px; }
+.lf-tr-stage .tr-pk .lf-field { margin: 0 0 8px; height: 40px; }
+.lf-tr-stage .tr-pk .lf-li { margin-bottom: 6px; }
+.lf-tr-stage .tr-pk-t { display: block; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .lf-tr-stage .tr-pick { box-shadow: 0 0 0 2px var(--log); }
 .lf-tr-f { position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.45); border: 2px solid rgba(255,255,255,.9); box-shadow: 0 4px 14px rgba(0,0,0,.45); transition: transform .6s cubic-bezier(.4, 0, .2, 1), scale .2s, background .2s; z-index: 3; }
 .lf-tr-f.is-tap { scale: .72; background: rgba(255,255,255,.9); }
@@ -3018,11 +3024,11 @@ function lfAsk(title, text, yes, onYes) {
 
 /* THE WORKOUT GUIDE. Supersets, warm-ups, drop sets, taking a set out, swapping an exercise: none of it is written on the screen, so a film of it is. Five short scenes, each the real card and the real rows with a finger doing the press, one after another, and any can be jumped to. It opens once, over your first workout, and always from You. */
 var TOUR = [
-  ['Superset', 'Open the sliders menu on an exercise and choose Superset with, then pick the one to pair it with. They become one card with a tick for each round.', 8200],
+  ['Superset', 'Open the sliders menu on an exercise and choose Superset with. Pick the one to pair it with and press Make superset. You get one card with a tick for each round.', 10000],
   ['Warm-up', '+ Warm-up puts a lighter set above your first. It is not counted as a set and does not start the rest timer.', 5600],
   ['Drop set', '+ Drop goes right after a set. Lower the weight and keep going straight away.', 6000],
   ['Remove a set', 'Swipe a set to the left to take it out. Warm-ups and drop sets go the same way.', 5000],
-  ['Swap or remove', 'The sliders menu swaps an exercise for a different one, or takes it out of the workout.', 7200],
+  ['Swap or remove', 'The sliders menu swaps an exercise for a different one you pick from the list, or takes it out of the workout.', 9200],
   ['Coach', 'Each exercise says what to try, worked out from your last sets of it: one more rep, or a little more weight once you reach the top of the range. Tap it to fill the sets. Three sessions with no gain and it asks for a lighter week.', 6600]
 ];
 var TR_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>';
@@ -3056,7 +3062,7 @@ function lfTour() {
   function clear() { timers.forEach(clearTimeout); timers = []; }
   function T(ms, fn) { timers.push(setTimeout(fn, ms)); }
   function q(sel) { return $(sel, stage); }
-  function aim(sel, dx) { var n = q(sel); if (!n) return; var a = stage.getBoundingClientRect(), r = n.getBoundingClientRect(); /* a finger on a label hides the label it points at, so a press on words lands at the right-hand end of the row, where there are none */ if (dx == null && n.matches('.lf-xm-i, .lf-ex-n')) dx = Math.min(r.width / 2 - 24, 120); f.style.transform = 'translate(' + (r.left - a.left + r.width / 2 - 17 + (dx || 0)) + 'px,' + (r.top - a.top + r.height / 2 - 17) + 'px)'; }
+  function aim(sel, dx) { var n = q(sel); if (!n) return; var a = stage.getBoundingClientRect(), r = n.getBoundingClientRect(); /* a finger on a label hides the label it points at, so a press on words lands at the right-hand end of the row, where there are none */ var dy = 0; if (dx == null) { if (n.matches('.lf-xm-i, .lf-ex-n')) dx = Math.min(r.width / 2 - 24, 120); else if (n.matches('.lf-sspk-i, #trMake, .tr-pk .lf-li')) dx = r.width / 2 - 36; else if (n.matches('.lf-ex-ft button, .lf-aim')) { dx = r.width / 2 - 6; dy = r.height / 2 - 4; } } f.style.transform = 'translate(' + (r.left - a.left + r.width / 2 - 17 + (dx || 0)) + 'px,' + (r.top - a.top + r.height / 2 - 17 + dy) + 'px)'; }
   function press(sel, ms, fn) { T(ms, function () { aim(sel); }); T(ms + 650, function () { f.classList.add('is-tap'); }); T(ms + 760, function () { if (fn) fn(); }); T(ms + 930, function () { f.classList.remove('is-tap'); }); }
   function tick(row) { if (row) { row.classList.add('is-done', 'is-pop'); var cd = row.closest('.lf-ex'), dd = cd ? $$('.lf-ex-dots i', cd).filter(function (x) { return !x.classList.contains('on'); })[0] : null; if (dd && row.getAttribute('data-k') === 's') dd.classList.add('on'); } }
   function menu(card) { gone(); var m = el('<div class="lf-xmenu tr-menu">' + TR_MENU.map(function (r) { return '<button type="button" class="lf-xm-i' + (r[0] === 'rm' ? ' is-bad' : '') + '" data-i="' + r[0] + '" tabindex="-1"><span>' + r[1] + '</span></button>'; }).join('') + '</div>'); m.style.top = (card.offsetTop + 38) + 'px'; stage.appendChild(m); }
@@ -3080,9 +3086,16 @@ function lfTour() {
     var A = q('[data-t="a"]'), B = q('[data-t="b"]');
     if (i === 0) {
       press('[data-t="a"] .lf-more', 500, function () { menu(A); });
-      press('.tr-menu [data-i="ss"]', 2000, function () { gone(); B.classList.add('tr-pick'); });
-      press('[data-t="b"] .lf-ex-n', 3500, function () { stage.querySelectorAll('.lf-ex').forEach(function (c) { c.remove(); }); stage.insertAdjacentHTML('afterbegin', trSsCard('Incline dumbbell press', 'Cable flyes')); });
-      press('.lf-ssr-chk', 5300, function () { var r1 = q('.lf-ssr'); if (r1) { r1.classList.add('is-done', 'is-pop'); var d1 = q('.lf-ex-dots i'); if (d1) d1.classList.add('on'); } });
+      press('.tr-menu [data-i="ss"]', 2000, function () {
+        gone();
+        var pk = el('<div class="tr-pk"><b class="tr-pk-t">Superset Incline dumbbell press with</b><p class="lf-sspk-n">Pick one. You alternate sets, and rest after both.</p><div class="lf-sspk">'
+          + [['Cable flyes', 1], ['Lateral raises', 0], ['Rear delt flyes', 0]].map(function (r) { return '<button type="button" class="lf-sspk-i' + (r[1] ? ' is-on' : '') + '" tabindex="-1"><span><b>' + r[0] + '</b><em>4 sets</em></span><i aria-hidden="true"></i></button>'; }).join('')
+          + '</div><button type="button" class="lf-btn is-log is-full" id="trMake" tabindex="-1">Make superset</button></div>');
+        stage.appendChild(pk); stage.querySelectorAll('.lf-ex').forEach(function (c) { c.style.opacity = '.35'; });
+      });
+      press('.tr-pk .lf-sspk-i', 3800, function () { $$('.tr-pk .lf-sspk-i', stage).forEach(function (x, k) { x.classList.toggle('is-on', k === 0); }); });
+      press('#trMake', 5400, function () { var pk = q('.tr-pk'); if (pk) pk.remove(); stage.querySelectorAll('.lf-ex').forEach(function (c) { c.remove(); }); stage.insertAdjacentHTML('afterbegin', trSsCard('Incline dumbbell press', 'Cable flyes')); });
+      press('.lf-ssr-chk', 7600, function () { var r1 = q('.lf-ssr'); if (r1) { r1.classList.add('is-done', 'is-pop'); var d1 = q('.lf-ex-dots i'); if (d1) d1.classList.add('on'); } });
     } else if (i === 1) {
       press('.lf-wu-add', 500, function () { var r = el(trRow('wu', 0, 'Warm-up', '20', '10')); r.classList.add('lf-tr-in'); var rows = q('.tr-rows'); rows.insertBefore(r, rows.firstChild); });
       press('.is-wu .lf-chk', 2500, function () { tick(q('.is-wu')); });
@@ -3103,9 +3116,15 @@ function lfTour() {
       press('.lf-set[data-k="s"] .lf-chk', 2400, function () { tick(q('.lf-set[data-k="s"]')); });
     } else {
       press('[data-t="a"] .lf-more', 400, function () { menu(A); });
-      press('.tr-menu [data-i="sw"]', 1900, function () { gone(); var n = q('.lf-ex-n'); n.style.opacity = 0; T(260, function () { n.textContent = 'Leg press'; n.style.opacity = 1; }); });
-      press('[data-t="a"] .lf-more', 3500, function () { menu(A); });
-      press('.tr-menu [data-i="rm"]', 5000, function () { gone(); A.style.opacity = 0; A.style.transform = 'scale(.94)'; });
+      press('.tr-menu [data-i="sw"]', 1900, function () {
+        gone();
+        var pk = el('<div class="tr-pk"><b class="tr-pk-t">Swap Hack squat</b><input class="lf-field" value="" placeholder="Search exercises" readonly tabindex="-1" />'
+          + [['Leg press', 'Quads, glutes'], ['Smith machine squat', 'Quads, glutes'], ['Goblet squat', 'Quads, core']].map(function (r) { return '<div class="lf-li"><div class="lf-li-t"><b>' + r[0] + '</b><span>' + r[1] + '</span></div></div>'; }).join('') + '</div>');
+        stage.appendChild(pk); A.style.opacity = '.35';
+      });
+      press('.tr-pk .lf-li', 3600, function () { var pk = q('.tr-pk'); if (pk) pk.remove(); A.style.opacity = 1; var n = q('.lf-ex-n'); n.style.opacity = 0; T(260, function () { n.textContent = 'Leg press'; n.style.opacity = 1; }); });
+      press('[data-t="a"] .lf-more', 5400, function () { menu(A); });
+      press('.tr-menu [data-i="rm"]', 6900, function () { gone(); A.style.opacity = 0; A.style.transform = 'scale(.94)'; });
     }
     T(TOUR[i][2], function () { if (reduced) return; play(i >= TOUR.length - 1 ? i : i + 1); });
   }
