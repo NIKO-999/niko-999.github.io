@@ -770,9 +770,10 @@ svg { display: block; }
 .lf-ex-dots i.on { background: var(--log); }
 .lf-ex-tk { width: 15px; height: 15px; margin-right: 3px; fill: none; stroke: var(--log); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
 /* the exercise's options: one round sliders icon, so the card does not read as a row of dots */
-.lf-more { width: 34px; height: 34px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; color: var(--ink); flex: none; }
-.lf-more::before { content: ''; position: absolute; }
-.lf-more svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.lf-more { position: relative; width: 28px; height: 28px; margin-right: 2px; border-radius: 50%; background: var(--card2); display: grid; place-items: center; color: var(--ink); flex: none; }
+/* drawn small, pressed at the usual 44 */
+.lf-more::before { content: ''; position: absolute; inset: -8px; }
+.lf-more svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
 .lf-ex-sum { display: none; font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
 .lf-ex.is-fold { cursor: pointer; padding: 4px 14px; border-radius: 16px; }
 .lf-ex.is-fold .lf-ex-sum:not(:empty) { display: block; }
