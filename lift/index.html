@@ -764,6 +764,32 @@ svg { display: block; }
 @media (prefers-reduced-motion: reduce) { .lf-ss-rest.is-over .lf-rs-c { animation: none; } }
 .lf-ex { background: var(--card); border-radius: var(--r); padding: 14px 14px 10px; margin-top: 12px; }
 .lf-ex-hd { display: flex; align-items: center; gap: 8px; }
+/* the card header: the name, one dot a set, and the three dots */
+.lf-ex-dots { display: flex; align-items: center; gap: 5px; flex: none; }
+.lf-ex-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--mark-off); }
+.lf-ex-dots i.on { background: var(--log); }
+.lf-ex-tk { width: 15px; height: 15px; margin-right: 3px; fill: none; stroke: var(--quiet); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.lf-more { width: 44px; height: 44px; margin-right: -12px; display: grid; place-items: center; color: var(--dim); flex: none; }
+.lf-more svg { width: 22px; height: 22px; fill: currentColor; }
+.lf-ex-sum { display: none; font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
+.lf-ex.is-fold { cursor: pointer; padding-bottom: 8px; }
+.lf-ex.is-fold .lf-ex-sum:not(:empty) { display: block; }
+.lf-ex.is-fold > :not(.lf-ex-hd):not(.lf-ex-sum) { display: none; }
+/* the three dots open this */
+.lf-xmenu { position: fixed; z-index: 95; width: 236px; padding: 6px; border-radius: 20px; background: var(--card3, #232327); box-shadow: 0 18px 50px rgba(0,0,0,.55); }
+.lf-xm-i { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 46px; padding: 0 12px; border-radius: 12px; text-align: left; font-size: 15px; font-weight: 600; color: var(--ink); }
+.lf-xm-i svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; opacity: .8; }
+.lf-xm-i:disabled { opacity: .35; }
+.lf-xm-i.is-bad { color: var(--bad); }
+.lf-xm-sep { height: 1px; margin: 4px 8px; background: var(--line, rgba(255,255,255,.08)); }
+.lf-sspk-n { color: var(--dim); font-size: 13px; margin: 0 0 12px; }
+.lf-sspk-i { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 0 16px; margin-bottom: 8px; border-radius: 18px; background: var(--card); text-align: left; }
+.lf-sspk-i span { flex: 1; display: grid; gap: 1px; }
+.lf-sspk-i b { font-size: 16px; font-weight: 600; }
+.lf-sspk-i em { font-style: normal; font-size: 12px; color: var(--dim); }
+.lf-sspk-i i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--quiet); flex: none; }
+.lf-sspk-i.is-on { box-shadow: inset 0 0 0 1.5px var(--ink); }
+.lf-sspk-i.is-on i { background: var(--ink); box-shadow: none; }
 .lf-grip { appearance: none; border: 0; background: none; width: 26px; height: 44px; margin: 0 -4px 0 -8px; display: grid; place-items: center; color: var(--quiet); cursor: grab; touch-action: none; flex: none; position: relative; }
 .lf-grip svg { width: 16px; height: 16px; fill: currentColor; }
 .lf-grip:active { cursor: grabbing; color: var(--ink); }
@@ -1023,7 +1049,6 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-chk span { width: 28px; height: 28px; border-radius: 9px; background: var(--card2); display: grid; place-items: center; color: var(--ph); transition: background .15s, color .15s, transform .15s var(--ease); }
 .lf-chk span .lf-ic { width: 15px; height: 15px; stroke-width: 3; }
 .lf-set.is-done .lf-chk span { background: var(--log-g, var(--log)); color: var(--on-log); }
-.lf-set.is-done input { background: color-mix(in srgb, var(--log) 14%, transparent); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
 /* THE TICK: the box springs, the mark draws itself, and the row it is on
    glows once in your colour, so the press is felt rather than read */
@@ -1117,8 +1142,10 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-rpb .lf-wave { animation-duration: .55s; }
 .lf-rpb b { font-size: 12px; padding: 2px 9px; top: -30px; }
 .lf-rpb i { width: 6px; height: 6px; left: -3px; top: -3px; }
-.lf-ex-ft { display: flex; gap: 8px; margin-top: 6px; }
-.lf-ex-ft button { flex: 1; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
+.lf-ex-ft { display: flex; gap: 18px; margin-top: 2px; }
+/* the three ways to add a set are quiet text, the same for all three */
+.lf-ex-ft button, .lf-ex-ft button.lf-wu-add, .lf-ex-ft button.lf-drop-add, :root[data-mode="light"] .lf-ex-ft button.lf-wu-add { background: none !important; box-shadow: none !important; color: var(--dim) !important; min-height: 44px; padding: 0 2px; font-size: 13px; font-weight: 600; }
+.lf-ex-ft button { flex: none; min-height: 36px; border-radius: 10px; background: var(--card2); color: var(--dim); font-size: 12.5px; font-weight: 600; position: relative; }
 .lf-ex-ft button::before { content: ''; position: absolute; inset: -2px 0; }
 .lf-add { margin-top: 12px; width: 100%; min-height: 46px; border-radius: var(--r); border: 0; background: var(--card2); color: var(--ink); font-weight: 600; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
@@ -3933,7 +3960,7 @@ function lfStart(rt) {
   var nToday = act ? 0 : woOn(ymd(today())).length;
   if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
-  lfAgainOk = 0; lfCurExId = ''; lfSsPend = null;
+  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfSsPend = null;
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() >= 1 && !!rt, half = lfRc() >= 2;
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -4189,7 +4216,7 @@ function lfTick() {
    it rather than on the first card; ticked off, the next one comes up to
    take its place, so the set you are about to do is never down by the
    rest timer at the foot */
-var lfCurGo = 0, lfOrd = null, lfCurExId = '';
+var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '';
 /* THE ORDER CARDS ARE DRAWN IN. Set when the workout opens: what is not
    finished first, in its order, so the exercise you are on leads, and
    what is done after it. It holds still while you work, so a card never
@@ -4333,6 +4360,78 @@ function lfGripWire(gp, card, e) {
     gp.addEventListener('pointermove', move); gp.addEventListener('pointerup', end); gp.addEventListener('pointercancel', end);
   });
 }
+/* THREE DOTS AND A TICK, drawn here so the card template stays one line */
+var LF_MORE = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>';
+var LF_TICK = '<svg class="lf-ex-tk" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.500l4.500 4.500L19 7.500"/></svg>';
+/* WHICH EXERCISE IS OPEN: the one you chose, else the one you pinned, else the one the work says, else the first with a set left. A finished workout has none open. */
+function lfOpenId() {
+  var und = function (q) { return q.sets.some(function (z) { return !z.ok; }); };
+  if (lfOpenEx && act.x.some(function (q) { return q.id === lfOpenEx; })) return lfOpenEx;
+  var pin = act.cur && act.x.filter(function (q) { return q.id === act.cur && und(q); })[0];
+  if (pin) return pin.id;
+  var r = lfResumeEx(); if (r) return r;
+  var f = (lfOrd || act.x).filter(und)[0];
+  return f ? f.id : '';
+}
+function lfNextOpen(e) {
+  var o = lfOrd || act.x, und = function (q) { return q !== e && q.sets.some(function (z) { return !z.ok; }); }, i = o.indexOf(e);
+  return o.slice(i + 1).filter(und)[0] || o.filter(und)[0] || null;
+}
+function lfOpenAt(e) { lfOpenEx = e.id; lfCurExId = e.id; lfCurGo = 1; lfPaintSession(); }
+function lfExRemove(e) {
+  var go = function () { act.x.splice(act.x.indexOf(e), 1); lfSaveAct(); lfPaintSession(); };
+  if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
+}
+/* THE THREE DOTS: what you can do to the exercise itself. The three ways to add a set stay on the card, because those are the ones you reach for mid-workout. */
+function lfExMenu(e, btn) {
+  var old = $('#lfExMenu'); if (old) { var was = old.dataset.for; old.remove(); if (was === e.id) return; }
+  var m = el('<div class="lf-xmenu" id="lfExMenu" role="menu"></div>'); m.dataset.for = e.id;
+  var ss = e.ss && lfSsGroup(e).length > 1, o = lfOrd || act.x, ix = o.indexOf(e);
+  var I = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
+  var rows = [
+    ['Swap exercise', I('M7 7h11l-3-3M17 17H6l3 3'), function () { lfSwap(e); }],
+    [ss ? 'Take out of the superset' : 'Superset with…', I(ss ? 'M9 15l-3 3a3 3 0 0 1-4-4l3-3M15 9l3-3a3 3 0 0 1 4 4l-3 3M4 4l16 16' : 'M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1'), function () { if (ss) lfSsToggle(e); else lfSsPick(e); }],
+    null,
+    ['Move up', I('M12 19V5M6 11l6-6 6 6'), function () { if (lfMoveEx(e, ix - 1)) { buzz(8); lfPaintSession(); } }, ix <= 0],
+    ['Move down', I('M12 5v14M6 13l6 6 6-6'), function () { if (lfMoveEx(e, ix + 1)) { buzz(8); lfPaintSession(); } }, ix >= o.length - 1],
+    null,
+    ['Remove exercise', I('M6 6l12 12M18 6L6 18'), function () { lfExRemove(e); }, false, 'is-bad']
+  ];
+  rows.forEach(function (r) {
+    if (!r) { m.appendChild(el('<div class="lf-xm-sep"></div>')); return; }
+    var b = el('<button type="button" class="lf-xm-i" role="menuitem">' + r[1] + '<span></span></button>'); $('span', b).textContent = r[0];
+    if (r[4]) b.classList.add(r[4]); b.disabled = !!r[3];
+    b.addEventListener('click', function () { m.remove(); r[2](); });
+    m.appendChild(b);
+  });
+  document.body.appendChild(m);
+  var rc = btn.getBoundingClientRect(), mh = m.offsetHeight, top = rc.bottom + 4;
+  if (top + mh > window.innerHeight - 12) top = Math.max(12, rc.top - mh - 4);
+  m.style.top = top + 'px'; m.style.right = Math.max(8, window.innerWidth - rc.right) + 'px';
+  var off = function (ev) { if (ev && ev.type === 'keydown' && ev.key !== 'Escape') return; if (ev && ev.type === 'pointerdown' && m.contains(ev.target)) return; m.remove(); document.removeEventListener('pointerdown', off, true); document.removeEventListener('keydown', off, true); };
+  setTimeout(function () { document.addEventListener('pointerdown', off, true); document.addEventListener('keydown', off, true); }, 0);
+}
+/* SUPERSET WITH…: pick the partner from a list, then make it. The pairing itself is the same two steps the link button always did. */
+function lfSsPick(e) {
+  var cand = act.x.filter(function (q) { return q !== e && !(q.ss && q.ss === e.ss); });
+  if (!cand.length) { lfToast('Add another exercise to superset with'); return; }
+  var pick = cand[0], b = el('<div></div>'), list = el('<div class="lf-sspk" role="radiogroup"></div>');
+  b.appendChild(el('<p class="lf-sspk-n">Pick one. You alternate sets, and rest after both.</p>')); b.appendChild(list);
+  var go = el('<button type="button" class="lf-btn is-log is-full" id="lfSsMake">Make superset</button>');
+  var s = lfSheet({ title: 'Superset ' + e.n + ' with', body: b, foot: [go], key: 'sspick' });
+  function paint() {
+    list.textContent = '';
+    cand.forEach(function (q) {
+      var r = el('<button type="button" class="lf-sspk-i" role="radio"><span><b></b><em></em></span><i aria-hidden="true"></i></button>');
+      $('b', r).textContent = q.n; $('em', r).textContent = q.sets.length + (q.sets.length === 1 ? ' set' : ' sets');
+      r.setAttribute('aria-checked', q === pick ? 'true' : 'false'); r.classList.toggle('is-on', q === pick);
+      r.addEventListener('click', function () { pick = q; paint(); });
+      list.appendChild(r);
+    });
+  }
+  paint();
+  go.addEventListener('click', function () { s.close(); lfSsPend = e; lfSsToggle(pick); lfToast('Superset made'); });
+}
 function lfPaintSession() {
   var list = $('#lfExList'); if (!list) return;
   /* THE LIST IS REBUILT, AND A REBUILT LIST HAS NO HEIGHT FOR A MOMENT, so the
@@ -4347,35 +4446,29 @@ function lfPaintSession() {
   list.textContent = '';
   /* a pinned exercise lets go of the pin when it has nothing left to do */
   if (act.cur && !act.x.some(function (e) { return e.id === act.cur && e.sets.some(function (q) { return !q.ok; }); })) { act.cur = ''; lfSaveAct(); }
+  var openId = lfOpenId(), openE = act.x.filter(function (q) { return q.id === openId; })[0], openG = openE ? lfSsGroup(openE) : [];
   ord.forEach(function (e) {
     var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
     var aim = lfAim(e);
-    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><button type="button" class="lf-swp" aria-label="Swap exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"/></svg></button><button type="button" class="lf-ssb" aria-label="Superset with the next exercise"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg></button><button type="button" class="lf-x" aria-label="Remove exercise">' + IC.x + '</button></div>'
-      + '<i class="lf-ex-pb" aria-hidden="true"><i></i></i><div class="lf-tg"></div><button type="button" class="lf-aim"></button>'
-      + '<div class="lf-set is-hd" aria-hidden="true"><span>Set</span><span>Last</span><span>' + S.unit + '</span><span>Reps</span><span></span></div></div>');
+    var card = el('<div class="lf-ex"><div class="lf-ex-hd"><button type="button" class="lf-ex-n"></button><span class="lf-ex-dots" aria-hidden="true"></span><button type="button" class="lf-more" aria-haspopup="menu">' + LF_MORE + '</button></div><div class="lf-ex-sum"></div><div class="lf-tg"></div><button type="button" class="lf-aim"></button></div>');
     card.dataset.ex = e.id;
-    /* THE GRIP: pick the exercise up by it and move it up or down, or press the arrows on it */
-    var gp = el('<button type="button" class="lf-grip"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="5" r="1.8"/><circle cx="15" cy="5" r="1.8"/><circle cx="9" cy="12" r="1.8"/><circle cx="15" cy="12" r="1.8"/><circle cx="9" cy="19" r="1.8"/><circle cx="15" cy="19" r="1.8"/></svg></button>');
-    gp.setAttribute('aria-label', 'Move ' + e.n + '. Drag it, or press the up and down arrows');
-    var hdr = $('.lf-ex-hd', card); hdr.insertBefore(gp, hdr.firstChild); lfGripWire(gp, card, e);
-    var ssb = $('.lf-ssb', card), ssg = e.ss ? lfSsGroup(e) : [];
+    /* ONE MENU instead of four icons: swap, superset, move and remove all live behind the three dots */
+    var ssg = e.ss ? lfSsGroup(e) : [];
     if (lfSsPend && act.x.indexOf(lfSsPend) < 0) lfSsPend = null;
-    var pend = lfSsPend === e, pick = lfSsPend && !pend;
-    ssb.setAttribute('aria-pressed', ssg.length > 1 ? 'true' : 'false');
-    ssb.setAttribute('aria-label', ssg.length > 1 ? 'Take out of the superset' : pend ? 'Cancel the superset' : pick ? 'Superset with ' + lfSsPend.n : 'Superset this exercise');
-    ssb.classList.toggle('is-pend', !!pend); ssb.classList.toggle('is-pick', !!pick);
-    ssb.addEventListener('click', function () { lfSsToggle(e); });
+    $('.lf-more', card).setAttribute('aria-label', 'More for ' + e.n);
+    $('.lf-more', card).addEventListener('click', function (ev) { ev.stopPropagation(); lfExMenu(e, ev.currentTarget); });
     if (ssg.length > 1) {
       card.classList.add('is-ss');
       var sl = el('<div class="lf-ss-l"><i aria-hidden="true"></i><span></span></div>'); $('span', sl).textContent = ssg.length > 2 ? 'Superset · ' + ssg.length + ' exercises, round by round' : 'Superset with ' + ssg.filter(function (q) { return q !== e; })[0].n;
       card.insertBefore(sl, $('.lf-tg', card));
     }
     $('.lf-ex-n', card).textContent = e.n;
-    /* the bar starts where it was before this repaint and slides to now */
-    var pbK = ei + ':' + e.id, pbNow = e.sets.length ? e.sets.filter(function (q) { return q.ok; }).length / e.sets.length * 100 : 0, pbI = $('.lf-ex-pb i', card);
-    pbI.style.width = (pbK in lfPbWas ? lfPbWas[pbK] : pbNow) + '%'; lfPbWas[pbK] = pbNow;
-    requestAnimationFrame(function () { requestAnimationFrame(function () { pbI.style.width = pbNow + '%'; }); });
+    /* THE DOTS ARE THE SETS: one a working set, lit as each is ticked. Warm-ups and drops are not counted. */
+    var nOk = e.sets.filter(function (q) { return q.ok; }).length, dEl = $('.lf-ex-dots', card), allOk = e.sets.length > 0 && nOk === e.sets.length;
+    if (allOk) dEl.insertAdjacentHTML('beforeend', LF_TICK);
+    e.sets.forEach(function (q) { var d = document.createElement('i'); if (q.ok) d.className = 'on'; dEl.appendChild(d); });
+    card.setAttribute('data-done', nOk + '/' + e.sets.length);
     var rs = lfRestOf(e.id);
     /* The plan's target where the day has one, the recommended dose
        for what the exercise is everywhere else. */
@@ -4396,17 +4489,13 @@ function lfPaintSession() {
       e.sets.forEach(function (q, qi) { if (q.ok || (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null)) return; var fl = aim.fill || aim.sets, g2 = fl[Math.min(qi, fl.length - 1)]; q.w = g2.w; q.r = g2.r; });
       buzz(8); lfSaveAct(); lfPaintSession();
     });
-    $('.lf-swp', card).addEventListener('click', function () { lfSwap(e); });
     if (e.from) {
       var fb = el('<button type="button" class="lf-from"></button>'); fb.textContent = 'Instead of ' + exName(e.from) + ' · back to original';
       fb.addEventListener('click', function () { lfSwapTo(e, e.from); });
-      card.insertBefore(fb, $('.lf-set.is-hd', card));
+      card.appendChild(fb);
     }
-    $('.lf-ex-n', card).addEventListener('click', function () { lfExSheet(e.id); });
-    $('.lf-x', card).addEventListener('click', function () {
-      var go = function () { act.x.splice(ei, 1); lfSaveAct(); lfPaintSession(); };
-      if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
-    });
+    $('.lf-ex-n', card).addEventListener('click', function () { if (card.classList.contains('is-fold')) lfOpenAt(e); else lfExSheet(e.id); });
+    card.addEventListener('click', function (ev) { if (card.classList.contains('is-fold') && !ev.target.closest('.lf-more')) lfOpenAt(e); });
     /* WARM-UP ROWS, marked W: the same row, ticked the same way, but no
        record is judged on one, no rest timer starts, and it is not a set */
     (e.wu || []).forEach(function (s, wi0) {
@@ -4478,7 +4567,8 @@ function lfPaintSession() {
         var ssn = e.ss ? lfSsNext(e, si) : null;
         if (ssn) { act.rest = 0; act.rang = 0; } else { act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush(); lfLockStart(); }
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
-        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); lfCurExId = ssn ? ssn.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
+        lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); var nxE = !ssn && e.sets.every(function (q) { return q.ok; }) ? lfNextOpen(e) : null;
+        lfOpenEx = nxE ? nxE.id : e.id; lfCurExId = ssn ? ssn.id : nxE ? nxE.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
       lfSwipe(row, function () { e.sets.splice(si, 1); }, 'Set removed');
@@ -4505,7 +4595,7 @@ function lfPaintSession() {
         card.appendChild(dr);
       });
     });
-    var ft = el('<div class="lf-ex-ft"><button type="button">+ Add set</button><button type="button" class="lf-drop-add">+ Drop set</button><button type="button" class="lf-wu-add">+ Warm-up</button></div>');
+    var ft = el('<div class="lf-ex-ft"><button type="button" aria-label="Add set">+ Set</button><button type="button" class="lf-drop-add" aria-label="Add a drop set">+ Drop</button><button type="button" class="lf-wu-add" aria-label="Add a warm-up">+ Warm-up</button></div>');
     var bs = $$('button', ft);
     /* A DROP SET hangs off the set ticked last, starting a fifth lighter
        than it (or than the drop before it); a row is taken away by a swipe */
@@ -4522,6 +4612,11 @@ function lfPaintSession() {
     bs[2].addEventListener('click', function () { e.wu = e.wu || []; var l = e.wu[e.wu.length - 1]; e.wu.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); lfTick(); });
     bs[0].addEventListener('click', function () { var l = e.sets[e.sets.length - 1]; e.sets.push({ w: l && l.w !== '' ? l.w : '', r: '', ok: 0 }); lfSaveAct(); lfPaintSession(); lfTick(); });
     card.appendChild(ft);
+    /* ONE EXERCISE IS OPEN, with its superset partners; every other folds to its name, its dots and, once it has sets in, the best of them */
+    if (openG.indexOf(e) < 0) {
+      card.classList.add('is-fold');
+      if (nOk) { var tp = null; e.sets.forEach(function (q) { if (q.ok && (!tp || +q.w > +tp.w)) tp = q; }); $('.lf-ex-sum', card).textContent = nOk + (nOk === 1 ? ' set' : ' sets') + (tp ? ' · top set ' + fmtWS(tp.w) + ' × ' + tp.r : ''); }
+    }
     list.appendChild(card);
   });
   var add = el('<button type="button" class="lf-add" id="lfAddEx">' + IC.plus + 'Add exercise</button>');
