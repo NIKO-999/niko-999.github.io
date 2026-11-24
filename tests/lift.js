@@ -220,7 +220,7 @@ const freeze = (at) => `(() => {
     return r.height > 0 && r.top >= 0 && r.bottom <= innerHeight && !bd.contains(document.querySelector('#lfRest'));
   }));
   ok('while a rest runs the bar has one button, End', (await page.textContent('#lfRestBtn')).trim() === 'End' && await page.locator('#lfRest .lf-rs-ring').count() === 0);
-  ok('Discard and Finish are at the very end of the workout, after the cardio, and not in the footer', await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), ft = document.querySelector('.lf-session .lf-sh-ft'), f = document.querySelector('#lfFinish'), c = document.querySelector('#lfCardio'); return !!(bd.contains(f) && !ft.contains(f) && (c.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_FOLLOWING) && [...bd.querySelectorAll('button')].filter((b) => /^(Discard|Finish)$/.test(b.textContent.trim())).length === 2); }));
+  ok('Discard and Finish are at the very end of the workout, after the cardio, and not in the footer', await page.evaluate(() => { const bd = document.querySelector('.lf-session .lf-sh-bd'), ft = document.querySelector('.lf-session .lf-sh-ft'), f = document.querySelector('#lfFinish'), c = document.querySelector('#lfCardio'); return !!(bd.contains(f) && !ft.contains(f) && (c.compareDocumentPosition(f) & Node.DOCUMENT_POSITION_FOLLOWING) && [...bd.querySelectorAll('button')].filter((b) => /^(Discard workout|Finish)$/.test(b.textContent.trim())).length === 2); }));
   await page.click('#lfRestBtn'); await page.waitForTimeout(300);
   ok('End stops the rest and the button reads Start', await page.evaluate(() => document.querySelector('#lfRest').classList.contains('is-idle')) && (await page.textContent('#lfRestBtn')).trim() === 'Start');
   await page.click('#lfRestBtn'); await page.waitForTimeout(1300);
@@ -2304,7 +2304,7 @@ const freeze = (at) => `(() => {
     let st = await store(page);
     const rid = Object.keys(st.sw || {})[0];
     ok('the swap is kept against the day, by the original', rid && st.sw[rid].pendulum === 'frontsq', st.sw);
-    await page.click('.lf-session .lf-btn:has-text("Discard")'); await page.waitForTimeout(400); await page.locator('.lf-sheet').last().locator('.lf-btn.is-log').click(); await settle(page);
+    await page.click('.lf-session .lf-discard'); await page.waitForTimeout(400); await page.locator('.lf-sheet').last().locator('.lf-btn.is-log').click(); await settle(page);
     await page.click('#lfGo'); await settle(page);
     ok('so the next time the day starts with it, with no asking', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-from').count() === 1);
     ok('a second swap of the same slot keeps pointing at the original', await (async () => { await swapOpen(); await page.waitForTimeout(500); await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: 'Goblet squat' }).first().click(); await page.waitForTimeout(500); const q = await store(page); return q.sw[rid].pendulum === 'gobletsq' && /Instead of Pendulum squat/.test(await first().locator('.lf-from').textContent()); })());

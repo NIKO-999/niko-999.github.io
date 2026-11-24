@@ -755,8 +755,9 @@ svg { display: block; }
 @media (prefers-reduced-motion: reduce) { .lf-rs-bar b { transition: none; } }
 .lf-rs-btn { margin-left: auto; flex: none; padding: 0 26px; min-height: 46px; }
 .lf-rs-t { font-size: 12px; line-height: 1.3; }
-.lf-ss-end { display: flex; gap: 10px; margin: 22px 0 8px; }
-.lf-ss-end .lf-btn { flex: 1; }
+.lf-ss-end { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 18px 0 8px; }
+.lf-ss-end .lf-btn { width: 100%; }
+.lf-discard { min-height: 44px; padding: 0 16px; font-size: 13px; font-weight: 600; color: var(--quiet, var(--dim)); }
 .lf-rs-side { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .lf-rs-l { font-size: 14px; font-weight: 700; color: var(--ink); }
 .lf-ss-rest.is-idle .lf-rs-c, .lf-ss-rest.is-idle .lf-rs-l { color: var(--quiet); }
@@ -4220,9 +4221,9 @@ function lfOpenSession() {
   /* THE REST BAR IS THREE THINGS: the time, what it is doing, and one button. Start when no rest is running, End while one is. A rest still starts by itself when a set is ticked (not mid-superset); the button is for starting one by hand and for ending one early. Discard and Finish are not here any more: next to the rest clock, people pressed Finish thinking it ended the rest. */
   var rest = el('<div class="lf-ss-rest" id="lfRest" role="timer" aria-live="off"><b class="lf-rs-c lf-num"></b>'
     + '<div class="lf-rs-side"><span class="lf-rs-l"></span><span class="lf-rs-t"></span></div><button type="button" class="lf-btn lf-rs-btn" id="lfRestBtn"></button><i class="lf-rs-bar" aria-hidden="true"><b></b></i></div>');
-  var discard = el('<button type="button" class="lf-btn">Discard</button>');
+  var discard = el('<button type="button" class="lf-discard">Discard workout</button>');
   var finish = el('<button type="button" class="lf-btn is-log" id="lfFinish">Finish</button>');
-  var endActs = el('<div class="lf-ss-end"></div>'); endActs.appendChild(discard); endActs.appendChild(finish); body.appendChild(endActs);
+  var endActs = el('<div class="lf-ss-end"></div>'); endActs.appendChild(finish); endActs.appendChild(discard); body.appendChild(endActs);
   /* WHEN EVERY SET IS TICKED the rest clock gives its place to the one thing left to do: Finish workout. Add a set and the clock is back. */
   var finBar = el('<button type="button" class="lf-btn is-log" id="lfFinishBar" style="display:none">Finish workout</button>');
   sessSheet = lfSheet({ full: true, head: head, body: body, foot: [rest, finBar], cls: 'lf-session', title: 'Workout',
@@ -4253,6 +4254,7 @@ function lfTick() {
   if (allDone && act.rest) { act.rest = 0; act.rang = 0; lfSaveAct(); }
   var rEl = $('#lfRest'), fBar = $('#lfFinishBar');
   if (rEl) rEl.style.display = allDone ? 'none' : ''; if (fBar) fBar.style.display = allDone ? '' : 'none';
+  var fRow = $('#lfFinish'); if (fRow) fRow.style.display = allDone ? 'none' : '';
   var c = $('#lfClock'); if (c) c.textContent = fmtClock(Date.now() - act.s);
   var r = $('#lfRest');
   if (r) {
