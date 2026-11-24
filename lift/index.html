@@ -1802,7 +1802,13 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @media (prefers-reduced-motion: reduce) { .tt-sc em, .tt-gl em, .tt-ph em, .tt-vn em, .tt-rp span, .tt-hg em, .tt-hg em::after, .tt-pl em, .tt-ch em, .tt-tp em, .tt-ob em, .tt-sv em, .tt-gd em { animation: none; } }
 @keyframes tt-ti { 0%, 78%, 100% { transform: none; text-shadow: none; } 84% { transform: scale(1.06, .9) translateY(1px); text-shadow: 0 2px 0 rgba(255, 255, 255, .25); } 90% { transform: scale(.98, 1.04) translateY(-1px); } 95% { transform: none; text-shadow: 0 0 10px rgba(255, 255, 255, .6); } }
 @media (prefers-reduced-motion: reduce) { .tt-ice em, .tt-lv em, .tt-mb em, .tt-ne em, .tt-gx em, .tt-sr em, .tt-ed em::after, .tt-cb em { animation: none; } .tt-sr em { background-size: 100% 100%; } .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
-.lf-bshow { margin-bottom: 14px; }
+.lf-bshow { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--dim); }
+.lf-tgl { position: relative; width: 50px; height: 30px; border-radius: 15px; background: var(--mark-off); flex: none; transition: background .2s; }
+.lf-tgl::before { content: ''; position: absolute; inset: -7px -3px; }
+.lf-tgl i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); transition: transform .22s var(--ease, ease); }
+.lf-tgl[aria-checked="true"] { background: var(--log); }
+.lf-tgl[aria-checked="true"] i { transform: translateX(20px); background: var(--on-log); }
+@media (prefers-reduced-motion: reduce) { .lf-tgl, .lf-tgl i { transition: none; } }
 .lf-cu-pv { display: flex; align-items: center; gap: 12px; padding: 12px 4px 14px; }
 .lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
 .lf-cu-pv .fr-ti { margin: 0; }
@@ -8763,10 +8769,10 @@ function lfRkRows(cb) {
 }
 /* BADGES SHOWN LIVES WITH THE BADGES, at the top of that screen, since it is about them: what friends see of the shelf. It used to sit in Appearance beside the title and flair, two screens away from the thing it decides. THE SHOWCASE CAN BE EMPTY: with nothing picked, friends were shown your latest three whether you wanted that or not; None is a choice too. */
 function lfShowBtn() {
-  var sb = el('<button type="button" class="lf-btn is-full rk-set rk-show lf-bshow"><span>Badges shown</span><b></b></button>');
-  var say = function () { $('b', sb).textContent = S.shn ? 'None' : lfShow().length ? 'Your picks' : 'Latest three'; sb.setAttribute('aria-pressed', S.shn ? 'true' : 'false'); };
+  var row = el('<div class="lf-bshow"><span>Show badges</span><button type="button" class="lf-tgl rk-show" role="switch" aria-label="Show badges to friends"><i></i></button></div>'), sb = $('button', row);
+  var say = function () { sb.setAttribute('aria-checked', S.shn ? 'false' : 'true'); };
   sb.dataset.k = 'sh'; say(); sb.addEventListener('click', function () { if (S.shn) delete S.shn; else S.shn = true; lfSave(); say(); frPushNow(); lfRender(); });
-  return sb;
+  return row;
 }
 
 /* ── MILESTONES: the moments that are worth stopping for, said once ── */

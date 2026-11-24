@@ -2247,11 +2247,11 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     await cuOpen(page);
     const rows = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.dataset.k + ':' + e.querySelector('span').textContent));
-    ok('Settings has a row each for title, flair and frame', rows.join() === 'ti:Title,fl:Flair,fm:Frame,sh:Badges shown', rows);
+    ok('Settings has a row each for title, flair and frame, and the badge switch is on the Badges screen', rows.join() === 'ti:Title,fl:Flair,fm:Frame', rows);
     await page.click('#lfYou .rk-show'); await settle(page);
-    ok('the showcase can be nothing at all: one press and no badge is shown to friends', (await store(page)).shn === true && await page.textContent('#lfYou .rk-show b') === 'None' && /if \(S\.shn\) return \[\];/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
+    ok('the showcase can be nothing at all: one press and no badge is shown to friends', (await store(page)).shn === true && await page.getAttribute('#lfYou .rk-show', 'aria-checked') === 'false' && /if \(S\.shn\) return \[\];/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     await page.click('#lfYou .rk-show'); await settle(page);
-    ok('and a second press puts it back', !(await store(page)).shn && await page.textContent('#lfYou .rk-show b') !== 'None');
+    ok('and a second press puts it back', !(await store(page)).shn && await page.getAttribute('#lfYou .rk-show', 'aria-checked') === 'true');
     ok('and there is no rank sheet, level or duel anywhere', await page.locator('#frRankBtn, #frDu, .rk-lv').count() === 0);
     const openRow = async (k) => { await cuOpen(page); await page.click('#lfYou .rk-set[data-k="' + k + '"]'); await page.waitForTimeout(600); };
     const pick = async (k, id) => { await openRow(k); await page.evaluate(([k, id]) => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.rk-o[data-k="' + k + '"][data-id="' + id + '"]').click(), [k, id]); await page.waitForTimeout(350); await page.keyboard.press('Escape'); await settle(page); };
