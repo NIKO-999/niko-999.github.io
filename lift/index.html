@@ -1069,9 +1069,11 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-chk span .lf-ic { width: 15px; height: 15px; stroke-width: 3; }
 .lf-set.is-done .lf-chk span { background: var(--log-g, var(--log)); color: var(--on-log); }
 .lf-set.is-done .lf-chk:active span { transform: scale(.9); }
+.lf-session .lf-set:not(.is-wu):not(.is-drop).is-done .lf-chk span { box-shadow: 0 0 9px color-mix(in srgb, var(--log) 45%, transparent); }
+.lf-session .lf-set.is-pop .lf-chk span { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1), lf-nglow .9s ease-out; }
 /* THE TICK: the box springs, the mark draws itself, and the row it is on
    glows once in your colour, so the press is felt rather than read */
-.lf-set.is-pop { border-radius: 12px; animation: lf-rowglow .8s ease-out; }
+.lf-set.is-pop { border-radius: 12px; }
 .lf-set.is-pop .lf-chk span { animation: lf-pop .46s cubic-bezier(.3, 1.7, .5, 1); }
 .lf-set.is-pop .lf-chk path { stroke-dasharray: 22; stroke-dashoffset: 22; animation: lf-draw .32s .1s ease-out forwards; }
 @keyframes lf-pop { 0% { transform: scale(.6); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
