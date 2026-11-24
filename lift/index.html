@@ -4717,7 +4717,7 @@ function lfMenuPop(key, btn, rows) {
   var rc = btn.getBoundingClientRect(), mh = m.offsetHeight, top = rc.bottom + 4;
   if (top + mh > window.innerHeight - 12) top = Math.max(12, rc.top - mh - 4);
   m.style.top = top + 'px'; m.style.right = Math.max(8, window.innerWidth - rc.right) + 'px';
-  var off = function (ev) { if (ev && ev.type === 'keydown' && ev.key !== 'Escape') return; if (ev && ev.type === 'pointerdown' && m.contains(ev.target)) return; m.remove(); document.removeEventListener('pointerdown', off, true); document.removeEventListener('keydown', off, true); };
+  var off = function (ev) { if (ev && ev.type === 'keydown' && ev.key !== 'Escape') return; if (ev && ev.type === 'pointerdown' && m.contains(ev.target)) return; if (ev && ev.type === 'keydown') { ev.stopPropagation(); ev.preventDefault(); } m.remove(); document.removeEventListener('pointerdown', off, true); document.removeEventListener('keydown', off, true); };
   setTimeout(function () { document.addEventListener('pointerdown', off, true); document.addEventListener('keydown', off, true); }, 0);
 }
 var LF_MI = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + d + '"/></svg>'; };
