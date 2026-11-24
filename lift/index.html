@@ -281,6 +281,11 @@ svg { display: block; }
 .pl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .pl-chips i { font-style: normal; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35); }
 .pl-go { display: block; width: 100%; margin-top: 12px; padding: 12px; border-radius: 99px; background: #f5f5f7; color: #000; font: inherit; font-size: 14px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+.pl-lean { margin: 0 0 8px; font-size: 13px; font-weight: 600; color: var(--dim); }
+.pl-fl { display: flex; gap: 6px; margin-bottom: 10px; overflow-x: auto; scrollbar-width: none; }
+.pl-fl::-webkit-scrollbar { display: none; }
+.pl-fl button { flex: none; min-height: 34px; padding: 0 14px; border-radius: 99px; background: color-mix(in srgb, var(--ink) 8%, transparent); color: var(--dim); font: inherit; font-size: 13px; font-weight: 700; }
+.pl-fl button[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
 .pl-ct { text-align: center; font-size: 12px; font-weight: 600; color: var(--dim); padding-top: 8px; }
 .pl-hd { display: flex; align-items: center; min-height: 44px; }
 .pl-back { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--ink); position: relative; }
@@ -5994,6 +5999,22 @@ var PLANS = [
       ['Shoulders', 'Shoulders and traps', [['ohp', 4, 6, 10], ['dbshp', 3, 8, 12], ['latraise', 4, 12, 20], ['revpec', 3, 12, 20], ['shrug', 3, 10, 15]]],
       ['Arms', 'Biceps and triceps', [['ezcurl', 3, 8, 12], ['incurl', 3, 10, 12], ['hammer', 3, 10, 12], ['skull', 3, 8, 12], ['ropepush', 3, 10, 15], ['ohcable', 3, 10, 15]]],
       ['Legs', 'Quads, hamstrings, calves', [['squat', 4, 6, 10], ['legpress', 3, 10, 15], ['rdl', 3, 8, 12], ['legext', 3, 12, 15], ['seatcurl', 3, 10, 15], ['calfstand', 4, 10, 15]]]] },
+  { id: 'cd5', n: 'Chest and Delts', lv: 'Intermediate', g: 'Push focus', sp: 'Push priority', art: 'cd',
+    desc: 'Chest, shoulders and triceps get the most volume, with back, legs and arms kept up around them.',
+    tip: 'Control the lowering on every press. Add reps first, then weight.',
+    days: [['Chest A', 'Chest and front delts', [['bench', 4, 6, 10], ['incdb', 3, 8, 12], ['dips', 3, 8, 12], ['cfly', 3, 12, 15]]],
+      ['Shoulders and triceps', 'Delts and triceps', [['ohp', 4, 6, 10], ['dbshp', 3, 8, 12], ['latraise', 4, 12, 20], ['revpec', 3, 12, 20], ['skull', 3, 8, 12], ['ropepush', 3, 10, 15]]],
+      ['Legs', 'Quads, hamstrings, calves', [['squat', 3, 6, 10], ['legpress', 3, 10, 15], ['rdl', 3, 8, 12], ['seatcurl', 3, 10, 15], ['calfstand', 4, 10, 15]]],
+      ['Chest B', 'Chest and triceps', [['incdb', 4, 8, 12], ['dbbench', 3, 8, 12], ['pecdeck', 3, 12, 15], ['cablecross', 3, 12, 15], ['tripush', 3, 10, 15]]],
+      ['Back and arms', 'Back and biceps', [['wgpd', 3, 8, 12], ['seatrow', 3, 10, 12], ['ezcurl', 3, 8, 12], ['ohcable', 3, 10, 15]]]] },
+  { id: 'wb5', n: 'Wide Back', lv: 'Intermediate', g: 'Pull focus', sp: 'Pull priority', art: 'wb',
+    desc: 'Back width and thickness, rear delts and biceps get the most volume, with legs and pressing kept up.',
+    tip: 'Pull with your elbows, not your hands. Pause for a second at the top of every row.',
+    days: [['Back thickness', 'Rows and traps', [['bbrow', 4, 6, 10], ['tbar', 3, 8, 12], ['seatrow', 3, 10, 12], ['straight', 3, 12, 15], ['shrug', 2, 10, 15]]],
+      ['Back width', 'Vertical pulls and rear delts', [['pullup', 4, 6, 10], ['wgpd', 3, 8, 12], ['cgpd', 3, 10, 12], ['facepull', 3, 12, 20], ['revpec', 3, 12, 20]]],
+      ['Legs', 'Quads, hamstrings, calves, abs', [['squat', 3, 6, 10], ['rdl', 3, 8, 12], ['legpress', 3, 10, 15], ['calfstand', 3, 10, 15], ['hlr', 3, 10, 15]]],
+      ['Push', 'Chest, shoulders, triceps', [['bench', 3, 6, 10], ['dbshp', 3, 8, 12], ['latraise', 3, 12, 20], ['ropepush', 3, 10, 15]]],
+      ['Back and biceps', 'Back and arms', [['dbrow', 3, 8, 12], ['ezcurl', 4, 8, 12], ['incurl', 3, 10, 12], ['hammer', 3, 10, 12], ['preacher', 3, 8, 12]]]] },
   { id: 'pp6', n: 'Push Pull Legs x2', lv: 'Advanced', g: 'Build muscle', sp: 'Push / pull / legs', art: 'pp',
     desc: 'Push, pull and legs twice a week. Every muscle gets hit twice, with a heavy and a lighter day.',
     tip: 'Make the first lift of each day heavy and the rest higher-rep. Eat enough to recover from six days.',
@@ -6087,6 +6108,8 @@ var PL_ART = {
   qd: function () { return plScene('#223675', '#0f1a45', '#2d4596', '#f2c230', plBarbell(100, 118, 160, '#f2c230', '#e5484d', '#cfd6ee'), 178); },
   gf: function () { return plScene('#f58aa8', '#b3436c', '#ffa3bb', '#fff0e6', plBridge(100, 122, 62, '#fff0e6', '#c4577c'), 198); },
   bs: function () { return plScene('#6a3dc8', '#341a78', '#8353e0', '#fcd34d', plDbell(100, 120, 130, '#fcd34d', '#c8920c', '#e9defa'), 178); },
+  cd: function () { return plScene('#0f8fd8', '#0a3f7a', '#27a6ee', '#ffd24a', plBarbell(100, 118, 160, '#ffd24a', '#f2f2f5', '#d8e6f5') + plDbell(100, 178, 70, '#ffd24a', '#b88a00', '#f2f2f5'), 206); },
+  wb: function () { return plScene('#7b3fe0', '#3a1a82', '#9460ee', '#9be8ff', plArr(70, 112, 1.4, '#f2eaff', '#2a0f66', 180) + plArr(130, 112, 1.4, '#f2eaff', '#2a0f66', 180), 200); },
   pp: function () { var o = ''; [88, 152].forEach(function (y) { [52, 100, 148].forEach(function (x, i) { o += plArr(x, y, .8, '#1a2f8a', '#0d1a54', i === 1 ? 180 : 0); }); }); return plScene('#d9f03e', '#8fae10', '#e6f77a', '#1a2f8a', o, 206); },
   qp: function () { return plScene('#1a9a6c', '#0b5236', '#27b283', '#f2c230', plKbell(100, 142, 1.6, '#f2f0d2', '#b8b48a'), 206); },
   gb: function () { return plScene('#9a3ae8', '#4c168c', '#b25cf0', '#ffb1e4', plBridge(100, 128, 66, '#ffb1e4', '#b4399a'), 200); },
@@ -6107,28 +6130,68 @@ function plFit(p) {
 function plPack(p) { var dw = PL_DOW[p.days.length]; return { n: p.n, c: [], d: p.days.map(function (d, i) { return { w: dw[i], n: d[0], sp: d[1], x: d[2].map(function (e) { return e.slice(); }) }; }) }; }
 function plMins(p) { var tot = 0; p.days.forEach(function (d) { d[2].forEach(function (e) { tot += e[1]; }); }); return Math.max(30, Math.round(tot / p.days.length * 2.8 / 5) * 5 + 5); }
 function plOrder() { var fit = {}; PLANS.forEach(function (p) { fit[p.id] = plFit(p); }); return PLANS.map(function (p, i) { return [p, i]; }).sort(function (a, b) { return ((fit[b[0].id] || 0) - (fit[a[0].id] || 0)) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
-var PL_AT = 0;
+var PL_AT = 0, PL_F = 'you';
+/* WHERE A SET OF NUMBERS LEANS: muscles fall in push, pull, legs or core, and a group leans when its muscles average well above the rest. Targets lean where you marked priorities, if you did, otherwise where the numbers are biggest. */
+var PL_GRP = { Chest: 'Push', Shoulders: 'Push', Triceps: 'Push', Back: 'Pull', Biceps: 'Pull', Quads: 'Legs', Hamstrings: 'Legs', Glutes: 'Legs', Calves: 'Legs', Abs: 'Core', Core: 'Core' };
+function plLean(map, pri) {
+  var g = {}, n = {}, tot = 0, cnt = 0;
+  Object.keys(map).forEach(function (m) { var k = PL_GRP[m]; if (!k || !(map[m] > 0)) return; g[k] = (g[k] || 0) + map[m]; n[k] = (n[k] || 0) + 1; tot += map[m]; cnt++; });
+  if (pri) { var pc = {}; Object.keys(pri).forEach(function (m) { var k = PL_GRP[m]; if (k && pri[m]) pc[k] = (pc[k] || 0) + 1; }); var best = Object.keys(pc).sort(function (a, c) { return pc[c] - pc[a]; })[0]; if (best) return best; }
+  if (!cnt) return null;
+  var all = tot / cnt, top = null, tv = 0;
+  Object.keys(g).forEach(function (k) { if (k === 'Core') return; var v = g[k] / n[k]; if (v > tv) { tv = v; top = k; } });
+  return top && tv >= all * 1.12 ? top : null;
+}
+function plEmp(p) { return plLean(plSets(p), null); }
+/* how hard a plan leans on one group: that group's average sets a muscle against the plan's average */
+function plRatio(p, grp) { var m = plSets(p), g = 0, n = 0, t = 0, c = 0; Object.keys(m).forEach(function (k) { if (!PL_GRP[k]) return; t += m[k]; c++; if (PL_GRP[k] === grp) { g += m[k]; n++; } }); return n && c ? (g / n) / (t / c) : 0; }
+function plWant() { var t = {}, pri = {}, any = 0; lfTargets().forEach(function (x) { t[x[0]] = x[2] || x[1]; if (x[3]) { pri[x[0]] = 1; any = 1; } }); return plLean(t, any ? pri : null); }
 function plBackBtn(go) { var b = el('<button type="button" class="pl-back" aria-label="Back">' + IC.chev + '</button>'); b.addEventListener('click', go); return b; }
-/* THE DECK: one plan a card, swiped sideways, best fit to your targets first */
+/* what the deck shows for a filter: For you puts the plans that lean where your targets lean first, best fit within each half */
+function plList(f) {
+  var want = plWant(), fit = {}, emp = {};
+  PLANS.forEach(function (p) { fit[p.id] = plFit(p); emp[p.id] = plEmp(p); });
+  var base = PLANS.map(function (p, i) { return [p, i]; });
+  if (f === 'Push' || f === 'Pull' || f === 'Legs') base = base.filter(function (x) { return emp[x[0].id] === f; });
+  var grp = f === 'you' ? want : f;
+  return base.sort(function (a, b) {
+    if (f === 'you' && want) { var da = emp[a[0].id] === want ? 1 : 0, db = emp[b[0].id] === want ? 1 : 0; if (da !== db) return db - da; }
+    if (grp === 'Push' || grp === 'Pull' || grp === 'Legs') { var ra = plRatio(a[0], grp), rb = plRatio(b[0], grp); if (Math.abs(ra - rb) > .02) return rb - ra; }
+    return ((fit[b[0].id] || 0) - (fit[a[0].id] || 0)) || a[1] - b[1];
+  }).map(function (x) { return x[0]; });
+}
+/* THE DECK: one plan a card, swiped sideways. For you leads with the plans that lean where your targets lean. */
 function lfPlansSheet() {
-  var list = plOrder(), b = el('<div class="pl-w"><div class="pl-deck" id="plDeck" tabindex="0" aria-label="Training plans"></div><div class="pl-ct" aria-live="polite"></div></div>'), deck = $('#plDeck', b), ct = $('.pl-ct', b);
-  var fitAny = lfTargets().length > 0;
-  list.forEach(function (p, i) {
-    var f = plFit(p), c = el('<div class="pl-card" role="group"><div class="pl-art"></div>' + (f !== null ? '<span class="pl-fit">Fits your targets <b></b></span>' : '') + '<div class="pl-tx"><h3></h3><p></p><div class="pl-chips"></div><button type="button" class="pl-go">Details</button></div></div>');
-    $('.pl-art', c).appendChild(plArtEl(p)); $('h3', c).textContent = p.n; $('p', c).textContent = p.desc;
-    if (f !== null) $('.pl-fit b', c).textContent = f + '%';
-    [p.days.length + 'x / week', p.lv, p.sp].forEach(function (t) { var s = el('<i></i>'); s.textContent = t; $('.pl-chips', c).appendChild(s); });
-    c.setAttribute('aria-label', p.n + ', ' + p.days.length + ' days a week, ' + p.lv);
-    $('.pl-go', c).addEventListener('click', function () { PL_AT = i; lfPlanPage(p, list); });
-    deck.appendChild(c);
+  var want = plWant(), fitAny = lfTargets().length > 0;
+  var b = el('<div class="pl-w"><p class="pl-lean"></p><div class="pl-fl" role="group" aria-label="Show"></div><div class="pl-deck" id="plDeck" tabindex="0" aria-label="Training plans"></div><div class="pl-ct" aria-live="polite"></div></div>'), deck = $('#plDeck', b), ct = $('.pl-ct', b), fl = $('.pl-fl', b), list = [];
+  $('.pl-lean', b).textContent = want ? 'Your targets lean ' + want.toLowerCase() + '.' : (fitAny ? 'Your targets are spread evenly.' : '');
+  if (!fitAny) $('.pl-lean', b).hidden = true;
+  function say() { var n = Math.round(deck.scrollLeft / ((deck.firstChild ? deck.firstChild.offsetWidth : 1) + 12)); n = Math.max(0, Math.min(list.length - 1, n)); PL_AT = n; ct.textContent = list.length ? (n + 1) + ' / ' + list.length + (PL_F === 'you' && fitAny ? ' · best fit first' : '') : 'No plans here'; }
+  function draw() {
+    list = plList(PL_F); deck.textContent = '';
+    list.forEach(function (p, i) {
+      var f = plFit(p), c = el('<div class="pl-card" role="group"><div class="pl-art"></div>' + (f !== null ? '<span class="pl-fit">Fits your targets <b></b></span>' : '') + '<div class="pl-tx"><h3></h3><p></p><div class="pl-chips"></div><button type="button" class="pl-go">Details</button></div></div>');
+      $('.pl-art', c).appendChild(plArtEl(p)); $('h3', c).textContent = p.n; $('p', c).textContent = p.desc;
+      if (f !== null) $('.pl-fit b', c).textContent = f + '%';
+      [p.days.length + 'x / week', p.lv, p.sp].forEach(function (t) { var sp = el('<i></i>'); sp.textContent = t; $('.pl-chips', c).appendChild(sp); });
+      c.setAttribute('aria-label', p.n + ', ' + p.days.length + ' days a week, ' + p.lv);
+      $('.pl-go', c).addEventListener('click', function () { PL_AT = i; lfPlanPage(p); });
+      deck.appendChild(c);
+    });
+    $$('button', fl).forEach(function (x) { x.setAttribute('aria-pressed', x.dataset.f === PL_F ? 'true' : 'false'); });
+    say();
+  }
+  [['you', 'For you'], ['Push', 'Push'], ['Pull', 'Pull'], ['Legs', 'Legs'], ['all', 'All']].forEach(function (x) {
+    var bt = el('<button type="button"></button>'); bt.textContent = x[1]; bt.dataset.f = x[0];
+    bt.addEventListener('click', function () { PL_F = x[0]; PL_AT = 0; draw(); deck.scrollLeft = 0; say(); }); fl.appendChild(bt);
   });
-  function say() { var w = deck.clientWidth || 1, n = Math.round(deck.scrollLeft / ((deck.firstChild ? deck.firstChild.offsetWidth : w) + 12)); n = Math.max(0, Math.min(list.length - 1, n)); PL_AT = n; ct.textContent = (n + 1) + ' / ' + list.length + (fitAny ? ' · best fit first' : ''); }
-  deck.addEventListener('scroll', function () { say(); });
-  var s = lfSheet({ title: 'Training plans', body: b, full: true, key: 'plans', cls: 'pl-sheet' });
+  deck.addEventListener('scroll', say);
+  lfSheet({ title: 'Training plans', body: b, full: true, key: 'plans', cls: 'pl-sheet' });
+  draw();
   setTimeout(function () { var c = deck.children[PL_AT]; if (c) deck.scrollLeft = c.offsetLeft - (deck.clientWidth - c.offsetWidth) / 2; say(); }, 30);
 }
 /* ONE PLAN: the poster, what it is, what to lift, how it fits your targets, then the week */
-function lfPlanPage(p, list) {
+function lfPlanPage(p) {
   var f = plFit(p), got = plSets(p), dw = PL_DOW[p.days.length], b = el('<div class="pl-pg"></div>');
   var hero = el('<div class="pl-hero"></div>'); hero.appendChild(plArtEl(p, 1)); b.appendChild(hero);
   var h = el('<h2 class="pl-h"></h2>'); h.textContent = p.n; b.appendChild(h);
