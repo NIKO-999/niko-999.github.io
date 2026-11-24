@@ -2229,11 +2229,11 @@ const freeze = (at) => `(() => {
     ok('a friend\'s flair sits after their name on the list, and their title is not there: it is for a profile', sam && sam.tt === '' && sam.fl === 'bolt', sam);
     ok('a title or flair this build has never heard of is not drawn', ally && !ally.fl, ally);
     ok('your own row has no title either, and no flair until you pick one', me && me.tt === '' && !me.fl, me);
-    ok('the title is drawn outside the name\'s text, so a name is still only its name', await page.$$eval('#frBoard .fr-t b', (b) => b.every((x) => !/Grinder|Rookie|Regular/.test(x.textContent))));
+    ok('the title is drawn outside the name\'s text, so a name is still only its name', await page.$$eval('#frBoard .fr-t b', (b) => b.every((x) => !/Grinder|Fresh Blood|Mr Consistent/.test(x.textContent))));
     const openFr = async (who) => { const i = await page.locator('#frBoard .fr-row').evaluateAll((els, n) => els.findIndex((e) => e.querySelector('.fr-t b').textContent === n), who); await page.locator('#frBoard .fr-row').nth(i).locator('.fr-open').click({ force: true }); await page.waitForTimeout(900); };
     await openFr('Sam');
     const ban = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(); return { ti: s.querySelector('.fr-ti').textContent, hid: s.querySelector('.fr-ti').hidden, av: s.querySelector('.fr-ban-av').className, bk: s.querySelector('.fr-ban').className, fl: !!s.querySelector('.fr-ban-t b .lf-fl') }; });
-    ok('their profile says their title', ban.ti === 'Grinder' && !ban.hid, ban);
+    ok('their profile says their title', ban.ti === 'The Grinder' && !ban.hid, ban);
     ok('and wears their frame and their flair, on a banner that stays the accent', /is-fm-aurora/.test(ban.av) && !/fr-bk-/.test(ban.bk) && ban.fl, ban);
     const ring = await page.evaluate(() => { const s = [...document.querySelectorAll('.lf-sheet')].pop(), e = s.querySelector('.fm-em.is-art'); return e ? { art: e.style.getPropertyValue('--art'), over: getComputedStyle(e).zIndex, fx: e.className } : null; });
     ok('the frame is their painting, laid over the picture, with its effect', ring && /fm\/aurora\.webp/.test(ring.art) && ring.over === '2' && /is-fx-s/.test(ring.fx), ring);
@@ -2265,7 +2265,7 @@ const freeze = (at) => `(() => {
     ok('what you pick is kept', st.ti === 'regular' && st.fl === 'spark' && st.fm === 'ring', st);
     await cuOpen(page);
     const vals = await page.$$eval('#lfYou .rk-set', (x) => x.map((e) => e.querySelector('b').textContent));
-    ok('each row says what is worn', vals[0] === 'Regular' && vals[1] === 'Spark' && vals[2] === 'Molten', vals);
+    ok('each row says what is worn', vals[0] === 'Mr Consistent' && vals[1] === 'Spark' && vals[2] === 'Molten', vals);
     await page.waitForTimeout(3200);
     const last = posts.filter((q) => q.s && 'ti' in q.s).pop();
     ok('and it goes to friends as ids, nothing else', last && last.s.ti === 'regular' && last.s.fl === 'spark' && last.s.fm === 'ring' && !('xl' in last.s) && !('du' in last.s), last && last.s);
