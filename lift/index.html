@@ -12075,6 +12075,17 @@ function bdSlab(b, n) {
   }
   function grain(x, amt) { var im = x.getImageData(0, 0, cw, ch), d = im.data; for (var p = 0; p < d.length; p += 4) { var q = (bdNoise(p * .37) - .5) * amt; d[p] += q; d[p + 1] += q; d[p + 2] += q; } x.putImageData(im, 0, 0); }
   /* DAY, one letter at a time because a canvas cannot space them everywhere, and the bottom mark: both pressed into the plate */
+  /* the lift's mark on the front: a barbell, pressed into the plate the way the lettering is (two plates a side, the collars, the bar) */
+  function pressIcon(x, cy, fill, hl) {
+    var w = ch * .2, u = w / 20;
+    [[1.6 * s * 2, hl], [0, fill]].forEach(function (L) {
+      x.fillStyle = L[1]; var y = cy + L[0], cxm = cw / 2;
+      function r(dx, dw, dh) { x.beginPath(); if (x.roundRect) x.roundRect(cxm + dx * u, y - dh * u / 2, dw * u, dh * u, u * .8); else x.rect(cxm + dx * u, y - dh * u / 2, dw * u, dh * u); x.fill(); }
+      r(-10, 20, 1.4);
+      r(-8.2, 2.2, 9); r(5.9, 2.2, 9); r(-5.6, 1.8, 6.2); r(3.8, 1.8, 6.2);
+      r(-9.6, 1.1, 3.6); r(8.5, 1.1, 3.6);
+    });
+  }
   function press(x, txt, cy, px, gap, fill, hl) {
     x.font = '900 ' + px + 'px "Avenir Next", "Helvetica Neue", Arial, sans-serif'; x.textAlign = 'left'; x.textBaseline = 'middle';
     var ws = txt.split('').map(function (c) { return x.measureText(c).width; }), tw = ws.reduce(function (a, c) { return a + c; }, 0) + gap * (txt.length - 1), cx = (cw - tw) / 2;
@@ -12089,7 +12100,7 @@ function bdSlab(b, n) {
     x.save(); path(x, cw * .042); x.lineWidth = 9 * s * 1.4; x.strokeStyle = 'rgba(0,0,0,.55)'; x.stroke(); path(x, cw * .062); x.lineWidth = 3 * s * 1.4; x.strokeStyle = 'rgba(255,255,255,.10)'; x.stroke(); x.restore();
   }
   var col = cvs(), cx0 = col.getContext('2d'); base(cx0);
-  press(cx0, HEAD, ch * .19, ch * (lift ? .052 : hrs ? .07 : .085), ch * (lift ? .01 : .018), 'rgba(4,4,5,.97)', 'rgba(255,255,255,.14)');
+  if (lift) pressIcon(cx0, ch * .19, 'rgba(4,4,5,.97)', 'rgba(255,255,255,.14)'); else press(cx0, HEAD, ch * .19, ch * (hrs ? .07 : .085), ch * .018, 'rgba(4,4,5,.97)', 'rgba(255,255,255,.14)');
   press(cx0, lift ? '' : 'LIFT', ch * .875, ch * .03, ch * .01, 'rgba(255,255,255,.05)', 'rgba(0,0,0,.4)');
   /* roughness (green) and metal (blue): scuffs are shinier than the plate */
   var orm = cvs(), ox = orm.getContext('2d'); ox.fillStyle = 'rgb(255,150,170)'; ox.fillRect(0, 0, cw, ch);
@@ -12098,7 +12109,7 @@ function bdSlab(b, n) {
   /* the bump: scratches, the rim's channel, the lettering sunk */
   var ht = cvs(), hx = ht.getContext('2d'); hx.fillStyle = 'rgb(128,128,128)'; hx.fillRect(0, 0, cw, ch); scratches(hx, 'h');
   hx.save(); path(hx, cw * .042); hx.lineWidth = 9 * s * 1.4; hx.strokeStyle = 'rgb(40,40,40)'; hx.stroke(); path(hx, cw * .062); hx.lineWidth = 3 * s * 1.4; hx.strokeStyle = 'rgb(190,190,190)'; hx.stroke(); hx.restore();
-  press(hx, HEAD, ch * .19, ch * (lift ? .052 : hrs ? .07 : .085), ch * (lift ? .01 : .018), 'rgb(70,70,70)', 'rgb(128,128,128)');
+  if (lift) pressIcon(hx, ch * .19, 'rgb(70,70,70)', 'rgb(128,128,128)'); else press(hx, HEAD, ch * .19, ch * (hrs ? .07 : .085), ch * .018, 'rgb(70,70,70)', 'rgb(128,128,128)');
   var hd = hx.getImageData(0, 0, cw, ch).data, nm = cvs(), nx = nm.getContext('2d'), NI = nx.createImageData(cw, ch), nd = NI.data;
   function H(x, y) { x = x < 0 ? 0 : x >= cw ? cw - 1 : x; y = y < 0 ? 0 : y >= ch ? ch - 1 : y; return hd[(y * cw + x) * 4] / 255; }
   for (var y = 0; y < ch; y++) for (var x = 0; x < cw; x++) {
