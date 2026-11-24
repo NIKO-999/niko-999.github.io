@@ -1811,7 +1811,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ago { margin: 0; }
 .fr-dash .lf-stat .lf-ic { margin-top: 4px; }
 /* a rest day is a half-lit square: part of the way to a trained one, never a miss */
-.lf-day.is-rest { background: color-mix(in srgb, var(--mark-on) 38%, transparent); }
+.lf-day.is-rest { background: color-mix(in srgb, var(--mark-on) 38%, transparent); display: grid; place-items: center; color: var(--ink); }
+.lf-day.is-rest .lf-ic { width: 11px; height: 11px; stroke-width: 2.4; }
 /* a rest day carries a moon where a workout carries its dots */
 .lf-cell.is-rest .lf-dots { justify-content: center; } .lf-cell.is-rest .lf-ic { width: 13px; height: 13px; stroke-width: 2.2; }
 /* A rest day reads at a glance: the cell is half lit, the same as in the
@@ -3808,7 +3809,7 @@ function lfGridCard() {
     var d = ymd(addDays(t, -i)), x = el('<i class="lf-day"></i>');
     if (on[d]) { x.classList.add('is-on'); n++; }
     else if (lfFz(d)) { x.classList.add('is-fz'); x.innerHTML = lfFzI(); }
-    else if (S.rd[d]) x.classList.add('is-rest');
+    else if (S.rd[d]) { x.classList.add('is-rest'); x.innerHTML = IC.moon; }
     if (i === 0) x.classList.add('is-now');
     x.dataset.d = d;
     g.appendChild(x);
