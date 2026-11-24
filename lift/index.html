@@ -12012,7 +12012,7 @@ function bdIsSlab(b) { return /^(d|hr|st|run)\d+$/.test(b.id || '') || (b && (b.
 function bdSlab(b, n) {
   var T = BD3, g = new T.Group(), hi = n > 500, HW = .7, HH = 1.02, DEP = .09, BV = .02, lock = !!b.lock;
   var ch = Math.max(384, Math.min(1024, n * 1.25 | 0)), cw = Math.round(ch * HW / HH), s = ch / 1024;
-  var lift = !!BD_LIFTID[b.id], hrs = /^hr/.test(b.id), num = lift ? String(BD_GL[b.id] || '') : b.id === 'seven' ? '7' : b.id === 'zero' ? '14' : String(b.id).replace(/^\D+/, ''), HEAD = lift ? S.unit.toUpperCase() : hrs ? 'HOURS' : /^st/.test(b.id) ? 'WEEKS' : /^run|^seven$|^zero$/.test(b.id) ? 'DAYS' : 'DAY';
+  var lift = !!BD_LIFTID[b.id], hrs = /^hr/.test(b.id), num = lift ? String(BD_GL[b.id] || '') : b.id === 'seven' ? '7' : b.id === 'zero' ? '14' : String(b.id).replace(/^\D+/, ''), anim = lift && !lock && (+String(b.id).slice(2) >= 3), HEAD = lift ? S.unit.toUpperCase() : hrs ? 'HOURS' : /^st/.test(b.id) ? 'WEEKS' : /^run|^seven$|^zero$/.test(b.id) ? 'DAYS' : 'DAY';
   function stad(hw, hh) { var sh = new T.Shape(), r = hw; sh.moveTo(-hw, -(hh - r)); sh.lineTo(-hw, hh - r); sh.absarc(0, hh - r, r, Math.PI, 0, true); sh.lineTo(hw, -(hh - r)); sh.absarc(0, -(hh - r), r, 0, Math.PI, true); return sh; }
   function plateGeo(hw, hh) { var gg = new T.ShapeGeometry(stad(hw, hh), 48), pa = gg.attributes.position, uv = gg.attributes.uv; for (var i = 0; i < pa.count; i++) uv.setXY(i, (pa.getX(i) + HW) / (2 * HW), (pa.getY(i) + HH) / (2 * HH)); return gg; }
   function cvs() { var c = document.createElement('canvas'); c.width = cw; c.height = ch; return c; }
@@ -12089,15 +12089,17 @@ function bdSlab(b, n) {
   }
   var tg = cvs().getContext('2d').createLinearGradient(0, ch * .3, 0, ch * .78);
   if (lock) { tg.addColorStop(0, '#6d7077'); tg.addColorStop(1, '#3b3d42'); } else { if (hrs) { tg.addColorStop(0, '#ffe3da'); tg.addColorStop(.3, '#ff9a80'); tg.addColorStop(.62, '#e8352e'); tg.addColorStop(1, '#8c0f1c'); } else { tg.addColorStop(0, '#fffbe0'); tg.addColorStop(.3, '#ffe590'); tg.addColorStop(.62, '#e9a736'); tg.addColorStop(1, '#a8610a'); } }
+  /* THE REALLY GOOD LIFTS ARE ALIVE: from Advanced up, the weight is painted in greys and every layer, the glow and the light are tinted by one hue that travels round the wheel */
+  if (anim) { tg = cvs().getContext('2d').createLinearGradient(0, ch * .3, 0, ch * .78); tg.addColorStop(0, '#ffffff'); tg.addColorStop(.4, '#ececec'); tg.addColorStop(.75, '#bcbcbc'); tg.addColorStop(1, '#7e7e7e'); }
   var layers = [], LN = 5;
   for (var li = 0; li < LN; li++) {
-    var top = li === LN - 1, c = top ? numCv(tg) : numCv(lock ? 'rgb(' + (46 + li * 5) + ',' + (48 + li * 5) + ',' + (54 + li * 5) + ')' : (hrs ? 'rgb(' + (92 + li * 18) + ',' + (14 + li * 5) + ',' + (20 + li * 4) + ')' : 'rgb(' + (88 + li * 18) + ',' + (50 + li * 10) + ',6)'));
+    var top = li === LN - 1, c = top ? numCv(tg) : numCv(lock ? 'rgb(' + (46 + li * 5) + ',' + (48 + li * 5) + ',' + (54 + li * 5) + ')' : (anim ? 'rgb(' + (70 + li * 24) + ',' + (70 + li * 24) + ',' + (70 + li * 24) + ')' : hrs ? 'rgb(' + (92 + li * 18) + ',' + (14 + li * 5) + ',' + (20 + li * 4) + ')' : 'rgb(' + (88 + li * 18) + ',' + (50 + li * 10) + ',6)'));
     var pl = new T.Mesh(new T.PlaneGeometry(2 * HW, 2 * HH), new T.MeshBasicMaterial({ map: tex(c, true), transparent: true, depthWrite: false, toneMapped: false }));
     pl.position.z = zf + .006 + li * .0075; pl.renderOrder = 5 + li; g.add(pl); layers.push(pl);
   }
   var glow = null, lt = null;
   if (!lock) {
-    var gm = new T.MeshBasicMaterial({ map: tex(numCv(hrs ? '#ff4a3a' : '#ffb23a', hi ? 70 : 40), true), transparent: true, opacity: .8, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
+    var gm = new T.MeshBasicMaterial({ map: tex(numCv(anim ? '#ffffff' : hrs ? '#ff4a3a' : '#ffb23a', hi ? 70 : 40), true), transparent: true, opacity: .8, blending: T.AdditiveBlending, depthWrite: false, toneMapped: false });
     glow = new T.Mesh(new T.PlaneGeometry(2 * HW, 2 * HH), gm); glow.position.z = zf + .004; glow.renderOrder = 4; g.add(glow);
     lt = new T.PointLight(hrs ? 0xff4a3a : 0xffa83a, 1.1, 3); lt.position.set(0, -.02, zf + .45); g.add(lt);
     /* a light that crosses the plate every few seconds */
@@ -12107,6 +12109,7 @@ function bdSlab(b, n) {
       glow.material.opacity = .62 + Math.sin(t * 1.5) * .22; lt.intensity = 1 + Math.sin(t * 1.5) * .35;
       /* the gold breathes: the layers behind slide a hair against the front */
       for (var k = 0; k < LN - 1; k++) layers[k].position.x = Math.sin(t * .6) * .0015 * (LN - k);
+      if (anim) { var hu = (t * .07) % 1; for (var j = 0; j < LN; j++) layers[j].material.color.setHSL(hu, .95, j === LN - 1 ? .62 : .3 + j * .04); glow.material.color.setHSL(hu, 1, .55); lt.color.setHSL(hu, 1, .6); }
     };
     g.userData.cr(1.2);
   }
