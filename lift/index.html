@@ -6361,17 +6361,16 @@ function lfRenderLib() {
   if (!newU && !window.__lfInline) QA.unshift(['lfSplitOpen', 'Your split', '#9ad0ff', '<rect x="3.500" y="5" width="17" height="15" rx="3"/><path d="M3.500 10h17M8 3v4M16 3v4M8 14h3"/>', lfSplitSheet, lfProg().n]);
   if (!newU) QA.push(['lfProgMg', 'Manage splits', '#f08ad6', '<rect x="5" y="4" width="14" height="16" rx="2.500"/><path d="M9 9h6M9 13h6M9 17h3"/>', lfProgManage]);
   if (LF_WGT && LF_WGT.healthReadAuth && lfCaps.health) QA.push(['lfHealthQa', 'Apple Health', '#ff7a8a', HK_IC.heart, lfHealthSheet]);
-  /* PREVIOUS WORKOUTS closes the screen: the same wide block as Your split, with a clock mark and how many there are */
-  var prevQ = ['lfPrevOpen', 'Previous workouts', '#c9b6ff', '<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>', lfPrevSheet, S.wo.length + (S.wo.length === 1 ? ' workout' : ' workouts')];
+  /* PREVIOUS WORKOUTS closes the screen and is a small block like the rest, so it pairs with Apple Health when that is on. With nothing to pair with, the last block takes the width. */
+  QA.push(['lfPrevOpen', 'Previous workouts', '#c9b6ff', '<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>', lfPrevSheet]);
   var lastPair = -1; QA.forEach(function (q, ix) { if (!q[5]) lastPair = ix; });
-  QA.push(prevQ);
   var qg = el('<div class="lf-qa"></div>');
   QA.forEach(function (q, ix) {
     var b = el('<button type="button" class="lf-qa-t" id="' + q[0] + '"><i><svg viewBox="0 0 24 24" aria-hidden="true">' + q[3] + '</svg></i><span></span></button>');
     $('span', b).textContent = q[1];
     /* the split block is full width and says which programme is running; whatever is left over after the pairs spans two so no block sits beside a gap */
     var wide = q[5] || (ix === lastPair && QA.filter(function (z) { return !z[5]; }).length % 2 === 1);
-    if (q[5]) { b.classList.add('is-wide'); b.appendChild(el('<em></em>')); $('em', b).textContent = q[5]; } else if (wide) b.classList.add('is-wide');
+    if (q[5]) { b.classList.add('is-wide'); b.appendChild(el('<em></em>')); $('em', b).textContent = q[5]; } else if (wide) { b.classList.add('is-wide'); if (q[0] === 'lfPrevOpen') { b.appendChild(el('<em></em>')); $('em', b).textContent = S.wo.length + (S.wo.length === 1 ? ' workout' : ' workouts'); } }
     b.style.setProperty('--c', q[2]); b.addEventListener('click', q[4]); qg.appendChild(b);
   });
   root.appendChild(qg);
