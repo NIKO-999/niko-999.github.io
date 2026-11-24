@@ -3706,7 +3706,7 @@ function lfGridCard() {
     g.appendChild(x);
   }
   var rn = 0; for (var j = 0; j < 30; j++) { var dj = ymd(addDays(t, -j)); if (S.rd[dj] && !on[dj]) rn++; }
-  $('.lf-num', c).textContent = n + (rn ? ' · ' + rn + ' rest' : '') + ' · goal ' + S.goal + '/wk';
+  $('.lf-num', c).textContent = n + (rn ? ' · ' + rn + ' rest' : '');
   c.setAttribute('aria-label', 'Trained ' + n + ' of the last 30 days. Open the calendar');
   var gt = lfTagsOf(['goal', 'streak']);
   if (gt.length) { var row = el('<div class="lf-tags" id="lfTags"></div>'); gt.forEach(function (x) { row.appendChild(lfTag(x)); }); c.insertBefore(row, $('.lf-days', c)); }
