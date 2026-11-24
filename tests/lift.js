@@ -2461,7 +2461,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await page.waitForSelector('.lf-tr-stage', { timeout: 6000 }).catch(() => {});
     const g1 = [await page.locator('.lf-tr-stage').count(), await page.locator('.lf-session').count()];
     ok('the first workout opens the guide once, over the session', g1[0] === 1 && g1[1] === 1, g1);
-    ok('seven scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove","Pin an exercise","Coach"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
+    ok('six scenes, named, the first playing', JSON.stringify(await page.$$eval('.lf-tr-segs button', (b) => b.map((x) => x.getAttribute('aria-label')))) === '["Superset","Warm-up","Drop set","Remove a set","Swap or remove","Coach"]' && await page.locator('.lf-tr-segs button.is-on').count() === 1);
     await page.click('.lf-tr-segs button:nth-child(2)'); await page.waitForTimeout(3800);
     ok('the warm-up scene puts a W row above the first set and ticks it', await page.evaluate(() => { const r = [...document.querySelectorAll('.lf-tr-stage .tr-rows .lf-set')]; return r.length === 3 && r[0].classList.contains('is-wu') && r[0].classList.contains('is-done'); }));
     await page.click('.lf-tr-segs button:nth-child(3)'); await page.waitForTimeout(5200);

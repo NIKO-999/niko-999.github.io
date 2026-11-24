@@ -1115,10 +1115,8 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .lf-tr-stage .lf-set { transition: transform .5s ease, opacity .4s; }
 .lf-tr-stage .lf-ex-n { transition: opacity .25s; }
 .lf-tr-stage .lf-ex { position: relative; }
-.lf-tr-stage .tr-menu { position: absolute; right: 8px; top: 44px; z-index: 5; min-width: 200px; padding: 4px; }
+.lf-tr-stage .tr-menu { position: absolute; right: 8px; top: 44px; z-index: 2; min-width: 200px; padding: 4px; }
 .lf-tr-stage .tr-menu .lf-xm-i { min-height: 38px; font-size: 14px; }
-.lf-tr-stage .tr-toast { position: absolute; bottom: 16px; max-width: calc(100% - 24px); z-index: 5; }
-.lf-tr-stage .tr-toast span { white-space: normal; }
 .lf-tr-stage .tr-pick { box-shadow: 0 0 0 2px var(--log); }
 .lf-tr-f { position: absolute; left: 0; top: 0; width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.45); border: 2px solid rgba(255,255,255,.9); box-shadow: 0 4px 14px rgba(0,0,0,.45); transition: transform .6s cubic-bezier(.4, 0, .2, 1), scale .2s, background .2s; z-index: 3; }
 .lf-tr-f.is-tap { scale: .72; background: rgba(255,255,255,.9); }
@@ -3025,7 +3023,6 @@ var TOUR = [
   ['Drop set', '+ Drop goes right after a set. Lower the weight and keep going straight away.', 6000],
   ['Remove a set', 'Swipe a set to the left to take it out. Warm-ups and drop sets go the same way.', 5000],
   ['Swap or remove', 'The sliders menu swaps an exercise for a different one, or takes it out of the workout.', 7200],
-  ['Pin an exercise', 'Press the pin on the exercise you are on and every other one locks. Finish it, or press the pin again, to unlock them.', 7400],
   ['Coach', 'Each exercise says what to try, worked out from your last sets of it: one more rep, or a little more weight once you reach the top of the range. Tap it to fill the sets. Three sessions with no gain and it asks for a lighter week.', 6600]
 ];
 var TR_LINK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1"/></svg>';
@@ -3047,10 +3044,6 @@ function trSsCard(a, b) {
   var rd = function (n, wa, ra, wb, rb) { return '<div class="lf-ssr"><b class="lf-ssr-n">' + n + '</b><div class="lf-ssr-rows"><div class="lf-ssr-r"><span class="lf-ssr-t">' + a + '</span><input readonly tabindex="-1" value="' + wa + '" /><input readonly tabindex="-1" value="' + ra + '" /></div><div class="lf-ssr-r"><span class="lf-ssr-t">' + b + '</span><input readonly tabindex="-1" value="' + wb + '" /><input readonly tabindex="-1" value="' + rb + '" /></div></div><button type="button" class="lf-chk lf-ssr-chk" tabindex="-1"><span>' + IC.check + '</span></button></div>'; };
   return '<div class="lf-ex is-ssc" data-t="a"><div class="lf-ex-hd"><svg class="lf-ssc-ic" viewBox="0 0 24 24" aria-hidden="true">' + TR_LINK.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '') + '</svg><button type="button" class="lf-ex-n" tabindex="-1">Superset</button><span class="lf-ex-dots" aria-hidden="true"><i></i><i></i></span><button type="button" class="lf-pin" tabindex="-1" aria-pressed="false">' + LF_PIN + '</button><button type="button" class="lf-more" tabindex="-1">' + LF_MORE + '</button></div><div class="lf-tg">2 rounds · rest 2:00</div><div class="lf-ssc-rs">' + rd(1, '32', '10', '15', '12') + rd(2, '32', '9', '15', '12') + '</div></div>';
 }
-function trFold(id, name, n) {
-  var dots = ''; for (var i = 0; i < n; i++) dots += '<i></i>';
-  return '<div class="lf-ex is-fold" data-t="' + id + '"><div class="lf-ex-hd"><button type="button" class="lf-ex-n" tabindex="-1">' + name + '</button><span class="lf-ex-dots" aria-hidden="true">' + dots + '</span><button type="button" class="lf-more" tabindex="-1">' + LF_MORE + '</button></div><div class="lf-ex-sum"></div></div>';
-}
 function lfTour() {
   var at = 0, timers = [], stage, f, segs, cap, back, next, reduced = false, sh;
   try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
@@ -3063,7 +3056,7 @@ function lfTour() {
   function clear() { timers.forEach(clearTimeout); timers = []; }
   function T(ms, fn) { timers.push(setTimeout(fn, ms)); }
   function q(sel) { return $(sel, stage); }
-  function aim(sel, dx) { var n = q(sel); if (!n) return; var a = stage.getBoundingClientRect(), r = n.getBoundingClientRect(); f.style.transform = 'translate(' + (r.left - a.left + r.width / 2 - 17 + (dx || 0)) + 'px,' + (r.top - a.top + r.height / 2 - 17) + 'px)'; }
+  function aim(sel, dx) { var n = q(sel); if (!n) return; var a = stage.getBoundingClientRect(), r = n.getBoundingClientRect(); /* a finger on a label hides the label it points at, so a press on words lands at the right-hand end of the row, where there are none */ if (dx == null && n.matches('.lf-xm-i, .lf-ex-n')) dx = Math.min(r.width / 2 - 24, 120); f.style.transform = 'translate(' + (r.left - a.left + r.width / 2 - 17 + (dx || 0)) + 'px,' + (r.top - a.top + r.height / 2 - 17) + 'px)'; }
   function press(sel, ms, fn) { T(ms, function () { aim(sel); }); T(ms + 650, function () { f.classList.add('is-tap'); }); T(ms + 760, function () { if (fn) fn(); }); T(ms + 930, function () { f.classList.remove('is-tap'); }); }
   function tick(row) { if (row) { row.classList.add('is-done', 'is-pop'); var cd = row.closest('.lf-ex'), dd = cd ? $$('.lf-ex-dots i', cd).filter(function (x) { return !x.classList.contains('on'); })[0] : null; if (dd && row.getAttribute('data-k') === 's') dd.classList.add('on'); } }
   function menu(card) { gone(); var m = el('<div class="lf-xmenu tr-menu">' + TR_MENU.map(function (r) { return '<button type="button" class="lf-xm-i' + (r[0] === 'rm' ? ' is-bad' : '') + '" data-i="' + r[0] + '" tabindex="-1"><span>' + r[1] + '</span></button>'; }).join('') + '</div>'); m.style.top = (card.offsetTop + 38) + 'px'; stage.appendChild(m); }
@@ -3080,8 +3073,7 @@ function lfTour() {
     else if (i === 2) html = trCard('a', 'Lat pulldown', trRow('', 1, '70×10', '70', '10') + trRow('', 2, '70×9', '70', '9'), 1);
     else if (i === 3) html = trCard('a', 'Shoulder press', trRow('', 1, '24×10', '24', '10', 1) + trRow('', 2, '24×9', '24', '9') + trRow('', 3, '24×8', '24', '8'), 1);
     else if (i === 4) html = trCard('a', 'Hack squat', trRow('', 1, '80×10', '80', '10') + trRow('', 2, '80×9', '80', '9'), 1);
-    else if (i === 5) html = trCard('a', 'Incline dumbbell press', trRow('', 1, '30×10', '', ''), 0) + trFold('b', 'Cable flyes', 3) + trFold('c', 'Lateral raises', 4);
-    else if (i === 6) html = trCard('a', 'Hack squat', trRow('', 1, '100×10', '', '') + trRow('', 2, '100×9', '', '') + trRow('', 3, '100×9', '', ''), 1).replace('<div class="tr-rows">', '<button type="button" class="lf-aim" tabindex="-1"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg>Try 102.5 × 6</button><div class="tr-rows">');
+    else if (i === 5) html = trCard('a', 'Hack squat', trRow('', 1, '100×10', '', '') + trRow('', 2, '100×9', '', '') + trRow('', 3, '100×9', '', ''), 1).replace('<div class="tr-rows">', '<button type="button" class="lf-aim" tabindex="-1"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg>Try 102.5 × 6</button><div class="tr-rows">');
     else html = '<div class="tr-slide">' + trCard('a', 'Seated calf raises', trRow('', 1, '40×16', '40', '17') + trRow('', 2, '60×12', '60', '13')) + trCard('b', 'Cable crunches', trRow('', 1, '64×15', '64', '15') + trRow('', 2, '68×15', '68', '15')) + '</div>';
     stage.innerHTML = html; f = el('<i class="lf-tr-f" aria-hidden="true"></i>'); stage.appendChild(f);
     f.style.transition = 'none'; f.style.transform = 'translate(' + (stage.clientWidth / 2 - 17) + 'px,' + (stage.clientHeight + 10) + 'px)'; void f.offsetWidth; f.style.transition = '';
@@ -3106,13 +3098,6 @@ function lfTour() {
       T(2500, function () { f.classList.remove('is-tap'); r2.style.opacity = 0; });
       T(3000, function () { r2.style.height = r2.offsetHeight + 'px'; void r2.offsetHeight; r2.style.transition = 'height .35s ease, margin .35s'; r2.style.height = '0px'; r2.style.minHeight = '0px'; var n3 = $('.lf-sn', rows3[2]); if (n3) n3.textContent = '2'; });
     } else if (i === 5) {
-      var pn = q('.lf-pin'), tt = null;
-      var lockOn = function (on) { [B, q('[data-t="c"]')].forEach(function (c) { if (c) c.classList.toggle('is-lock', on); }); pn.setAttribute('aria-pressed', on ? 'true' : 'false'); };
-      press('.lf-pin', 500, function () { lockOn(true); });
-      press('[data-t="b"]', 2200, function () { tt = el('<div class="lf-toast is-bare is-up tr-toast"><span>Finish Incline dumbbell press or unpin to switch</span></div>'); stage.appendChild(tt); });
-      press('.lf-set[data-k="s"] .lf-chk', 4300, function () { tick(q('.lf-set[data-k="s"]')); });
-      T(5400, function () { lockOn(false); if (tt) tt.remove(); });
-    } else if (i === 6) {
       /* the coach line, pressed: every empty set takes its aim, set by set */
       press('.lf-aim', 700, function () { Array.prototype.slice.call(stage.querySelectorAll('.lf-set[data-k="s"]')).forEach(function (r) { var ins = r.querySelectorAll('input'); ins[0].value = '102.5'; ins[1].value = '6'; r.classList.add('lf-tr-in'); }); });
       press('.lf-set[data-k="s"] .lf-chk', 2400, function () { tick(q('.lf-set[data-k="s"]')); });
