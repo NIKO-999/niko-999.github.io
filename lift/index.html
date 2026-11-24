@@ -4035,7 +4035,7 @@ function lfStart(rt) {
   var nToday = act ? 0 : woOn(ymd(today())).length;
   if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
-  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfKeep = []; lfSsPend = null;
+  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfKeep = []; lfShut = []; lfSsPend = null;
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() >= 1 && !!rt, half = lfRc() >= 2;
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -4292,7 +4292,7 @@ function lfTick() {
    it rather than on the first card; ticked off, the next one comes up to
    take its place, so the set you are about to do is never down by the
    rest timer at the foot */
-var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '', lfKeep = [];
+var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '', lfKeep = [], lfShut = [];
 /* THE ORDER CARDS ARE DRAWN IN. Set when the workout opens: what is not
    finished first, in its order, so the exercise you are on leads, and
    what is done after it. It holds still while you work, so a card never
@@ -4428,11 +4428,17 @@ function lfStarted(e) {
   var typed = function (q) { return (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null); };
   return e.sets.some(function (q) { return q.ok || typed(q) || (q.ds || []).some(function (d) { return d.ok || typed(d); }); }) || (e.wu || []).some(function (q) { return q.ok || typed(q); });
 }
+/* AN EXERCISE ONLY FOLDS WHEN IT IS FINISHED, or when you press its name again. Opening another never closes the one you are on, so a mis-tap costs nothing: the one you left stays open, unfinished, until you finish it or fold it yourself. */
+function lfUnshut(e) { lfSsGroup(e).forEach(function (m) { lfShut = lfShut.filter(function (id) { return id !== m.id; }); }); }
 function lfOpenAt(e) {
   var cur = lfOpenId(), curE = act.x.filter(function (q) { return q.id === cur; })[0];
-  if (curE && lfSsGroup(curE).indexOf(e) < 0) lfSsGroup(curE).forEach(function (q) { if (lfStarted(q) && lfKeep.indexOf(q.id) < 0) lfKeep.push(q.id); });
+  if (curE && lfSsGroup(curE).indexOf(e) < 0 && lfShut.indexOf(curE.id) < 0) lfSsGroup(curE).forEach(function (q) { if (lfKeep.indexOf(q.id) < 0) lfKeep.push(q.id); });
   lfKeep = lfKeep.filter(function (id) { return id !== e.id; });
-  lfOpenEx = e.id; lfCurExId = e.id; lfCurGo = 1; lfPaintSession();
+  lfUnshut(e); lfOpenEx = e.id; lfCurExId = e.id; lfCurGo = 1; lfPaintSession();
+}
+function lfFoldAt(e) {
+  lfSsGroup(e).forEach(function (q) { lfKeep = lfKeep.filter(function (id) { return id !== q.id; }); if (lfShut.indexOf(q.id) < 0) lfShut.push(q.id); });
+  lfCurGo = 0; lfPaintSession();
 }
 function lfExRemove(e) {
   var go = function () { act.x.splice(act.x.indexOf(e), 1); lfSaveAct(); lfPaintSession(); };
@@ -4460,6 +4466,7 @@ var LF_MI = function (d) { return '<svg viewBox="0 0 24 24" aria-hidden="true"><
 function lfExMenu(e, btn) {
   var ss = e.ss && lfSsGroup(e).length > 1, o = lfOrd || act.x, ix = o.indexOf(e), I = LF_MI;
   lfMenuPop(e.id, btn, [
+    ['Exercise info', I('M12 11v5M12 8h.01M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z'), function () { lfExSheet(e.id); }],
     ['Swap exercise', I('M7 7h11l-3-3M17 17H6l3 3'), function () { lfSwap(e); }],
     [ss ? 'Take out of the superset' : 'Superset with…', I(ss ? 'M9 15l-3 3a3 3 0 0 1-4-4l3-3M15 9l3-3a3 3 0 0 1 4 4l-3 3M4 4l16 16' : 'M10 14a4 4 0 0 0 5.700 0l3-3a4 4 0 0 0-5.700-5.700l-1 1M14 10a4 4 0 0 0-5.700 0l-3 3a4 4 0 0 0 5.700 5.700l1-1'), function () { if (ss) lfSsToggle(e); else lfSsPick(e); }],
     null,
@@ -4576,7 +4583,7 @@ function lfSsCard(g, openG) {
       act.rest = Date.now(); act.restEx = longest.id; act.rang = 0; lfRestPush(); lfLockStart();
       var all = g.every(function (m) { return m.sets.every(function (q) { return q.ok; }); }), nx = all ? lfSsNextOut(g) : null;
       lfKeep = lfKeep.filter(function (id) { return !g.some(function (m) { return m.id === id; }); });
-      lfOpenEx = nx ? nx.id : g[0].id; lfCurExId = lfOpenEx; lfCurGo = 1; lfPopAt = 'ss:' + g[0].id + ':' + i; lfSaveAct(); if (!cheer) buzz(14);
+      lfOpenEx = nx ? nx.id : g[0].id; lfCurExId = lfOpenEx; if (nx) lfUnshut(nx); lfCurGo = 1; lfPopAt = 'ss:' + g[0].id + ':' + i; lfSaveAct(); if (!cheer) buzz(14);
       lfPaintSession(); lfTick(); if (cheer) lfCheer(cheer, at);
     });
     rounds.appendChild(rd);
@@ -4590,6 +4597,8 @@ function lfSsCard(g, openG) {
     $('.lf-ex-sum', card).textContent = ssNames + (nDone ? ' · ' + nDone + ' of ' + n : '');
     $('.lf-ex-n', card).addEventListener('click', function () { lfOpenAt(g[0]); });
     card.addEventListener('click', function (ev) { if (!ev.target.closest('.lf-more')) lfOpenAt(g[0]); });
+  } else {
+    $('.lf-ex-n', card).addEventListener('click', function () { lfFoldAt(g[0]); });
   }
   return card;
 }
@@ -4608,8 +4617,9 @@ function lfPaintSession() {
   /* a pinned exercise lets go of the pin when it has nothing left to do */
   if (act.cur && !act.x.some(function (e) { return e.id === act.cur && e.sets.some(function (q) { return !q.ok; }); })) { act.cur = ''; lfSaveAct(); }
   var openId = lfOpenId(), openE = act.x.filter(function (q) { return q.id === openId; })[0], openG = openE ? lfSsGroup(openE).slice() : [];
-  lfKeep = lfKeep.filter(function (id) { return act.x.some(function (q) { return q.id === id && lfStarted(q) && q.sets.some(function (z) { return !z.ok; }); }); });
+  lfKeep = lfKeep.filter(function (id) { return act.x.some(function (q) { return q.id === id && q.sets.some(function (z) { return !z.ok; }); }); });
   lfKeep.forEach(function (id) { var k = act.x.filter(function (q) { return q.id === id; })[0]; if (k) lfSsGroup(k).forEach(function (m) { if (openG.indexOf(m) < 0) openG.push(m); }); });
+  openG = openG.filter(function (m) { return lfShut.indexOf(m.id) < 0; });
   var ssSeen = {};
   ord.forEach(function (e) {
     if (e.ss && lfSsGroup(e).length > 1) { if (!ssSeen[e.ss]) { ssSeen[e.ss] = 1; list.appendChild(lfSsCard(lfSsGroup(e), openG)); } return; }
@@ -4659,7 +4669,7 @@ function lfPaintSession() {
       fb.addEventListener('click', function () { lfSwapTo(e, e.from); });
       card.appendChild(fb);
     }
-    $('.lf-ex-n', card).addEventListener('click', function () { if (card.classList.contains('is-fold')) lfOpenAt(e); else lfExSheet(e.id); });
+    $('.lf-ex-n', card).addEventListener('click', function () { if (card.classList.contains('is-fold')) lfOpenAt(e); else lfFoldAt(e); });
     card.addEventListener('click', function (ev) { if (card.classList.contains('is-fold') && !ev.target.closest('.lf-more')) lfOpenAt(e); });
     /* WARM-UP ROWS, marked W: the same row, ticked the same way, but no
        record is judged on one, no rest timer starts, and it is not a set */
@@ -4733,7 +4743,7 @@ function lfPaintSession() {
         if (ssn) { act.rest = 0; act.rang = 0; } else { act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush(); lfLockStart(); }
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
         lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); var nxE = !ssn && e.sets.every(function (q) { return q.ok; }) ? lfNextOpen(e) : null;
-        lfKeep = lfKeep.filter(function (id) { return id !== e.id; }); lfOpenEx = nxE ? nxE.id : e.id; lfCurExId = ssn ? ssn.id : nxE ? nxE.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
+        lfKeep = lfKeep.filter(function (id) { return id !== e.id; }); lfOpenEx = nxE ? nxE.id : e.id; if (nxE) lfUnshut(nxE); lfCurExId = ssn ? ssn.id : nxE ? nxE.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
       lfSwipe(row, function () { e.sets.splice(si, 1); }, 'Set removed');

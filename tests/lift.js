@@ -558,7 +558,7 @@ const freeze = (at) => `(() => {
     await page.click('#lfGo'); await settle(page);
     ok('no exercise is linked to start with, and the old link buttons are gone', await page.locator('.lf-ex.is-ssc').count() === 0 && await page.locator('.lf-ssb').count() === 0);
     await page.locator('.lf-session .lf-ex .lf-more').first().click(); await settle(page);
-    ok('the exercise menu holds swap, superset, move up and down, and remove, with move up shut on the first', JSON.stringify(await page.$$eval('#lfExMenu .lf-xm-i', (x) => x.map((b) => b.textContent + (b.disabled ? '!' : '')))) === '["Swap exercise","Superset with…","Move up!","Move down","Remove exercise"]');
+    ok('the exercise menu holds swap, superset, move up and down, and remove, with move up shut on the first', JSON.stringify(await page.$$eval('#lfExMenu .lf-xm-i', (x) => x.map((b) => b.textContent + (b.disabled ? '!' : '')))) === '["Exercise info","Swap exercise","Superset with…","Move up!","Move down","Remove exercise"]');
     await page.locator('#lfExMenu .lf-xm-i', { hasText: 'Superset with' }).click(); await settle(page);
     ok('Superset with… lists the other exercises to pair it with, and Make superset waits for you', await page.locator('.lf-sspk-i').count() >= 3 && await page.locator('#lfSsMake').count() === 1);
     await page.locator('.lf-sspk-i').nth(1).click(); await page.locator('#lfSsMake').click(); await settle(page);
@@ -580,12 +580,13 @@ const freeze = (at) => `(() => {
     ok('each exercise has one dot a working set, none lit yet, and a sliders button instead of the grip, swap, link and cross', await page.locator('.lf-session .lf-ex').first().locator('.lf-ex-dots i').count() === 4 && await page.locator('.lf-session .lf-ex-dots i.on').count() === 0 && await page.locator('.lf-grip, .lf-swp, .lf-ssb').count() === 0 && await page.locator('.lf-session .lf-more').count() === 5);
     ok('a folded row is a slim row, not a card', await page.locator('.lf-session .lf-ex.is-fold').first().evaluate((e) => e.getBoundingClientRect().height < 56));
     await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(0).click(); await settle(page);
-    ok('opening the second folds the first, which has nothing in it', (await st()) === 'FOFFF');
-    await page.locator('.lf-session .lf-ex:not(.is-fold) .lf-set input').first().fill('40'); await settle(page);
-    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(1).click(); await settle(page);
-    ok('once you have typed in the second, opening the third leaves it open', (await st()) === 'FOOFF');
-    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(1).click(); await settle(page);
-    ok('and opening a fourth folds the third, which you have not started, and keeps the second', (await st()) === 'FOFOF');
+    ok('opening the second leaves the first open: a mis-tap costs nothing', (await st()) === 'OOFFF');
+    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(0).click(); await settle(page);
+    ok('and a third leaves both', (await st()) === 'OOOFF');
+    await page.locator('.lf-session .lf-ex:not(.is-fold) .lf-ex-n').nth(1).click(); await settle(page);
+    ok('pressing an open exercise\'s name folds it', (await st()) === 'OFOFF');
+    await page.locator('.lf-session .lf-ex.is-fold .lf-ex-n').nth(0).click(); await settle(page);
+    ok('and pressing it again opens it', (await st()) === 'OOOFF');
     const open = page.locator('.lf-session .lf-ex:not(.is-fold)').first();
     const nSets = await open.locator('.lf-set:not(.is-wu):not(.is-drop)').count();
     for (let i = 0; i < nSets; i++) { const row = open.locator('.lf-set:not(.is-wu):not(.is-drop)').nth(i); await row.locator('input').nth(0).fill('40'); await row.locator('input').nth(1).fill('10'); await row.locator('.lf-chk').click(); await page.waitForTimeout(400); }
