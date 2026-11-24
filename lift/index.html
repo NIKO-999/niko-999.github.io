@@ -7382,7 +7382,7 @@ function lfThemeBody() {
       thg.appendChild(tb);
     });
     var hg = $('#lfHues', c), sg = $('#lfShades', c);
-    for (var hq = 0; hq < 360; hq += 30) (function (hv) {
+    for (var hq = 0; hq < 360; hq += 15) (function (hv) {
       var b = el('<button type="button" class="lf-sw"></button>'); b.dataset.h = hv; b.style.background = 'hsl(' + hv + ' 82% ' + (dk ? 60 : 46) + '%)';
       b.setAttribute('aria-label', lfHueName(hv)); b.addEventListener('click', function () { buzz(8); lfAccentSet(hv, true); show(hv); lfRender(); }); hg.appendChild(b);
     })(hq);
@@ -7405,7 +7405,7 @@ function lfThemeBody() {
       if (nu && hu - 1000 < NN) nk.style.transform = 'rotate(' + ((hu - 1000 + .5) / NN * 360) + 'deg)';
       $('#lfWhCap', c).textContent = lfAccName(hu);
       $$('.lf-th', c).forEach(function (b) { b.setAttribute('aria-pressed', +b.dataset.h === hu ? 'true' : 'false'); });
-      $$('.lf-sw', c).forEach(function (b) { var v = +b.dataset.h; b.setAttribute('aria-pressed', (v >= 1000 ? v === hu : typeof hu === 'number' && hu < 360 && Math.abs(hu - v) < 15) ? 'true' : 'false'); });
+      $$('.lf-sw', c).forEach(function (b) { var v = +b.dataset.h; b.setAttribute('aria-pressed', (v >= 1000 ? v === hu : typeof hu === 'number' && hu < 360 && Math.abs(hu - v) < 7.5) ? 'true' : 'false'); });
       wh.setAttribute('aria-valuenow', Math.round(a)); wh.setAttribute('aria-valuetext', lfAccName(hu));
       rs.disabled = hu === null;
     }
@@ -12707,7 +12707,13 @@ var NEUTRALS = [
   { n: 'Rust', d: '#b5603a', l: '#7d3a1d', di: '#d4825a', li: '#7d3a1d' },
   { n: 'Wine', d: '#9a3b52', l: '#5a1a2b', di: '#cc6a80', li: '#5a1a2b' },
   { n: 'Mauve', d: '#b58f9f', l: '#80566a', di: '#c7a6b4', li: '#664456' },
-  { n: 'Plum', d: '#a07a9a', l: '#6b3f63', di: '#b996b3', li: '#55304f' }
+  { n: 'Plum', d: '#a07a9a', l: '#6b3f63', di: '#b996b3', li: '#55304f' },
+  { n: 'Denim', d: '#5b7fa6', l: '#2f4f78', di: '#7f9fc2', li: '#243f61' },
+  { n: 'Pine', d: '#3f7a6a', l: '#1d4d41', di: '#65a090', li: '#163d33' },
+  { n: 'Brick', d: '#b5524a', l: '#7a2a24', di: '#d17a72', li: '#7a2a24' },
+  { n: 'Honey', d: '#d9a441', l: '#9a6a12', di: '#e6bc6a', li: '#7a5410' },
+  { n: 'Lilac', d: '#a99bd0', l: '#6b5aa3', di: '#bcb0de', li: '#54458a' },
+  { n: 'Blush', d: '#d99aa6', l: '#a85a6a', di: '#e6b3bc', li: '#86424f' }
 ];
 var NRING = 19;
 /* THE THEMES THAT ARE EARNED: an accent that is a GRADIENT, deep and
