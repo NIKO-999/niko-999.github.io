@@ -3984,7 +3984,7 @@ function lfStart(rt) {
   var nToday = act ? 0 : woOn(ymd(today())).length;
   if (nToday >= 2) { lfToast('Two sessions today is the limit'); return; }
   if (nToday && !lfAgainOk) { lfToast('You trained today'); return; }
-  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfSsPend = null;
+  lfAgainOk = 0; lfCurExId = ''; lfOpenEx = ''; lfKeep = []; lfSsPend = null;
   act = { id: lfId(), s: Date.now(), n: rt ? rt.n : 'Workout', rt: rt ? rt.id : null, rest: 0, x: [] };
   var cut = LEG_CHECK && lfRc() >= 1 && !!rt, half = lfRc() >= 2;
   var swm = rt && S.sw && S.sw[rt.id] || {};
@@ -4240,7 +4240,7 @@ function lfTick() {
    it rather than on the first card; ticked off, the next one comes up to
    take its place, so the set you are about to do is never down by the
    rest timer at the foot */
-var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '';
+var lfCurGo = 0, lfOrd = null, lfCurExId = '', lfOpenEx = '', lfKeep = [];
 /* THE ORDER CARDS ARE DRAWN IN. Set when the workout opens: what is not
    finished first, in its order, so the exercise you are on leads, and
    what is done after it. It holds still while you work, so a card never
@@ -4401,7 +4401,17 @@ function lfNextOpen(e) {
   var o = lfOrd || act.x, und = function (q) { return q !== e && q.sets.some(function (z) { return !z.ok; }); }, i = o.indexOf(e);
   return o.slice(i + 1).filter(und)[0] || o.filter(und)[0] || null;
 }
-function lfOpenAt(e) { lfOpenEx = e.id; lfCurExId = e.id; lfCurGo = 1; lfPaintSession(); }
+/* STARTED means a set ticked or a figure typed in it, on a working set, a warm-up or a drop. An exercise you have started stays open when you open another; one you have not started folds, so the page stays short. */
+function lfStarted(e) {
+  var typed = function (q) { return (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null); };
+  return e.sets.some(function (q) { return q.ok || typed(q) || (q.ds || []).some(function (d) { return d.ok || typed(d); }); }) || (e.wu || []).some(function (q) { return q.ok || typed(q); });
+}
+function lfOpenAt(e) {
+  var cur = lfOpenId(), curE = act.x.filter(function (q) { return q.id === cur; })[0];
+  if (curE && lfSsGroup(curE).indexOf(e) < 0) lfSsGroup(curE).forEach(function (q) { if (lfStarted(q) && lfKeep.indexOf(q.id) < 0) lfKeep.push(q.id); });
+  lfKeep = lfKeep.filter(function (id) { return id !== e.id; });
+  lfOpenEx = e.id; lfCurExId = e.id; lfCurGo = 1; lfPaintSession();
+}
 function lfExRemove(e) {
   var go = function () { act.x.splice(act.x.indexOf(e), 1); lfSaveAct(); lfPaintSession(); };
   if (e.sets.some(function (s) { return s.ok; })) lfAsk('Remove ' + e.n + '?', 'The sets you logged for it in this workout go with it.', 'Remove', go); else go();
@@ -4470,7 +4480,9 @@ function lfPaintSession() {
   list.textContent = '';
   /* a pinned exercise lets go of the pin when it has nothing left to do */
   if (act.cur && !act.x.some(function (e) { return e.id === act.cur && e.sets.some(function (q) { return !q.ok; }); })) { act.cur = ''; lfSaveAct(); }
-  var openId = lfOpenId(), openE = act.x.filter(function (q) { return q.id === openId; })[0], openG = openE ? lfSsGroup(openE) : [];
+  var openId = lfOpenId(), openE = act.x.filter(function (q) { return q.id === openId; })[0], openG = openE ? lfSsGroup(openE).slice() : [];
+  lfKeep = lfKeep.filter(function (id) { return act.x.some(function (q) { return q.id === id && lfStarted(q) && q.sets.some(function (z) { return !z.ok; }); }); });
+  lfKeep.forEach(function (id) { var k = act.x.filter(function (q) { return q.id === id; })[0]; if (k) lfSsGroup(k).forEach(function (m) { if (openG.indexOf(m) < 0) openG.push(m); }); });
   ord.forEach(function (e) {
     var ei = act.x.indexOf(e);
     var prev = lastFor(e.id) || (lfCarry(e.id) || {}).sets || [];
@@ -4592,7 +4604,7 @@ function lfPaintSession() {
         if (ssn) { act.rest = 0; act.rang = 0; } else { act.rest = Date.now(); act.restEx = e.id; act.rang = 0; lfRestPush(); lfLockStart(); }
         var at = s.pr || s.rp ? $('.lf-sn', row).getBoundingClientRect() : null;
         lfPopAt = ei + ':' + si; lfSaveAct(); if (!at) buzz(14); var nxE = !ssn && e.sets.every(function (q) { return q.ok; }) ? lfNextOpen(e) : null;
-        lfOpenEx = nxE ? nxE.id : e.id; lfCurExId = ssn ? ssn.id : nxE ? nxE.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
+        lfKeep = lfKeep.filter(function (id) { return id !== e.id; }); lfOpenEx = nxE ? nxE.id : e.id; lfCurExId = ssn ? ssn.id : nxE ? nxE.id : e.id; lfCurGo = 1; lfPaintSession(); lfTick();
         if (at) lfCheer(s, at);
       });
       lfSwipe(row, function () { e.sets.splice(si, 1); }, 'Set removed');
