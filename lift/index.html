@@ -1932,6 +1932,129 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes fl-frw { 0%, 100% { transform: translateX(-3px); } 50% { transform: translateX(3px) scale(1.08); } }
 .lf-fl[data-fl="fsquat"] { transform-origin: 50% 100%; animation: fl-fsq 2.2s ease-in-out infinite; }
 @keyframes fl-fsq { 0%, 100% { transform: scaleY(1); } 45%, 60% { transform: scaleY(.72) scaleX(1.08); } }
+/* TWENTY MORE NICKNAME TITLES, each with a motion of its own. */
+.fr-ti .tt-n-showtime em { display: inline-block; background: linear-gradient(100deg, #f59e0b 30%, #fff 50%, #f59e0b 70%) 100% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: ttn-showtime 2.8s linear infinite; }
+@keyframes ttn-showtime { to { background-position: -60% 0; } }
+.fr-ti .tt-n-overdrive em { position: relative; display: inline-block; color: #38bdf8; font-style: italic; animation: ttn-overdrive 2.2s ease-in-out infinite; }
+.tt-n-overdrive em::before { content: ''; position: absolute; right: 100%; top: 50%; width: 16px; height: 6px; margin-right: 2px; transform: translateY(-50%); background: repeating-linear-gradient(0deg, #38bdf8 0 1px, transparent 1px 3px); opacity: .7; animation: ttn-od-l 2.2s ease-in-out infinite; }
+@keyframes ttn-overdrive { 0%, 100% { transform: skewX(-10deg) translateX(0); } 50% { transform: skewX(-18deg) translateX(3px); } }
+@keyframes ttn-od-l { 0%, 100% { opacity: .2; width: 6px; } 50% { opacity: .8; width: 18px; } }
+.fr-ti .tt-n-wreckball em { display: inline-block; color: #fb923c; transform-origin: 50% -8px; animation: ttn-wreck 2.6s ease-in-out infinite; }
+@keyframes ttn-wreck { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(9deg); } }
+.fr-ti .tt-n-clutch em { position: relative; display: inline-block; color: #fbbf24; animation: ttn-clutch 3s ease-in-out infinite; }
+.tt-n-clutch em::after { content: ''; position: absolute; inset: -3px -6px; border: 1.5px solid #fbbf24; border-radius: 8px; opacity: 0; animation: ttn-clutch-r 3s ease-out infinite; }
+@keyframes ttn-clutch { 0%, 80%, 100% { transform: scale(1); } 88% { transform: scale(1.18); } 94% { transform: scale(.97); } }
+@keyframes ttn-clutch-r { 0%, 84% { opacity: 0; transform: scale(.85); } 90% { opacity: .9; } 100% { opacity: 0; transform: scale(1.25); } }
+.fr-ti .tt-n-lightsout em { display: inline-block; color: #e2e8f0; animation: ttn-lights 3.4s steps(1) infinite; }
+@keyframes ttn-lights { 0%, 60%, 70%, 100% { opacity: 1; text-shadow: 0 0 8px rgba(226, 232, 240, .8); } 62% { opacity: .15; text-shadow: none; } 66% { opacity: .9; } 68% { opacity: .1; text-shadow: none; } 82% { opacity: .3; text-shadow: none; } }
+.fr-ti .tt-n-rainmaker em { position: relative; display: inline-block; color: #7dd3fc; }
+.tt-n-rainmaker em::after { content: ''; position: absolute; left: 0; right: 0; top: 100%; height: 7px; background: repeating-linear-gradient(90deg, transparent 0 4px, rgba(125, 211, 252, .85) 4px 5px, transparent 5px 9px); -webkit-mask: linear-gradient(#000, transparent); mask: linear-gradient(#000, transparent); animation: ttn-rain .8s linear infinite; }
+@keyframes ttn-rain { from { transform: translateY(-6px); } to { transform: translateY(3px); } }
+.fr-ti .tt-n-coldstart em { display: inline-block; color: #bae6fd; animation: ttn-cold 3.4s ease-in-out infinite; }
+@keyframes ttn-cold { 0%, 100% { filter: blur(2px); opacity: .55; color: #e0f2fe; text-shadow: 0 0 10px #bae6fd; } 30%, 80% { filter: blur(0); opacity: 1; color: #38bdf8; text-shadow: 0 0 6px rgba(56, 189, 248, .6); } }
+.fr-ti .tt-n-hotstreak em { display: inline-block; background: linear-gradient(0deg, #ef4444, #f97316, #fde047, #f97316, #ef4444) 0 0 / 100% 300%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 4px rgba(249, 115, 22, .7)); animation: ttn-hot 1.6s linear infinite; }
+@keyframes ttn-hot { to { background-position: 0 -300%; } }
+.fr-ti .tt-n-zenmaster em { display: inline-block; color: #a7f3d0; animation: ttn-zen 5s ease-in-out infinite; }
+@keyframes ttn-zen { 0%, 100% { letter-spacing: .01em; opacity: .65; } 50% { letter-spacing: .12em; opacity: 1; } }
+.fr-ti .tt-n-overlord em { position: relative; display: inline-block; color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, .5); }
+.tt-n-overlord em::before { content: ''; position: absolute; left: 50%; top: -8px; width: 12px; height: 8px; margin-left: -6px; background: #fbbf24; clip-path: polygon(0 100%, 0 25%, 25% 65%, 50% 0, 75% 65%, 100% 25%, 100% 100%); animation: ttn-crown 2.4s ease-in-out infinite; }
+@keyframes ttn-crown { 0%, 100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-2px) rotate(6deg); filter: brightness(1.4); } }
+.fr-ti .tt-n-daredevil em { display: inline-block; color: #fb7185; animation: ttn-dare 3s linear infinite; }
+@keyframes ttn-dare { 0%, 70%, 100% { transform: none; } 72% { transform: translate(-2px, 1px) rotate(-3deg); } 76% { transform: translate(2px, -1px) rotate(3deg); } 80% { transform: translate(-2px, -1px) rotate(-2deg); } 84% { transform: translate(1px, 1px) rotate(2deg); } 88% { transform: none; } }
+.fr-ti .tt-n-ghostride em { display: inline-block; color: #e2e8f0; animation: ttn-ghost 3s ease-in-out infinite; }
+@keyframes ttn-ghost { 0%, 100% { text-shadow: 0 0 0 transparent; opacity: .9; } 50% { text-shadow: -6px 0 0 rgba(203, 213, 225, .45), -12px 0 0 rgba(203, 213, 225, .2); opacity: .75; transform: translateX(3px); } }
+.fr-ti .tt-n-bigdog em { display: inline-block; color: #fcd34d; transform-origin: 50% 100%; animation: ttn-dog 1.5s ease-in-out infinite; }
+@keyframes ttn-dog { 0%, 100% { transform: translateY(0) scale(1.06, .92); } 40% { transform: translateY(-4px) scale(.97, 1.06); } 70% { transform: translateY(0) scale(1.06, .92); } }
+.fr-ti .tt-n-madsci em { position: relative; display: inline-block; color: #86efac; animation: ttn-sci 2.2s ease-in-out infinite; }
+.tt-n-madsci em::before, .tt-n-madsci em::after { content: ''; position: absolute; bottom: 60%; width: 4px; height: 4px; border: 1.5px solid #4ade80; border-radius: 50%; opacity: 0; animation: ttn-bub 2.2s ease-in infinite; }
+.tt-n-madsci em::before { left: 22%; } .tt-n-madsci em::after { left: 66%; animation-delay: 1.1s; }
+@keyframes ttn-sci { 0%, 100% { text-shadow: 0 0 3px rgba(74, 222, 128, .4); } 50% { text-shadow: 0 0 10px rgba(74, 222, 128, .9); } }
+@keyframes ttn-bub { 0% { transform: translateY(6px) scale(.5); opacity: 0; } 30% { opacity: .9; } 100% { transform: translateY(-10px) scale(1.2); opacity: 0; } }
+.fr-ti .tt-n-sharpshot em { position: relative; display: inline-block; color: #fca5a5; padding-left: 14px; }
+.tt-n-sharpshot em::before { content: ''; position: absolute; left: 0; top: 50%; width: 10px; height: 10px; margin-top: -6px; border: 1.5px solid #f87171; border-radius: 50%; box-shadow: inset 0 0 0 3px transparent, 0 0 0 0 transparent; animation: ttn-shot 2.8s ease-in-out infinite; }
+@keyframes ttn-shot { 0% { transform: scale(2.6); opacity: 0; } 25% { transform: scale(1); opacity: 1; } 60% { transform: scale(1); opacity: 1; background: radial-gradient(circle, #f87171 0 1.5px, transparent 2px); } 100% { transform: scale(1); opacity: 0; } }
+.fr-ti .tt-n-thunder em { display: inline-block; color: #fef08a; animation: ttn-thunder 3.6s steps(1) infinite; }
+@keyframes ttn-thunder { 0%, 86%, 100% { text-shadow: 0 0 4px rgba(254, 240, 138, .4); filter: none; } 88% { text-shadow: 0 0 14px #fff, 0 0 24px #fde047; filter: brightness(1.8); } 90% { text-shadow: none; filter: none; } 92% { text-shadow: 0 0 12px #fff; filter: brightness(1.5); } }
+.fr-ti .tt-n-lockedon em { position: relative; display: inline-block; color: #67e8f9; padding: 0 5px; animation: ttn-lock 2.6s ease-in-out infinite; }
+.tt-n-lockedon em::before, .tt-n-lockedon em::after { content: ''; position: absolute; top: 0; bottom: 0; width: 4px; border: 1.5px solid #67e8f9; animation: ttn-lock-b 2.6s ease-in-out infinite; }
+.tt-n-lockedon em::before { left: 0; border-right: 0; } .tt-n-lockedon em::after { right: 0; border-left: 0; }
+@keyframes ttn-lock { 0%, 100% { letter-spacing: .3em; opacity: .5; } 45%, 80% { letter-spacing: .01em; opacity: 1; } }
+@keyframes ttn-lock-b { 0%, 100% { opacity: 0; } 45%, 80% { opacity: 1; } }
+.fr-ti .tt-n-finalboss em { position: relative; display: inline-block; color: #f87171; animation: ttn-boss 2.4s steps(1) infinite; }
+.tt-n-finalboss em::after { content: ''; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: #ef4444; animation: ttn-boss-b 2.4s steps(1) infinite; }
+@keyframes ttn-boss { 0%, 70%, 100% { text-shadow: 0 0 6px rgba(239, 68, 68, .6); transform: none; } 72% { text-shadow: 3px 0 #22d3ee, -3px 0 #ef4444; transform: scaleX(1.05); } 76% { text-shadow: -3px 0 #22d3ee, 3px 0 #ef4444; transform: scaleX(.97); } 80% { text-shadow: 0 0 6px rgba(239, 68, 68, .6); transform: none; } }
+@keyframes ttn-boss-b { 0%, 70%, 82%, 100% { opacity: .35; } 72%, 80% { opacity: 1; } }
+.fr-ti .tt-n-goat em { position: relative; display: inline-block; padding-right: 12px; background: linear-gradient(90deg, #f43f5e, #fbbf24, #34d399, #38bdf8, #a78bfa, #f43f5e) 0 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: ttn-goat 4s linear infinite; }
+.tt-n-goat em::after { content: ''; position: absolute; right: 0; top: 0; width: 8px; height: 8px; background: #fde68a; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); -webkit-text-fill-color: initial; animation: ttn-goat-s 1.8s ease-in-out infinite; }
+@keyframes ttn-goat { to { background-position: -300% 0; } }
+@keyframes ttn-goat-s { 0%, 100% { transform: scale(.4) rotate(0); opacity: .4; } 50% { transform: scale(1) rotate(90deg); opacity: 1; } }
+.fr-ti .tt-n-wildcard em { display: inline-block; color: #f472b6; animation: ttn-wild 4s linear infinite; }
+@keyframes ttn-wild { 0% { filter: hue-rotate(0); transform: rotate(-2deg); } 25% { transform: rotate(2deg) skewX(4deg); } 50% { transform: rotate(-2deg); } 75% { transform: rotate(2deg) skewX(-4deg); } 100% { filter: hue-rotate(360deg); transform: rotate(-2deg); } }
+
+/* FLAIRS THAT PLAY WITH THE NAME. The name sits in .lf-nw with its flair and each effect is drawn on that wrapper, so it fits the name whatever the name is. The wrapper wears the name's own colour flat: a gradient name cannot be animated under a transform. */
+b:has(> .lf-nw) { padding: 5px 3px; margin: -5px -3px; }
+.lf-nw { position: relative; display: inline-block; max-width: 100%; vertical-align: top; white-space: pre; -webkit-text-fill-color: var(--ngc, currentColor); }
+.lf-nl { display: inline-block; white-space: pre; }
+.lf-nw[data-nf="nfink"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; border-radius: 2px; background: #38bdf8; transform-origin: 0 50%; animation: nf-ink 3s ease-in-out infinite; }
+@keyframes nf-ink { 0% { transform: scaleX(0); transform-origin: 0 50%; } 45%, 65% { transform: scaleX(1); transform-origin: 0 50%; } 66% { transform: scaleX(1); transform-origin: 100% 50%; } 100% { transform: scaleX(0); transform-origin: 100% 50%; } }
+.lf-nw[data-nf="nfspot"] { background: linear-gradient(100deg, var(--ngc, #fff) 34%, #fff7c2 50%, var(--ngc, #fff) 66%) 150% 0 / 260% 100% no-repeat; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: nf-spot 3.2s linear infinite; }
+@keyframes nf-spot { to { background-position: -60% 0; } }
+.lf-nw[data-nf="nfwave"] .lf-nl { animation: nf-wave 1.5s ease-in-out infinite; animation-delay: calc(var(--i) * .09s); }
+@keyframes nf-wave { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-4px); } }
+.lf-nw[data-nf="nfdomino"] .lf-nl { transform-origin: 0 100%; animation: nf-dom 3.4s ease-in-out infinite; animation-delay: calc(var(--i) * .1s); }
+@keyframes nf-dom { 0%, 55%, 100% { transform: rotate(0); } 68% { transform: rotate(20deg); } 80% { transform: rotate(0); } }
+.lf-nw[data-nf="nforbit"]::after { content: ''; position: absolute; left: 0; top: -3px; width: 5px; height: 5px; margin: -2px 0 0 -2px; border-radius: 50%; background: #c4b5fd; box-shadow: 0 0 6px #a78bfa; animation: nf-orbit 3.6s linear infinite; }
+@keyframes nf-orbit { 0% { left: 0; top: 0; } 25% { left: 100%; top: 0; } 50% { left: 100%; top: 100%; } 75% { left: 0; top: 100%; } 100% { left: 0; top: 0; } }
+.lf-nw[data-nf="nfcaret"] { padding-right: 8px; }
+.lf-nw[data-nf="nfcaret"]::after { content: ''; position: absolute; right: 1px; top: 12%; bottom: 12%; width: 2px; background: #e5e7eb; animation: nf-caret 1s steps(1) infinite; }
+@keyframes nf-caret { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+.lf-nw[data-nf="nfstamp"] { transform-origin: 0 60%; animation: nf-stamp 3.4s ease-in-out infinite; }
+@keyframes nf-stamp { 0%, 70%, 100% { transform: scale(1); text-shadow: none; } 78% { transform: scale(1.14); text-shadow: 0 0 10px rgba(248, 113, 113, .8); } 86% { transform: scale(.97); } 92% { transform: scale(1); } }
+.lf-nw[data-nf="nfglitch"] { animation: nf-glt 2.8s steps(1) infinite; }
+@keyframes nf-glt { 0%, 80%, 100% { transform: none; text-shadow: none; } 82% { transform: translateX(-2px); text-shadow: 2px 0 #f43f5e, -2px 0 #22d3ee; } 85% { transform: translateX(2px) skewX(-6deg); text-shadow: -2px 0 #f43f5e, 2px 0 #22d3ee; } 88% { transform: none; text-shadow: none; } }
+.lf-nw[data-nf="nfember"]::before, .lf-nw[data-nf="nfember"]::after { content: ''; position: absolute; bottom: 20%; width: 3px; height: 3px; border-radius: 50%; background: #fb923c; box-shadow: 0 0 5px #f97316; opacity: 0; animation: nf-ember 2.2s ease-out infinite; }
+.lf-nw[data-nf="nfember"]::before { left: 18%; } .lf-nw[data-nf="nfember"]::after { left: 62%; animation-delay: 1.1s; }
+.lf-nw[data-nf="nfember"] { animation: nf-emg 2.2s ease-in-out infinite; }
+@keyframes nf-ember { 0% { transform: translateY(2px) scale(1); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-14px) scale(.3); opacity: 0; } }
+@keyframes nf-emg { 0%, 100% { text-shadow: 0 0 2px rgba(249, 115, 22, .3); } 50% { text-shadow: 0 0 9px rgba(249, 115, 22, .8); } }
+.lf-nw[data-nf="nffrost"] { animation: nf-fg 3s ease-in-out infinite; }
+.lf-nw[data-nf="nffrost"]::before, .lf-nw[data-nf="nffrost"]::after { content: ''; position: absolute; width: 5px; height: 5px; background: #e0f2fe; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0; animation: nf-fs 3s ease-in-out infinite; }
+.lf-nw[data-nf="nffrost"]::before { left: 20%; top: 10%; } .lf-nw[data-nf="nffrost"]::after { left: 70%; top: 55%; animation-delay: 1.5s; }
+@keyframes nf-fg { 0%, 100% { text-shadow: 0 0 2px rgba(186, 230, 253, .3); } 50% { text-shadow: 0 0 10px rgba(125, 211, 252, .85); } }
+@keyframes nf-fs { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1.2) rotate(60deg); } }
+.lf-nw[data-nf="nftilt"] { transform-origin: 50% 100%; animation: nf-tilt 2.8s ease-in-out infinite; }
+@keyframes nf-tilt { 0%, 100% { transform: rotate(-2.5deg); } 50% { transform: rotate(2.5deg); } }
+.lf-nw[data-nf="nfecho"] { animation: nf-echo 2.6s ease-in-out infinite; }
+@keyframes nf-echo { 0%, 100% { text-shadow: 0 0 0 transparent; } 50% { text-shadow: -3px 0 0 rgba(168, 85, 247, .55), 3px 0 0 rgba(56, 189, 248, .55), 0 0 12px rgba(192, 132, 252, .5); } }
+.lf-nw[data-nf="nfmark"] { isolation: isolate; }
+.lf-nw[data-nf="nfmark"]::before { content: ''; position: absolute; z-index: -1; left: -3px; right: -3px; bottom: 8%; height: 46%; border-radius: 3px; background: rgba(250, 204, 21, .5); transform-origin: 0 50%; animation: nf-mark 3.4s ease-in-out infinite; }
+@keyframes nf-mark { 0% { transform: scaleX(0); opacity: 1; } 35%, 70% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+.lf-nw[data-nf="nfscan"]::after { content: ''; position: absolute; top: -2px; bottom: -2px; width: 2px; left: 0; background: #22d3ee; box-shadow: 0 0 8px #22d3ee; animation: nf-scan 2.4s ease-in-out infinite alternate; }
+@keyframes nf-scan { from { left: 0; } to { left: 100%; } }
+.lf-nw[data-nf="nfconf"]::before { content: ''; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px; border-radius: 50%; background: #f472b6; box-shadow: 14px -8px 0 #facc15, -16px -6px 0 #38bdf8, 26px 4px 0 #34d399, -28px 6px 0 #fb923c, 4px -14px 0 #a78bfa, -6px 13px 0 #f43f5e; opacity: 0; animation: nf-conf 3.2s ease-out infinite; }
+@keyframes nf-conf { 0%, 60% { opacity: 0; transform: scale(.2); } 66% { opacity: 1; } 90% { opacity: 0; transform: scale(1.7); } 100% { opacity: 0; } }
+/* the flair icons beside them, each its own move */
+.lf-fl[data-fl="nfink"] { animation: nfi-ink 1.6s ease-in-out infinite; } @keyframes nfi-ink { 0%, 100% { transform: rotate(-10deg) translateX(-1px); } 50% { transform: rotate(8deg) translateX(1px); } }
+.lf-fl[data-fl="nfspot"] { animation: nfi-spot 9s linear infinite; } @keyframes nfi-spot { to { transform: rotate(360deg); } }
+.lf-fl[data-fl="nfwave"] { animation: nfi-wave 1.4s ease-in-out infinite; } @keyframes nfi-wave { 0%, 100% { transform: translateX(-2px); } 50% { transform: translateX(2px); } }
+.lf-fl[data-fl="nfdomino"] { transform-origin: 0 100%; animation: nfi-dom 3.4s ease-in-out infinite; } @keyframes nfi-dom { 0%, 55%, 100% { transform: rotate(0); } 70% { transform: rotate(24deg); } }
+.lf-fl[data-fl="nforbit"] { animation: nfi-orb 5s linear infinite; } @keyframes nfi-orb { to { transform: rotate(360deg); } }
+.lf-fl[data-fl="nfcaret"] { animation: nf-caret 1s steps(1) infinite; }
+.lf-fl[data-fl="nfstamp"] { animation: nfi-st 3.4s ease-in-out infinite; } @keyframes nfi-st { 0%, 70%, 100% { transform: translateY(0); } 78% { transform: translateY(2px) scale(1.15); } }
+.lf-fl[data-fl="nfglitch"] { animation: nfi-gl 2.8s steps(1) infinite; } @keyframes nfi-gl { 0%, 80%, 100% { transform: none; } 82% { transform: translate(-2px, 1px); } 85% { transform: translate(2px, -1px); } }
+.lf-fl[data-fl="nfember"] { animation: nfi-em 1.2s ease-in-out infinite; } @keyframes nfi-em { 0%, 100% { transform: scale(1) rotate(-3deg); } 50% { transform: scale(1.18) rotate(3deg); } }
+.lf-fl[data-fl="nffrost"] { animation: nfi-fr 10s linear infinite; } @keyframes nfi-fr { to { transform: rotate(360deg); } }
+.lf-fl[data-fl="nftilt"] { transform-origin: 50% 100%; animation: nfi-ti 2.8s ease-in-out infinite; } @keyframes nfi-ti { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+.lf-fl[data-fl="nfecho"] { animation: nfi-ec 2.6s ease-in-out infinite; } @keyframes nfi-ec { 0%, 100% { transform: scale(.9); opacity: .7; } 50% { transform: scale(1.2); opacity: 1; } }
+.lf-fl[data-fl="nfmark"] { animation: nfi-mk 1.8s ease-in-out infinite; } @keyframes nfi-mk { 0%, 100% { transform: translateX(-2px) rotate(-6deg); } 50% { transform: translateX(2px) rotate(6deg); } }
+.lf-fl[data-fl="nfscan"] { animation: nfi-sc 2.4s ease-in-out infinite alternate; } @keyframes nfi-sc { from { transform: scale(.85); } to { transform: scale(1.15); } }
+.lf-fl[data-fl="nfconf"] { animation: nfi-cf 3.2s ease-in-out infinite; } @keyframes nfi-cf { 0%, 60%, 100% { transform: scale(1) rotate(0); } 70% { transform: scale(1.3) rotate(-14deg); } 80% { transform: scale(1) rotate(8deg); } }
+.lf-fl[data-fl="xcomet"] { animation: nfi-co 2.2s ease-in-out infinite; } @keyframes nfi-co { 0% { transform: translate(-4px, 4px); opacity: .3; } 50% { opacity: 1; } 100% { transform: translate(4px, -4px); opacity: .3; } }
+.lf-fl[data-fl="xbeat"] path { stroke-dasharray: 34; animation: nfi-be 1.8s ease-in-out infinite; } .lf-fl[data-fl="xbeat"] { animation: none; } @keyframes nfi-be { 0% { stroke-dashoffset: 34; } 60%, 100% { stroke-dashoffset: 0; } }
+.lf-fl[data-fl="xdice"] { animation: nfi-di 3s ease-in-out infinite; } @keyframes nfi-di { 0%, 55%, 100% { transform: rotate(0) translateY(0); } 65% { transform: rotate(180deg) translateY(-3px); } 75% { transform: rotate(360deg) translateY(0); } }
+.lf-fl[data-fl="xmagnet"] { animation: nfi-mg 1.2s ease-in-out infinite; } @keyframes nfi-mg { 0%, 100% { transform: translateX(-1.5px) rotate(-4deg); } 50% { transform: translateX(1.5px) rotate(4deg); } }
+.lf-fl[data-fl="xradar"] { animation: nfi-ra 2.4s linear infinite; } @keyframes nfi-ra { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { [class*="tt-n-"] em, [class*="tt-n-"] em::before, [class*="tt-n-"] em::after, .lf-nw, .lf-nw::before, .lf-nw::after, .lf-nl, .lf-fl[data-fl^="nf"], .lf-fl[data-fl^="x"], .lf-fl[data-fl^="x"] path { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .tt-s1 em, .tt-s2 em, .tt-s3 em, .tt-s4 em, .lf-fl[data-fl^="f"] { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .lf-fl, .lf-fl[data-fl] { animation: none; } }
 .fr-ban-av[class*="is-fm-"] { position: relative; }
@@ -8295,6 +8418,26 @@ var RK = {
     ['hitter', 'Heavy Hitter', '15 workouts', function (c) { return c.wo >= 15; }], ['blaze', 'On Fire', '4 weeks on goal', function (c) { return c.run >= 4; }],
     ['lockedin', 'Locked In', '40 workouts', function (c) { return c.wo >= 40; }], ['nodaysoff', 'No Days Off', '8 weeks on goal', function (c) { return c.run >= 8; }],
     ['ironheart', 'Iron Heart', '120 workouts', function (c) { return c.wo >= 120; }],
+    ['showtime', 'Showtime', 'Earn Week goal hit', function (c) { return !!c.has.goal; }],
+    ['overdrive', 'Overdrive', 'Earn 15,000 kg Day', function (c) { return !!c.has.ton15; }],
+    ['wreckball', 'Wrecking Ball', 'Earn Falling Weight', function (c) { return !!c.has.ds2; }],
+    ['clutch', 'Clutch', 'Earn 50 PRs', function (c) { return !!c.has.pr50; }],
+    ['lightsout', 'Lights Out', '25 badges', function (c) { return c.bd >= 25; }],
+    ['rainmaker', 'Rainmaker', 'Earn Rep Tsunami', function (c) { return !!c.has.rep2k; }],
+    ['coldstart', 'Cold Start', 'Earn Primed', function (c) { return !!c.has.wu2; }],
+    ['hotstreak', 'Hot Streak', '8 weeks on goal', function (c) { return c.run >= 8; }],
+    ['zenmaster', 'Zen Master', 'Earn 26-week streak', function (c) { return !!c.has.st26; }],
+    ['overlord', 'Overlord', 'Earn Quarter Thousand', function (c) { return !!c.has.wo250; }],
+    ['daredevil', 'Daredevil', 'Earn Double Up', function (c) { return !!c.has.ss2; }],
+    ['ghostride', 'Ghost Rider', 'Earn cardio50', function (c) { return !!c.has.cardio25; }],
+    ['bigdog', 'Big Dog', 'Earn Chest Hero', function (c) { return !!c.has.chest100; }],
+    ['madsci', 'Mad Scientist', 'Earn Signature Lift', function (c) { return !!c.has.sig50; }],
+    ['sharpshot', 'Sharpshooter', 'Earn 12 weeks on target', function (c) { return !!c.has.tgt12; }],
+    ['thunder', 'Thunderstruck', 'Earn arm100', function (c) { return !!c.has.arm50; }],
+    ['lockedon', 'Locked On', 'Earn Cardio Week', function (c) { return !!c.has.cdwk; }],
+    ['finalboss', 'Final Boss', 'Earn a myth badge', function (c) { return !!c.myth; }],
+    ['goat', 'The G.O.A.T.', '100 badges', function (c) { return c.bd >= 100; }],
+    ['wildcard', 'Wild Card', 'Earn Encyclopedia', function (c) { return !!c.has.ex80; }],
     ['slayer', 'Giant Slayer', 'Beat the creator', function (c) { return c.slay; }],
     ['creator', 'Creator', 'One of one', function (c) { return c.own; }], ['eye', 'The Eye', 'One of one', function (c) { return c.own; }]],
   fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
@@ -8345,7 +8488,27 @@ var RK = {
     ['fpress', 'Overhead', 'The iconic press', function (c) { return !!c.has.oh4; }, 'M12 4v11M6 6h12M4 5v2M20 5v2M12 15l-3 6M12 15l3 6', '#3b82f6', 1],
     ['fdead', 'Deadlift', 'The iconic deadlift', function (c) { return !!c.has.dl3; }, 'M3 19h18M6 13v6M18 13v6M4 11v8M20 11v8M6 16h12', '#ef3b2d', 1],
     ['frow', 'Row', 'Barbell row, Advanced', function (c) { return !!c.has.rw3; }, 'M5 12h14M3 10v4M21 10v4M8 6l4 4 4-4', '#22b8cf', 1],
-    ['fsquat', 'Squat', 'The iconic squat', function (c) { return !!c.has.sq3; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#a855f7', 1]],
+    ['fsquat', 'Squat', 'The iconic squat', function (c) { return !!c.has.sq3; }, 'M12 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM4 10h16M12 8v6l-4 6M12 14l4 6', '#a855f7', 1],
+    ['nfink', 'Ink Line', 'Earn Back Hero', function (c) { return !!c.has.bk100; }, 'M4 20l4-1 11-11-3-3L5 16zM14 6l3 3', '#38bdf8', 1],
+    ['nfspot', 'Spotlight', 'Earn Shoulder Hero', function (c) { return !!c.has.sh100; }, 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM12 2v3M12 19v3M2 12h3M19 12h3', '#fde68a', 1],
+    ['nfwave', 'Wavelet', 'Earn Leg Immortal', function (c) { return !!c.has.leg200; }, 'M3 12c3-6 6-6 9 0s6 6 9 0', '#22d3ee', 1],
+    ['nfdomino', 'Domino', 'Earn Six-Pack Club', function (c) { return !!c.has.abs50; }, 'M5 5h5v14H5zM14 8l4-1 3 12-4 1z', '#f472b6', 1],
+    ['nforbit', 'Orbit', 'Earn post100', function (c) { return !!c.has.post50; }, 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM3 12c0-4 4-6 9-6s9 2 9 6-4 6-9 6-9-2-9-6', '#a78bfa', 1],
+    ['nfcaret', 'Caret', 'Earn Uphill', function (c) { return !!c.has.incl10; }, 'M9 4h6M9 20h6M12 4v16', '#e5e7eb', 1],
+    ['nfstamp', 'Stamp', 'Earn Quad target × 8', function (c) { return !!c.has.quad; }, 'M8 3h8v6l3 3v3H5v-3l3-3zM5 20h14', '#f87171', 1],
+    ['nfglitch', 'Glitch Trail', 'Earn 4 weeks on target', function (c) { return !!c.has.tgt4; }, 'M4 8h10M10 16h10M4 12h4M16 12h4', '#34d399', 1],
+    ['nfember', 'Embers', '10 weeks on goal', function (c) { return c.run >= 10; }, 'M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 1 1 2 1 3-3z', '#fb923c', 1],
+    ['nffrost', 'Frostbite', '40 badges', function (c) { return c.bd >= 40; }, 'M12 2v20M5 6l14 12M5 18L19 6', '#bae6fd', 1],
+    ['nftilt', 'Seesaw', '40 workouts', function (c) { return c.wo >= 40; }, 'M4 14l16-4M12 12v8M8 20h8', '#fbbf24', 1],
+    ['nfecho', 'Echo', 'Earn allmus2', function (c) { return !!c.has.allmus; }, 'M12 8a4 4 0 1 0 0 8M12 4a8 8 0 1 0 0 16M12 11a1 1 0 1 0 0 2', '#c084fc', 1],
+    ['nfmark', 'Highlighter', 'Earn st12', function (c) { return !!c.has.st4; }, 'M4 20h6M14 4l6 6-8 8-6-1-1-6z', '#facc15', 1],
+    ['nfscan', 'Scanner', '60 badges', function (c) { return c.bd >= 60; }, 'M4 7V4h3M20 7V4h-3M4 17v3h3M20 17v3h-3M3 12h18', '#22d3ee', 1],
+    ['nfconf', 'Confetti', 'Earn 100 workouts', function (c) { return !!c.has.wo100; }, 'M4 20l4-12 8 8zM14 5v2M19 9h2M17 13l2 1', '#f472b6', 1],
+    ['xcomet', 'Comet', 'Earn Century of PRs', function (c) { return !!c.has.pr100; }, 'M20 4L8 16M8 16l-3 3M20 4l-6 1M20 4l-1 6', '#7dd3fc', 1],
+    ['xbeat', 'Heartbeat', 'Earn explore', function (c) { return !!c.has.ex15; }, 'M2 12h5l2-6 4 12 2-6h7', '#fb7185', 1],
+    ['xdice', 'Dice', 'Earn Every target', function (c) { return !!c.has.tgtall; }, 'M5 5h14v14H5zM9 9h.01M15 9h.01M12 12h.01M9 15h.01M15 15h.01', '#e5e7eb', 1],
+    ['xmagnet', 'Magnet', 'Earn 50 workouts', function (c) { return !!c.has.wo50; }, 'M5 3v8a7 7 0 0 0 14 0V3h-4v8a3 3 0 0 1-6 0V3z', '#f87171', 1],
+    ['xradar', 'Radar', '20 weeks on goal', function (c) { return c.run >= 20; }, 'M12 12L19 7M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5', '#4ade80', 1]],
   fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
     ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
     ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
@@ -8358,7 +8521,8 @@ var RK = {
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'twice', 'mythic']],
-  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['gs', 'Against the creator', '#e11d48', ['slayer']],
+  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['nk', 'Nicknames', '#f43f5e', ['ruthless', 'gymrat', 'apex', 'savage', 'beastmode', 'machine', 'predator', 'ironwill', 'unstop', 'juggernaut', 'pumpchaser', 'repreaper', 'barbender', 'stalker', 'crusher', 'heavymetal', 'gravity', 'dragon', 'irongiant', 'mountain', 'showtime', 'overdrive', 'wreckball', 'clutch', 'lightsout', 'rainmaker', 'coldstart', 'hotstreak', 'zenmaster', 'overlord', 'daredevil', 'ghostride', 'bigdog', 'madsci', 'sharpshot', 'thunder', 'lockedon', 'finalboss', 'goat', 'wildcard']], ['tch', 'Animated finishes', '#38bdf8', ['static', 'glitch', 'phantom', 'venom', 'ripple', 'hologram', 'plasma', 'chrome', 'tempest', 'obsidian', 'supernova', 'gilded']], ['lfx', 'Strength', '#22c55e', ['benchbud', 'twoplates', 'benchboss', 'benchking', 'incstart', 'incpro', 'incbeast', 'incking', 'pressrook', 'ohpro', 'boulder', 'skypush', 'pullstart', 'floormove', 'fourplate', 'deadlord', 'rowrookie', 'backbuild', 'rowmaster', 'cobraback', 'sqrookie', 'deepdiver', 'threefif', 'sqboss', 'quadkill']],
+  ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
 function lfTitleEl(id) {
@@ -8427,6 +8591,26 @@ function lfTitleEl(id) {
     obsidian: ['tt-ob', '<em>Dark Matter</em>'],
     supernova: ['tt-sv', '<em>Big Bang</em>'],
     gilded: ['tt-gd', '<em>Gold Standard</em>'],
+    showtime: ['tt-n-showtime', '<em>Showtime</em>'],
+    overdrive: ['tt-n-overdrive', '<em>Overdrive</em>'],
+    wreckball: ['tt-n-wreckball', '<em>Wrecking Ball</em>'],
+    clutch: ['tt-n-clutch', '<em>Clutch</em>'],
+    lightsout: ['tt-n-lightsout', '<em>Lights Out</em>'],
+    rainmaker: ['tt-n-rainmaker', '<em>Rainmaker</em>'],
+    coldstart: ['tt-n-coldstart', '<em>Cold Start</em>'],
+    hotstreak: ['tt-n-hotstreak', '<em>Hot Streak</em>'],
+    zenmaster: ['tt-n-zenmaster', '<em>Zen Master</em>'],
+    overlord: ['tt-n-overlord', '<em>Overlord</em>'],
+    daredevil: ['tt-n-daredevil', '<em>Daredevil</em>'],
+    ghostride: ['tt-n-ghostride', '<em>Ghost Rider</em>'],
+    bigdog: ['tt-n-bigdog', '<em>Big Dog</em>'],
+    madsci: ['tt-n-madsci', '<em>Mad Scientist</em>'],
+    sharpshot: ['tt-n-sharpshot', '<em>Sharpshooter</em>'],
+    thunder: ['tt-n-thunder', '<em>Thunderstruck</em>'],
+    lockedon: ['tt-n-lockedon', '<em>Locked On</em>'],
+    finalboss: ['tt-n-finalboss', '<em>Final Boss</em>'],
+    goat: ['tt-n-goat', '<em>The G.O.A.T.</em>'],
+    wildcard: ['tt-n-wildcard', '<em>Wild Card</em>'],
     ruthless: ['tt-ru', '<em>Ruthless</em>'],
     gymrat: ['tt-gy', '<svg viewBox="0 0 24 12" aria-hidden="true"><path d="M5 2.500v7M8 1v10M16 1v10M19 2.500v7M8 6h8"/></svg><em>Gym Rat</em>'],
     apex: ['tt-ax', '<em>Apex</em>'],
@@ -13066,10 +13250,19 @@ function lfApplyAccent() {
 /* the page's own accent is the root's; a friend's sheet is a node under it, and
    a custom property inherits, so a sheet that does not SAY its gradient
    would wear the page's. Every sheet writes both, flat when it is flat */
+/* THESE FLAIRS PLAY WITH THE NAME ITSELF: the name and its flair go inside one wrapper that the effect is drawn on (an underline that draws, a light across it, letters that wave, a dot that orbits it). Wave and Domino need each letter on its own. */
+var LF_NF = { nfink: 1, nfspot: 1, nfwave: 1, nfdomino: 1, nforbit: 1, nfcaret: 1, nfstamp: 1, nfglitch: 1, nfember: 1, nffrost: 1, nftilt: 1, nfecho: 1, nfmark: 1, nfscan: 1, nfconf: 1 };
+var LF_NSPLIT = { nfwave: 1, nfdomino: 1 };
 function lfNameOn(node, st) {
   lfNameCol(node, st);
+  if ($('.lf-nw', node)) node.textContent = node.textContent;
   var old = $('.lf-fl', node); if (old) old.remove();
-  var fe = st && st.fl && lfFlairEl(st.fl); if (fe) node.appendChild(fe);
+  var fe = st && st.fl && lfFlairEl(st.fl); if (!fe) return;
+  if (!LF_NF[st.fl]) { node.appendChild(fe); return; }
+  var txt = node.textContent, w = el('<span class="lf-nw"></span>'); w.dataset.nf = st.fl; node.textContent = '';
+  if (LF_NSPLIT[st.fl]) txt.split('').forEach(function (ch, i) { var s = document.createElement('span'); s.className = 'lf-nl'; s.style.setProperty('--i', i); s.textContent = ch; w.appendChild(s); });
+  else w.appendChild(document.createTextNode(txt));
+  w.appendChild(fe); node.appendChild(w);
 }
 function lfNameCol(node, st) {
   var th = lfTheme(frHue(st));
