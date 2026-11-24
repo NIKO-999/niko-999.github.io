@@ -266,6 +266,54 @@ svg { display: block; }
 .lf-sf-c { display: flex; gap: 12px; }
 .lf-sf-c > svg { flex: none; margin-top: 2px; }
 .lf-sf-c b { display: block; font-size: 13px; margin-bottom: 4px; } .lf-sf-c span { font-size: 14px; color: var(--dim); }
+/* TRAINING PLANS: a deck of posters swiped sideways, and a plan page under it */
+.pl-sheet .lf-sh-bd { overflow-x: hidden; }
+.pl-w { display: flex; flex-direction: column; }
+.pl-deck { display: flex; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; margin: 0 -20px; padding: 4px 28px 8px; scrollbar-width: none; overscroll-behavior-x: contain; }
+.pl-deck::-webkit-scrollbar { display: none; }
+.pl-card { position: relative; display: flex; flex-direction: column; flex: 0 0 100%; height: min(calc(100dvh - 250px), 640px); border-radius: 26px; overflow: hidden; scroll-snap-align: center; scroll-snap-stop: always; background: #111; box-shadow: inset 0 0 0 1px var(--edge); }
+.pl-art { position: relative; flex: 1 1 auto; min-height: 150px; } .pl-art::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 56px; background: linear-gradient(180deg, transparent, #0a0a0c); } .pl-art svg { display: block; width: 100%; height: 100%; }
+.pl-fit { position: absolute; top: 14px; left: 14px; padding: 7px 12px; border-radius: 99px; background: rgba(10, 10, 12, .72); color: #fff; font-size: 12px; font-weight: 800; }
+.pl-fit b { color: var(--log); margin-left: 4px; }
+.pl-tx { position: relative; flex: none; padding: 0 18px 16px; background: #0a0a0c; color: #fff; }
+.pl-tx h3 { font-size: 19px; line-height: 1.15; letter-spacing: -.01em; }
+.pl-tx p { margin: 6px 0 10px; font-size: 13px; line-height: 1.4; font-weight: 500; color: rgba(255, 255, 255, .78); }
+.pl-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pl-chips i { font-style: normal; font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 99px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .35); }
+.pl-go { display: block; width: 100%; margin-top: 12px; padding: 12px; border-radius: 99px; background: #f5f5f7; color: #000; font: inherit; font-size: 14px; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+.pl-ct { text-align: center; font-size: 12px; font-weight: 600; color: var(--dim); padding-top: 8px; }
+.pl-hd { display: flex; align-items: center; min-height: 44px; }
+.pl-back { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--ink) 9%, transparent); color: var(--ink); position: relative; }
+.pl-back::before { content: ''; position: absolute; inset: -3px; }
+.pl-back svg { width: 18px; height: 18px; transform: rotate(180deg); }
+.pl-pg { padding-bottom: 8px; }
+.pl-hero { height: 216px; border-radius: 22px; overflow: hidden; } .pl-hero svg { display: block; width: 100%; height: 100%; }
+.pl-h { margin: 16px 0 0; font-size: 26px; line-height: 1.1; letter-spacing: -.02em; }
+.pl-meta { display: flex; flex-wrap: wrap; gap: 4px 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--dim); }
+.pl-meta em { font-style: normal; opacity: .5; }
+.pl-ds { margin: 14px 0 0; font-size: 14px; line-height: 1.5; font-weight: 500; color: color-mix(in srgb, var(--ink) 72%, transparent); }
+.pl-tip { margin-top: 22px; } .pl-tip h4 { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--today-ink); }
+.pl-tip h4 svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.pl-tip p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; font-weight: 500; color: var(--dim); }
+.pl-fx { margin-top: 24px; } .pl-fx .lf-flab { margin: 0 0 4px; }
+.pl-r { display: grid; grid-template-columns: 88px 1fr 64px; gap: 10px; align-items: center; padding: 9px 0; font-size: 13px; border-top: 1px solid var(--line); }
+.pl-r:first-child { border-top: 0; }
+.pl-bar { position: relative; display: block; height: 5px; border-radius: 9px; background: color-mix(in srgb, var(--ink) 12%, transparent); }
+.pl-bar b { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 9px; background: var(--log); }
+.pl-bar u { position: absolute; top: -4px; bottom: -4px; width: 2px; margin-left: -1px; border-radius: 2px; background: var(--ink); }
+.pl-r em { font-style: normal; text-align: right; color: var(--dim); font-size: 12px; } .pl-r em b { color: var(--ink); }
+.pl-r.is-low .pl-bar b { background: #e0a060; } .pl-r.is-low em b { color: #e0a060; }
+.pl-nt { margin: 8px 0 0; font-size: 12px; line-height: 1.45; color: var(--dim); font-weight: 500; }
+.pl-wk { margin-top: 26px; } .pl-wk .lf-flab { margin: 0 0 4px; }
+.pl-day { border-top: 1px solid var(--line); }
+.pl-dh { display: flex; align-items: center; gap: 14px; width: 100%; min-height: 60px; padding: 8px 0; background: none; border: 0; color: inherit; font: inherit; text-align: left; }
+.pl-dw { width: 38px; font-size: 11px; font-weight: 800; letter-spacing: .06em; color: var(--today-ink); }
+.pl-dn { flex: 1; } .pl-dn b { display: block; font-size: 15px; } .pl-dn i { display: block; font-style: normal; font-size: 12px; font-weight: 500; color: var(--dim); margin-top: 2px; }
+.pl-dh svg { width: 16px; height: 16px; flex: none; color: var(--dim); transform: rotate(90deg); transition: transform .2s var(--ease); }
+.pl-dh[aria-expanded="true"] svg { transform: rotate(-90deg); }
+.pl-ex[hidden] { display: none; } .pl-ex { padding: 0 0 8px 52px; }
+.pl-ex > div { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; font-size: 13px; font-weight: 500; } .pl-ex em { font-style: normal; color: var(--dim); }
+.pl-rest { display: flex; gap: 14px; padding: 10px 0; border-top: 1px solid var(--line); font-size: 12px; font-weight: 500; color: var(--dim); } .pl-rest span { width: 38px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
 .lf-sk-h { display: flex; align-items: center; gap: 8px; }
 .lf-sk-h > svg { width: 14px; height: 14px; fill: var(--log); flex: none; }
 .lf-sk-h b { font-size: 16px; letter-spacing: -.02em; line-height: 1; }
@@ -5885,12 +5933,246 @@ function lfTargetsAsk() {
   keep.addEventListener('click', function () { S.focus.forEach(function (f) { var v = zVal(f.m, zn); f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); sh.close(true); });
   chg.addEventListener('click', function () { S.zn = zn; lfSave(); sh.close(true); setTimeout(lfZonesSheet, 260); });
 }
-function lfProgAdd(pk, name) {
+/* ── TRAINING PLANS ─────────────────────────────────────────────────────
+   Thirteen ready-made splits, four to seven days a week. Each day is
+   [name, what it works, [[exercise, sets, low reps, high reps, unit?]]]. The
+   weekdays are not stored: a plan of N days takes the first sensible N. The
+   weekly sets for every muscle are counted from these lists, so how well a
+   plan fits somebody's targets is arithmetic on real exercises. */
+var PL_DOW = { 4: [1, 2, 4, 5], 5: [1, 2, 3, 4, 5], 6: [1, 2, 3, 4, 5, 6], 7: [1, 2, 3, 4, 5, 6, 0] };
+var PLANS = [
+  { id: 'ul4', n: 'Upper / Lower', lv: 'Intermediate', g: 'Strength and size', sp: 'Upper / lower', art: 'ul',
+    desc: 'Two upper days and two lower days. Heavy compounds first, then higher-rep work to build size.',
+    tip: 'Pick weights you can lift for every rep with 1 to 2 left in the tank. Add a little each week.',
+    days: [['Upper A', 'Chest, back, shoulders, arms', [['bench', 4, 5, 8], ['bbrow', 4, 6, 10], ['ohp', 3, 6, 10], ['latpd', 3, 8, 12], ['ezskull', 3, 8, 12], ['ezcurl', 3, 8, 12]]],
+      ['Lower A', 'Quads, hamstrings, calves, abs', [['squat', 4, 5, 8], ['rdl', 3, 6, 10], ['legpress', 3, 10, 15], ['seatcurl', 3, 10, 15], ['calfstand', 4, 10, 15], ['hlr', 3, 10, 15]]],
+      ['Upper B', 'Chest, back, shoulders, arms', [['incdb', 3, 8, 12], ['seatrow', 3, 8, 12], ['dbshp', 3, 8, 12], ['cfly', 3, 12, 15], ['wgpd', 3, 10, 12], ['latraise', 3, 12, 20], ['hammer', 3, 10, 15], ['ropepush', 3, 10, 15]]],
+      ['Lower B', 'Quads, glutes, hamstrings, calves, abs', [['hack', 3, 8, 12], ['hipthrust', 3, 8, 12], ['legext', 3, 12, 15], ['lyingcurl', 3, 10, 15], ['calfseat', 4, 12, 15], ['cablecrunch', 3, 12, 15]]]] },
+  { id: 'sb4', n: 'Strength Base', lv: 'Beginner', g: 'Strength', sp: 'Full body', art: 'sb',
+    desc: 'Four days built around the big lifts: squat, press, deadlift and bench. Simple and repeatable.',
+    tip: 'Start lighter than you think. Add weight only when every rep of every set felt solid.',
+    days: [['Squat day', 'Squat, bench, row', [['squat', 5, 5, 5], ['bench', 3, 5, 8], ['bbrow', 3, 8, 10], ['plank', 3, 30, 45, 'seconds']]],
+      ['Press day', 'Overhead press and upper body', [['ohp', 4, 5, 6], ['incdb', 3, 8, 10], ['chinup', 3, 6, 8], ['ropepush', 2, 10, 12], ['curl', 2, 10, 12]]],
+      ['Deadlift day', 'Deadlift and legs', [['deadlift', 4, 3, 5], ['legpress', 3, 10, 12], ['latpd', 3, 8, 12], ['calfstand', 3, 12, 15], ['hlr', 3, 10, 12]]],
+      ['Bench day', 'Bench and back', [['bench', 5, 5, 5], ['bbrow', 4, 6, 8], ['dbshp', 3, 8, 10], ['ezcurl', 3, 8, 12], ['tripush', 3, 10, 12]]]] },
+  { id: 'la4', n: 'Lean Athlete', lv: 'Intermediate', g: 'Lean build', sp: 'Strength + conditioning', art: 'la',
+    desc: 'Strength work with a conditioning day, so you get stronger and keep your engine up.',
+    tip: 'Keep a good pace on the conditioning day, and rest fully on the strength lifts.',
+    days: [['Lower power', 'Legs and power', [['trapdl', 4, 4, 6], ['gobletsq', 3, 8, 10], ['lunge', 3, 10, 12, 'each side'], ['calfstand', 3, 12, 15], ['sled', 4, 1, 1, 'rounds']]],
+      ['Upper', 'Push and pull', [['dbbench', 3, 8, 10], ['dbrow', 3, 8, 10], ['dbshp', 3, 8, 12], ['pullupbw', 3, 6, 10], ['facepull', 2, 12, 15]]],
+      ['Conditioning', 'Swings, carries and core', [['kbswing', 4, 15, 20], ['burpee', 3, 10, 12], ['mtnclimb', 3, 30, 40, 'seconds'], ['farmer', 3, 30, 40, 'm each side'], ['plank', 3, 40, 60, 'seconds']]],
+      ['Full body', 'Squat, press, row, hinge', [['squat', 3, 5, 8], ['ohp', 3, 6, 8], ['bbrow', 3, 8, 10], ['hipthrust', 3, 8, 12], ['vups', 3, 10, 12]]]] },
+  { id: 'pu5', n: 'Push Pull Legs + Upper Lower', lv: 'Intermediate', g: 'Build muscle', sp: 'Push / pull / legs', art: 'pu',
+    desc: 'Push, pull and legs, then an upper and a lower day. Every muscle is trained about twice a week.',
+    tip: 'Take most sets to 1 or 2 reps from failure. Progress the first exercise each day first.',
+    days: [['Push', 'Chest, shoulders, triceps', [['bench', 3, 6, 10], ['incdb', 3, 8, 12], ['mshp', 3, 8, 12], ['latraise', 3, 12, 20], ['cfly', 2, 12, 15], ['ropepush', 3, 10, 15]]],
+      ['Pull', 'Back, rear delts, biceps', [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['seatrow', 3, 10, 12], ['revpec', 3, 12, 20], ['incurl', 3, 8, 12], ['hammer', 2, 10, 15]]],
+      ['Legs', 'Quads, hamstrings, calves, abs', [['squat', 3, 6, 10], ['legpress', 3, 10, 15], ['rdl', 3, 8, 12], ['seatcurl', 3, 10, 15], ['calfstand', 4, 10, 15], ['cablecrunch', 3, 10, 15]]],
+      ['Upper', 'Chest, back, shoulders, arms', [['dbbench', 3, 8, 12], ['wgpd', 3, 8, 12], ['dbshp', 3, 10, 12], ['dbrow', 3, 10, 12], ['ezcurl', 2, 10, 12], ['triover', 2, 10, 12]]],
+      ['Lower', 'Quads, glutes, hamstrings, calves', [['hack', 3, 8, 12], ['hipthrust', 3, 8, 12], ['legext', 3, 12, 15], ['lyingcurl', 3, 10, 15], ['calfseat', 4, 12, 15]]]] },
+  { id: 'qd5', n: 'Quad Dominant', lv: 'Advanced', g: 'Quad focus', sp: 'Quad priority', art: 'qd',
+    desc: 'Squat patterns first, with two quad days a week and the upper body in between. Built for big quads.',
+    tip: 'Go deep on the squats and keep the reps clean. Leave 1 rep in reserve on the first lift.',
+    days: [['Quads A', 'Quads and calves', [['squat', 4, 6, 8], ['hack', 3, 8, 12], ['legext', 3, 12, 15], ['lunge', 3, 10, 12, 'each side'], ['calfstand', 4, 10, 15]]],
+      ['Push', 'Chest, shoulders, triceps', [['bench', 3, 6, 10], ['incdb', 3, 8, 12], ['mshp', 3, 8, 12], ['latraise', 3, 12, 20], ['tripush', 3, 10, 15]]],
+      ['Pull', 'Back, rear delts, biceps', [['pullup', 3, 6, 10], ['csrow', 3, 8, 12], ['seatrow', 3, 10, 12], ['revpec', 3, 12, 20], ['incurl', 3, 8, 12], ['hammer', 2, 10, 15]]],
+      ['Quads B', 'Quads, hamstrings, glutes, calves', [['legpress', 4, 10, 15], ['smithsq', 3, 8, 12], ['bss', 3, 8, 12, 'each side'], ['seatcurl', 3, 10, 15], ['legext', 3, 15, 20], ['calfseat', 4, 12, 15]]],
+      ['Upper and core', 'Upper body and abs', [['dbbench', 3, 8, 12], ['wgpd', 3, 8, 12], ['dbshp', 3, 10, 12], ['cablecurl', 2, 12, 15], ['ropepush', 2, 12, 15], ['cablecrunch', 3, 12, 15]]]] },
+  { id: 'gf5', n: 'Glute Focus', lv: 'Intermediate', g: 'Glute focus', sp: 'Glute priority', art: 'gf',
+    desc: 'Hip thrusts and hinges first, then legs. Glutes get the most volume, with the rest of the body kept up.',
+    tip: 'Squeeze hard at the top of every hip thrust. Add weight slowly, and keep the reps controlled.',
+    days: [['Glutes heavy', 'Glutes and hamstrings', [['hipthrust', 4, 6, 10], ['rdl', 3, 6, 10], ['bss', 3, 8, 12, 'each side'], ['abduct', 3, 12, 20], ['backext', 3, 12, 15]]],
+      ['Upper', 'Chest, back, shoulders', [['incdb', 3, 8, 12], ['latpd', 3, 8, 12], ['dbshp', 3, 10, 12], ['csrow', 3, 10, 12], ['latraise', 3, 15, 20]]],
+      ['Quads and calves', 'Quads, hamstrings, calves', [['legpress', 3, 10, 15], ['hack', 3, 8, 12], ['legext', 3, 12, 15], ['lyingcurl', 3, 10, 15], ['calfseat', 4, 12, 15]]],
+      ['Glutes volume', 'Glutes and core', [['smithhip', 3, 8, 12], ['cablekb', 3, 12, 15, 'each side'], ['frogpump', 3, 15, 20], ['revlunge', 3, 10, 12, 'each side'], ['cableabd', 3, 12, 20]]],
+      ['Back, arms and core', 'Back, arms, abs', [['wgpd', 3, 8, 12], ['seatrow', 3, 10, 12], ['hammer', 2, 10, 12], ['ropepush', 2, 10, 12], ['hlr', 3, 10, 12], ['plank', 3, 40, 60, 'seconds']]]] },
+  { id: 'bs5', n: 'Bro Split', lv: 'Intermediate', g: 'Build muscle', sp: 'Body part split', art: 'bs',
+    desc: 'One muscle group a day with plenty of volume, then a full leg day.',
+    tip: 'Use the last set of each exercise to push close to failure. Rest 2 to 3 minutes on the heavy lifts.',
+    days: [['Chest', 'Chest and front delts', [['bench', 4, 6, 10], ['incdb', 3, 8, 12], ['dips', 3, 8, 12], ['cfly', 3, 12, 15], ['pecdeck', 2, 12, 15]]],
+      ['Back', 'Back and rear delts', [['pullup', 4, 6, 10], ['bbrow', 4, 6, 10], ['latpd', 3, 10, 12], ['seatrow', 3, 10, 12], ['straight', 3, 12, 15]]],
+      ['Shoulders', 'Shoulders and traps', [['ohp', 4, 6, 10], ['dbshp', 3, 8, 12], ['latraise', 4, 12, 20], ['revpec', 3, 12, 20], ['shrug', 3, 10, 15]]],
+      ['Arms', 'Biceps and triceps', [['ezcurl', 3, 8, 12], ['incurl', 3, 10, 12], ['hammer', 3, 10, 12], ['skull', 3, 8, 12], ['ropepush', 3, 10, 15], ['ohcable', 3, 10, 15]]],
+      ['Legs', 'Quads, hamstrings, calves', [['squat', 4, 6, 10], ['legpress', 3, 10, 15], ['rdl', 3, 8, 12], ['legext', 3, 12, 15], ['seatcurl', 3, 10, 15], ['calfstand', 4, 10, 15]]]] },
+  { id: 'pp6', n: 'Push Pull Legs x2', lv: 'Advanced', g: 'Build muscle', sp: 'Push / pull / legs', art: 'pp',
+    desc: 'Push, pull and legs twice a week. Every muscle gets hit twice, with a heavy and a lighter day.',
+    tip: 'Make the first lift of each day heavy and the rest higher-rep. Eat enough to recover from six days.',
+    days: [['Push A', 'Chest, shoulders, triceps', [['bench', 4, 5, 8], ['incdb', 3, 8, 12], ['mshp', 3, 8, 12], ['cablat', 4, 12, 20], ['ropepush', 3, 10, 15]]],
+      ['Pull A', 'Back, rear delts, biceps', [['pullup', 4, 6, 10], ['bbrow', 3, 6, 10], ['seatrow', 3, 10, 12], ['revpec', 3, 12, 20], ['ezcurl', 3, 8, 12]]],
+      ['Legs A', 'Quads, hamstrings, calves', [['squat', 4, 5, 8], ['rdl', 3, 6, 10], ['legpress', 3, 10, 15], ['seatcurl', 3, 10, 15], ['calfstand', 4, 8, 15]]],
+      ['Push B', 'Shoulders, chest, triceps', [['ohp', 4, 6, 10], ['dbbench', 3, 8, 12], ['cfly', 3, 12, 15], ['latraise', 4, 12, 20], ['skull', 3, 8, 12]]],
+      ['Pull B', 'Back thickness, biceps', [['csrow', 4, 8, 12], ['wgpd', 3, 8, 12], ['straight', 3, 12, 15], ['facepull', 3, 12, 20], ['hammer', 3, 10, 12]]],
+      ['Legs B', 'Quads, glutes, hamstrings, calves', [['hack', 3, 8, 12], ['bss', 3, 8, 12, 'each side'], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['calfseat', 4, 12, 15], ['cablecrunch', 3, 10, 15]]]] },
+  { id: 'qp6', n: 'Quad Dominant Pro', lv: 'Advanced', g: 'Quad focus', sp: 'Quad priority', art: 'qp',
+    desc: 'Six days with quads trained three times a week and push and pull in between. High volume for experienced lifters.',
+    tip: 'Keep legs fresh by eating and sleeping well. Back off a set if your quads are not recovering.',
+    days: [['Quads heavy', 'Quads and calves', [['squat', 5, 5, 8], ['hack', 3, 8, 10], ['legext', 3, 12, 15], ['calfstand', 4, 8, 12]]],
+      ['Push', 'Chest, shoulders, triceps', [['bench', 3, 6, 10], ['incdb', 3, 8, 12], ['mshp', 3, 8, 12], ['latraise', 3, 12, 20], ['tripush', 3, 10, 15]]],
+      ['Pull', 'Back and biceps', [['pullup', 3, 6, 10], ['bbrow', 3, 6, 10], ['seatrow', 3, 10, 12], ['incurl', 3, 8, 12], ['hammer', 2, 10, 15]]],
+      ['Quads volume', 'Quads, glutes, calves', [['legpress', 4, 10, 15], ['pendulum', 3, 8, 12], ['bss', 3, 8, 12, 'each side'], ['legext', 3, 15, 20], ['calfseat', 4, 12, 15]]],
+      ['Hamstrings and glutes', 'Hamstrings, glutes, abs', [['rdl', 4, 6, 10], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['abduct', 3, 12, 20], ['hlr', 3, 10, 15]]],
+      ['Upper and arms', 'Shoulders, arms, back', [['dbshp', 3, 8, 12], ['wgpd', 3, 8, 12], ['cablat', 3, 12, 20], ['ezcurl', 3, 8, 12], ['ropepush', 3, 10, 15]]]] },
+  { id: 'gb6', n: 'Glute Builder', lv: 'Advanced', g: 'Glute focus', sp: 'Glute priority', art: 'gb',
+    desc: 'Glutes three times a week, with push, pull and quads between. High volume for experienced lifters.',
+    tip: 'Pause at the top of each rep. Increase the reps first, then the weight.',
+    days: [['Glutes heavy', 'Glutes and hamstrings', [['hipthrust', 4, 6, 10], ['rdl', 4, 6, 10], ['bss', 3, 8, 12, 'each side'], ['abduct', 3, 12, 20]]],
+      ['Push', 'Chest and shoulders, triceps', [['incdb', 3, 8, 12], ['mchest', 3, 8, 12], ['dbshp', 3, 10, 12], ['latraise', 3, 15, 20], ['ropepush', 3, 10, 15]]],
+      ['Quads and calves', 'Quads, calves', [['hack', 3, 8, 12], ['legpress', 3, 10, 15], ['legext', 3, 12, 15], ['calfseat', 4, 12, 15]]],
+      ['Glutes volume', 'Glutes', [['smithhip', 3, 8, 12], ['cablekb', 3, 12, 15, 'each side'], ['frogpump', 3, 15, 20], ['revlunge', 3, 10, 12, 'each side'], ['cableabd', 3, 15, 20]]],
+      ['Pull', 'Back and biceps', [['wgpd', 3, 8, 12], ['seatrow', 3, 10, 12], ['csrow', 3, 10, 12], ['revpec', 3, 12, 20], ['hammer', 3, 10, 12]]],
+      ['Glutes and core', 'Glutes, hamstrings, abs', [['sumodl', 3, 6, 8], ['lyingcurl', 3, 10, 15], ['latlunge', 3, 10, 12, 'each side'], ['hlr', 3, 10, 15], ['plank', 3, 40, 60, 'seconds']]]] },
+  { id: 'as6', n: 'Arnold Split', lv: 'Advanced', g: 'Build muscle', sp: 'Body part split', art: 'as',
+    desc: 'Chest and back, shoulders and arms, then legs, all done twice a week.',
+    tip: 'Pair the chest and back lifts back to back and keep rests short. Use a weight you can control.',
+    days: [['Chest and back A', 'Chest and back', [['bench', 4, 6, 10], ['pullup', 4, 6, 10], ['incdb', 3, 8, 12], ['bbrow', 3, 8, 10], ['cfly', 3, 12, 15], ['pullover', 3, 10, 12]]],
+      ['Shoulders and arms A', 'Shoulders, biceps, triceps', [['ohp', 4, 6, 10], ['latraise', 3, 12, 20], ['ezcurl', 3, 8, 12], ['skull', 3, 8, 12], ['hammer', 2, 10, 12], ['ropepush', 2, 10, 15]]],
+      ['Legs A', 'Quads, hamstrings, calves', [['squat', 4, 6, 10], ['legpress', 3, 10, 15], ['rdl', 3, 8, 12], ['legext', 3, 12, 15], ['calfstand', 4, 10, 15], ['hlr', 3, 10, 15]]],
+      ['Chest and back B', 'Chest and back', [['dbbench', 4, 8, 12], ['wgpd', 4, 8, 12], ['incmach', 3, 10, 12], ['seatrow', 3, 10, 12], ['pecdeck', 3, 12, 15], ['straight', 3, 12, 15]]],
+      ['Shoulders and arms B', 'Shoulders, biceps, triceps', [['dbshp', 4, 8, 12], ['revpec', 3, 12, 20], ['incurl', 3, 10, 12], ['triover', 3, 10, 12], ['cablecurl', 2, 12, 15], ['tripush', 2, 10, 15]]],
+      ['Legs B', 'Quads, glutes, hamstrings, calves', [['hack', 3, 8, 12], ['bss', 3, 8, 12, 'each side'], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['calfseat', 4, 12, 15]]]] },
+  { id: 'sd7', n: 'Seven Day Split', lv: 'Advanced', g: 'Build muscle', sp: 'Body part split', art: 'sd',
+    desc: 'A different muscle group every day of the week, with a core and conditioning day to finish.',
+    tip: 'This is a lot of training. Keep your sets honest and sleep enough, and drop a set if you stall.',
+    days: [['Chest', 'Chest', [['bench', 4, 6, 10], ['incdb', 3, 8, 12], ['cfly', 3, 12, 15], ['dips', 3, 8, 12]]],
+      ['Back', 'Back', [['pullup', 4, 6, 10], ['bbrow', 4, 6, 10], ['latpd', 3, 10, 12], ['seatrow', 3, 10, 12]]],
+      ['Shoulders', 'Shoulders', [['ohp', 4, 6, 10], ['dbshp', 3, 8, 12], ['latraise', 4, 12, 20], ['revpec', 3, 12, 20]]],
+      ['Arms', 'Biceps and triceps', [['ezcurl', 3, 8, 12], ['hammer', 3, 10, 12], ['skull', 3, 8, 12], ['ropepush', 3, 10, 15]]],
+      ['Quads', 'Quads and calves', [['squat', 4, 6, 10], ['legpress', 3, 10, 15], ['legext', 3, 12, 15], ['calfstand', 4, 10, 15]]],
+      ['Hamstrings and glutes', 'Hamstrings and glutes', [['rdl', 4, 6, 10], ['lyingcurl', 3, 10, 15], ['hipthrust', 3, 8, 12], ['abduct', 3, 12, 20]]],
+      ['Core and cardio', 'Abs and conditioning', [['hlr', 3, 10, 15], ['cablecrunch', 3, 12, 15], ['plank', 3, 40, 60, 'seconds'], ['kbswing', 3, 15, 20], ['sled', 4, 1, 1, 'rounds']]]] },
+  { id: 'dl7', n: 'Daily Lift 7', lv: 'Intermediate', g: 'General fitness', sp: 'Light and heavy', art: 'dl',
+    desc: 'A session every day: three heavy days and four lighter ones, so you train often without burning out.',
+    tip: 'Keep the light days truly light, about half effort. The heavy days are the ones that count.',
+    days: [['Heavy full body', 'Squat, bench, row', [['squat', 4, 5, 8], ['bench', 4, 5, 8], ['bbrow', 3, 6, 10], ['plank', 3, 30, 45, 'seconds']]],
+      ['Light push', 'Chest, shoulders, triceps', [['pushup', 3, 10, 15], ['dbshp', 2, 10, 15], ['latraise', 3, 15, 20], ['tripush', 2, 12, 15]]],
+      ['Light pull', 'Back and biceps', [['latpd', 3, 10, 15], ['seatrow', 3, 10, 15], ['facepull', 3, 15, 20], ['curl', 2, 12, 15]]],
+      ['Heavy lower', 'Deadlift and legs', [['deadlift', 4, 3, 6], ['legpress', 3, 8, 12], ['seatcurl', 3, 10, 12], ['calfstand', 4, 10, 15]]],
+      ['Light upper', 'Upper body', [['dbbench', 3, 12, 15], ['dbrow', 3, 12, 15], ['dbshp', 2, 12, 15], ['hammer', 2, 12, 15]]],
+      ['Light legs', 'Legs and glutes', [['gobletsq', 3, 12, 15], ['hipthrust', 3, 10, 12], ['lyingcurl', 3, 12, 15], ['calfseat', 3, 15, 20]]],
+      ['Heavy upper', 'Press, pull, arms', [['ohp', 4, 5, 8], ['pullup', 4, 5, 8], ['incdb', 3, 8, 10], ['ezcurl', 3, 8, 12], ['skull', 3, 8, 12]]]] }
+];
+/* THE POSTERS: one hero object each on a gradient, a soft disc behind it and a floor shadow. Drawn here so they ship with the app and follow no image budget. */
+var PL_U = 0;
+function plScene(c1, c2, disc, acc, hero, floor) {
+  var g = 'pls' + (PL_U++);
+  return '<defs><linearGradient id="' + g + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="' + c1 + '"/><stop offset="1" stop-color="' + c2 + '"/></linearGradient></defs><rect width="200" height="260" fill="url(#' + g + ')"/><circle cx="100" cy="116" r="78" fill="' + disc + '"/>'
+    + '<circle cx="30" cy="34" r="5" fill="' + acc + '"/><circle cx="170" cy="52" r="3.500" fill="' + acc + '" opacity=".7"/><path d="M168 196h8M172 192v8M24 188h8M28 184v8" stroke="' + acc + '" stroke-width="3" stroke-linecap="round"/>'
+    + '<ellipse cx="100" cy="' + (floor || 200) + '" rx="58" ry="7" fill="#000" opacity=".28"/>' + hero;
+}
+function plPlate(cx, cy, r, a, b, c) { return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + b + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r * .93 + '" fill="' + a + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r * .74 + '" fill="none" stroke="' + b + '" stroke-width="' + r * .06 + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r * .58 + '" fill="' + c + '" opacity=".5"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r * .2 + '" fill="' + b + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r * .1 + '" fill="' + a + '"/><path d="M' + (cx - r * .7) + ' ' + (cy - r * .5) + 'A' + r * .85 + ' ' + r * .85 + ' 0 0 1 ' + (cx - r * .1) + ' ' + (cy - r * .88) + '" fill="none" stroke="#fff" stroke-width="' + r * .07 + '" stroke-linecap="round" opacity=".5"/>'; }
+function plDbell(cx, cy, w, a, b, metal) {
+  var h = w * .46, t = w * .17, x = w / 2, o = '<g transform="translate(' + cx + ' ' + cy + ')"><rect x="' + -x * .62 + '" y="' + -t * .5 + '" width="' + x * 1.24 + '" height="' + t + '" rx="' + t * .4 + '" fill="' + metal + '"/>';
+  [-1, 1].forEach(function (s) { var px = s < 0 ? -x : x * .54; o += '<rect x="' + px + '" y="' + -h / 2 + '" width="' + x * .46 + '" height="' + h + '" rx="' + w * .06 + '" fill="' + a + '"/><rect x="' + px + '" y="' + -h / 2 + '" width="' + x * .14 + '" height="' + h + '" rx="' + w * .04 + '" fill="' + b + '" opacity=".45"/><rect x="' + (s < 0 ? -x * .88 : x * .66) + '" y="' + (-h / 2 + h * .1) + '" width="' + x * .08 + '" height="' + h * .8 + '" rx="2" fill="#fff" opacity=".35"/>'; });
+  for (var i = -2; i <= 2; i++) o += '<rect x="' + (i * x * .16 - 1.5) + '" y="' + -t * .5 + '" width="3" height="' + t + '" fill="#000" opacity=".16"/>';
+  return o + '</g>';
+}
+function plKbell(cx, cy, s, a, b) { return '<g transform="translate(' + cx + ' ' + cy + ') scale(' + s + ')"><path d="M-22 -22L-15 -54H15L22 -22" fill="none" stroke="' + b + '" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/><path d="M-22 -22L-15 -54H15L22 -22" fill="none" stroke="' + a + '" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M-38 12A38 36 0 0 1 38 12L32 38Q0 47 -32 38Z" fill="' + a + '"/><path d="M12 -16A38 36 0 0 1 38 12L32 38Q20 42 10 43C28 24 30 0 12 -16Z" fill="' + b + '" opacity=".4"/><path d="M-28 4C-24 -14 -12 -22 0 -24" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/><circle cx="0" cy="12" r="11" fill="' + b + '" opacity=".5"/></g>'; }
+function plBarbell(cx, cy, w, pa, pb, bar) {
+  var x = w / 2, o = '<g transform="translate(' + cx + ' ' + cy + ')"><rect x="' + -x + '" y="-4" width="' + w + '" height="8" rx="4" fill="' + bar + '"/>';
+  [-1, 1].forEach(function (s) { [[.58, 64, pa], [.7, 52, pb], [.8, 38, pa]].forEach(function (q) { o += '<rect x="' + (s < 0 ? -x * q[0] - x * .1 : x * q[0] - x * .1) + '" y="' + -q[1] / 2 + '" width="' + x * .12 + '" height="' + q[1] + '" rx="3" fill="' + q[2] + '"/>'; }); });
+  return o + '<rect x="' + -x * .47 + '" y="-4" width="' + x * .94 + '" height="8" fill="#fff" opacity=".22"/></g>';
+}
+function plStopw(cx, cy, r, a, b) {
+  var t = '';
+  for (var i = 0; i < 12; i++) { var q = i / 12 * Math.PI * 2, k = i % 3 ? .7 : .64; t += '<line x1="' + (cx + Math.sin(q) * r * .78) + '" y1="' + (cy - Math.cos(q) * r * .78) + '" x2="' + (cx + Math.sin(q) * r * k) + '" y2="' + (cy - Math.cos(q) * r * k) + '" stroke="' + b + '" stroke-width="' + (i % 3 ? 2 : 4) + '" stroke-linecap="round"/>'; }
+  return '<rect x="' + (cx - r * .2) + '" y="' + (cy - r * 1.35) + '" width="' + r * .4 + '" height="' + r * .28 + '" rx="4" fill="' + b + '"/><rect x="' + (cx - r * .07) + '" y="' + (cy - r * 1.12) + '" width="' + r * .14 + '" height="' + r * .2 + '" fill="' + b + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + b + '"/><circle cx="' + cx + '" cy="' + cy + '" r="' + r * .92 + '" fill="' + a + '"/>' + t + '<path d="M' + cx + ' ' + cy + 'L' + (cx + r * .4) + ' ' + (cy - r * .42) + '" stroke="' + b + '" stroke-width="5" stroke-linecap="round"/><circle cx="' + cx + '" cy="' + cy + '" r="6" fill="' + b + '"/><path d="M' + (cx - r * .7) + ' ' + (cy - r * .2) + 'A' + r * .76 + ' ' + r * .76 + ' 0 0 1 ' + (cx - r * .2) + ' ' + (cy - r * .72) + '" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>';
+}
+function plArr(cx, cy, s, a, b, rot) { var d = 'M-20 4L0 -22L20 4M0 -16V30'; return '<g transform="translate(' + cx + ' ' + cy + ') rotate(' + (rot || 0) + ') scale(' + s + ')"><path d="' + d + '" fill="none" stroke="' + b + '" stroke-width="13" stroke-linecap="round" stroke-linejoin="round" transform="translate(3 4)"/><path d="' + d + '" fill="none" stroke="' + a + '" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/></g>'; }
+function plBridge(cx, cy, r, a, b) { var d = 'M' + (cx - r) + ' ' + (cy + r * .7) + 'C' + (cx - r * .9) + ' ' + (cy - r * .8) + ' ' + (cx + r * .9) + ' ' + (cy - r * .8) + ' ' + (cx + r) + ' ' + (cy + r * .7); return '<path d="' + d + '" fill="none" stroke="' + b + '" stroke-width="30" stroke-linecap="round" transform="translate(3 5)"/><path d="' + d + '" fill="none" stroke="' + a + '" stroke-width="30" stroke-linecap="round"/><path d="M' + (cx - r * .82) + ' ' + (cy - r * .05) + 'C' + (cx - r * .6) + ' ' + (cy - r * .5) + ' ' + (cx - r * .3) + ' ' + (cy - r * .58) + ' ' + (cx - r * .1) + ' ' + (cy - r * .58) + '" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>'; }
+var PL_ART = {
+  ul: function () { return plScene('#2c55e8', '#16358f', '#3b66f0', '#d3ec36', plDbell(100, 88, 112, '#f4f6ff', '#8fa3e8', '#b8c4f2') + plKbell(100, 176, .9, '#d3ec36', '#6f8f0a'), 208); },
+  sb: function () { return plScene('#e0453e', '#8c1f24', '#ea5c52', '#ffd7a0', plPlate(100, 118, 66, '#26172d', '#12081a', '#e0453e'), 206); },
+  la: function () { return plScene('#18a89d', '#0b5a5c', '#26bcb0', '#f5f1d0', plStopw(100, 126, 56, '#f5f1d0', '#0b5a5c'), 208); },
+  pu: function () { return plScene('#f26a35', '#a93410', '#f98550', '#fff3e6', plArr(46, 112, 1.15, '#fff3e6', '#a93410', 0) + plArr(100, 112, 1.15, '#fff3e6', '#a93410', 180) + plArr(154, 112, 1.15, '#fff3e6', '#a93410', 0), 200); },
+  qd: function () { return plScene('#223675', '#0f1a45', '#2d4596', '#f2c230', plBarbell(100, 118, 160, '#f2c230', '#e5484d', '#cfd6ee'), 178); },
+  gf: function () { return plScene('#f58aa8', '#b3436c', '#ffa3bb', '#fff0e6', plBridge(100, 122, 62, '#fff0e6', '#c4577c'), 198); },
+  bs: function () { return plScene('#6a3dc8', '#341a78', '#8353e0', '#fcd34d', plDbell(100, 120, 130, '#fcd34d', '#c8920c', '#e9defa'), 178); },
+  pp: function () { var o = ''; [88, 152].forEach(function (y) { [52, 100, 148].forEach(function (x, i) { o += plArr(x, y, .8, '#1a2f8a', '#0d1a54', i === 1 ? 180 : 0); }); }); return plScene('#d9f03e', '#8fae10', '#e6f77a', '#1a2f8a', o, 206); },
+  qp: function () { return plScene('#1a9a6c', '#0b5236', '#27b283', '#f2c230', plKbell(100, 142, 1.6, '#f2f0d2', '#b8b48a'), 206); },
+  gb: function () { return plScene('#9a3ae8', '#4c168c', '#b25cf0', '#ffb1e4', plBridge(100, 128, 66, '#ffb1e4', '#b4399a'), 200); },
+  as: function () { return plScene('#2a2f3a', '#14171e', '#3a4150', '#e8582a', plDbell(100, 90, 116, '#e8582a', '#a32e0c', '#cfd4e0') + plDbell(100, 152, 116, '#f2f2f5', '#a0a6b8', '#cfd4e0'), 204); },
+  sd: function () { var cs = ['#e5484d', '#f2a030', '#f2d230', '#4fc27a', '#2f9fe0', '#7a5cf0', '#e85aa0'], o = ''; cs.forEach(function (c, i) { var h = 30 + ((i * 37) % 5) * 10; o += '<rect x="' + (31 + i * 22) + '" y="' + (150 - h) + '" width="14" height="' + h + '" rx="7" fill="' + c + '"/>'; }); return plScene('#1c2030', '#0a0c14', '#262c42', '#f2d230', o, 166); },
+  dl: function () { var d = ''; for (var i = 0; i < 7; i++) { var a = i / 7 * Math.PI * 2 - Math.PI / 2; d += '<circle cx="' + (100 + Math.cos(a) * 54) + '" cy="' + (122 + Math.sin(a) * 54) + '" r="' + (i === 0 ? 10 : 7.5) + '" fill="' + (i === 0 ? '#e8582a' : '#f2efe4') + '"/>'; } return plScene('#faf6ea', '#e6dec8', '#f0e8d2', '#e8582a', '<circle cx="100" cy="122" r="54" fill="none" stroke="#e8582a" stroke-width="9" opacity=".25"/>' + d + '<circle cx="100" cy="122" r="22" fill="#e8582a"/>', 196); }
+};
+function plArtEl(p, wide) { var s = el('<svg viewBox="' + (wide ? '0 -8 200 260' : '0 0 200 260') + '" preserveAspectRatio="xMidYMid slice" aria-hidden="true"></svg>'); s.innerHTML = PL_ART[p.art](); return s; }
+/* the weekly sets a plan gives each muscle: counted from its exercises */
+function plSets(p) { var t = {}; p.days.forEach(function (d) { d[2].forEach(function (e) { var x = exById(e[0]); if (x) t[x.m] = (t[x.m] || 0) + e[1]; }); }); return t; }
+/* how close a plan comes to YOUR targets, 0 to 100: each target muscle counts by its size, and a plan is as far off as the gap is big */
+function plFit(p) {
+  var ts = lfTargets().filter(function (t) { return t[2] > 0 || t[1] > 0; }); if (!ts.length) return null;
+  var got = plSets(p), num = 0, den = 0;
+  ts.forEach(function (t) { var tg = t[2] || t[1]; num += tg * (1 - Math.min(1, Math.abs((got[t[0]] || 0) - tg) / tg)); den += tg; });
+  return den ? Math.round(num / den * 100) : null;
+}
+function plPack(p) { var dw = PL_DOW[p.days.length]; return { n: p.n, c: [], d: p.days.map(function (d, i) { return { w: dw[i], n: d[0], sp: d[1], x: d[2].map(function (e) { return e.slice(); }) }; }) }; }
+function plMins(p) { var tot = 0; p.days.forEach(function (d) { d[2].forEach(function (e) { tot += e[1]; }); }); return Math.max(30, Math.round(tot / p.days.length * 2.8 / 5) * 5 + 5); }
+function plOrder() { var fit = {}; PLANS.forEach(function (p) { fit[p.id] = plFit(p); }); return PLANS.map(function (p, i) { return [p, i]; }).sort(function (a, b) { return ((fit[b[0].id] || 0) - (fit[a[0].id] || 0)) || a[1] - b[1]; }).map(function (x) { return x[0]; }); }
+var PL_AT = 0;
+function plBackBtn(go) { var b = el('<button type="button" class="pl-back" aria-label="Back">' + IC.chev + '</button>'); b.addEventListener('click', go); return b; }
+/* THE DECK: one plan a card, swiped sideways, best fit to your targets first */
+function lfPlansSheet() {
+  var list = plOrder(), b = el('<div class="pl-w"><div class="pl-deck" id="plDeck" tabindex="0" aria-label="Training plans"></div><div class="pl-ct" aria-live="polite"></div></div>'), deck = $('#plDeck', b), ct = $('.pl-ct', b);
+  var fitAny = lfTargets().length > 0;
+  list.forEach(function (p, i) {
+    var f = plFit(p), c = el('<div class="pl-card" role="group"><div class="pl-art"></div>' + (f !== null ? '<span class="pl-fit">Fits your targets <b></b></span>' : '') + '<div class="pl-tx"><h3></h3><p></p><div class="pl-chips"></div><button type="button" class="pl-go">Details</button></div></div>');
+    $('.pl-art', c).appendChild(plArtEl(p)); $('h3', c).textContent = p.n; $('p', c).textContent = p.desc;
+    if (f !== null) $('.pl-fit b', c).textContent = f + '%';
+    [p.days.length + 'x / week', p.lv, p.sp].forEach(function (t) { var s = el('<i></i>'); s.textContent = t; $('.pl-chips', c).appendChild(s); });
+    c.setAttribute('aria-label', p.n + ', ' + p.days.length + ' days a week, ' + p.lv);
+    $('.pl-go', c).addEventListener('click', function () { PL_AT = i; lfPlanPage(p, list); });
+    deck.appendChild(c);
+  });
+  function say() { var w = deck.clientWidth || 1, n = Math.round(deck.scrollLeft / ((deck.firstChild ? deck.firstChild.offsetWidth : w) + 12)); n = Math.max(0, Math.min(list.length - 1, n)); PL_AT = n; ct.textContent = (n + 1) + ' / ' + list.length + (fitAny ? ' · best fit first' : ''); }
+  deck.addEventListener('scroll', function () { say(); });
+  var s = lfSheet({ title: 'Training plans', body: b, full: true, key: 'plans', cls: 'pl-sheet' });
+  setTimeout(function () { var c = deck.children[PL_AT]; if (c) deck.scrollLeft = c.offsetLeft - (deck.clientWidth - c.offsetWidth) / 2; say(); }, 30);
+}
+/* ONE PLAN: the poster, what it is, what to lift, how it fits your targets, then the week */
+function lfPlanPage(p, list) {
+  var f = plFit(p), got = plSets(p), dw = PL_DOW[p.days.length], b = el('<div class="pl-pg"></div>');
+  var hero = el('<div class="pl-hero"></div>'); hero.appendChild(plArtEl(p, 1)); b.appendChild(hero);
+  var h = el('<h2 class="pl-h"></h2>'); h.textContent = p.n; b.appendChild(h);
+  var meta = el('<div class="pl-meta"></div>'); [p.days.length + 'x week', plMins(p) + ' min', p.lv, p.g].forEach(function (t, i) { if (i) meta.appendChild(el('<em>·</em>')); var s = el('<span></span>'); s.textContent = t; meta.appendChild(s); }); b.appendChild(meta);
+  var ds = el('<p class="pl-ds"></p>'); ds.textContent = p.desc; b.appendChild(ds);
+  var tip = el('<div class="pl-tip"><h4><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.500 10.900c.6.5 1 1.200 1 2.100h5c0-.9.4-1.600 1-2.100A6 6 0 0 0 12 3z"/></svg>Weight recommendation</h4><p></p></div>'); $('p', tip).textContent = p.tip; b.appendChild(tip);
+  var ts = lfTargets().filter(function (t) { return t[2] > 0 || t[1] > 0; }).slice(0, 9);
+  if (ts.length && f !== null) {
+    var fx = el('<div class="pl-fx"><span class="lf-flab"></span><div class="pl-rows"></div><p class="pl-nt"></p></div>'); $('.lf-flab', fx).textContent = 'Matches your targets · ' + f + '%';
+    var low = [];
+    ts.forEach(function (t) {
+      var tg = t[2] || t[1], g = got[t[0]] || 0, top = Math.max(tg, g) * 1.12 || 1, r = el('<div class="pl-r"><span></span><i class="pl-bar"><b></b><u></u></i><em class="lf-num"></em></div>');
+      $('span', r).textContent = t[0]; $('b', r).style.width = Math.min(100, g / top * 100) + '%'; $('u', r).style.left = Math.min(100, tg / top * 100) + '%'; $('em', r).innerHTML = '<b>' + g + '</b> / ' + tg;
+      if (g < tg * .8) { r.classList.add('is-low'); low.push(t[0]); } $('.pl-rows', fx).appendChild(r);
+    });
+    $('.pl-nt', fx).textContent = low.length ? low.slice(0, 3).join(', ') + (low.length > 1 ? ' sit' : ' sits') + ' under your target. You can raise ' + (low.length > 1 ? 'them' : 'it') + ' yourself after.' : 'Every muscle is at or near your target.';
+    b.appendChild(fx);
+  }
+  var wk = el('<div class="pl-wk"><span class="lf-flab">Your week</span></div>'), used = {};
+  p.days.forEach(function (d, i) { used[dw[i]] = [d, i]; });
+  [1, 2, 3, 4, 5, 6, 0].forEach(function (w) {
+    if (!used[w]) { var rest = el('<div class="pl-rest"><span></span>Rest day</div>'); $('span', rest).textContent = DOW_LONG[w].slice(0, 3).toUpperCase(); wk.appendChild(rest); return; }
+    var d = used[w][0], r = el('<div class="pl-day"><button type="button" class="pl-dh" aria-expanded="false"><span class="pl-dw"></span><span class="pl-dn"><b></b><i></i></span>' + IC.chev + '</button><div class="pl-ex" hidden></div></div>');
+    $('.pl-dw', r).textContent = DOW_LONG[w].slice(0, 3).toUpperCase(); $('b', r).textContent = d[0]; $('i', r).textContent = d[2].length + ' exercises';
+    d[2].forEach(function (e) { var x = exById(e[0]), q = el('<div><span></span><em class="lf-num"></em></div>'); $('span', q).textContent = x ? x.n : e[0]; $('em', q).textContent = e[1] + ' × ' + (e[2] === e[3] ? e[2] : e[2] + '–' + e[3]) + (e[4] ? ' ' + e[4] : ''); $('.pl-ex', r).appendChild(q); });
+    $('.pl-dh', r).addEventListener('click', function (ev) { var bt = ev.currentTarget, open = bt.getAttribute('aria-expanded') !== 'true'; bt.setAttribute('aria-expanded', open ? 'true' : 'false'); $('.pl-ex', r).hidden = !open; });
+    wk.appendChild(r);
+  });
+  b.appendChild(wk);
+  var go = el('<button type="button" class="lf-btn is-ink is-full" id="plUse">Use this plan</button>'), mt = el('<button type="button" class="lf-btn is-full" id="plUseT">Use and set targets</button>');
+  var head = el('<div class="pl-hd"></div>'); head.appendChild(plBackBtn(function () { lfPlansSheet(); }));
+  var s = lfSheet({ title: '', head: head, body: b, foot: [go, mt], full: true, key: 'plans', cls: 'pl-sheet' });
+  go.addEventListener('click', function () { s.close(true); lfProgAdd(plPack(p), p.n, { goal: p.days.length }); });
+  mt.addEventListener('click', function () { s.close(true); lfProgAdd(plPack(p), p.n, { goal: p.days.length, focus: true }); });
+}
+/* opt: { goal } sets the weekly goal to the plan's days; { focus } sets the weekly targets from the plan. Undo puts both back. */
+function lfProgAdd(pk, name, opt) {
   var wasNew = lfNew(), id; do { id = 'u' + Math.random().toString(36).slice(2, 8); } while (PROGRAMS[id]);
   var p = { id: id, n: (name || pk.n).trim().slice(0, 30) || 'Program', d: pk.d.map(function (d) { return { id: id + '-' + d.w, w: d.w, n: d.n, sp: d.sp, x: d.x, ss: d.ss }; }) };
   pk.c.forEach(function (e) { if (!exById(e.id)) S.ex.push(e); });
   S.pg = (S.pg || []).concat([p]); lfProgSync();
-  var was = lfProgSwitch(id);
+  var was = lfProgSwitch(id); was.goal = S.goal; was.hadFz = 0;
+  if (opt && opt.goal) S.goal = opt.goal;
+  if (opt && opt.focus) S.focus = lfFocusOf(PROGRAMS[id].focus);
   /* A NEW PERSON STARTS WITHOUT PROGRAMMES: the seven that come with the app are put away the moment their first split exists, and come back from Manage programs if they want one. */
   if (wasNew) S.hp = BUILTIN_PROGS.slice();
   if (wasNew) S.focus = lfFocusOf(PROGRAMS[id].focus && PROGRAMS[id].focus.length ? PROGRAMS[id].focus : FOCUS_DEFAULT);
@@ -5898,7 +6180,7 @@ function lfProgAdd(pk, name) {
   if (wasNew) setTimeout(lfTargetsAsk, 450);
   /* the first split's confirmation is the targets sheet itself: a toast over its list would cover the last rows */
   if (!wasNew) lfToast(p.n + ' added and on', function () {
-    S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; if (wasNew) delete S.hp;
+    S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; if (wasNew) delete S.hp; if (was.goal) S.goal = was.goal; else delete S.goal;
     S.pg = (S.pg || []).filter(function (q) { return q.id !== id; }); if (!S.pg.length) delete S.pg; lfProgSync(); lfSave(); lfRender();
   });
 }
@@ -6008,7 +6290,8 @@ function lfRenderLib() {
   if (!newU) root.appendChild(lfTgCard());
   /* QUICK ACTIONS: the four things you do from here, each a block with its own mark. The library is one of them, so the screen no longer ends in a wall of exercises. Apple Health is only drawn where Health is signed in. */
   var QA = [['lfLibOpen', 'Exercise library', '#e6f27a', '<path d="M6 8v8M3.5 10v4M18 8v8M20.5 10v4M6 12h12"/>', function () { lfLibSheet(); }],
-    ['lfNewSplit', 'Create split', '#7ff0b4', '<path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/>', function () { lfSplitForm(null); }]];
+    ['lfNewSplit', 'Create split', '#7ff0b4', '<path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/>', function () { lfSplitForm(null); }],
+    ['lfPlansOpen', 'Training plans', '#ffcf70', '<rect x="3.500" y="7" width="11" height="14" rx="2.500"/><path d="M8 4h9.500a3 3 0 0 1 3 3v10M7 12h4M7 16h4"/>', lfPlansSheet]];
   if (!newU && !window.__lfInline) QA.unshift(['lfSplitOpen', 'Your split', '#9ad0ff', '<rect x="3.500" y="5" width="17" height="15" rx="3"/><path d="M3.500 10h17M8 3v4M16 3v4M8 14h3"/>', lfSplitSheet, lfProg().n]);
   if (!newU) QA.push(['lfProgMg', 'Manage splits', '#f08ad6', '<rect x="5" y="4" width="14" height="16" rx="2.500"/><path d="M9 9h6M9 13h6M9 17h3"/>', lfProgManage]);
   if (LF_WGT && LF_WGT.healthReadAuth && lfCaps.health) QA.push(['lfHealthQa', 'Apple Health', '#ff7a8a', HK_IC.heart, lfHealthSheet]);
