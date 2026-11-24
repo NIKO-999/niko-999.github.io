@@ -64,6 +64,8 @@ const freeze = (at) => `(() => {
   }
   const store = (page) => page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1') || 'null'));
   const settle = (page) => page.waitForTimeout(420);
+  /* Finish is the row at the end of the workout, or the Finish workout bar once every set is ticked: press whichever is on screen */
+  const fin = async (pg) => { const b = (await pg.locator('#lfFinish').isVisible()) ? '#lfFinish' : '#lfFinishBar'; await pg.click(b); };
   /* Customise is a fold, shut until pressed: open it before a row inside it is */
   const cuOpen = async () => {};
   const top = (page) => page.locator('.lf-sheet').last();
@@ -2639,7 +2641,7 @@ const freeze = (at) => `(() => {
       await o.page.locator('.lf-session .lf-ex').first().locator('.lf-aim').click(); await settle(o.page);
       ok('one tap takes the lighter week', (await o.page.locator('.lf-session .lf-ex').first().locator('.lf-set:not(.is-hd) input').evaluateAll((i) => i.map((x) => x.value))).join() === '55,5,55,5,55,5');
       for (let i = 0; i < 3; i++) await o.page.locator('.lf-session .lf-ex').first().locator('.lf-chk').nth(i).click();
-      await o.page.click('#lfFinish'); await o.page.waitForTimeout(900);
+      await fin(o.page); await o.page.waitForTimeout(900);
       ok('finishing says what to do next time', await top(o.page).locator('#lfFinNext').count() === 1 && /bench press.*55 × 6/i.test(await top(o.page).locator('#lfFinNext').textContent()));
       await o.c.close();
     }
@@ -2698,7 +2700,7 @@ const freeze = (at) => `(() => {
     const ex = o.page.locator('.lf-session .lf-ex').first();
     await ex.locator('.lf-aim').click().catch(() => {}); await settle(o.page);
     for (let i = 0; i < 2; i++) await ex.locator('.lf-chk').nth(i).click();
-    await o.page.click('#lfFinish'); await o.page.waitForTimeout(900);
+    await fin(o.page); await o.page.waitForTimeout(900);
     await o.page.locator('#lfFinDone').click().catch(() => {});
     await o.page.waitForSelector('#lfWeekSum', { timeout: 25000 }).catch(() => {});
     ok('the seventh day of the week brings the weekly report up by itself, on a Wednesday', await o.page.locator('#lfWeekSum').count() === 1);
@@ -2715,7 +2717,7 @@ const freeze = (at) => `(() => {
     await q.page.click('#lfGo'); await settle(q.page);
     const qe = q.page.locator('.lf-session .lf-ex').first(); await qe.locator('.lf-aim').click().catch(() => {}); await settle(q.page);
     for (let i = 0; i < 2; i++) await qe.locator('.lf-chk').nth(i).click();
-    await q.page.click('#lfFinish'); await q.page.waitForTimeout(900); await q.page.locator('#lfFinDone').click().catch(() => {}); await q.page.waitForTimeout(6000);
+    await fin(q.page); await q.page.waitForTimeout(900); await q.page.locator('#lfFinDone').click().catch(() => {}); await q.page.waitForTimeout(6000);
     ok('six days is not seven: no report comes up on a Wednesday', await q.page.locator('#lfWeekSum').count() === 0);
     await q.c.close();
   }
@@ -2795,7 +2797,7 @@ const freeze = (at) => `(() => {
     ok('and it starts the rest like any other tick', !!act.rest);
     await pg.evaluate((m) => window.__fire.watchMsg(m), { t: 'set', id: wj.id, i: 1, w: 999, r: 99 }); await pg.waitForTimeout(300);
     ok('the same set sent twice is not logged twice', (await pg.evaluate(() => JSON.parse(localStorage.getItem('lift.active.v1')))).x.find((x) => x.id === wj.id).sets[1].w === 105);
-    await pg.click('#lfFinish'); await pg.waitForTimeout(900);
+    await fin(pg); await pg.waitForTimeout(900);
     ok('and finishing lets the screen sleep again and tells the watch there is no workout', (await calls()).some((x) => /^keepAwake:\{"on":false\}/.test(x)) && (await calls()).filter((x) => /^watchAct:/.test(x)).pop() === 'watchAct:{"json":""}', (await calls()).slice(-4));
     await c2.close();
     }
