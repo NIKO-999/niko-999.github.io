@@ -2611,7 +2611,9 @@ function lfCleanPgs(list) {
       var ss = (Array.isArray(d.ss) ? d.ss : []).slice(0, 6).map(function (g) { return Array.isArray(g) ? g.filter(function (id) { return ids.indexOf(id) >= 0; }).slice(0, 6) : []; }).filter(function (g) { return g.length > 1; });
       return { id: d.id, w: d.w, n: (typeof d.n === 'string' ? d.n.slice(0, 40) : '') || 'Day', sp: typeof d.sp === 'string' ? d.sp.slice(0, 60) : '', x: x, ss: ss };
     }).filter(Boolean);
-    return days.length ? { id: p.id, n: p.n.slice(0, 30).trim() || 'Program', d: days } : null;
+    var out = days.length ? { id: p.id, n: p.n.slice(0, 30).trim() || 'Program', d: days } : null;
+    if (out && typeof p.pl === 'string' && /^[a-z0-9]{2,8}$/.test(p.pl)) out.pl = p.pl;
+    return out;
   }).filter(Boolean);
 }
 function lfCleanWo(w) {
@@ -6224,13 +6226,14 @@ function lfPlanPage(p) {
   var go = el('<button type="button" class="lf-btn is-ink is-full" id="plUse">Use this plan</button>'), mt = el('<button type="button" class="lf-btn is-full" id="plUseT">Use and set targets</button>');
   var head = el('<div class="pl-hd"></div>'); head.appendChild(plBackBtn(function () { lfPlansSheet(); }));
   var s = lfSheet({ title: '', head: head, body: b, foot: [go, mt], full: true, key: 'plans', cls: 'pl-sheet' });
-  go.addEventListener('click', function () { s.close(true); lfProgAdd(plPack(p), p.n, { goal: p.days.length }); });
-  mt.addEventListener('click', function () { s.close(true); lfProgAdd(plPack(p), p.n, { goal: p.days.length, focus: true }); });
+  go.addEventListener('click', function () { s.close(true); lfProgAdd(plPack(p), p.n, { goal: p.days.length, plan: p.id }); });
+  mt.addEventListener('click', function () { s.close(true); lfProgAdd(plPack(p), p.n, { goal: p.days.length, focus: true, plan: p.id }); });
 }
 /* opt: { goal } sets the weekly goal to the plan's days; { focus } sets the weekly targets from the plan. Undo puts both back. */
 function lfProgAdd(pk, name, opt) {
   var wasNew = lfNew(), id; do { id = 'u' + Math.random().toString(36).slice(2, 8); } while (PROGRAMS[id]);
   var p = { id: id, n: (name || pk.n).trim().slice(0, 30) || 'Program', d: pk.d.map(function (d) { return { id: id + '-' + d.w, w: d.w, n: d.n, sp: d.sp, x: d.x, ss: d.ss }; }) };
+  if (opt && opt.plan) p.pl = opt.plan;
   pk.c.forEach(function (e) { if (!exById(e.id)) S.ex.push(e); });
   S.pg = (S.pg || []).concat([p]); lfProgSync();
   var was = lfProgSwitch(id); was.goal = S.goal; was.hadFz = 0;
@@ -9445,10 +9448,16 @@ var BD_LAD = [
   ['la', ['lava1', 'lava2', 'lava3', 'lava4', 'lava5']],
   ['ma', ['marb1', 'marb2', 'marb3', 'marb4', 'marb5']],
   ['dq', ['duo5', 'duo25', 'duo75', 'duo150', 'duo300']],
-  ['lq', ['lead2', 'lead5', 'lead15', 'lead35', 'lead75']]
+  ['lq', ['lead2', 'lead5', 'lead15', 'lead35', 'lead75']],
+  ['pn', ['plan1', 'plan4', 'plan12', 'plan26', 'plan52']]
 ];
 /* the medals the ladders were missing: id, name, kind, what it says, colour, the metric and the count it is won at, then for an exotic or mythic one the painting and the hue */
 var BD_NEW = [
+  ['plan1', 'On Plan', 'mile', 'Trained a week on a training plan.', '#ff8a2a', 'plw', 1],
+  ['plan4', 'Month on Plan', 'mile', 'Four weeks trained on a training plan.', '#ff8a2a', 'plw', 4],
+  ['plan12', 'Quarter on Plan', 'mile', 'Twelve weeks trained on a training plan.', '#ff8a2a', 'plw', 12],
+  ['plan26', 'Half Year on Plan', 'mile', 'Twenty-six weeks trained on a training plan.', '#ff8a2a', 'plw', 26, 'petals', .07],
+  ['plan52', 'Year on Plan', 'mile', 'Fifty-two weeks trained on a training plan.', '#ff8a2a', 'plw', 52, 'nova', .07],
   ['sets10k', 'Set Titan', 'mile', 'Ten thousand sets logged, all time.', '#22b8cf', 'sets', 10000, 'drift', .52],
   ['sets20k', 'Set Deity', 'mile', 'Twenty thousand sets logged, all time.', '#22b8cf', 'sets', 20000, 'circuit', .5],
   ['rp250k', 'Quarter Million Reps', 'mile', 'Two hundred and fifty thousand reps, all time.', '#f59f00', 'reps', 250000, 'rain', .12],
@@ -9770,9 +9779,10 @@ function lfRunStep(prevD, d, run) {
   return run;
 }
 function lfLadderMetrics(ws) {
-  var snaps = [], c = { wo: 0, sets: 0, reps: 0, min: 0, chest: 0, bk: 0, sh: 0, arm: 0, leg: 0, abs: 0, post: 0, cd: 0, cdm: 0, early: 0, owl: 0, mo: 0, ex: 0, sig: 0, plate: 0, run: 0 };
+  var snaps = [], plw = {}, plp = (S.pg || []).filter(function (q) { return q.pl; }).map(function (q) { return q.id + '-'; }), c = { plw: 0, wo: 0, sets: 0, reps: 0, min: 0, chest: 0, bk: 0, sh: 0, arm: 0, leg: 0, abs: 0, post: 0, cd: 0, cdm: 0, early: 0, owl: 0, mo: 0, ex: 0, sig: 0, plate: 0, run: 0 };
   var seen = {}, uses = {}, monN = {}, prevD = '', runNow = 0;
   ws.forEach(function (w) {
+    if (plp.length && w.rt) { var pk0 = w.rt; if (plp.some(function (pre) { return pk0.indexOf(pre) === 0; })) { var wk0 = ymd(monday(parseYmd(w.d))); if (!plw[wk0]) { plw[wk0] = 1; c.plw++; } } }
     c.wo++; c.sets += woSets(w); c.reps += woReps(w); c.min += w.s > 1e11 && w.e > w.s ? Math.min(360, (w.e - w.s) / 60000) : 0;
     var hit = {}, once = {};
     w.x.forEach(function (e) {
@@ -10177,7 +10187,7 @@ var BD_FXTRIM = { tempest: '#2b2e3a', jet: '#2b2d35', holo: '#eef6ff', plasma: '
 var BD_CREAM = '#eee8dc';
 /* every kind has its own bdOutline; the target badges each have their own */
 var BD_SHK = { start: 'circle', streak: 'hexp', volume: 'squircle', pr: 'banner', feat: 'oct', body: 'diamond', core: 'tall' };
-var BD_SHI = { tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', stair10: 'tri', stairhr: 'tri', incl10: 'ramp', inclhr: 'ramp',
+var BD_SHI = { plan1: 'ticket', tgt1: 'hex', tgtall: 'shield', tgt4: 'rosette', quad: 'pent', stair10: 'tri', stairhr: 'tri', incl10: 'ramp', inclhr: 'ramp',
   duo1: 'twin', duo10: 'capsule', lead1: 'crownb', unbeat: 'shard', lead3: 'star5', squad: 'crest',
   early: 'sun', owl: 'gem', long: 'hourglass', ton10: 'trap', rep300: 'cross', back: 'drop', seven: 'hept', explore: 'compass',
   ton15: 'trap', ton20: 'trap', rep1k: 'cross', rep2k: 'cross', leg100: 'hextall', leg200: 'hextall', duo50: 'twin', lead10: 'crownb',
@@ -10197,7 +10207,7 @@ var BD_GS = { plaque: [.72, 0], arch: [.62, 90], tri: [.52, 150], diamond: [.72,
   scallop: [.66, 0], dome: [.56, 60], flare: [.5, 0], shard: [.46, 0], ellt: [.6, 0], trid: [.46, -110],
   clover: [.6, 0], star6: [.5, 0], star8: [.52, 0], kite: [.5, 0], arrowhead: [.5, 30], ticket: [.7, 0],
   burst: [.44, 0], gear: [.56, 0], flag: [.56, 0], tag: [.56, 0], coin24: [.76, 0], egg: [.62, 0], heart: [.5, 40], hextall: [.62, 0] };
-var BD_GL = { first: 'i:check', wo10: '10', wo50: '50', wo100: '100', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50', duo1: 'i:pair', duo10: '10', lead1: '1', lead3: '3', squad: 'i:ring',
+var BD_GL = { plan1: 'i:cal', first: 'i:check', wo10: '10', wo50: '50', wo100: '100', goal: 'i:ring', st4: '4', st12: '12', tgt1: '1', tgtall: 'i:bars', tgt4: '4', quad: 'i:leg', pr: 'i:trophy', pr10: '10', v100k: 'i:weight', v1m: '1M', week: 'i:cal', plate3: '3', stair10: '10', stairhr: 'i:stairs', incl10: '10', inclhr: 'i:ramp', bwgoal: 'i:scale', abs10: '10', abs50: '50', duo1: 'i:pair', duo10: '10', lead1: '1', lead3: '3', squad: 'i:ring',
   early: 'i:sun', owl: 'i:moon', long: '90', ton10: '10k', rep300: '300', back: 'i:flame', seven: '7', explore: '40',
   st26: '26', v5m: '5M', pr100: '100', abs100: '100', duo50: '50', lead10: '10', ton15: '15k', ton20: '20k', rep1k: '1k', rep2k: '2k', leg100: '100', leg200: '200',
   night: 'i:moon', dawn: 'i:sun', onfire: 'i:flame', winter: 'i:star', lungs: 'i:ring', fullbody: 'i:dumb',
@@ -12006,6 +12016,7 @@ var BD_COLL = [
   ['fri', 'Friends', '#6366f1', ['duo1', 'duo5', 'duo10', 'duo25', 'duo50', 'duo75', 'duo150', 'duo300', 'lead1', 'lead2', 'lead5', 'lead15', 'lead35', 'lead75', 'lead3', 'lead10', 'squad', 'wave', 'trio', 'landslide', 'photo', 'pack', 'slayer', 'unbeat']]
 ];
 /* the new rungs go into the collection their ladder was already in */
+BD_COLL.push(['pln', 'Training plans', '#ff8a2a', ['plan1', 'plan4', 'plan12', 'plan26', 'plan52']]);
 BD_COLL.push(['dys', 'Day streaks', '#ff7a1a', BD_DST.map(function (r) { return 'd' + r[0]; })]);
 (function () {
   var home = {}; BD_COLL.forEach(function (c) { c[3].forEach(function (id) { home[id] = c; }); });
