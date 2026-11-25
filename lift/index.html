@@ -973,6 +973,28 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .fr-rg-cr { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--rc) 85%, transparent)); }
 .fr-rg-cr { width: 20px; height: 20px; margin: 0 auto 2px; color: var(--rc); fill: var(--rc); stroke: var(--rc); stroke-width: 1.5; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
+/* THE RING BESIDE ITS LEGEND, and past four friends the list closes up */
+.fr-top { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 2px 0 8px; }
+.fr-top .fr-rg-w { margin: 0; flex: none; }
+.fr-top .fr-rg-w > svg { width: 140px; height: 140px; }
+.fr-lg { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.fr-lg-r { display: grid; grid-template-columns: 10px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 14px; padding: 3px 0; }
+.fr-lg-r i { width: 10px; height: 10px; border-radius: 50%; background: var(--rc); }
+.fr-lg-r span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fr-lg-r b { font-size: 13px; font-weight: 700; color: var(--dim); }
+.fr-lg-r.is-lead i { box-shadow: 0 0 6px 1px var(--rc), 0 0 14px color-mix(in srgb, var(--rc) 55%, transparent); }
+.fr-lg-r.is-lead span { text-shadow: 0 0 10px color-mix(in srgb, var(--rc) 60%, transparent); }
+.fr-lg-r.is-lead b { color: var(--ink); }
+.fr-rg-a.is-lead:not(.is-live) { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--rc) 70%, transparent)); }
+#frRings #frBoard.is-compact .fr-row { padding: 9px 0; row-gap: 6px; }
+#frRings #frBoard.is-compact .fr-t { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
+#frRings #frBoard.is-compact .fr-t b { flex: 0 1 auto; min-width: 0; }
+#frRings #frBoard.is-compact .fr-t > span { flex: none; font-size: 11px; }
+#frRings #frBoard.is-compact .fr-t > span:not(:empty)::before { content: '\00b7\00a0'; }
+#frRings #frBoard.is-compact .fr-strip { margin-top: 0; gap: 1.5px; }
+#frRings #frBoard.is-compact .fr-strip i { height: 4px; }
+#frRings #frBoard.is-compact .fr-wk { font-size: 15px; }
+@media (prefers-reduced-motion: reduce) { .fr-rg-a.is-lead { filter: none; } }
 #frRings .fr-row { padding: 12px 0; }
 .fr-row.is-off { display: none !important; }
 #frSearch { margin: 4px 0 10px; }
@@ -9869,7 +9891,7 @@ function frRings(rows) {
      longer run of weeks on goal. Until anyone has hit theirs it is whoever is
      closest to their own */
   var ls = rows.map(frStand).sort(frCmp);
-  var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div><div id="frBoard"></div></div>');
+  var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-top"><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div></div><div id="frBoard"></div></div>');
   /* THE RING IS A PODIUM, NOT A ROLL CALL. A circle each stops being a picture at a dozen friends and is a blur at two hundred, and a friend who has not trained yet is an empty track that says nothing. So it draws the five furthest ahead this week, and you: the list under it is where everybody is. */
   var g = $('g', c), live0 = ls.filter(function (x) { return !x.f.gone; }), drawn = live0.filter(function (x) { return x.k > 0 || frLive(x.f.s); }).slice(0, 5), n;
   if (!drawn.some(function (x) { return x.f.me; })) { var mine0 = live0.filter(function (x) { return x.f.me; })[0]; if (mine0) drawn = drawn.slice(0, 4).concat([mine0]); }
@@ -9895,7 +9917,7 @@ function frRings(rows) {
     frRgMem[key] = x.k; frRgSeen[key] = x.k;
     var up = x.k > was + 1e-6, shut = x.k >= 1 && was < 1, seg = Math.min(18, len * (x.k - was));
     g.insertAdjacentHTML('beforeend', '<circle cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="var(--card3)" stroke-width="' + sw + '"/>'
-      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + '" data-k="' + esc(key) + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + paint + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
+      + (x.k > 0 ? '<circle class="fr-rg-a' + (lv ? ' is-live' : '') + (shut ? ' is-shut' : '') + (x.k > 0 && frCmp(x, ls[0]) === 0 ? ' is-lead' : '') + '" data-k="' + esc(key) + '" data-to="' + (len * x.k).toFixed(1) + '" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="' + paint + '" stroke-width="' + sw + '" stroke-dasharray="' + (len * from).toFixed(1) + ' ' + len.toFixed(1) + '" style="--rc:' + col + '"/>' : '')
       + (up && x.k > 0 ? '<circle class="fr-rg-cm" cx="75" cy="75" r="' + rr.toFixed(1) + '" stroke="#fff" stroke-width="' + (sw * .55).toFixed(1) + '" stroke-dasharray="' + seg.toFixed(1) + ' ' + len.toFixed(1) + '" style="--o0:' + (-len * was).toFixed(1) + 'px;--o1:' + (-(len * x.k - seg)).toFixed(1) + 'px;--rc:' + col + '"/>' : ''));
     if (up) grew.push(key);
     /* THEY FINISHED one since you last looked: confetti off the tip of their ring */
@@ -9907,6 +9929,20 @@ function frRings(rows) {
         + '<circle class="fr-rg-h" cx="' + hx.toFixed(1) + '" cy="' + hy.toFixed(1) + '" r="' + (sw / 2 - 2).toFixed(1) + '" fill="#fff"/>');
     }
   });
+  /* THE LEGEND: only people with a day logged this week (or training right now) are on it, so a week nobody else has started is just your own name. Whoever is in front glows here and on the ring. */
+  (function () {
+    var on = live0.filter(function (x) { return x.k > 0 || frLive(x.f.s); }).slice(0, 5), top = $('.fr-top', c);
+    if (!on.length) return;
+    var lg = el('<div class="fr-lg"></div>');
+    on.forEach(function (x) {
+      var r = el('<div class="fr-lg-r"><i></i><span></span><b class="lf-num"></b></div>');
+      r.style.setProperty('--rc', frColOf(x.f.s));
+      if (x.k > 0 && frCmp(x, ls[0]) === 0) r.classList.add('is-lead');
+      $('span', r).textContent = x.f.me ? (FRS.name || 'You') : (x.f.n || 'Friend');
+      $('b', r).textContent = x.w.n + '/' + x.w.g; lg.appendChild(r);
+    });
+    top.appendChild(lg); c.classList.add('has-lg');
+  })();
   /* THE MIDDLE IS WHO IS IN FRONT: closest to their own goal, crowned,
      in their colour. Two level at the top is a tie, and a week nobody has
      started yet says nothing. Training now stays on the ring itself. */
@@ -9919,7 +9955,7 @@ function frRings(rows) {
     $('b', mid).textContent = nm;
     /* THE NAME HAS TO FIT THE HOLE IN THE RINGS. With five friends the free middle is about 41px across, and a full name at 15px is nearly twice that, so it ran out over the rings. It is sized to the hole: the whole name if it fits at 11px or more, else the first name, never smaller than 10px, and the crown steps down with it. The full name stays in the spoken label. */
     (function () {
-      var rin = Math.max(8, r0 - (n - 1) * step), D = Math.floor(2 * (rin - sw / 2 - 1) * 1.2 * .84), nb = $('b', mid), cw = $('.fr-rg-cr', mid), cv = document.createElement('canvas').getContext('2d'), fam = getComputedStyle(document.body).fontFamily;
+      var rin = Math.max(8, r0 - (n - 1) * step), D = Math.floor(2 * (rin - sw / 2 - 1) * (140 / 150) * .84), nb = $('b', mid), cw = $('.fr-rg-cr', mid), cv = document.createElement('canvas').getContext('2d'), fam = getComputedStyle(document.body).fontFamily;
       var fit = function (t) { cv.font = '800 15px ' + fam; return Math.min(15, 15 * D / Math.max(1, cv.measureText(t).width)); };
       var pick = nm, px = fit(nm), first = nm.split(/\s+/)[0];
       if (px < 11 && first && first !== nm) { pick = first; px = fit(first); }
@@ -9956,14 +9992,14 @@ function frRings(rows) {
     $('span:last-child', pill).textContent = 'In sync with ' + who;
     var dots = $('.fr-sync-d', pill); var md = el('<i></i>'); md.style.setProperty('--rc', frColOf({ ac: lfAccent() })); dots.appendChild(md);
     sync.slice(0, 3).forEach(function (x) { var d = el('<i></i>'); d.style.setProperty('--rc', frColOf(x.f.s)); dots.appendChild(d); });
-    c.insertBefore(pill, $('.fr-rg-w', c));
+    c.insertBefore(pill, $('.fr-top', c));
     var sk = act.id + ':' + sync.map(function (x) { return x.f.c; }).sort().join(',');
     if (frSyncSaid !== sk) { frSyncSaid = sk; setTimeout(function () { if (view === 'fr') { lfBanner(IC_LINK, 'In sync', 'Training with ' + who + ' right now', frColOf(sync[0].f.s)); buzz([10, 50, 10]); } }, 500); }
   }
   /* the arcs move to where they stand on the next frame, so the move is drawn */
   requestAnimationFrame(function () { requestAnimationFrame(function () { $$('.fr-rg-a', c).forEach(function (a) { a.setAttribute('stroke-dasharray', a.dataset.to + ' 999'); }); }); });
   if (grew.length && !arrive) buzz(10);
-  var bd = $('#frBoard', c);
+  var bd = $('#frBoard', c), CMP = ls.filter(function (x) { return !x.f.me && !x.f.gone; }).length > 4; if (CMP) bd.classList.add('is-compact');
   ls.forEach(function (x) {
     var f = x.f, st = f.s || {};
     var row = el('<div class="fr-row"><button type="button" class="fr-open"></button><i class="fr-rg-k"></i><div class="fr-t"><b></b><span></span></div><span class="fr-wk lf-num"></span></div>');
@@ -9994,7 +10030,7 @@ function frRings(rows) {
     if (!f.gone) {
       /* the badge column is always there, so every count lines up */
       var bg = frBadges(st), ch = el('<div class="fr-bg"></div>');
-      bg.forEach(function (b) { ch.appendChild(lfCoinBtn(b, 30)); }); row.insertBefore(ch, $('.fr-wk', row));
+      bg.forEach(function (b) { ch.appendChild(lfCoinBtn(b, CMP ? 22 : 30)); }); row.insertBefore(ch, $('.fr-wk', row));
       row.appendChild(frStrip(st.d));
     }
     $('.fr-open', row).setAttribute('aria-label', (f.me ? (FRS.name || 'You') : (f.n || 'Friend')) + ', ' + x.w.n + ' of ' + x.w.g + ' this week. Open their dashboard');
