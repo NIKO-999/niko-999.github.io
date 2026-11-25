@@ -496,6 +496,8 @@ svg { display: block; }
 .lf-rcm > .lf-rcm-b { display: block; margin: 3px 0 0 15px; }
 .lf-rcm-b::before { content: ''; position: absolute; inset: -12px -5px; }
 .lf-li.is-off { opacity: .5; }
+.lf-orig-h { color: var(--log); }
+.lf-orig b { color: var(--log); }
 .lf-aim { appearance: none; background: none; border: 0; padding: 0; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--log); margin: 2px 0 6px; text-align: left; cursor: pointer; display: flex; align-items: center; }
 .lf-aim::before { content: 'COACH'; order: -1; margin-right: 7px; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; color: var(--log); }
 .lf-aim-s { order: -2; flex: none; width: 11px; height: 11px; margin-right: 4px; fill: none; stroke: var(--log); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -5258,7 +5260,7 @@ function lfSwap(e) {
     if (id === e.id) return;
     if (act.x.some(function (q) { return q !== e && q.id === id; })) { lfToast('That one is already in this workout'); return; }
     lfSwapTo(e, id);
-  }, 'Swap ' + e.n);
+  }, 'Swap ' + e.n, e.from);
 }
 /* MOVING AN EXERCISE. The workout is as long as it is and nobody does it in the order a program wrote it down: pick an exercise up by its grip and put it where you will do it. The workout's own order follows, so it is saved, and logged, the way you set it. */
 function lfMoveEx(e, to) {
@@ -6549,7 +6551,7 @@ function lfGrouped(list) {
   return out;
 }
 
-function lfPicker(onPick, title) {
+function lfPicker(onPick, title, orig) {
   var b = el('<div><input class="lf-field" type="search" placeholder="Search exercises" aria-label="Search exercises" autocomplete="off" /><div class="lf-pplw"></div><div class="lf-list lf-sec"></div></div>');
   var mk = el('<button type="button" class="lf-btn is-full">' + IC.plus + 'Create exercise</button>');
   var s = lfSheet({ title: title || 'Add exercise', body: b, foot: [mk] });
@@ -6558,8 +6560,17 @@ function lfPicker(onPick, title) {
   function paint() {
     list.textContent = '';
     var t = q.value.trim().toLowerCase();
-    var all = allEx().filter(function (e) { return (!t || e.n.toLowerCase().indexOf(t) >= 0) && (grp === 'all' || lfPpl(e) === grp); });
-    if (!all.length) { list.appendChild(el('<div class="lf-empty"><b>' + (allEx().length ? 'No match' : 'No exercises yet') + '</b>' + (allEx().length ? 'Try another word, or create it.' : 'Create one and it is here every time.') + '</div>')); return; }
+    var all = allEx().filter(function (e) { return e.id !== orig && (!t || e.n.toLowerCase().indexOf(t) >= 0) && (grp === 'all' || lfPpl(e) === grp); });
+    /* THE EXERCISE THIS ONE STANDS IN FOR is at the top, marked, so going back to it is one press */
+    var ox = orig && exById(orig);
+    if (ox && (!t || ox.n.toLowerCase().indexOf(t) >= 0)) {
+      var oh = el('<div class="lf-cap lf-pick-h lf-orig-h">Original</div>'); list.appendChild(oh);
+      var ol = el('<button type="button" class="lf-li lf-orig"><div class="lf-li-t"><b></b><span></span></div>' + IC.plus + '</button>');
+      $('b', ol).textContent = ox.n; $('span', ol).textContent = ox.m + ' \u00b7 ' + lfRecTxt(ox.id);
+      ol.addEventListener('click', function () { s.close(true); onPick(ox.id); });
+      list.appendChild(ol);
+    }
+    if (!all.length && !(ox && (!t || ox.n.toLowerCase().indexOf(t) >= 0))) { list.appendChild(el('<div class="lf-empty"><b>' + (allEx().length ? 'No match' : 'No exercises yet') + '</b>' + (allEx().length ? 'Try another word, or create it.' : 'Create one and it is here every time.') + '</div>')); return; }
     lfGrouped(all).forEach(function (G) {
       var h = el('<div class="lf-cap lf-pick-h"></div>'); h.textContent = G.n; list.appendChild(h);
       G.es.forEach(function (e) {
