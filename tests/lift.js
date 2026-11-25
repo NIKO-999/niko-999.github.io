@@ -2363,7 +2363,7 @@ const freeze = (at) => `(() => {
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     await cuOpen(page); await page.click('#lfYou .rk-set[data-k="ti"]'); await page.waitForTimeout(600);
     const heads = await page.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4').length && [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol h4')].map((h) => h.textContent).join());
-    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges,Animated,Moments,Signature,Finishes,Nicknames,Animated finishes,Strength,Against the creator', heads);
+    ok('titles sit in collections, as badges do', heads === 'Milestones,Consistency,Badges,Animated,Moments,Signature,Finishes,Workout count,Badge count,Weeks on goal,Challenges,Animated finishes,Strength,Against the creator', heads);
     ok('and nobody else is offered Creator, not even locked', await page.locator('.rk-o[data-id="creator"]').count() === 0);
     await page.keyboard.press('Escape'); await settle(page); await cuOpen(page); await page.click('#lfYou .rk-set[data-k="fm"]'); await page.waitForTimeout(500);
     ok('or the Prestige frame', await page.locator('.rk-o[data-id="prestige"]').count() === 0 && await page.locator('.rk-o[data-id="neon"]').count() === 1);

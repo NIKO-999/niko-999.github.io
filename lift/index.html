@@ -2078,6 +2078,44 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes tt2-phx { 0%, 100% { filter: hue-rotate(-20deg); text-shadow: 0 0 6px rgba(239, 68, 68, .6); } 50% { filter: hue-rotate(25deg); text-shadow: 0 -3px 12px rgba(250, 204, 21, .9); } }
 .fr-ti .tt-n-grim em { color: #e5e7eb; display: inline-block; animation: tt2-grim 3s steps(1) infinite; }
 @keyframes tt2-grim { 0%, 70%, 100% { text-shadow: 0 0 0 transparent; } 72% { text-shadow: 2px 0 #7c3aed, -2px 0 #111; transform: translateX(-1px); } 76% { text-shadow: -2px 0 #7c3aed, 2px 0 #111; transform: translateX(1px); } 80% { text-shadow: 0 0 0 transparent; transform: none; } }
+/* twenty-four more nicknames, twelve moves, each in its own colour and speed */
+.fr-ti .tt-n-sledge em { --c: #f59e0b; color: var(--c); display: inline-block; animation: tt3-10 1.6s ease-in-out infinite; }
+@keyframes tt3-10 { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+.fr-ti .tt-n-stallion em { --c: #fb7185; color: var(--c); display: inline-block; animation: tt3-4 1.8s ease-in-out infinite; }
+@keyframes tt3-4 { 0%, 100% { transform: translateY(1px); } 50% { transform: translateY(-3px); } }
+.fr-ti .tt-n-bison em { --c: #d97706; color: var(--c); display: inline-block; animation: tt3-7 2.6s steps(1) infinite; }
+@keyframes tt3-7 { 0%, 78%, 100% { transform: none; } 80% { transform: translateX(-2px); } 83% { transform: translateX(2px); } 86% { transform: translateX(-1px); } 89% { transform: none; } }
+.fr-ti .tt-n-cobra em { --c: #4ade80; color: var(--c); display: inline-block; animation: tt3-9 1.9s ease-in-out infinite; }
+@keyframes tt3-9 { 0%, 100% { transform: skewX(-7deg); } 50% { transform: skewX(7deg); } }
+.fr-ti .tt-n-falcon em { --c: #38bdf8; color: var(--c); display: inline-block; animation: tt3-4 2.4s ease-in-out infinite; }
+.fr-ti .tt-n-lonewolf em { --c: #cbd5e1; color: var(--c); display: inline-block; animation: tt3-12 2.8s ease-in-out infinite; }
+@keyframes tt3-12 { 0%, 100% { text-shadow: 0 0 0 transparent; transform: translateX(0); } 50% { text-shadow: -4px 0 0 color-mix(in srgb, var(--c) 45%, transparent), -8px 0 0 color-mix(in srgb, var(--c) 20%, transparent); transform: translateX(3px); } }
+.fr-ti .tt-n-lion em { --c: #fbbf24; color: var(--c); display: inline-block; background: linear-gradient(100deg, var(--c) 30%, #fff 50%, var(--c) 70%) 120% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: tt3-1 3s linear infinite; }
+@keyframes tt3-1 { to { background-position: -60% 0; } }
+.fr-ti .tt-n-grizzly em { --c: #fb923c; color: var(--c); display: inline-block; animation: tt3-10 2.2s ease-in-out infinite; }
+.fr-ti .tt-n-shark em { --c: #7dd3fc; color: var(--c); display: inline-block; animation: tt3-9 1.5s ease-in-out infinite; }
+.fr-ti .tt-n-hawkeye em { --c: #fde047; color: var(--c); display: inline-block; position: relative; animation: none; }
+@keyframes tt3-11 { 0% { transform: scaleX(0); } 50% { transform: scaleX(1); } 100% { transform: scaleX(0); transform-origin: 100% 50%; } }
+.fr-ti .tt-n-hawkeye em::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; background: var(--c); transform-origin: 0 50%; animation: tt3-11 3s ease-in-out infinite; }
+.fr-ti .tt-n-raven em { --c: #a78bfa; color: var(--c); display: inline-block; animation: tt3-5 3.2s steps(1) infinite; }
+@keyframes tt3-5 { 0%, 100% { opacity: 1; } 40% { opacity: .4; } 44% { opacity: 1; } 70% { opacity: .55; } 74% { opacity: 1; } }
+.fr-ti .tt-n-jaguar em { --c: #f59e0b; color: var(--c); display: inline-block; animation: tt3-12 2.2s ease-in-out infinite; }
+.fr-ti .tt-n-mammoth em { --c: #cbd5e1; color: var(--c); display: inline-block; animation: tt3-6 3.6s ease-in-out infinite; }
+@keyframes tt3-6 { 0%, 100% { letter-spacing: .01em; } 50% { letter-spacing: .12em; } }
+.fr-ti .tt-n-rhino em { --c: #d6d3d1; color: var(--c); display: inline-block; animation: tt3-7 3s steps(1) infinite; }
+.fr-ti .tt-n-kraken em { --c: #2dd4bf; color: var(--c); display: inline-block; animation: tt3-3 2.6s ease-in-out infinite; }
+@keyframes tt3-3 { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.fr-ti .tt-n-hydra em { --c: #34d399; color: var(--c); display: inline-block; animation: tt3-8 6s linear infinite; }
+@keyframes tt3-8 { to { filter: hue-rotate(360deg); } }
+.fr-ti .tt-n-minotaur em { --c: #ef4444; color: var(--c); display: inline-block; animation: tt3-10 1.3s ease-in-out infinite; }
+.fr-ti .tt-n-centaur em { --c: #c084fc; color: var(--c); display: inline-block; animation: tt3-4 1.5s ease-in-out infinite; }
+.fr-ti .tt-n-cyclops em { --c: #f472b6; color: var(--c); display: inline-block; animation: tt3-2 2.4s ease-in-out infinite; }
+@keyframes tt3-2 { 0%, 100% { text-shadow: 0 0 2px color-mix(in srgb, var(--c) 40%, transparent); } 50% { text-shadow: 0 0 6px var(--c), 0 0 16px color-mix(in srgb, var(--c) 60%, transparent); } }
+.fr-ti .tt-n-valkyrie em { --c: #fef08a; color: var(--c); display: inline-block; background: linear-gradient(100deg, var(--c) 30%, #fff 50%, var(--c) 70%) 120% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: tt3-1 2.4s linear infinite; }
+.fr-ti .tt-n-berserker em { --c: #dc2626; color: var(--c); display: inline-block; animation: tt3-7 2s steps(1) infinite; }
+.fr-ti .tt-n-behemoth em { --c: #22d3ee; color: var(--c); display: inline-block; animation: tt3-3 3.2s ease-in-out infinite; }
+.fr-ti .tt-n-goliath em { --c: #e5e7eb; color: var(--c); display: inline-block; animation: tt3-6 4s ease-in-out infinite; }
+.fr-ti .tt-n-paragon em { --c: #fcd34d; color: var(--c); display: inline-block; animation: tt3-2 2.8s ease-in-out infinite; }
 .fr-ti .tt-n-wildcard em { display: inline-block; color: #f472b6; animation: ttn-wild 4s linear infinite; }
 @keyframes ttn-wild { 0% { filter: hue-rotate(0); transform: rotate(-2deg); } 25% { transform: rotate(2deg) skewX(4deg); } 50% { transform: rotate(-2deg); } 75% { transform: rotate(2deg) skewX(-4deg); } 100% { filter: hue-rotate(360deg); transform: rotate(-2deg); } }
 
@@ -2262,6 +2300,13 @@ b:has(> .lf-nw) { padding: 5px 3px; margin: -5px -3px; }
 .fr-ban-av.is-fm-molten::before { animation: lf-fmr 4.5s linear infinite; filter: drop-shadow(0 0 5px #ff5a1f); }
 .fr-ban-av.is-fm-ember::before { filter: drop-shadow(0 0 4px #ff6a00); }
 @keyframes lf-fmr { to { transform: rotate(360deg); } }
+.rk-opts[hidden] { display: none; }
+.rk-eqh { margin: 14px 0 6px; } .rk-eqh h4 { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.rk-eq { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; padding: 6px 6px 6px 14px; border-radius: 12px; background: var(--card2); box-shadow: inset 0 0 0 1.5px var(--log); }
+.rk-eq-n { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; min-width: 0; }
+.rk-eq-x { position: relative; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--card3); color: var(--ink); flex: none; }
+.rk-eq-x::before { content: ''; position: absolute; inset: -6px; }
+.rk-eq-x svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 .rk-opts { margin-top: 12px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
 .rk-o { display: flex; flex-direction: column; justify-content: center; gap: 2px; min-height: 46px; padding: 6px 12px; border-radius: 12px; text-align: left; background: var(--card2); box-shadow: inset 0 0 0 1.5px transparent; }
 .rk-o b { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; }
@@ -8627,6 +8672,30 @@ var RK = {
     ['glacier', 'Glacier', '10 badges', function (c) { return c.bd >= 10; }],
     ['firebird', 'Firebird', '30 weeks on goal', function (c) { return c.run >= 30; }],
     ['grim', 'Grim', '70 badges', function (c) { return c.bd >= 70; }],
+    ['sledge', 'Sledge', '40 workouts', function (c) { return c.wo >= 40; }],
+    ['stallion', 'Stallion', '50 workouts', function (c) { return c.wo >= 50; }],
+    ['bison', 'Bison', '85 workouts', function (c) { return c.wo >= 85; }],
+    ['cobra', 'Cobra', '25 badges', function (c) { return c.bd >= 25; }],
+    ['falcon', 'Falcon', '40 badges', function (c) { return c.bd >= 40; }],
+    ['lonewolf', 'Lone Wolf', '95 workouts', function (c) { return c.wo >= 95; }],
+    ['lion', 'Lion', '130 workouts', function (c) { return c.wo >= 130; }],
+    ['grizzly', 'Grizzly', '175 workouts', function (c) { return c.wo >= 175; }],
+    ['shark', 'Shark', '45 badges', function (c) { return c.bd >= 45; }],
+    ['hawkeye', 'Hawkeye', '60 badges', function (c) { return c.bd >= 60; }],
+    ['raven', 'Raven', '80 badges', function (c) { return c.bd >= 80; }],
+    ['jaguar', 'Jaguar', '90 badges', function (c) { return c.bd >= 90; }],
+    ['mammoth', 'Mammoth', '225 workouts', function (c) { return c.wo >= 225; }],
+    ['rhino', 'Rhino', '275 workouts', function (c) { return c.wo >= 275; }],
+    ['kraken', 'Kraken', '350 workouts', function (c) { return c.wo >= 350; }],
+    ['hydra', 'Hydra', '10 weeks on goal', function (c) { return c.run >= 10; }],
+    ['minotaur', 'Minotaur', '400 workouts', function (c) { return c.wo >= 400; }],
+    ['centaur', 'Centaur', '14 weeks on goal', function (c) { return c.run >= 14; }],
+    ['cyclops', 'Cyclops', '110 badges', function (c) { return c.bd >= 110; }],
+    ['valkyrie', 'Valkyrie', '20 weeks on goal', function (c) { return c.run >= 20; }],
+    ['berserker', 'Berserker', '450 workouts', function (c) { return c.wo >= 450; }],
+    ['behemoth', 'Behemoth', '500 workouts', function (c) { return c.wo >= 500; }],
+    ['goliath', 'Goliath', '125 badges', function (c) { return c.bd >= 125; }],
+    ['paragon', 'Paragon', '40 weeks on goal', function (c) { return c.run >= 40; }],
     ['slayer', 'Giant Slayer', 'Beat the creator', function (c) { return c.slay; }],
     ['creator', 'Creator', 'One of one', function (c) { return c.own; }], ['eye', 'The Eye', 'One of one', function (c) { return c.own; }]],
   fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
@@ -8730,7 +8799,7 @@ var RK = {
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'twice', 'mythic']],
-  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['nk', 'Nicknames', '#f43f5e', ['ruthless', 'gymrat', 'apex', 'savage', 'beastmode', 'machine', 'predator', 'ironwill', 'unstop', 'juggernaut', 'pumpchaser', 'repreaper', 'barbender', 'stalker', 'crusher', 'heavymetal', 'gravity', 'dragon', 'irongiant', 'mountain', 'showtime', 'overdrive', 'wreckball', 'clutch', 'lightsout', 'rainmaker', 'coldstart', 'hotstreak', 'zenmaster', 'overlord', 'daredevil', 'ghostride', 'bigdog', 'madsci', 'sharpshot', 'thunder', 'lockedon', 'finalboss', 'goat', 'wildcard', 'tank', 'bulldozer', 'nightcrawler', 'specter', 'viper', 'maverick', 'outlaw', 'spartan', 'gladiator', 'warlord', 'samurai', 'ninja', 'pharaoh', 'shogun', 'blastoff', 'cyclone', 'volcano', 'glacier', 'firebird', 'grim']], ['tch', 'Animated finishes', '#38bdf8', ['static', 'glitch', 'phantom', 'venom', 'ripple', 'hologram', 'plasma', 'chrome', 'tempest', 'obsidian', 'supernova', 'gilded']], ['lfx', 'Strength', '#22c55e', ['benchbud', 'twoplates', 'benchboss', 'benchking', 'incstart', 'incpro', 'incbeast', 'incking', 'pressrook', 'ohpro', 'boulder', 'skypush', 'pullstart', 'floormove', 'fourplate', 'deadlord', 'rowrookie', 'backbuild', 'rowmaster', 'cobraback', 'sqrookie', 'deepdiver', 'threefif', 'sqboss', 'quadkill']],
+  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['nk', 'Nicknames', '#f43f5e', ['ruthless', 'gymrat', 'apex', 'savage', 'beastmode', 'machine', 'predator', 'ironwill', 'unstop', 'juggernaut', 'pumpchaser', 'repreaper', 'barbender', 'stalker', 'crusher', 'heavymetal', 'gravity', 'dragon', 'irongiant', 'mountain', 'showtime', 'overdrive', 'wreckball', 'clutch', 'lightsout', 'rainmaker', 'coldstart', 'hotstreak', 'zenmaster', 'overlord', 'daredevil', 'ghostride', 'bigdog', 'madsci', 'sharpshot', 'thunder', 'lockedon', 'finalboss', 'goat', 'wildcard', 'sledge', 'stallion', 'bison', 'cobra', 'falcon', 'lonewolf', 'lion', 'grizzly', 'shark', 'hawkeye', 'raven', 'jaguar', 'mammoth', 'rhino', 'kraken', 'hydra', 'minotaur', 'centaur', 'cyclops', 'valkyrie', 'berserker', 'behemoth', 'goliath', 'paragon', 'tank', 'bulldozer', 'nightcrawler', 'specter', 'viper', 'maverick', 'outlaw', 'spartan', 'gladiator', 'warlord', 'samurai', 'ninja', 'pharaoh', 'shogun', 'blastoff', 'cyclone', 'volcano', 'glacier', 'firebird', 'grim']], ['tch', 'Animated finishes', '#38bdf8', ['static', 'glitch', 'phantom', 'venom', 'ripple', 'hologram', 'plasma', 'chrome', 'tempest', 'obsidian', 'supernova', 'gilded']], ['lfx', 'Strength', '#22c55e', ['benchbud', 'twoplates', 'benchboss', 'benchking', 'incstart', 'incpro', 'incbeast', 'incking', 'pressrook', 'ohpro', 'boulder', 'skypush', 'pullstart', 'floormove', 'fourplate', 'deadlord', 'rowrookie', 'backbuild', 'rowmaster', 'cobraback', 'sqrookie', 'deepdiver', 'threefif', 'sqboss', 'quadkill']],
   ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
@@ -8820,6 +8889,30 @@ function lfTitleEl(id) {
     finalboss: ['tt-n-finalboss', '<em>Final Boss</em>'],
     goat: ['tt-n-goat', '<em>The G.O.A.T.</em>'],
     wildcard: ['tt-n-wildcard', '<em>Wild Card</em>'],
+    sledge: ['tt-n-sledge', '<em>Sledge</em>'],
+    stallion: ['tt-n-stallion', '<em>Stallion</em>'],
+    bison: ['tt-n-bison', '<em>Bison</em>'],
+    cobra: ['tt-n-cobra', '<em>Cobra</em>'],
+    falcon: ['tt-n-falcon', '<em>Falcon</em>'],
+    lonewolf: ['tt-n-lonewolf', '<em>Lone Wolf</em>'],
+    lion: ['tt-n-lion', '<em>Lion</em>'],
+    grizzly: ['tt-n-grizzly', '<em>Grizzly</em>'],
+    shark: ['tt-n-shark', '<em>Shark</em>'],
+    hawkeye: ['tt-n-hawkeye', '<em>Hawkeye</em>'],
+    raven: ['tt-n-raven', '<em>Raven</em>'],
+    jaguar: ['tt-n-jaguar', '<em>Jaguar</em>'],
+    mammoth: ['tt-n-mammoth', '<em>Mammoth</em>'],
+    rhino: ['tt-n-rhino', '<em>Rhino</em>'],
+    kraken: ['tt-n-kraken', '<em>Kraken</em>'],
+    hydra: ['tt-n-hydra', '<em>Hydra</em>'],
+    minotaur: ['tt-n-minotaur', '<em>Minotaur</em>'],
+    centaur: ['tt-n-centaur', '<em>Centaur</em>'],
+    cyclops: ['tt-n-cyclops', '<em>Cyclops</em>'],
+    valkyrie: ['tt-n-valkyrie', '<em>Valkyrie</em>'],
+    berserker: ['tt-n-berserker', '<em>Berserker</em>'],
+    behemoth: ['tt-n-behemoth', '<em>Behemoth</em>'],
+    goliath: ['tt-n-goliath', '<em>Goliath</em>'],
+    paragon: ['tt-n-paragon', '<em>Paragon</em>'],
     tank: ['tt-n-tank', '<em>Tank</em>'],
     bulldozer: ['tt-n-bulldozer', '<em>Bulldozer</em>'],
     nightcrawler: ['tt-n-nightcrawler', '<em>Nightcrawler</em>'],
@@ -9265,6 +9358,24 @@ function lfEmblem3(kind, colStr) {
   });
 }
 var RK_HEAD = { ti: 'Title', fl: 'Flair', fm: 'Frame' };
+/* THERE IS NO NICKNAMES SECTION: every title is a nickname. The ones that were filed under it are sorted by what earns them. */
+(function () {
+  var nk = RK_TC.filter(function (c) { return c[0] === 'nk'; })[0]; if (!nk) return;
+  var at = RK_TC.indexOf(nk), b = { w: [], b: [], r: [], c: [] }, num = function (q) { return parseInt(q, 10) || 0; };
+  nk[3].forEach(function (id) {
+    var x = RK.ti.filter(function (y) { return y[0] === id; })[0]; if (!x) return;
+    var q = String(x[2]); (/ workouts$/.test(q) ? b.w : / badges$/.test(q) ? b.b : / weeks on goal$/.test(q) ? b.r : b.c).push([id, num(q)]);
+  });
+  var out = function (l) { return l.sort(function (p, q) { return p[1] - q[1]; }).map(function (p) { return p[0]; }); };
+  RK_TC.splice(at, 1, ['nkw', 'Workout count', '#f97316', out(b.w)], ['nkb', 'Badge count', '#a78bfa', out(b.b)], ['nkr', 'Weeks on goal', '#22c55e', out(b.r)], ['nkc', 'Challenges', '#f43f5e', b.c.map(function (p) { return p[0]; })]);
+})();
+/* the flairs, by what they do */
+function lfRkFc() {
+  var nm = [], mv = [], ic = [];
+  RK.fl.forEach(function (x) { (/^nf/.test(x[0]) ? nm : /^x/.test(x[0]) ? mv : ic).push(x[0]); });
+  return [['fnm', 'Plays with your name', '#f472b6', nm], ['fmv', 'Icons that move', '#22d3ee', mv], ['fic', 'Icons', '#94a3b8', ic]];
+}
+function lfRkOnly() { try { return localStorage.getItem('lift.rkonly.v1') === '1'; } catch (e) { return false; } }
 function lfRkItem(kind, id) { return (RK[kind] || []).filter(function (x) { return x[0] === id; })[0] || null; }
 function lfRkName(kind, id) { if (kind === 'ti' && LF_TIN[id]) return lfLiftTitleName(id); var x = lfRkItem(kind, id); return x ? x[1] : ''; }
 function lfRkHas(kind, id) { return !!lfRkItem(kind, id); }
@@ -9338,14 +9449,37 @@ function lfRkPick(kind, onPick) {
       return o;
     }
     var opts = RK[kind].filter(function (x) { return !(kind === 'fl' && x[0] === 'eye' && !lfOwner()) && !(kind === 'fm' && (x[0] === 'prestige' || x[0] === 'sovereign' || (RK_ORN[x[0]] && RK_ORN[x[0]].own)) && !lfOwner()); }).map(function (x) { return { id: x[0], n: x[1], q: x[2], ok: !!x[3](c) }; });
-    if (kind === 'ti') { var gn = el('<div class="rk-opts"></div>'); gn.appendChild(opt({ id: 'none', n: 'None', q: '', ok: true })); body.appendChild(gn); }
-    if (kind !== 'ti') { opts.unshift({ id: '', n: 'None', q: '', ok: true }); var g0 = el('<div class="rk-opts"></div>'); opts.forEach(function (x) { g0.appendChild(opt(x)); }); body.appendChild(g0); return; }
-    RK_TC.forEach(function (tc) {
+    if (kind === 'fm') { opts.unshift({ id: '', n: 'None', q: '', ok: true }); var g0 = el('<div class="rk-opts"></div>'); opts.forEach(function (x) { g0.appendChild(opt(x)); }); body.appendChild(g0); return; }
+    /* TITLES AND FLAIRS FOLD LIKE THE BADGE SHELF: what you are wearing at the top with a way off, an Unlocked-only switch, and every section shut until you open it (and left open once you do). */
+    var only = lfRkOnly(), openMap = lfBcolOpen();
+    var bar = el('<div class="lf-bopts"><div class="lf-bshow"><span>Unlocked only</span><button type="button" class="lf-tgl" role="switch" aria-label="Show only what you have unlocked"><i></i></button></div></div>'), ob = $('button', bar);
+    ob.dataset.k = 'rkonly'; ob.setAttribute('aria-checked', only ? 'true' : 'false');
+    ob.addEventListener('click', function () { try { localStorage.setItem('lift.rkonly.v1', lfRkOnly() ? '0' : '1'); } catch (e) {} paint(); });
+    body.appendChild(bar);
+    var wornId = kind === 'ti' ? (S.ti === 'none' ? '' : lfRkTitle(c)) : lfRkWorn(kind, c) || '';
+    if (wornId) {
+      var eh = el('<div class="rk-eqh"><h4>Wearing</h4></div>'), eq = el('<div class="rk-eq"><span class="rk-eq-n"></span><button type="button" class="rk-eq-x"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>');
+      var en = $('.rk-eq-n', eq);
+      if (kind === 'ti') { var tw0 = lfTitleEl(wornId); if (tw0) { var tf0 = el('<span class="fr-ti"></span>'); tf0.appendChild(tw0); en.appendChild(tf0); } else en.textContent = lfRkName('ti', wornId); }
+      else { en.textContent = lfRkName('fl', wornId) + ' '; var fe0 = lfFlairEl(wornId); if (fe0) en.appendChild(fe0); }
+      $('.rk-eq-x', eq).setAttribute('aria-label', 'Take off ' + lfRkName(kind, wornId));
+      $('.rk-eq-x', eq).addEventListener('click', function () { if (kind === 'ti') S.ti = 'none'; else delete S.fl; lfSave(); paint(); buzz(8); if (onPick) onPick(); });
+      body.appendChild(eh); body.appendChild(eq);
+    }
+    var gn = el('<div class="rk-opts"></div>');
+    gn.appendChild(opt(kind === 'ti' ? { id: 'none', n: 'None', q: '', ok: true } : { id: '', n: 'None', q: '', ok: true })); body.appendChild(gn);
+    var cols = kind === 'ti' ? RK_TC : lfRkFc();
+    cols.forEach(function (tc) {
       if (tc[4] && !lfOwner()) return;
-      var mine = opts.filter(function (x) { return tc[3].indexOf(x.id) >= 0; }), got = mine.filter(function (x) { return x.ok; }).length;
-      var hd = el('<div class="lf-bcol"><div class="lf-bcol-t"><h4></h4><span class="lf-num"></span></div><i aria-hidden="true"><i></i></i></div>');
-      hd.style.setProperty('--cc', tc[2]); $('h4', hd).textContent = tc[1]; $('.lf-num', hd).textContent = got + ' / ' + mine.length; $('i i', hd).style.width = (mine.length ? got / mine.length * 100 : 0) + '%';
-      body.appendChild(hd); var g = el('<div class="rk-opts"></div>'); mine.forEach(function (x) { g.appendChild(opt(x)); }); body.appendChild(g);
+      var mine = opts.filter(function (x) { return tc[3].indexOf(x.id) >= 0; }), got = mine.filter(function (x) { return x.ok; }).length, vis = only ? mine.filter(function (x) { return x.ok; }) : mine;
+      if (!vis.length) return;
+      var key = 'rk' + kind + tc[0], isOpen = !!openMap[key];
+      var hd = el('<div class="lf-bcol"><div class="lf-bcol-t"><h4><button type="button" class="lf-bcol-b"></button></h4><span class="lf-num"></span>' + IC.chev + '</div><i aria-hidden="true"><i></i></i></div>');
+      hd.style.setProperty('--cc', tc[2]); var tb = $('.lf-bcol-b', hd), g = el('<div class="rk-opts"></div>'); g.id = 'rkg' + kind + tc[0];
+      tb.textContent = tc[1]; $('.lf-num', hd).textContent = got + ' / ' + mine.length; $('i i', hd).style.width = (mine.length ? got / mine.length * 100 : 0) + '%';
+      tb.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); tb.setAttribute('aria-controls', g.id); g.hidden = !isOpen; hd.classList.toggle('is-open', isOpen);
+      tb.addEventListener('click', function () { var on = g.hidden; g.hidden = !on; tb.setAttribute('aria-expanded', on ? 'true' : 'false'); hd.classList.toggle('is-open', on); lfBcolSet(key, on); });
+      body.appendChild(hd); body.appendChild(g); vis.forEach(function (x) { g.appendChild(opt(x)); });
     });
   }
   paint();
