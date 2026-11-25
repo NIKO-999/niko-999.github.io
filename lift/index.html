@@ -9958,7 +9958,7 @@ function frRings(rows) {
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
     $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend'); lfNameOn($('.fr-t b', row), st);
-    var sub = $('.fr-t span', row);
+    var sub = $('.fr-t > span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
     else if (frLive(st)) {
       row.classList.add('is-live');
