@@ -5536,7 +5536,7 @@ function lfPaintSession() {
       aimEl.innerHTML = '<i class="lf-aim-k">Deload</i><span></span>'; $('span', aimEl).textContent = 'Try ' + fmtW(aimF.w) + ' × ' + aimF.r;
     }
     if (!aim.note) $('.lf-aim', card).remove();
-    var recOn = !!(e.fit && lfFitOn() && act && act.rt);
+    /* a swap is your own choice, so only an exercise as the targets made it is recommended */ var recOn = !!(e.fit && !e.from && lfFitOn() && act && act.rt);
     if (recOn) { var ca = $('.lf-aim', card), rc = lfRecEl(e); if (ca) ca.remove(); $('.lf-tg', card).insertAdjacentElement('afterend', rc); }
     else if (!$('.lf-aim', card)) { /* no coach line */ }
     else if (!aim.sets.length) { $('.lf-aim', card).classList.add('is-info'); $('.lf-aim', card).disabled = true; }
