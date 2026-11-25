@@ -2109,8 +2109,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ti .tx-s9 b { font-style: italic; font-weight: 800; letter-spacing: .02em; }
 @media (prefers-reduced-motion: reduce) { .fr-ti .tx em, .fr-ti .tx b, .tx em::before, .tx em::after { animation: none; } }
 /* the new flairs on the name: the same three moves, drawn on the name's own letters */
-.lf-nx { --c2: color-mix(in srgb, var(--c) 40%, #fff); animation: var(--ae, none); }
-.lf-nx .lf-nl { animation: var(--am, none); }
+.lf-nxf { --c2: color-mix(in srgb, var(--c) 40%, #fff); animation: var(--ae, none); }
+.lf-nxf .lf-nl { animation: var(--am, none); }
 .nx-m1 .lf-nl { --am: txm1 1.7s ease-in-out calc(var(--i) * .09s) infinite; }
 .nx-m2 .lf-nl { --am: txm2 3.2s ease-in-out calc(var(--i) * .08s) infinite; }
 .nx-m3 .lf-nl { --am: txm3 3.6s ease-out calc(var(--i) * .1s) infinite; }
@@ -2147,7 +2147,7 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes fim6 { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
 @keyframes fim7 { 0%, 100% { transform: scale(1.1, .85); } 40% { transform: scale(.9, 1.15) translateY(-3px); } }
 @keyframes fim8 { 0% { transform: translate(0, 0); } 25% { transform: translate(2px, -2px); } 50% { transform: translate(0, -3px); } 75% { transform: translate(-2px, -1px); } 100% { transform: translate(0, 0); } }
-@media (prefers-reduced-motion: reduce) { .lf-nx, .lf-nx .lf-nl, .nx-o1::after, .lf-nw[class*="nx-o"]::before, .lf-nw[class*="nx-o"]::after, .lf-fl[class*="fi-m"] { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .lf-nxf, .lf-nxf .lf-nl, .nx-o1::after, .lf-nw[class*="nx-o"]::before, .lf-nw[class*="nx-o"]::after, .lf-fl[class*="fi-m"] { animation: none; } }
 
 /* STAIR MASTER: the word is a flight of stairs, each letter one step higher than the last, and a light climbs it a step at a time, lighting each letter as it lands, then drops back to the bottom and goes again */
 .fr-ti .tt-stair em { position: relative; display: inline-block; padding-bottom: calc(var(--n) * 1px); font-style: normal; }
@@ -13753,7 +13753,7 @@ function lfNameOn(node, st) {
   var fe = st && st.fl && lfFlairEl(st.fl); if (!fe) return;
   if (!LF_NF[st.fl]) { node.appendChild(fe); return; }
   var txt = node.textContent, w = el('<span class="lf-nw"></span>'); w.dataset.nf = st.fl; node.textContent = '';
-  if (LF_NX[st.fl]) { var NXs = LF_NX[st.fl], fx = lfRkItem('fl', st.fl); w.className = 'lf-nw lf-nx nx-m' + NXs[0] + ' nx-o' + NXs[1] + ' nx-g' + NXs[2]; if (fx) w.style.setProperty('--c', fx[5]); }
+  if (LF_NX[st.fl]) { var NXs = LF_NX[st.fl], fx = lfRkItem('fl', st.fl); w.className = 'lf-nw lf-nxf nx-m' + NXs[0] + ' nx-o' + NXs[1] + ' nx-g' + NXs[2]; if (fx) w.style.setProperty('--c', fx[5]); }
   if (LF_NSPLIT[st.fl]) txt.split('').forEach(function (ch, i) { var s = document.createElement('span'); s.className = 'lf-nl'; s.style.setProperty('--i', i); s.textContent = ch; w.appendChild(s); });
   else w.appendChild(document.createTextNode(txt));
   w.appendChild(fe); node.appendChild(w);
