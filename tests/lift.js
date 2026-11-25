@@ -2330,6 +2330,7 @@ const freeze = (at) => `(() => {
     ok('swapping back to the original by hand puts the day back as it was', await first().getAttribute('data-ex') === 'pendulum' && !st.sw, st.sw);
     await swapOpen(); await page.waitForTimeout(500);
     await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: /^Front squat/ }).first().click(); await page.waitForTimeout(500);
+    await first().locator('.lf-rcm [data-k="keep"]').click(); await page.waitForTimeout(500);
     await page.keyboard.press('Escape'); await settle(page);
     await page.click('.lf-bar [data-v="you"]'); await settle(page);
     ok('Settings no longer lists swaps', await page.locator('#lfSwaps').count() === 0 && !/Swapped exercises/.test(await page.textContent('#lfYou')));
