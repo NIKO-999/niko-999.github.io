@@ -491,10 +491,10 @@ svg { display: block; }
 .lf-rcm > * { display: inline-block; vertical-align: middle; }
 .lf-rcm b { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; margin-right: 7px; }
 .lf-rcm .lf-aim-s { margin-right: 4px; }
-.lf-rcm-t { margin-right: 9px; }
+.lf-rcm-t { margin-right: 7px; }
 .lf-ex.is-2l .lf-tg { margin-top: 3px; }
 .lf-rcm-b { position: relative; background: none; border: 0; padding: 0; margin-right: 9px; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--dim); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
-.lf-rcm > .lf-rcm-b { display: block; margin: 3px 0 0 15px; }
+.lf-rcm > .lf-rcm-b { display: inline-block; margin: 0; }
 .lf-rcm.is-sw > .lf-rcm-b { display: inline-block; margin: 0; color: var(--log); }
 .lf-rcm-b::before { content: ''; position: absolute; inset: -12px -5px; }
 .lf-li.is-off { opacity: .5; }
@@ -4888,7 +4888,7 @@ function lfRecEl(e, swap) {
   var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b></b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
   $('b', r).textContent = 'RECOMMENDED';
   if (swap) { r.classList.add('is-sw'); $('b', r).remove(); $('.lf-rcm-t', r).remove(); }
-  if (!swap) $('.lf-rcm-t', r).textContent = '– set targets';
+  if (!swap) $('.lf-rcm-t', r).textContent = '–';
   $('[data-k="keep"]', r).addEventListener('click', function () { if (swap) lfSwapKeep(e); else lfFitKeep(e); });
   return r;
 }
