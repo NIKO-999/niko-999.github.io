@@ -499,6 +499,7 @@ svg { display: block; }
 .lf-rcm.is-sw > .lf-rcm-b { display: inline-block; margin: 0; color: var(--log); }
 .lf-sp-pk { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
 .lf-sp-ab { appearance: none; border: 1px solid var(--line, rgba(255,255,255,.18)); background: var(--card2, transparent); color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; min-height: 32px; padding: 0 11px; border-radius: 999px; cursor: pointer; }
+.lf-sp-ab.is-new { border-style: dashed; color: var(--log); }
 .lf-sp-c { flex: 1; min-width: 0; }
 .lf-sp-c .lf-li-t b { white-space: normal; overflow: visible; text-overflow: clip; display: block; }
 .lf-sp-c .lf-li-t { display: block; width: 100%; }
@@ -3301,6 +3302,10 @@ var LF_MG = [
   ['Back', /\brows?\b|pulldown|pull-?down|pull-?up|chin-?up|\blats?\b|pullover|shrug|back|deadlift/i],
   ['Chest', /bench|chest|\bpecs?\b|\bfl(y|ye|yes|ies)\b|push-?up|crossover|incline|decline|around the world|\bpress/i]
 ];
+function lfMakeEx(name) {
+  var gm = lfMuscleGuess(name) || 'Other', nx = { id: lfId(), n: String(name).slice(0, 60), m: gm, t: LF_BW.test(name) ? 'bw' : 'w', c: COMPOUND_RE.test(name) ? 1 : 0 };
+  S.ex.push(nx); lfSave(); return nx;
+}
 function lfMuscleGuess(n) { n = String(n || ''); for (var i = 0; i < LF_MG.length; i++) if (LF_MG[i][1].test(n)) return LF_MG[i][0]; return ''; }
 var LF_BW = /push-?up|pull-?up|chin-?up|^dips?\b|plank|sit-?up|crunch|burpee|bodyweight|bird ?dog|superman|toe touch|mountain climber|leg raise/i;
 var COMPOUND_RE = /press|squat|row\b|rows|deadlift|pull-?ups?|chin-?ups?|dips?\b|lunge|thrust|clean|snatch|pulldown|step-?ups?|good ?morning/i;
@@ -6845,8 +6850,10 @@ function planAlts(name) {
   /* the noun said once: the first half is only the modifier, so it borrows the second half's tail */
   if (wa.length <= 2 && wb.length > wa.length) a = (a + ' ' + wb.slice(wa.length).join(' ')).trim();
   var ma = planBare(a) || planMatch(a), mb = planBare(b) || planMatch(b);
-  if (!ma || !mb || ma.id === mb.id || ma.score < .6 || mb.score < .6) return null;
-  return [{ id: ma.id, raw: a.slice(0, 60) }, { id: mb.id, raw: b.slice(0, 60) }];
+  if (ma && mb && ma.id === mb.id) return null;
+  /* with neither half known only the word "or" says it is a choice; a slash alone might just be part of a name */
+  if (!ma && !mb && !/\sor\s/i.test(s)) return null;
+  return [{ id: ma ? ma.id : null, raw: a.slice(0, 60) }, { id: mb ? mb.id : null, raw: b.slice(0, 60) }];
 }
 var PLAN_DAY = /^(?:day\s*\d+|week\s*\d+|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?|push|pull|legs?|upper|lower|full\s*body|chest|back|shoulders?|arms?|abs|core|glutes?|quads?|hamstrings?)\b/i;
 function planParse(text) {
@@ -6986,8 +6993,14 @@ function lfSplitForm(days, name) {
           var wc = el('<div class="lf-sp-c"></div>'), lt0 = $('.lf-li-t', li); lt0.insertAdjacentElement('beforebegin', wc); wc.appendChild(lt0); $('span', lt0).textContent = 'Two exercises, pick one';
           var pk = el('<div class="lf-sp-pk"></div>');
           x.alts.forEach(function (a) {
-            var ab = el('<button type="button" class="lf-sp-ab"></button>'); ab.textContent = exName(a.id);
-            ab.addEventListener('click', function () { x.id = a.id; x.alts = null; paint(); });
+            var ab = el('<button type="button" class="lf-sp-ab"></button>');
+            ab.textContent = a.id ? exName(a.id) : '+ ' + a.raw + ' \u00b7 ' + (lfMuscleGuess(a.raw) || 'Other');
+            if (!a.id) ab.classList.add('is-new');
+            ab.addEventListener('click', function () {
+              if (a.id) { x.id = a.id; x.alts = null; paint(); return; }
+              var saved = x.alts, nx = lfMakeEx(a.raw); x.id = nx.id; x.alts = null; paint();
+              lfToast('Created \u00b7 ' + nx.m, function () { S.ex = S.ex.filter(function (q) { return q.id !== nx.id; }); x.id = ''; x.alts = saved; lfSave(); paint(); });
+            });
             pk.appendChild(ab);
           });
           wc.appendChild(pk);
@@ -6997,8 +7010,7 @@ function lfSplitForm(days, name) {
           var gm = lfMuscleGuess(x.raw) || 'Other';
           mk.textContent = 'Create · ' + gm;
           mk.addEventListener('click', function () {
-            var nx = { id: lfId(), n: x.raw.slice(0, 60), m: gm, t: LF_BW.test(x.raw) ? 'bw' : 'w', c: COMPOUND_RE.test(x.raw) ? 1 : 0 };
-            S.ex.push(nx); lfSave(); x.id = nx.id; paint();
+            var nx = lfMakeEx(x.raw); x.id = nx.id; paint();
             lfToast('Created \u00b7 ' + gm, function () { S.ex = S.ex.filter(function (q) { return q.id !== nx.id; }); x.id = ''; lfSave(); paint(); });
           });
           var wr = el('<div class="lf-sp-c"></div>'), lt = $('.lf-li-t', li); lt.insertAdjacentElement('beforebegin', wr); wr.appendChild(lt); wr.appendChild(mk); $('span', lt).textContent = '';
