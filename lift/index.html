@@ -2035,6 +2035,48 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .tt-n-goat em::after { content: ''; position: absolute; right: 0; top: 0; width: 8px; height: 8px; background: #fde68a; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); -webkit-text-fill-color: initial; animation: ttn-goat-s 1.8s ease-in-out infinite; }
 @keyframes ttn-goat { to { background-position: -300% 0; } }
 @keyframes ttn-goat-s { 0%, 100% { transform: scale(.4) rotate(0); opacity: .4; } 50% { transform: scale(1) rotate(90deg); opacity: 1; } }
+.fr-ti .tt-n-tank em { color: #86efac; display: inline-block; animation: tt2-tank 2.4s ease-in-out infinite; }
+@keyframes tt2-tank { 0%, 100% { transform: translateX(-2px) scaleY(1); } 50% { transform: translateX(3px) scaleY(.94); text-shadow: 0 2px 0 rgba(134, 239, 172, .5); } }
+.fr-ti .tt-n-bulldozer em { color: #fbbf24; position: relative; display: inline-block; padding-left: 7px; animation: tt2-bull 1.8s ease-in-out infinite; }
+.tt-n-bulldozer em::before { content: ""; position: absolute; left: 0; top: 18%; bottom: 8%; width: 3px; border-radius: 1px; background: #fbbf24; }
+@keyframes tt2-bull { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(3px); } }
+.fr-ti .tt-n-nightcrawler em { color: #a78bfa; display: inline-block; animation: tt2-night 3.4s ease-in-out infinite; }
+@keyframes tt2-night { 0%, 100% { opacity: .55; letter-spacing: .02em; } 50% { opacity: 1; letter-spacing: .14em; text-shadow: 0 0 10px rgba(167, 139, 250, .7); } }
+.fr-ti .tt-n-specter em { color: #cbd5e1; display: inline-block; animation: tt2-spec 2.8s steps(1) infinite; }
+@keyframes tt2-spec { 0%, 100% { opacity: 1; filter: none; } 30% { opacity: .35; filter: blur(1px); } 36% { opacity: 1; filter: none; } 70% { opacity: .5; transform: translateX(2px); } 76% { opacity: 1; transform: none; } }
+.fr-ti .tt-n-viper em { color: #4ade80; display: inline-block; animation: tt2-viper 1.6s ease-in-out infinite; }
+@keyframes tt2-viper { 0%, 100% { transform: skewX(-8deg) translateX(-1px); } 50% { transform: skewX(8deg) translateX(1px); text-shadow: 0 0 8px rgba(74, 222, 128, .7); } }
+.fr-ti .tt-n-maverick em { color: #38bdf8; display: inline-block; animation: tt2-mav 3.2s ease-in-out infinite; }
+@keyframes tt2-mav { 0%, 60%, 100% { transform: rotateX(0); } 75% { transform: rotateX(360deg); } }
+.fr-ti .tt-n-outlaw em { color: #f59e0b; display: inline-block; transform-origin: 50% 0; animation: tt2-out 2.6s ease-in-out infinite; }
+@keyframes tt2-out { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+.fr-ti .tt-n-spartan em { color: #f87171; display: inline-block; animation: tt2-spar 1.4s ease-in-out infinite; }
+@keyframes tt2-spar { 0%, 100% { transform: scale(1); text-shadow: 0 0 4px rgba(248, 113, 113, .4); } 50% { transform: scale(1.08); text-shadow: 0 0 12px rgba(248, 113, 113, .9); } }
+.fr-ti .tt-n-gladiator em { color: #fcd34d; display: inline-block; background: linear-gradient(100deg, #b45309 30%, #fef3c7 50%, #b45309 70%) 120% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: tt2-glad 2.8s linear infinite; }
+@keyframes tt2-glad { to { background-position: -60% 0; } }
+.fr-ti .tt-n-warlord em { color: #ef4444; display: inline-block; animation: tt2-war 2s steps(1) infinite; }
+@keyframes tt2-war { 0%, 80%, 100% { transform: none; text-shadow: 0 0 6px rgba(239, 68, 68, .6); } 82% { transform: translate(-1px, 1px); } 86% { transform: translate(1px, -1px); text-shadow: 0 0 14px #ef4444; } 90% { transform: translate(-1px, 0); } }
+.fr-ti .tt-n-samurai em { color: #fda4af; position: relative; display: inline-block; overflow: hidden; }
+.tt-n-samurai em::after { content: ""; position: absolute; left: -20%; top: 0; width: 140%; height: 1.5px; background: #fff; transform: rotate(-24deg); transform-origin: 0 50%; top: 80%; opacity: 0; animation: tt2-sam 2.6s ease-out infinite; }
+@keyframes tt2-sam { 0%, 55% { opacity: 0; top: 95%; } 62% { opacity: 1; top: 55%; } 80%, 100% { opacity: 0; top: 10%; } }
+.fr-ti .tt-n-ninja em { color: #94a3b8; display: inline-block; animation: tt2-nin 3s steps(1) infinite; }
+@keyframes tt2-nin { 0%, 100% { opacity: 1; } 60% { opacity: 0; } 63% { opacity: 1; transform: translateX(3px); } 66% { transform: none; } }
+.fr-ti .tt-n-pharaoh em { color: #facc15; display: inline-block; border-bottom: 1.5px solid #facc15; animation: tt2-pha 3s ease-in-out infinite; }
+@keyframes tt2-pha { 0%, 100% { text-shadow: 0 0 3px rgba(250, 204, 21, .4); border-bottom-color: rgba(250, 204, 21, .4); } 50% { text-shadow: 0 0 12px rgba(250, 204, 21, .9); border-bottom-color: #facc15; } }
+.fr-ti .tt-n-shogun em { color: #fb7185; display: inline-block; animation: tt2-sho 3.4s ease-in-out infinite; }
+@keyframes tt2-sho { 0%, 100% { letter-spacing: .02em; } 50% { letter-spacing: .16em; text-shadow: 0 0 10px rgba(251, 113, 133, .7); } }
+.fr-ti .tt-n-blastoff em { color: #fb923c; display: inline-block; animation: tt2-blast 2.2s ease-in infinite; }
+@keyframes tt2-blast { 0%, 55%, 100% { transform: translateY(0); } 75% { transform: translateY(-5px); text-shadow: 0 6px 8px rgba(251, 146, 60, .8); } 76% { transform: translateY(4px); } }
+.fr-ti .tt-n-cyclone em { color: #67e8f9; display: inline-block; animation: tt2-cyc 2.4s ease-in-out infinite; }
+@keyframes tt2-cyc { 0%, 100% { transform: rotate(-3deg) skewX(-6deg); } 50% { transform: rotate(3deg) skewX(6deg); text-shadow: 0 0 10px rgba(103, 232, 249, .7); } }
+.fr-ti .tt-n-volcano em { color: #f97316; display: inline-block; animation: tt2-vol 2s ease-in-out infinite; }
+@keyframes tt2-vol { 0%, 100% { text-shadow: 0 0 3px rgba(249, 115, 22, .4); transform: translateY(0); } 50% { text-shadow: 0 -4px 12px rgba(249, 115, 22, .95), 0 -8px 18px rgba(239, 68, 68, .6); transform: translateY(-1px); } }
+.fr-ti .tt-n-glacier em { color: #7dd3fc; display: inline-block; background: linear-gradient(100deg, #38bdf8 30%, #f0f9ff 50%, #38bdf8 70%) 120% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: tt2-gla 5s linear infinite; }
+@keyframes tt2-gla { to { background-position: -60% 0; } }
+.fr-ti .tt-n-firebird em { color: #fb923c; display: inline-block; animation: tt2-phx 3s ease-in-out infinite; }
+@keyframes tt2-phx { 0%, 100% { filter: hue-rotate(-20deg); text-shadow: 0 0 6px rgba(239, 68, 68, .6); } 50% { filter: hue-rotate(25deg); text-shadow: 0 -3px 12px rgba(250, 204, 21, .9); } }
+.fr-ti .tt-n-grim em { color: #e5e7eb; display: inline-block; animation: tt2-grim 3s steps(1) infinite; }
+@keyframes tt2-grim { 0%, 70%, 100% { text-shadow: 0 0 0 transparent; } 72% { text-shadow: 2px 0 #7c3aed, -2px 0 #111; transform: translateX(-1px); } 76% { text-shadow: -2px 0 #7c3aed, 2px 0 #111; transform: translateX(1px); } 80% { text-shadow: 0 0 0 transparent; transform: none; } }
 .fr-ti .tt-n-wildcard em { display: inline-block; color: #f472b6; animation: ttn-wild 4s linear infinite; }
 @keyframes ttn-wild { 0% { filter: hue-rotate(0); transform: rotate(-2deg); } 25% { transform: rotate(2deg) skewX(4deg); } 50% { transform: rotate(-2deg); } 75% { transform: rotate(2deg) skewX(-4deg); } 100% { filter: hue-rotate(360deg); transform: rotate(-2deg); } }
 
@@ -2101,6 +2143,59 @@ b:has(> .lf-nw) { padding: 5px 3px; margin: -5px -3px; }
 .lf-fl[data-fl="xdice"] { animation: nfi-di 3s ease-in-out infinite; } @keyframes nfi-di { 0%, 55%, 100% { transform: rotate(0) translateY(0); } 65% { transform: rotate(180deg) translateY(-3px); } 75% { transform: rotate(360deg) translateY(0); } }
 .lf-fl[data-fl="xmagnet"] { animation: nfi-mg 1.2s ease-in-out infinite; } @keyframes nfi-mg { 0%, 100% { transform: translateX(-1.5px) rotate(-4deg); } 50% { transform: translateX(1.5px) rotate(4deg); } }
 .lf-fl[data-fl="xradar"] { animation: nfi-ra 2.4s linear infinite; } @keyframes nfi-ra { to { transform: rotate(360deg); } }
+/* twenty more flairs: fifteen play with the name, five are icons that move */
+.lf-nw[data-nf="nfunder"]::after { content: ""; position: absolute; left: 0; right: 0; bottom: -2px; height: 2px; border-radius: 2px; background: repeating-linear-gradient(90deg, #38bdf8 0 6px, transparent 6px 9px); background-size: 9px 2px; animation: nf2-und 1s linear infinite; }
+@keyframes nf2-und { to { background-position: 9px 0; } }
+.lf-fl[data-fl="nfunder"] { animation: nf2i-a 1.6s ease-in-out infinite; } @keyframes nf2i-a { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+.lf-nw[data-nf="nfblink"] { animation: nf2-blink 3.6s steps(1) infinite; }
+@keyframes nf2-blink { 0%, 90%, 100% { opacity: 1; } 92% { opacity: .15; } 95% { opacity: 1; } 97% { opacity: .15; } }
+.lf-fl[data-fl="nfblink"] { animation: nf2i-b 3.6s steps(1) infinite; } @keyframes nf2i-b { 0%, 90%, 100% { transform: scaleY(1); } 92%, 96% { transform: scaleY(.1); } }
+.lf-nw[data-nf="nfshine"] { background: linear-gradient(100deg, var(--ngc, #fff) 40%, #ffffff 50%, var(--ngc, #fff) 60%) 160% 0 / 250% 100% no-repeat; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: nf2-shine 2.6s ease-in-out infinite; }
+@keyframes nf2-shine { 0%, 40% { background-position: 160% 0; } 100% { background-position: -40% 0; } }
+.lf-fl[data-fl="nfshine"] { animation: nf2i-c 2.6s ease-in-out infinite; } @keyframes nf2i-c { 0%, 100% { transform: scale(.8) rotate(0); } 50% { transform: scale(1.2) rotate(45deg); } }
+.lf-nw[data-nf="nfbounce"] { transform-origin: 50% 100%; animation: nf2-bnc 1.4s ease-in-out infinite; }
+@keyframes nf2-bnc { 0%, 100% { transform: translateY(0) scale(1.04, .94); } 40% { transform: translateY(-4px) scale(.98, 1.04); } }
+.lf-fl[data-fl="nfbounce"] { animation: nf2i-d 1.4s ease-in-out infinite; } @keyframes nf2i-d { 0%, 100% { transform: translateY(1px); } 40% { transform: translateY(-3px); } }
+.lf-nw[data-nf="nfneon"] { animation: nf2-neon 3s steps(1) infinite; }
+@keyframes nf2-neon { 0%, 100% { text-shadow: 0 0 6px rgba(240, 171, 252, .9), 0 0 14px rgba(217, 70, 239, .6); } 40% { text-shadow: none; } 43% { text-shadow: 0 0 6px rgba(240, 171, 252, .9), 0 0 14px rgba(217, 70, 239, .6); } 70% { text-shadow: none; } 73% { text-shadow: 0 0 6px rgba(240, 171, 252, .9), 0 0 14px rgba(217, 70, 239, .6); } }
+.lf-fl[data-fl="nfneon"] { animation: nf2i-e 3s steps(1) infinite; } @keyframes nf2i-e { 0%, 100% { opacity: 1; } 40% { opacity: .2; } 43% { opacity: 1; } 70% { opacity: .2; } 73% { opacity: 1; } }
+.lf-nw[data-nf="nfshake"] { animation: nf2-shk 2.8s steps(1) infinite; }
+@keyframes nf2-shk { 0%, 78%, 100% { transform: none; } 80% { transform: translateX(-2px); } 82% { transform: translateX(2px); } 84% { transform: translateX(-2px); } 86% { transform: translateX(1px); } 88% { transform: none; } }
+.lf-fl[data-fl="nfshake"] { animation: nf2i-f 2.8s steps(1) infinite; } @keyframes nf2i-f { 0%, 78%, 100% { transform: none; } 80%, 84% { transform: translateX(-2px); } 82%, 86% { transform: translateX(2px); } }
+.lf-nw[data-nf="nfrain"]::before, .lf-nw[data-nf="nfrain"]::after { content: ""; position: absolute; top: -2px; width: 1.5px; height: 6px; border-radius: 1px; background: #7dd3fc; opacity: 0; animation: nf2-rain 1.5s linear infinite; }
+.lf-nw[data-nf="nfrain"]::before { left: 25%; } .lf-nw[data-nf="nfrain"]::after { left: 70%; animation-delay: .7s; }
+@keyframes nf2-rain { 0% { transform: translateY(-4px); opacity: 0; } 20% { opacity: .9; } 100% { transform: translateY(20px); opacity: 0; } }
+.lf-fl[data-fl="nfrain"] { animation: nf2i-g 1.5s ease-in-out infinite; } @keyframes nf2i-g { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(1.5px); } }
+.lf-nw[data-nf="nfspark"]::before, .lf-nw[data-nf="nfspark"]::after { content: ""; position: absolute; width: 5px; height: 5px; background: #fde047; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0; animation: nf2-spk 2.4s ease-in-out infinite; }
+.lf-nw[data-nf="nfspark"]::before { left: 10%; top: -3px; } .lf-nw[data-nf="nfspark"]::after { right: 14%; bottom: -2px; animation-delay: 1.2s; }
+@keyframes nf2-spk { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 50% { opacity: 1; transform: scale(1.3) rotate(80deg); } }
+.lf-fl[data-fl="nfspark"] { animation: nf2i-h 2.4s linear infinite; } @keyframes nf2i-h { to { transform: rotate(90deg); } }
+.lf-nw[data-nf="nflaser"]::after { content: ""; position: absolute; left: 0; right: 0; top: 55%; height: 1.5px; background: #f43f5e; box-shadow: 0 0 8px #f43f5e; transform-origin: 0 50%; animation: nf2-las 2.2s ease-in-out infinite; }
+@keyframes nf2-las { 0%, 100% { transform: scaleX(0); opacity: 1; } 40% { transform: scaleX(1); opacity: 1; } 60% { transform: scaleX(1); opacity: 0; } }
+.lf-fl[data-fl="nflaser"] { animation: nf2i-i 2.2s ease-in-out infinite; } @keyframes nf2i-i { 0%, 40%, 100% { transform: scale(1); } 20% { transform: scale(1.25); } }
+.lf-nw[data-nf="nfpulse"] { animation: nf2-pul 2.4s ease-in-out infinite; }
+@keyframes nf2-pul { 0%, 100% { text-shadow: 0 0 0 transparent; } 50% { text-shadow: 0 0 6px rgba(52, 211, 153, .9), 0 0 16px rgba(52, 211, 153, .55); } }
+.lf-fl[data-fl="nfpulse"] { animation: nf2i-j 2.4s ease-in-out infinite; } @keyframes nf2i-j { 0%, 100% { transform: scale(.85); opacity: .7; } 50% { transform: scale(1.15); opacity: 1; } }
+.lf-nw[data-nf="nfflip"] .lf-nl { animation: nf2-flip 3s ease-in-out infinite; animation-delay: calc(var(--i) * .08s); }
+@keyframes nf2-flip { 0%, 55%, 100% { transform: rotateX(0); } 70% { transform: rotateX(180deg); } 85% { transform: rotateX(360deg); } }
+.lf-fl[data-fl="nfflip"] { animation: nf2i-k 3s ease-in-out infinite; } @keyframes nf2i-k { 0%, 55%, 100% { transform: rotate(0); } 80% { transform: rotate(180deg); } }
+.lf-nw[data-nf="nftype"] .lf-nl { animation: nf2-typ 4s steps(1) infinite; animation-delay: calc(var(--i) * .12s); }
+@keyframes nf2-typ { 0% { opacity: 0; } 8%, 88% { opacity: 1; } 96%, 100% { opacity: 0; } }
+.lf-fl[data-fl="nftype"] { animation: nf-caret 1s steps(1) infinite; }
+.lf-nw[data-nf="nfrainbow"] { background: linear-gradient(90deg, #f43f5e, #fbbf24, #34d399, #38bdf8, #a78bfa, #f43f5e) 0 0 / 300% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: nf2-rb 4s linear infinite; }
+@keyframes nf2-rb { to { background-position: -300% 0; } }
+.lf-fl[data-fl="nfrainbow"] { animation: nf2i-l 4s linear infinite; } @keyframes nf2i-l { to { filter: hue-rotate(360deg); } }
+.lf-nw[data-nf="nfstretch"] { animation: nf2-str 3s ease-in-out infinite; }
+@keyframes nf2-str { 0%, 100% { letter-spacing: 0; } 50% { letter-spacing: .14em; } }
+.lf-fl[data-fl="nfstretch"] { animation: nf2i-m 3s ease-in-out infinite; } @keyframes nf2i-m { 0%, 100% { transform: scaleX(.8); } 50% { transform: scaleX(1.2); } }
+.lf-nw[data-nf="nfhalo"]::before { content: ""; position: absolute; left: 50%; top: -5px; width: 14px; height: 4px; margin-left: -7px; border: 1.5px solid #fef08a; border-radius: 50%; box-shadow: 0 0 6px #fde047; animation: nf2-halo 2.4s ease-in-out infinite; }
+@keyframes nf2-halo { 0%, 100% { transform: translateY(1px); opacity: .6; } 50% { transform: translateY(-1px); opacity: 1; } }
+.lf-fl[data-fl="nfhalo"] { animation: nf2i-n 2.4s ease-in-out infinite; } @keyframes nf2i-n { 0%, 100% { transform: translateY(1px); } 50% { transform: translateY(-1px); } }
+.lf-fl[data-fl="xbolt"] { animation: x2-bolt 2.6s steps(1) infinite; } @keyframes x2-bolt { 0%, 80%, 100% { transform: none; filter: none; } 82% { transform: scale(1.3); filter: brightness(1.8); } 86% { transform: none; filter: none; } 90% { transform: scale(1.2); filter: brightness(1.6); } }
+.lf-fl[data-fl="xgear"] { animation: nfi-ra 6s linear infinite; }
+.lf-fl[data-fl="xbell"] { transform-origin: 50% 0; animation: x2-bell 3s ease-in-out infinite; } @keyframes x2-bell { 0%, 60%, 100% { transform: rotate(0); } 66% { transform: rotate(14deg); } 72% { transform: rotate(-12deg); } 78% { transform: rotate(8deg); } 84% { transform: rotate(-4deg); } }
+.lf-fl[data-fl="xhalo"] { animation: x2-halo 2s ease-out infinite; } @keyframes x2-halo { 0% { transform: scale(.7); opacity: .4; } 60% { opacity: 1; } 100% { transform: scale(1.15); opacity: .4; } }
+.lf-fl[data-fl="xkite"] { animation: x2-kite 3.2s ease-in-out infinite; } @keyframes x2-kite { 0%, 100% { transform: translate(-2px, 2px) rotate(-8deg); } 50% { transform: translate(2px, -2px) rotate(8deg); } }
 @media (prefers-reduced-motion: reduce) { .fr-ban-t:has(.tt-ti) > b, .fr-t:has(.tt-ti) > b, [class*="tt-n-"] em, [class*="tt-n-"] em::before, [class*="tt-n-"] em::after, .lf-nw, .lf-nw::before, .lf-nw::after, .lf-nl, .lf-fl[data-fl^="nf"], .lf-fl[data-fl^="x"], .lf-fl[data-fl^="x"] path { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .tt-s1 em, .tt-s2 em, .tt-s3 em, .tt-s4 em, .lf-fl[data-fl^="f"] { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .lf-fl, .lf-fl[data-fl] { animation: none; } }
@@ -8511,6 +8606,26 @@ var RK = {
     ['finalboss', 'Final Boss', 'Earn a myth badge', function (c) { return !!c.myth; }],
     ['goat', 'The G.O.A.T.', '100 badges', function (c) { return c.bd >= 100; }],
     ['wildcard', 'Wild Card', 'Earn Encyclopedia', function (c) { return !!c.has.ex80; }],
+    ['tank', 'Tank', '75 workouts', function (c) { return c.wo >= 75; }],
+    ['bulldozer', 'Bulldozer', '120 workouts', function (c) { return c.wo >= 120; }],
+    ['nightcrawler', 'Nightcrawler', '60 workouts', function (c) { return c.wo >= 60; }],
+    ['specter', 'Specter', '15 badges', function (c) { return c.bd >= 15; }],
+    ['viper', 'Viper', '20 badges', function (c) { return c.bd >= 20; }],
+    ['maverick', 'Maverick', '30 badges', function (c) { return c.bd >= 30; }],
+    ['outlaw', 'Outlaw', '50 badges', function (c) { return c.bd >= 50; }],
+    ['spartan', 'Spartan', '150 workouts', function (c) { return c.wo >= 150; }],
+    ['gladiator', 'Gladiator', '200 workouts', function (c) { return c.wo >= 200; }],
+    ['warlord', 'Warlord', '300 workouts', function (c) { return c.wo >= 300; }],
+    ['samurai', 'Samurai', '6 weeks on goal', function (c) { return c.run >= 6; }],
+    ['ninja', 'Ninja', '12 weeks on goal', function (c) { return c.run >= 12; }],
+    ['pharaoh', 'Pharaoh', '16 weeks on goal', function (c) { return c.run >= 16; }],
+    ['shogun', 'Shogun', '26 weeks on goal', function (c) { return c.run >= 26; }],
+    ['blastoff', 'Blast Off', '15 workouts', function (c) { return c.wo >= 15; }],
+    ['cyclone', 'Cyclone', '25 workouts', function (c) { return c.wo >= 25; }],
+    ['volcano', 'Volcano', '35 workouts', function (c) { return c.wo >= 35; }],
+    ['glacier', 'Glacier', '10 badges', function (c) { return c.bd >= 10; }],
+    ['firebird', 'Firebird', '30 weeks on goal', function (c) { return c.run >= 30; }],
+    ['grim', 'Grim', '70 badges', function (c) { return c.bd >= 70; }],
     ['slayer', 'Giant Slayer', 'Beat the creator', function (c) { return c.slay; }],
     ['creator', 'Creator', 'One of one', function (c) { return c.own; }], ['eye', 'The Eye', 'One of one', function (c) { return c.own; }]],
   fl: [['spark', 'Spark', '5 workouts', function (c) { return c.wo >= 5; }, 'M12 2.5l2 6.5 6.5 2-6.5 2-2 6.5-2-6.5-6.5-2 6.5-2z', '#facc15'],
@@ -8581,7 +8696,27 @@ var RK = {
     ['xbeat', 'Heartbeat', 'Earn explore', function (c) { return !!c.has.ex15; }, 'M2 12h5l2-6 4 12 2-6h7', '#fb7185', 1],
     ['xdice', 'Dice', 'Earn Every target', function (c) { return !!c.has.tgtall; }, 'M5 5h14v14H5zM9 9h.01M15 9h.01M12 12h.01M9 15h.01M15 15h.01', '#e5e7eb', 1],
     ['xmagnet', 'Magnet', 'Earn 50 workouts', function (c) { return !!c.has.wo50; }, 'M5 3v8a7 7 0 0 0 14 0V3h-4v8a3 3 0 0 1-6 0V3z', '#f87171', 1],
-    ['xradar', 'Radar', '20 weeks on goal', function (c) { return c.run >= 20; }, 'M12 12L19 7M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5', '#4ade80', 1]],
+    ['xradar', 'Radar', '20 weeks on goal', function (c) { return c.run >= 20; }, 'M12 12L19 7M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5', '#4ade80', 1],
+    ['nfunder', 'Underline', '5 workouts', function (c) { return c.wo >= 5; }, 'M4 19h16M7 5v7a5 5 0 0 0 10 0V5', '#38bdf8', 1],
+    ['nfblink', 'Blink', '10 workouts', function (c) { return c.wo >= 10; }, 'M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', '#e5e7eb', 1],
+    ['nfshine', 'Glint', '20 workouts', function (c) { return c.wo >= 20; }, 'M12 2l2.5 7.500L22 12l-7.500 2.500L12 22l-2.500-7.500L2 12l7.500-2.500z', '#fef9c3', 1],
+    ['nfbounce', 'Bounce', '30 workouts', function (c) { return c.wo >= 30; }, 'M5 20h14M8 14a4 4 0 0 1 8 0', '#fb923c', 1],
+    ['nfneon', 'Neon', '45 workouts', function (c) { return c.wo >= 45; }, 'M13 2L5 14h6l-1 8 8-12h-6z', '#f0abfc', 1],
+    ['nfshake', 'Tremor', '55 workouts', function (c) { return c.wo >= 55; }, 'M3 12l3-4 3 8 3-8 3 8 3-4h3', '#f87171', 1],
+    ['nfrain', 'Drizzle', '65 workouts', function (c) { return c.wo >= 65; }, 'M7 15a4 4 0 0 1 1-7.900A5 5 0 0 1 17.500 9 3.500 3.500 0 0 1 17 16M9 19v2M13 19v2M17 19v2', '#7dd3fc', 1],
+    ['nfspark', 'Sparks', '80 workouts', function (c) { return c.wo >= 80; }, 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2', '#fde047', 1],
+    ['nflaser', 'Laser', '90 workouts', function (c) { return c.wo >= 90; }, 'M3 12h18M12 3v18M7 7l10 10', '#f43f5e', 1],
+    ['nfpulse', 'Glow', '110 workouts', function (c) { return c.wo >= 110; }, 'M12 5a7 7 0 1 0 0 14 7 7 0 0 0 0-14z', '#34d399', 1],
+    ['nfflip', 'Flip', '12 badges', function (c) { return c.bd >= 12; }, 'M4 12h16M12 4l-8 8 8 8', '#a5b4fc', 1],
+    ['nftype', 'Typewriter', '22 badges', function (c) { return c.bd >= 22; }, 'M4 7h16M12 7v12M8 19h8', '#e5e7eb', 1],
+    ['nfrainbow', 'Spectrum', '35 badges', function (c) { return c.bd >= 35; }, 'M3 18a9 9 0 0 1 18 0M7 18a5 5 0 0 1 10 0', '#f472b6', 1],
+    ['nfstretch', 'Stretch', '45 badges', function (c) { return c.bd >= 45; }, 'M3 12h18M7 8l-4 4 4 4M17 8l4 4-4 4', '#2dd4bf', 1],
+    ['nfhalo', 'Halo', '3 weeks on goal', function (c) { return c.run >= 3; }, 'M12 4c4 0 7 1.200 7 2.500S16 9 12 9 5 7.800 5 6.500 8 4 12 4zM8 20a4 4 0 0 1 8 0', '#fef08a', 1],
+    ['xbolt', 'Bolt', '5 weeks on goal', function (c) { return c.run >= 5; }, 'M13 2L5 14h6l-1 8 8-12h-6z', '#facc15', 1],
+    ['xgear', 'Gear', '7 weeks on goal', function (c) { return c.run >= 7; }, 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2', '#94a3b8', 1],
+    ['xbell', 'Bell', '9 weeks on goal', function (c) { return c.run >= 9; }, 'M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21h4', '#fbbf24', 1],
+    ['xhalo', 'Ripple', '14 weeks on goal', function (c) { return c.run >= 14; }, 'M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', '#38bdf8', 1],
+    ['xkite', 'Kite', '55 badges', function (c) { return c.bd >= 55; }, 'M12 3l6 7-6 11-6-11zM12 3v18M6 10h12', '#c084fc', 1]],
   fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
     ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
     ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
@@ -8594,7 +8729,7 @@ var RK = {
 /* titles live in collections, as badges do. The last is not offered to anyone it is not theirs: it is not a locked row, it is not there. */
 var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'grinder', 'lifer', 'elite', 'veteran', 'master', 'legend']],
   ['con', 'Consistency', '#8b5cf6', ['steady', 'relentless']], ['bd', 'Badges', '#eab308', ['collector', 'curator', 'engine', 'twice', 'mythic']],
-  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['nk', 'Nicknames', '#f43f5e', ['ruthless', 'gymrat', 'apex', 'savage', 'beastmode', 'machine', 'predator', 'ironwill', 'unstop', 'juggernaut', 'pumpchaser', 'repreaper', 'barbender', 'stalker', 'crusher', 'heavymetal', 'gravity', 'dragon', 'irongiant', 'mountain', 'showtime', 'overdrive', 'wreckball', 'clutch', 'lightsout', 'rainmaker', 'coldstart', 'hotstreak', 'zenmaster', 'overlord', 'daredevil', 'ghostride', 'bigdog', 'madsci', 'sharpshot', 'thunder', 'lockedon', 'finalboss', 'goat', 'wildcard']], ['tch', 'Animated finishes', '#38bdf8', ['static', 'glitch', 'phantom', 'venom', 'ripple', 'hologram', 'plasma', 'chrome', 'tempest', 'obsidian', 'supernova', 'gilded']], ['lfx', 'Strength', '#22c55e', ['benchbud', 'twoplates', 'benchboss', 'benchking', 'incstart', 'incpro', 'incbeast', 'incking', 'pressrook', 'ohpro', 'boulder', 'skypush', 'pullstart', 'floormove', 'fourplate', 'deadlord', 'rowrookie', 'backbuild', 'rowmaster', 'cobraback', 'sqrookie', 'deepdiver', 'threefif', 'sqboss', 'quadkill']],
+  ['an', 'Animated', '#22d3ee', ['hitter', 'blaze', 'lockedin', 'nodaysoff', 'ironheart']], ['mv', 'Moments', '#f472b6', ['ironclad', 'unbroken', 'nightowl', 'earlybird', 'titan']], ['fin', 'Finishes', '#22d3ee', ['ice', 'lava', 'marble', 'neon', 'galaxy', 'sunrise', 'emerald', 'carbon']], ['tsg', 'Signature', '#a78bfa', ['comet', 'tidal', 'ember', 'voltage', 'frostbite', 'radar', 'metronome', 'prism', 'sentinel', 'zenith', 'anvil', 'aurora']], ['nk', 'Nicknames', '#f43f5e', ['ruthless', 'gymrat', 'apex', 'savage', 'beastmode', 'machine', 'predator', 'ironwill', 'unstop', 'juggernaut', 'pumpchaser', 'repreaper', 'barbender', 'stalker', 'crusher', 'heavymetal', 'gravity', 'dragon', 'irongiant', 'mountain', 'showtime', 'overdrive', 'wreckball', 'clutch', 'lightsout', 'rainmaker', 'coldstart', 'hotstreak', 'zenmaster', 'overlord', 'daredevil', 'ghostride', 'bigdog', 'madsci', 'sharpshot', 'thunder', 'lockedon', 'finalboss', 'goat', 'wildcard', 'tank', 'bulldozer', 'nightcrawler', 'specter', 'viper', 'maverick', 'outlaw', 'spartan', 'gladiator', 'warlord', 'samurai', 'ninja', 'pharaoh', 'shogun', 'blastoff', 'cyclone', 'volcano', 'glacier', 'firebird', 'grim']], ['tch', 'Animated finishes', '#38bdf8', ['static', 'glitch', 'phantom', 'venom', 'ripple', 'hologram', 'plasma', 'chrome', 'tempest', 'obsidian', 'supernova', 'gilded']], ['lfx', 'Strength', '#22c55e', ['benchbud', 'twoplates', 'benchboss', 'benchking', 'incstart', 'incpro', 'incbeast', 'incking', 'pressrook', 'ohpro', 'boulder', 'skypush', 'pullstart', 'floormove', 'fourplate', 'deadlord', 'rowrookie', 'backbuild', 'rowmaster', 'cobraback', 'sqrookie', 'deepdiver', 'threefif', 'sqboss', 'quadkill']],
   ['gs', 'Against the creator', '#e11d48', ['slayer']],
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
@@ -8684,6 +8819,26 @@ function lfTitleEl(id) {
     finalboss: ['tt-n-finalboss', '<em>Final Boss</em>'],
     goat: ['tt-n-goat', '<em>The G.O.A.T.</em>'],
     wildcard: ['tt-n-wildcard', '<em>Wild Card</em>'],
+    tank: ['tt-n-tank', '<em>Tank</em>'],
+    bulldozer: ['tt-n-bulldozer', '<em>Bulldozer</em>'],
+    nightcrawler: ['tt-n-nightcrawler', '<em>Nightcrawler</em>'],
+    specter: ['tt-n-specter', '<em>Specter</em>'],
+    viper: ['tt-n-viper', '<em>Viper</em>'],
+    maverick: ['tt-n-maverick', '<em>Maverick</em>'],
+    outlaw: ['tt-n-outlaw', '<em>Outlaw</em>'],
+    spartan: ['tt-n-spartan', '<em>Spartan</em>'],
+    gladiator: ['tt-n-gladiator', '<em>Gladiator</em>'],
+    warlord: ['tt-n-warlord', '<em>Warlord</em>'],
+    samurai: ['tt-n-samurai', '<em>Samurai</em>'],
+    ninja: ['tt-n-ninja', '<em>Ninja</em>'],
+    pharaoh: ['tt-n-pharaoh', '<em>Pharaoh</em>'],
+    shogun: ['tt-n-shogun', '<em>Shogun</em>'],
+    blastoff: ['tt-n-blastoff', '<em>Blast Off</em>'],
+    cyclone: ['tt-n-cyclone', '<em>Cyclone</em>'],
+    volcano: ['tt-n-volcano', '<em>Volcano</em>'],
+    glacier: ['tt-n-glacier', '<em>Glacier</em>'],
+    firebird: ['tt-n-firebird', '<em>Firebird</em>'],
+    grim: ['tt-n-grim', '<em>Grim</em>'],
     ruthless: ['tt-ru', '<em>Ruthless</em>'],
     gymrat: ['tt-gy', '<svg viewBox="0 0 24 12" aria-hidden="true"><path d="M5 2.500v7M8 1v10M16 1v10M19 2.500v7M8 6h8"/></svg><em>Gym Rat</em>'],
     apex: ['tt-ax', '<em>Apex</em>'],
@@ -13363,8 +13518,8 @@ function lfApplyAccent() {
    a custom property inherits, so a sheet that does not SAY its gradient
    would wear the page's. Every sheet writes both, flat when it is flat */
 /* THESE FLAIRS PLAY WITH THE NAME ITSELF: the name and its flair go inside one wrapper that the effect is drawn on (an underline that draws, a light across it, letters that wave, a dot that orbits it). Wave and Domino need each letter on its own. */
-var LF_NF = { nfink: 1, nfspot: 1, nfwave: 1, nfdomino: 1, nforbit: 1, nfcaret: 1, nfstamp: 1, nfglitch: 1, nfember: 1, nffrost: 1, nftilt: 1, nfecho: 1, nfmark: 1, nfscan: 1, nfconf: 1 };
-var LF_NSPLIT = { nfwave: 1, nfdomino: 1 };
+var LF_NF = { nfink: 1, nfspot: 1, nfwave: 1, nfdomino: 1, nforbit: 1, nfcaret: 1, nfstamp: 1, nfglitch: 1, nfember: 1, nffrost: 1, nftilt: 1, nfecho: 1, nfmark: 1, nfscan: 1, nfconf: 1, nfunder: 1, nfblink: 1, nfshine: 1, nfbounce: 1, nfneon: 1, nfshake: 1, nfrain: 1, nfspark: 1, nflaser: 1, nfpulse: 1, nfflip: 1, nftype: 1, nfrainbow: 1, nfstretch: 1, nfhalo: 1 };
+var LF_NSPLIT = { nfwave: 1, nfdomino: 1, nfflip: 1, nftype: 1 };
 function lfNameOn(node, st) {
   lfNameCol(node, st);
   if ($('.lf-nw', node)) node.textContent = node.textContent;
