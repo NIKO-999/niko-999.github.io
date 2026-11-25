@@ -1541,7 +1541,6 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 /* what you wear: a title beside the name, a flair, a frame round the picture */
 .fr-ti { margin: 3px 0 0; display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 700; color: var(--dim); }
 .fr-ti[hidden] { display: none; }
-.fr-t .fr-ti-r { margin: 0; }
 .fr-ti .tt { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .tt em { font-style: normal; }
 .fr-ti .tt-creator { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; text-transform: none; letter-spacing: .01em; font-size: 12px; padding: 4px 10px; border-radius: 6px; --tc: var(--rc, #3dffb0); color: color-mix(in srgb, var(--tc) 55%, #fff); background: color-mix(in srgb, var(--tc) 12%, #000); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 60%, transparent), 0 0 14px color-mix(in srgb, var(--tc) 35%, transparent); text-shadow: 0 0 7px color-mix(in srgb, var(--tc) 85%, transparent); animation: tt-glitch 8s steps(1) infinite; }
@@ -9959,8 +9958,6 @@ function frRings(rows) {
     if (f.me) row.classList.add('is-me');
     if (f.gone) row.classList.add('is-gone');
     $('.fr-t b', row).textContent = f.me ? (FRS.name || 'You') : (f.n || 'Friend'); lfNameOn($('.fr-t b', row), st);
-    /* A TITLE THAT REACHES THE NAME is shown on the board too, under the name it lights: the rest of the titles stay on the profile */
-    if (st.ti && LF_TI_NAME[st.ti] && lfRkHas('ti', st.ti)) { var tw = lfTitleEl(st.ti), tp = el('<p class="fr-ti fr-ti-r"></p>'); if (tw) { tp.appendChild(tw); $('.fr-t b', row).after(tp); } }
     var sub = $('.fr-t > span', row);
     if (f.gone) sub.textContent = 'Turned friends off';
     else if (frLive(st)) {
@@ -13329,8 +13326,6 @@ function lfApplyAccent() {
    a custom property inherits, so a sheet that does not SAY its gradient
    would wear the page's. Every sheet writes both, flat when it is flat */
 /* THESE FLAIRS PLAY WITH THE NAME ITSELF: the name and its flair go inside one wrapper that the effect is drawn on (an underline that draws, a light across it, letters that wave, a dot that orbits it). Wave and Domino need each letter on its own. */
-/* the titles that light the name they sit under */
-var LF_TI_NAME = { titan: 1 };
 var LF_NF = { nfink: 1, nfspot: 1, nfwave: 1, nfdomino: 1, nforbit: 1, nfcaret: 1, nfstamp: 1, nfglitch: 1, nfember: 1, nffrost: 1, nftilt: 1, nfecho: 1, nfmark: 1, nfscan: 1, nfconf: 1 };
 var LF_NSPLIT = { nfwave: 1, nfdomino: 1 };
 function lfNameOn(node, st) {
