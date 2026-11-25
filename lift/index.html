@@ -497,7 +497,10 @@ svg { display: block; }
 .lf-rcm-b { position: relative; background: none; border: 0; padding: 0; margin-right: 9px; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--dim); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .lf-rcm > .lf-rcm-b { display: inline-block; margin: 0; }
 .lf-rcm.is-sw > .lf-rcm-b { display: inline-block; margin: 0; color: var(--log); }
+.lf-sp-pk { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 2px; }
+.lf-sp-ab { appearance: none; border: 1px solid var(--line, rgba(255,255,255,.18)); background: var(--card2, transparent); color: var(--ink); font: inherit; font-size: 12px; font-weight: 600; min-height: 32px; padding: 0 11px; border-radius: 999px; cursor: pointer; }
 .lf-sp-c { flex: 1; min-width: 0; }
+.lf-sp-c .lf-li-t b { white-space: normal; overflow: visible; text-overflow: clip; display: block; }
 .lf-sp-c .lf-li-t { display: block; width: 100%; }
 .lf-sp-mk { display: block; background: none; border: 0; padding: 0; margin-top: -2px; min-height: 30px; text-align: left; font: inherit; font-size: 11px; font-weight: 700; color: var(--log); white-space: nowrap; cursor: pointer; }
 .lf-rcm-w { position: relative; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
@@ -6833,6 +6836,18 @@ function planMatch(name) {
 /* A BARE NAME MEANS THE COMMON LIFT. "Bench", "Press" and "Row" fit a dozen exercises each and the closest word match picks whichever is shortest (Bench became Bench dips, Press became Leg press), so the ones people write on their own are decided here. */
 var PLAN_BARE = { bench: 'bench', 'bench press': 'bench', press: 'ohp', 'overhead press': 'ohp', 'military press': 'ohp', ohp: 'ohp', squat: 'squat', squats: 'squat', 'back squat': 'squat', deadlift: 'deadlift', deadlifts: 'deadlift', row: 'bbrow', rows: 'bbrow', 'barbell row': 'bbrow', 'bent over row': 'bbrow', pulldown: 'latpd', pulldowns: 'latpd', 'lat pulldown': 'latpd', 'lat pulldowns': 'latpd', 'pull up': 'pullupbw', 'pull ups': 'pullupbw', pullups: 'pullupbw', 'chin up': 'chinup', 'chin ups': 'chinup', curl: 'curl', curls: 'curl', 'bicep curl': 'curl', 'bicep curls': 'curl', 'biceps curl': 'curl', 'biceps curls': 'curl', 'leg press': 'legpress', 'leg curl': 'seatcurl', 'leg curls': 'seatcurl', 'leg extension': 'legext', 'leg extensions': 'legext', rdl: 'rdl', dips: 'dips', dip: 'dips', 'lateral raise': 'latraise', 'lateral raises': 'latraise', 'face pull': 'facepull', 'face pulls': 'facepull', shrug: 'shrug', shrugs: 'shrug', 'calf raise': 'calfstand', 'calf raises': 'calfstand', 'hip thrust': 'hipthrust', 'hip thrusts': 'hipthrust', lunge: 'lunge', lunges: 'lunge', 'tricep pushdown': 'tripush', 'triceps pushdown': 'tripush', 'tricep pushdowns': 'tripush', 'triceps pushdowns': 'tripush', 'push up': 'pushup', 'push ups': 'pushup', pushups: 'pushup' };
 function planBare(name) { var k = String(name).toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim(); var id = PLAN_BARE[k]; return id && exById(id) ? { id: id, score: 1 } : null; }
+/* A LINE THAT OFFERS TWO EXERCISES is read as a choice, not as one odd name. "Lying hamstring curl or seated hamstring curl", "(or ...)", a slash, and "Lying / seated hamstring curls" with the noun said once. It only counts when both halves are exercises the app knows and they are not the same one: a name that happens to contain a slash stays a name. */
+function planAlts(name) {
+  var s = String(name).replace(/\(\s*or\s+/ig, ' or ').replace(/\)\s*$/, '');
+  var parts = s.split(/\s+or\s+|\s*\/\s*|\s*\|\s*/i).map(function (q) { return q.replace(/^[\s,.\-]+|[\s,.\-]+$/g, ''); }).filter(Boolean);
+  if (parts.length !== 2) return null;
+  var a = parts[0], b = parts[1], wa = a.split(' '), wb = b.split(' ');
+  /* the noun said once: the first half is only the modifier, so it borrows the second half's tail */
+  if (wa.length <= 2 && wb.length > wa.length) a = (a + ' ' + wb.slice(wa.length).join(' ')).trim();
+  var ma = planBare(a) || planMatch(a), mb = planBare(b) || planMatch(b);
+  if (!ma || !mb || ma.id === mb.id || ma.score < .6 || mb.score < .6) return null;
+  return [{ id: ma.id, raw: a.slice(0, 60) }, { id: mb.id, raw: b.slice(0, 60) }];
+}
 var PLAN_DAY = /^(?:day\s*\d+|week\s*\d+|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?|sun(?:day)?|push|pull|legs?|upper|lower|full\s*body|chest|back|shoulders?|arms?|abs|core|glutes?|quads?|hamstrings?)\b/i;
 function planParse(text) {
   var lines = String(text || '').split(/\r?\n/).map(function (l) { return l.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
@@ -6850,6 +6865,8 @@ function planParse(text) {
     if (sets > 0 && sets <= 12 && lo > 0 && lo <= 100 && name.length > 1) {
       if (hi < lo) hi = lo;
       if (!cur) day('Imported routine');
+      var alts = planAlts(name);
+      if (alts) { cur.ex.push({ raw: name.slice(0, 60), id: null, alts: alts, sets: sets, lo: lo, hi: hi }); return; }
       var mt = planBare(name) || planMatch(name);
       cur.ex.push({ raw: name.slice(0, 60), id: mt ? mt.id : null, sets: sets, lo: lo, hi: hi });
       return;
@@ -6924,7 +6941,7 @@ function lfPlanPreview(days) {
   var used = {}, free = function () { return [1, 2, 3, 4, 5, 6, 0].filter(function (q) { return !used[q]; })[0]; };
   days.forEach(function (d) { if (d.dow !== undefined && !used[d.dow]) { d.w = d.dow; used[d.w] = 1; } });
   days.forEach(function (d) { if (d.w === undefined) { var f = free(); d.w = f === undefined ? 1 : f; used[d.w] = 1; } });
-  lfSplitForm(days.map(function (d, i) { return { w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, sets: x.sets, lo: x.lo, hi: x.hi }; }) }; }), spDraft);
+  lfSplitForm(days.map(function (d, i) { return { w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, alts: x.alts, sets: x.sets, lo: x.lo, hi: x.hi }; }) }; }), spDraft);
 }
 function lfSplitForm(days, name) {
   days = days || [];
@@ -6939,7 +6956,7 @@ function lfSplitForm(days, name) {
     var used = {}, free = function () { return [1, 2, 3, 4, 5, 6, 0].filter(function (q) { return !used[q]; })[0]; };
     got.forEach(function (d) { if (d.dow !== undefined && !used[d.dow]) { d.w = d.dow; used[d.w] = 1; } });
     got.forEach(function (d) { if (d.w === undefined) { var f = free(); d.w = f === undefined ? 1 : f; used[d.w] = 1; } });
-    days.length = 0; got.slice(0, 7).forEach(function (d) { days.push({ w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, sets: x.sets, lo: x.lo, hi: x.hi }; }) }); });
+    days.length = 0; got.slice(0, 7).forEach(function (d) { days.push({ w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, alts: x.alts, sets: x.sets, lo: x.lo, hi: x.hi }; }) }); });
     paint();
   }
   pt.addEventListener('input', function () { clearTimeout(pTimer); pTimer = setTimeout(readPaste, 250); });
@@ -6964,7 +6981,17 @@ function lfSplitForm(days, name) {
         var li = el('<div class="lf-li"><button type="button" class="lf-li-t" style="text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit"><b></b><span></span></button><span class="lf-li-r lf-num"></span><button type="button" class="lf-x" aria-label="Remove">' + IC.x + '</button></div>');
         $('b', li).textContent = x.id ? exName(x.id) : x.raw;
         $('span', li).textContent = x.id ? (x.raw && exName(x.id).toLowerCase() !== x.raw.toLowerCase() ? 'Read as "' + x.raw + '"' : '') : 'Not matched · press to choose';
-        if (!x.id) {
+        if (!x.id && x.alts) {
+          $('b', li).textContent = x.raw; $('b', li).style.color = 'var(--ink)';
+          var wc = el('<div class="lf-sp-c"></div>'), lt0 = $('.lf-li-t', li); lt0.insertAdjacentElement('beforebegin', wc); wc.appendChild(lt0); $('span', lt0).textContent = 'Two exercises, pick one';
+          var pk = el('<div class="lf-sp-pk"></div>');
+          x.alts.forEach(function (a) {
+            var ab = el('<button type="button" class="lf-sp-ab"></button>'); ab.textContent = exName(a.id);
+            ab.addEventListener('click', function () { x.id = a.id; x.alts = null; paint(); });
+            pk.appendChild(ab);
+          });
+          wc.appendChild(pk);
+        } else if (!x.id) {
           $('b', li).style.color = 'var(--bad)';
           var mk = el('<button type="button" class="lf-sp-mk"></button>');
           var gm = lfMuscleGuess(x.raw) || 'Other';
