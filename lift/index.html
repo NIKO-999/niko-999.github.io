@@ -1446,7 +1446,11 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-bq-x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 .lf-bnone { margin: 18px 2px; font-size: 13px; color: var(--dim); }
 .lf-fit { display: block; margin-top: 2px; font-style: normal; font-size: 11px; font-weight: 600; color: var(--log); }
-.lf-fit-sw { justify-content: space-between; margin: 4px 0 10px; }
+.lf-bshow.lf-fit-sw { justify-content: space-between; margin: 0 0 12px; padding: 0 2px; font-size: 13px; }
+.lf-fit-sw .lf-tgl { width: 36px; height: 22px; border-radius: 11px; }
+.lf-fit-sw .lf-tgl::before { inset: -11px -4px; }
+.lf-fit-sw .lf-tgl i { top: 3px; left: 3px; width: 16px; height: 16px; }
+.lf-fit-sw .lf-tgl[aria-checked="true"] i { transform: translateX(14px); }
 .lf-bdg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; margin-top: 14px; }
 .lf-bdi { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
 .lf-bdi b { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
@@ -4983,7 +4987,7 @@ function lfZonesSheet() {
   var fr = el('<div class="lf-bshow lf-fit-sw"><span>Fit my workouts to these</span><button type="button" class="lf-tgl" role="switch" aria-label="Fit my workouts to my muscle targets"><i></i></button></div>'), fb = $('button', fr);
   fb.dataset.k = 'fit'; fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false');
   fb.addEventListener('click', function () { if (lfFitOn()) S.fit = false; else delete S.fit; lfSave(); fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false'); lfRender(); });
-  b.insertBefore(fr, $('.lf-zn-bs', b));
+  $('.lf-zn-bs', b).insertAdjacentElement('afterend', fr);
   var s = lfSheet({ title: 'Muscle targets', body: b, foot: [save, back, more] });
   back.addEventListener('click', function () { ed = {}; refresh(); });
   $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(lfZonesSheet); });
