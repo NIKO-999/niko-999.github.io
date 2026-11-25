@@ -4836,6 +4836,8 @@ function lfFitMap() {
     rows[m].forEach(function (r) {
       if (r.pin) return;
       acc += r.n * k; var now = Math.round(acc), give = now - prev; prev = now;
+      /* never one set of anything: an exercise that would be left with one keeps two */
+      if (give === 1) give = 2;
       if (give > LF_FITCAP) { spill[r.d] = (spill[r.d] || 0) + give - LF_FITCAP; give = LF_FITCAP; }
       (out[r.d] = out[r.d] || {})[r.id] = { was: r.n, n: give, m: m };
     });
@@ -4873,7 +4875,7 @@ function lfFitKeep(e) {
 }
 function lfRecEl(e) {
   var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b>RECOMMENDED</b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
-  $('.lf-rcm-t', r).textContent = (e.fit.extra ? 'From your ' : e.fit.n + (e.fit.n === 1 ? ' set' : ' sets') + ' from your ') + String(e.fit.m).toLowerCase() + ' target';
+  $('.lf-rcm-t', r).textContent = 'From your ' + String(e.fit.m).toLowerCase() + ' target';
   $('[data-k="keep"]', r).addEventListener('click', function () { lfFitKeep(e); });
   return r;
 }
