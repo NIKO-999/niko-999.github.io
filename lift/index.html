@@ -961,17 +961,6 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 @keyframes fr-rg-glow { 0%, 100% { filter: drop-shadow(0 0 2px var(--rc)); } 50% { filter: drop-shadow(0 0 7px var(--rc)); } }
 .fr-rg-p { transform-box: fill-box; transform-origin: center; animation: fr-rg-ping 1.8s ease-out infinite; opacity: .7; }
 @keyframes fr-rg-ping { 0% { transform: scale(1); opacity: .75; } 100% { transform: scale(2.6); opacity: 0; } }
-.fr-rg-c { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; pointer-events: none; }
-.fr-rg-c b { display: block; font-size: 15px; font-weight: 800; color: var(--rc); max-width: 96px; padding: 8px 10px; margin: -8px -10px; box-sizing: content-box; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fr-rg-c span { font-size: 11px; color: var(--dim); }
-.fr-rg-c.is-tap { pointer-events: auto; cursor: pointer; inset: 22%; border-radius: 50%; -webkit-tap-highlight-color: transparent; transition: transform .15s; }
-.fr-rg-c.is-tap:active { transform: scale(.94); }
-.fr-rg-c.is-tap::before { inset: 0; }
-.fr-rg-c::before { content: ''; position: absolute; inset: 22%; border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--rc) 26%, transparent), transparent 68%); filter: blur(6px); }
-.fr-rg-c > * { position: relative; }
-.fr-rg-c b { text-shadow: 0 0 10px color-mix(in srgb, var(--rc) 70%, transparent), 0 0 22px color-mix(in srgb, var(--rc) 35%, transparent); }
-.fr-rg-cr { filter: drop-shadow(0 0 5px color-mix(in srgb, var(--rc) 85%, transparent)); }
-.fr-rg-cr { width: 20px; height: 20px; margin: 0 auto 2px; color: var(--rc); fill: var(--rc); stroke: var(--rc); stroke-width: 1.5; stroke-linejoin: round; }
 @media (prefers-reduced-motion: reduce) { .fr-rg-a.is-live, .fr-rg-p { animation: none; } .fr-rg-p { opacity: 0; } .fr-rg-a.is-live { filter: drop-shadow(0 0 5px var(--rc)); } }
 /* THE RING BESIDE ITS LEGEND, and past four friends the list closes up */
 .fr-top { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 2px 0 8px; }
@@ -9891,7 +9880,7 @@ function frRings(rows) {
      longer run of weeks on goal. Until anyone has hit theirs it is whoever is
      closest to their own */
   var ls = rows.map(frStand).sort(frCmp);
-  var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-top"><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg><div class="fr-rg-c" id="frRgLive" hidden></div></div></div><div id="frBoard"></div></div>');
+  var c = el('<div class="lf-card fr-rg" id="frRings"><div class="lf-hd"><span class="lf-lab">This week</span><span class="lf-lab">weekly goal</span></div><div class="fr-top"><div class="fr-rg-w"><svg viewBox="0 0 150 150" aria-hidden="true"><g fill="none" stroke-linecap="round" transform="rotate(-90 75 75)"></g></svg></div></div><div id="frBoard"></div></div>');
   /* THE RING IS A PODIUM, NOT A ROLL CALL. A circle each stops being a picture at a dozen friends and is a blur at two hundred, and a friend who has not trained yet is an empty track that says nothing. So it draws the five furthest ahead this week, and you: the list under it is where everybody is. */
   var g = $('g', c), live0 = ls.filter(function (x) { return !x.f.gone; }), drawn = live0.filter(function (x) { return x.k > 0 || frLive(x.f.s); }).slice(0, 5), n;
   if (!drawn.some(function (x) { return x.f.me; })) { var mine0 = live0.filter(function (x) { return x.f.me; })[0]; if (mine0) drawn = drawn.slice(0, 4).concat([mine0]); }
@@ -9943,37 +9932,7 @@ function frRings(rows) {
     });
     top.appendChild(lg); c.classList.add('has-lg');
   })();
-  /* THE MIDDLE IS WHO IS IN FRONT: closest to their own goal, crowned,
-     in their colour. Two level at the top is a tie, and a week nobody has
-     started yet says nothing. Training now stays on the ring itself. */
-  var lead = ls.filter(function (x) { return !x.f.gone && x.k > 0; });
-  if (lead.length) {
-    var mid = $('#frRgLive', c), top = lead[0], tie = lead[1] && frCmp(top, lead[1]) === 0;
-    mid.hidden = false; mid.id = 'frRgLead';
-    mid.innerHTML = '<svg class="lf-ic fr-rg-cr" viewBox="0 0 24 24"><path d="M3 8l4.5 4L12 5l4.5 7L21 8l-2 11H5L3 8z"/></svg><b></b>';
-    var nm = tie ? 'Tied' : (top.f.me ? (FRS.name || 'You') : (top.f.n || 'Friend'));
-    $('b', mid).textContent = nm;
-    /* THE NAME HAS TO FIT THE HOLE IN THE RINGS. With five friends the free middle is about 41px across, and a full name at 15px is nearly twice that, so it ran out over the rings. It is sized to the hole: the whole name if it fits at 11px or more, else the first name, never smaller than 10px, and the crown steps down with it. The full name stays in the spoken label. */
-    (function () {
-      var rin = Math.max(8, r0 - (n - 1) * step), D = Math.floor(2 * (rin - sw / 2 - 1) * (140 / 150) * .84), nb = $('b', mid), cw = $('.fr-rg-cr', mid), cv = document.createElement('canvas').getContext('2d'), fam = getComputedStyle(document.body).fontFamily;
-      var fit = function (t) { cv.font = '800 15px ' + fam; return Math.min(15, 15 * D / Math.max(1, cv.measureText(t).width)); };
-      var pick = nm, px = fit(nm), first = nm.split(/\s+/)[0];
-      if (px < 11 && first && first !== nm) { pick = first; px = fit(first); }
-      px = Math.max(10, px); nb.textContent = pick; nb.style.fontSize = px.toFixed(1) + 'px'; nb.style.maxWidth = (D + 8) + 'px';
-      if (cw) { var cs = D >= 56 ? 20 : 14; cw.style.width = cw.style.height = cs + 'px'; }
-    })();
-    mid.setAttribute('aria-label', nm + ' in front this week');
-    mid.style.setProperty('--rc', tie ? 'var(--ink)' : frColOf(top.f.s));
-    /* THE CROWN OPENS WHOEVER IS WEARING IT: press the middle and their
-       profile comes up, the same one their name on the board opens */
-    if (!tie) {
-      mid.classList.add('is-tap'); mid.setAttribute('role', 'button'); mid.tabIndex = 0;
-      mid.setAttribute('aria-label', nm + ' in front this week. Open their profile');
-      var openTop = function () { buzz(8); if (top.f.me) frSheet({ n: FRS.name || 'You', s: top.f.s || {}, me: 1 }); else frSheet(top.f); };
-      mid.addEventListener('click', openTop);
-      mid.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTop(); } });
-    }
-  }
+  /* THE MIDDLE IS EMPTY: who is in front is the glow in the legend beside the ring. */
   try { localStorage.setItem('lift.rg.v1', JSON.stringify(frRgSeen)); localStorage.setItem('lift.frwo.v1', JSON.stringify(frWoSeen)); } catch (e) {}
   if (done.length) setTimeout(function () {
     /* the tab may have been drawn again since: aim at the rings that are there now */
