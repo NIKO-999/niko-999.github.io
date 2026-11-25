@@ -497,6 +497,9 @@ svg { display: block; }
 .lf-rcm-b { position: relative; background: none; border: 0; padding: 0; margin-right: 9px; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--dim); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .lf-rcm > .lf-rcm-b { display: inline-block; margin: 0; }
 .lf-rcm.is-sw > .lf-rcm-b { display: inline-block; margin: 0; color: var(--log); }
+.lf-sp-c { flex: 1; min-width: 0; }
+.lf-sp-c .lf-li-t { display: block; width: 100%; }
+.lf-sp-mk { display: block; background: none; border: 0; padding: 0; margin-top: -2px; min-height: 30px; text-align: left; font: inherit; font-size: 11px; font-weight: 700; color: var(--log); white-space: nowrap; cursor: pointer; }
 .lf-rcm-w { position: relative; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
 .lf-rcm-w b::after { content: '\203a'; display: inline-block; margin-left: 4px; color: var(--dim); transition: transform .2s; }
 .lf-rcm-w[aria-expanded="true"] b::after { transform: rotate(90deg); }
@@ -3280,6 +3283,23 @@ function lfRestOf(id) { var c = lfRec(id); return { lo: c.rlo, hi: c.rhi, rir: c
 function lfRecTxt(id) { var c = lfRec(id); return c.sets + ' × ' + c.lo + '–' + c.hi + ' · ' + c.rir; }
 /* A name that says what the movement is: used only to guess the type of
    an exercise you add, which you can change. */
+/* WHAT AN EXERCISE IS FOR, read off its name: the first of these that matches. The order is the mechanism: a leg curl is a hamstring before it is a curl, an upright row is a shoulder before it is a row, a rear delt fly is a shoulder before it is a fly. A name nothing matches is Other and the muscle is still yours to pick. */
+var LF_MG = [
+  ['Cardio', /treadmill|stair ?master|elliptical|cardio|jog|running|cycling|spin bike|rowing machine|\bwalk/i],
+  ['Lower back', /back ?extension|hyper ?extension|hip hinge|superman|bird ?dog|reverse hyper|jefferson/i],
+  ['Shoulders', /rear[- ]?delt|face ?pull|reverse (pec|fl)|rear fl|shoulder|overhead|military|\bohp\b|lateral raise|front raise|arnold|upright row|\bdelts?\b/i],
+  ['Abs', /crunch|sit-?up|plank|leg raise|\babs?\b|woodchop|russian twist|v-?up|hollow|torso rotation|cable twist/i],
+  ['Calves', /calf|calves/i],
+  ['Glutes', /hip thrust|glute bridge|glute|kickback|abduct|bridge/i],
+  ['Hamstrings', /leg curl|hamstring|romanian|\brdl\b|stiff[- ]leg|nordic|glute-?ham|\bghr\b|good ?morning/i],
+  ['Quads', /squat|leg press|leg extension|lunge|step-?up|hack|sissy|quad/i],
+  ['Triceps', /tricep|pushdown|push-?down|skull ?crusher|close[- ]grip|dips?\b/i],
+  ['Biceps', /curl|bicep|preacher|hammer/i],
+  ['Back', /\brows?\b|pulldown|pull-?down|pull-?up|chin-?up|\blats?\b|pullover|shrug|back|deadlift/i],
+  ['Chest', /bench|chest|\bpecs?\b|\bfl(y|ye|yes|ies)\b|push-?up|crossover|incline|decline|around the world|\bpress/i]
+];
+function lfMuscleGuess(n) { n = String(n || ''); for (var i = 0; i < LF_MG.length; i++) if (LF_MG[i][1].test(n)) return LF_MG[i][0]; return ''; }
+var LF_BW = /push-?up|pull-?up|chin-?up|^dips?\b|plank|sit-?up|crunch|burpee|bodyweight|bird ?dog|superman|toe touch|mountain climber|leg raise/i;
 var COMPOUND_RE = /press|squat|row\b|rows|deadlift|pull-?ups?|chin-?ups?|dips?\b|lunge|thrust|clean|snatch|pulldown|step-?ups?|good ?morning/i;
 
 var KEY = 'lift.v1', ACTK = 'lift.active.v1', VIEWK = 'lift.view.v1';
@@ -6623,7 +6643,7 @@ function lfPicker(onPick, title, orig) {
 }
 
 function lfExForm(ex, onDone, seed) {
-  var m = ex ? ex.m : 'Other', t = ex ? ex.t : 'w';
+  var m = ex ? ex.m : (lfMuscleGuess(seed) || 'Other'), t = ex ? ex.t : (LF_BW.test(seed || '') ? 'bw' : 'w');
   var b = el('<div><label class="lf-flab" for="lfExN">Name</label><input class="lf-field" id="lfExN" maxlength="60" autocomplete="off" /><span class="lf-flab">Muscle group</span><div class="lf-pills" id="lfExM"></div><span class="lf-flab">Logged as</span><div class="lf-pills" id="lfExT"></div><span class="lf-flab">Type</span><div class="lf-pills" id="lfExC"></div></div>');
   $('#lfExN', b).value = ex ? ex.n : (seed || '');
   var cp = ex ? (ex.c ? 1 : 0) : (COMPOUND_RE.test(seed || '') ? 1 : 0), cTouched = !!ex;
@@ -6641,7 +6661,7 @@ function lfExForm(ex, onDone, seed) {
   var cOpts = [[1, 'Compound · 3 × 6–10'], [0, 'Isolation · higher reps']];
   pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; });
   /* The type follows the name until you choose it yourself. */
-  $('#lfExN', b).addEventListener('input', function () { if (!mTouched && !ex) { var nm = this.value, g = /back ?extension|hyper ?extension|hip hinge|good ?morning|superman|bird ?dog|reverse hyper|jefferson/i.test(nm) ? 'Lower back' : /rear[- ]?delt|face ?pull|reverse (pec|fl)|rear fl/i.test(nm) ? 'Shoulders' : ''; if (g && g !== m) { m = g; pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; mTouched = true; }); } } if (cTouched) return; cp = COMPOUND_RE.test(this.value) ? 1 : 0; pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; }); });
+  $('#lfExN', b).addEventListener('input', function () { if (!mTouched && !ex) { var nm = this.value, g = lfMuscleGuess(nm); if (g && g !== m) { m = g; pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; mTouched = true; }); } } if (cTouched) return; cp = COMPOUND_RE.test(this.value) ? 1 : 0; pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; }); });
   var save = el('<button type="button" class="lf-btn is-ink is-full">Save</button>');
   var foot = [save];
   var del = null;
@@ -6944,7 +6964,18 @@ function lfSplitForm(days, name) {
         var li = el('<div class="lf-li"><button type="button" class="lf-li-t" style="text-align:left;background:none;border:0;padding:0;color:inherit;font:inherit"><b></b><span></span></button><span class="lf-li-r lf-num"></span><button type="button" class="lf-x" aria-label="Remove">' + IC.x + '</button></div>');
         $('b', li).textContent = x.id ? exName(x.id) : x.raw;
         $('span', li).textContent = x.id ? (x.raw && exName(x.id).toLowerCase() !== x.raw.toLowerCase() ? 'Read as "' + x.raw + '"' : '') : 'Not matched · press to choose';
-        if (!x.id) $('b', li).style.color = 'var(--bad)';
+        if (!x.id) {
+          $('b', li).style.color = 'var(--bad)';
+          var mk = el('<button type="button" class="lf-sp-mk"></button>');
+          var gm = lfMuscleGuess(x.raw) || 'Other';
+          mk.textContent = 'Create · ' + gm;
+          mk.addEventListener('click', function () {
+            var nx = { id: lfId(), n: x.raw.slice(0, 60), m: gm, t: LF_BW.test(x.raw) ? 'bw' : 'w', c: COMPOUND_RE.test(x.raw) ? 1 : 0 };
+            S.ex.push(nx); lfSave(); x.id = nx.id; paint();
+            lfToast('Created \u00b7 ' + gm, function () { S.ex = S.ex.filter(function (q) { return q.id !== nx.id; }); x.id = ''; lfSave(); paint(); });
+          });
+          var wr = el('<div class="lf-sp-c"></div>'), lt = $('.lf-li-t', li); lt.insertAdjacentElement('beforebegin', wr); wr.appendChild(lt); wr.appendChild(mk); $('span', lt).textContent = '';
+        }
         $('.lf-li-r', li).textContent = x.sets + ' × ' + lfRange(x.lo, x.hi);
         $('.lf-li-t', li).addEventListener('click', function () { lfPicker(function (id) { x.id = id; paint(); }); });
         $('.lf-x', li).addEventListener('click', function () { d.ex.splice(xi, 1); paint(); });
