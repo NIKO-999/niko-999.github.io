@@ -2096,7 +2096,60 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .tx-f5 b { background: linear-gradient(180deg, #f8fafc 0%, var(--c) 46%, #334155 54%, var(--c) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .tx-f6 b { color: var(--c); text-shadow: 2px 2px 0 var(--c3); --af: txf6 2.4s ease-in-out calc(var(--i) * .08s) infinite; }
 @keyframes txf6 { 0%, 100% { text-shadow: 2px 2px 0 var(--c3); } 50% { text-shadow: -2px -1px 0 var(--c2); } }
+/* and the skin: its own face and frame, so a title is told apart before it is read */
+.fr-ti .tx-s1 b { font-family: ui-monospace, Menlo, monospace; text-transform: none; letter-spacing: .02em; }
+.fr-ti .tx-s2 b { font-family: Georgia, 'Times New Roman', serif; font-style: italic; text-transform: none; letter-spacing: 0; font-size: 1.12em; }
+.fr-ti .tx-s3 b { font-weight: 900; letter-spacing: -.04em; font-size: 1.14em; }
+.fr-ti .tx-s4 em { border: 1.5px solid var(--c); border-radius: 999px; padding: 2px 10px; }
+.fr-ti .tx-s5 em { background: var(--c); border-radius: 5px; padding: 2px 8px; }
+.fr-ti .tx-s5 b { color: #0b0b0d; -webkit-text-fill-color: #0b0b0d; background: none; text-shadow: none; -webkit-text-stroke: 0; }
+.fr-ti .tx-s6 b { font-variant: small-caps; text-transform: none; letter-spacing: .24em; }
+.fr-ti .tx-s7 em { border-bottom: 3px double var(--c); padding-bottom: 2px; }
+.fr-ti .tx-s8 em { border-left: 3px solid var(--c); padding-left: 8px; }
+.fr-ti .tx-s9 b { font-style: italic; font-weight: 800; letter-spacing: .02em; }
 @media (prefers-reduced-motion: reduce) { .fr-ti .tx em, .fr-ti .tx b, .tx em::before, .tx em::after { animation: none; } }
+/* the new flairs on the name: the same three moves, drawn on the name's own letters */
+.lf-nx { --c2: color-mix(in srgb, var(--c) 40%, #fff); animation: var(--ae, none); }
+.lf-nx .lf-nl { animation: var(--am, none); }
+.nx-m1 .lf-nl { --am: txm1 1.7s ease-in-out calc(var(--i) * .09s) infinite; }
+.nx-m2 .lf-nl { --am: txm2 3.2s ease-in-out calc(var(--i) * .08s) infinite; }
+.nx-m3 .lf-nl { --am: txm3 3.6s ease-out calc(var(--i) * .1s) infinite; }
+.nx-m4 .lf-nl { --am: txm4 2s ease-in-out calc(var(--i) * .1s) infinite; }
+.nx-m5 .lf-nl { --am: txm5 1.5s ease-in-out infinite; } .nx-m5 .lf-nl:nth-child(even) { animation-direction: reverse, normal; }
+.nx-m6 .lf-nl { --am: txm6 2.4s ease-in-out calc(var(--i) * .12s) infinite; }
+.nx-m7 .lf-nl { --am: txm7 2.6s ease-in-out calc(var(--i) * .12s) infinite; }
+.nx-m8 { --ae: txm8 3.2s ease-in-out infinite; }
+.nx-m9 { --ae: txm9 2.8s steps(1) infinite; }
+.nx-m10 .lf-nl { transform-origin: 50% 0; --am: txm10 2.2s ease-in-out calc(var(--i) * .1s) infinite; }
+.nx-m11 .lf-nl { --am: txm11 2s ease-in-out calc(var(--i) * .1s) infinite; }
+.nx-m12 .lf-nl { --am: txm12 4s steps(1) calc(var(--i) * .13s) infinite; }
+.nx-o1::after, .nx-o2::after, .nx-o3::before, .nx-o3::after, .nx-o4::after, .nx-o5::after, .nx-o6::before, .nx-o7::before, .nx-o7::after, .nx-o8::after, .nx-o9::before, .nx-o9::after { content: ''; position: absolute; pointer-events: none; }
+.nx-o1::after { top: -2px; bottom: -2px; left: 0; width: 2px; background: var(--c2); box-shadow: 0 0 8px var(--c2); animation: txo1 2.2s ease-in-out infinite alternate; }
+.nx-o2::after { left: 0; right: 0; bottom: -3px; height: 2px; background: var(--c2); transform-origin: 0 50%; animation: txo2 2.8s ease-in-out infinite; }
+.nx-o3::before, .nx-o3::after { width: 6px; height: 6px; background: var(--c2); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0; animation: txo3 2.4s ease-in-out infinite; }
+.nx-o3::before { left: -7px; top: -4px; } .nx-o3::after { right: -7px; bottom: -3px; animation-delay: 1.2s; }
+.nx-o4::after { width: 4px; height: 4px; margin: -2px; border-radius: 50%; background: var(--c2); box-shadow: 0 0 6px var(--c2); animation: txo4 3.4s linear infinite; }
+.nx-o5::after { left: -2px; right: -2px; top: 54%; height: 1.5px; background: var(--c2); transform-origin: 0 50%; animation: txo5 3s ease-in-out infinite; }
+.nx-o6::before { left: 50%; top: -7px; width: 16px; height: 5px; margin-left: -8px; border: 1.5px solid var(--c2); border-radius: 50%; box-shadow: 0 0 6px var(--c2); animation: txo6 2.4s ease-in-out infinite; }
+.nx-o7::before, .nx-o7::after { top: 0; bottom: 0; width: 5px; border: 1.5px solid var(--c2); animation: txo7 2.4s ease-in-out infinite; }
+.nx-o7::before { left: -8px; border-right: 0; } .nx-o7::after { right: -8px; border-left: 0; }
+.nx-o8::after { left: 6%; right: 6%; bottom: -4px; height: 7px; border-radius: 50%; background: radial-gradient(ellipse, var(--c) 0%, transparent 70%); filter: blur(2px); animation: txo8 1.6s ease-in-out infinite; }
+.nx-o9::before, .nx-o9::after { top: -2px; width: 1.5px; height: 6px; border-radius: 1px; background: var(--c2); opacity: 0; animation: txo9 1.5s linear infinite; }
+.nx-o9::before { left: 28%; } .nx-o9::after { left: 72%; animation-delay: .75s; }
+.nx-g1 .lf-nl { text-shadow: 0 0 6px var(--c), 0 0 14px color-mix(in srgb, var(--c) 50%, transparent); }
+.nx-g2 .lf-nl { text-shadow: 2px 2px 0 color-mix(in srgb, var(--c) 60%, transparent); }
+.lf-fl.fi-m1 { animation: fim1 5s linear infinite; } .lf-fl.fi-m2 { animation: fim2 1.8s ease-in-out infinite; } .lf-fl.fi-m3 { animation: fim3 1.4s ease-in-out infinite; } .lf-fl.fi-m4 { animation: fim4 1.6s ease-in-out infinite; }
+.lf-fl.fi-m5 { animation: fim5 2.6s steps(1) infinite; } .lf-fl.fi-m6 { transform-origin: 50% 0; animation: fim6 2.2s ease-in-out infinite; } .lf-fl.fi-m7 { transform-origin: 50% 100%; animation: fim7 1.5s ease-in-out infinite; } .lf-fl.fi-m8 { animation: fim8 3s ease-in-out infinite; }
+@keyframes fim1 { to { transform: rotate(360deg); } }
+@keyframes fim2 { 0%, 100% { transform: translateY(1px); } 50% { transform: translateY(-3px); } }
+@keyframes fim3 { 0%, 100% { transform: scale(.85); } 50% { transform: scale(1.25); } }
+@keyframes fim4 { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@keyframes fim5 { 0%, 100% { opacity: 1; } 40% { opacity: .3; } 44% { opacity: 1; } 74% { opacity: .5; } 78% { opacity: 1; } }
+@keyframes fim6 { 0%, 100% { transform: rotate(-20deg); } 50% { transform: rotate(20deg); } }
+@keyframes fim7 { 0%, 100% { transform: scale(1.1, .85); } 40% { transform: scale(.9, 1.15) translateY(-3px); } }
+@keyframes fim8 { 0% { transform: translate(0, 0); } 25% { transform: translate(2px, -2px); } 50% { transform: translate(0, -3px); } 75% { transform: translate(-2px, -1px); } 100% { transform: translate(0, 0); } }
+@media (prefers-reduced-motion: reduce) { .lf-nx, .lf-nx .lf-nl, .nx-o1::after, .lf-nw[class*="nx-o"]::before, .lf-nw[class*="nx-o"]::after, .lf-fl[class*="fi-m"] { animation: none; } }
+
 .fr-ti .tt-n-wildcard em { display: inline-block; color: #f472b6; animation: ttn-wild 4s linear infinite; }
 @keyframes ttn-wild { 0% { filter: hue-rotate(0); transform: rotate(-2deg); } 25% { transform: rotate(2deg) skewX(4deg); } 50% { transform: rotate(-2deg); } 75% { transform: rotate(2deg) skewX(-4deg); } 100% { filter: hue-rotate(360deg); transform: rotate(-2deg); } }
 
@@ -8817,7 +8870,43 @@ var RK = {
     ['xgear', 'Gear', '7 weeks on goal', function (c) { return c.run >= 7; }, 'M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2', '#94a3b8', 1],
     ['xbell', 'Bell', '9 weeks on goal', function (c) { return c.run >= 9; }, 'M6 17V11a6 6 0 0 1 12 0v6l2 2H4zM10 21h4', '#fbbf24', 1],
     ['xhalo', 'Ripple', '14 weeks on goal', function (c) { return c.run >= 14; }, 'M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', '#38bdf8', 1],
-    ['xkite', 'Kite', '55 badges', function (c) { return c.bd >= 55; }, 'M12 3l6 7-6 11-6-11zM12 3v18M6 10h12', '#c084fc', 1]],
+    ['xkite', 'Kite', '55 badges', function (c) { return c.bd >= 55; }, 'M12 3l6 7-6 11-6-11zM12 3v18M6 10h12', '#c084fc', 1],
+    ['nxcompass', 'Compass', 'Earn Explorer', function (c) { return !!c.has.explore; }, 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM15.500 8.500l-2 5-5 2 2-5z', '#38bdf8', 1],
+    ['nxhex', 'Hexagon', '24 badges', function (c) { return c.bd >= 24; }, 'M12 2.500l8.500 5v9L12 21.500l-8.500-5v-9z', '#a3e635', 1],
+    ['nxtri', 'Summit Mark', 'Earn 4 weeks on target', function (c) { return !!c.has.tgt4; }, 'M12 4l9 16H3z', '#fb923c', 1],
+    ['nxcross', 'Medic', 'Earn Comeback', function (c) { return !!c.has.back; }, 'M9 3h6v6h6v6h-6v6H9v-6H3V9h6z', '#f87171', 1],
+    ['nxspiral', 'Spiral', '70 workouts', function (c) { return c.wo >= 70; }, 'M12 12a1 1 0 1 0 1 1M12 8a5 5 0 1 1-5 5M12 4a9 9 0 1 1-9 9', '#c084fc', 1],
+    ['nxzig', 'Zigzag', '11 weeks on goal', function (c) { return c.run >= 11; }, 'M3 16l4-8 4 8 4-8 4 8', '#facc15', 1],
+    ['nxup', 'Ascend', '35 workouts', function (c) { return c.wo >= 35; }, 'M12 20V5M6 11l6-6 6 6', '#4ade80', 1],
+    ['nxchev', 'Forward', 'Earn Three Weeks Straight', function (c) { return !!c.has.run21; }, 'M6 7l6 5-6 5M12 7l6 5-6 5', '#f472b6', 1],
+    ['nxcloud', 'Cloud Nine', 'Earn Night Shift', function (c) { return !!c.has.owl25; }, 'M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 11a3.500 3.500 0 0 1-.5 7z', '#93c5fd', 1],
+    ['nxumb', 'Shelter', 'Earn Winter Arc', function (c) { return !!c.has.winter; }, 'M3 12a9 9 0 0 1 18 0zM12 12v6a2 2 0 0 0 4 0', '#2dd4bf', 1],
+    ['nxdna', 'Helix', 'Earn Signature Lift', function (c) { return !!c.has.sig50; }, 'M7 3c0 6 10 6 10 12s-10 6-10 6M17 3c0 6-10 6-10 12', '#818cf8', 1],
+    ['nxfeather', 'Feather', '18 badges', function (c) { return c.bd >= 18; }, 'M20 4C10 4 5 10 5 16v4h4c6 0 11-5 11-16zM5 20l8-8', '#fda4af', 1],
+    ['nxskull', 'Skull', 'Earn Graveyard', function (c) { return !!c.has.owl50; }, 'M12 3a8 8 0 0 0-8 8c0 3 1.500 5 3 6v3h10v-3c1.500-1 3-3 3-6a8 8 0 0 0-8-8zM9 11h.01M15 11h.01', '#e5e7eb', 1],
+    ['nxsword', 'Blade', 'Earn Dynasty', function (c) { return !!c.has.lead10; }, 'M5 19l10-10M13 5h6v6M7 17l-2 2', '#cbd5e1', 1],
+    ['nxaxe', 'Axe', 'Earn Back Hero', function (c) { return !!c.has.bk100; }, 'M5 20L16 9M13 4c4 0 7 3 7 7-4 0-7-3-7-7z', '#ef4444', 1],
+    ['nxlantern', 'Lantern', 'Earn Dawn Patrol', function (c) { return !!c.has.early25; }, 'M9 3h6M8 6h8l1 12H7zM10 21h4', '#fbbf24', 1],
+    ['nxcandle', 'Candle', 'Earn Midnight Session', function (c) { return !!c.has.night; }, 'M12 3c2 3 2 4 0 6-2-2-2-3 0-6zM9 11h6v10H9z', '#fde68a', 1],
+    ['nxtrident', 'Trident', 'Earn Chest Hero', function (c) { return !!c.has.chest100; }, 'M12 3v18M6 3v6a6 6 0 0 0 12 0V3', '#22d3ee', 1],
+    ['nxwings', 'Wings', 'Earn Arm Hero', function (c) { return !!c.has.arm100; }, 'M3 8c4 0 7 2 9 6 2-4 5-6 9-6-1 6-4 10-9 12-5-2-8-6-9-12z', '#bae6fd', 1],
+    ['nxhorns', 'Horns', 'Earn Leg Hero', function (c) { return !!c.has.leg100; }, 'M5 5c0 6 3 9 7 9s7-3 7-9M12 14v7', '#dc2626', 1],
+    ['nxpin', 'Pin', '28 badges', function (c) { return c.bd >= 28; }, 'M12 21s7-6 7-11a7 7 0 0 0-14 0c0 5 7 11 7 11zM12 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4z', '#fb7185', 1],
+    ['nxbubble', 'Speech', 'Earn Gym Buddies', function (c) { return !!c.has.duo10; }, 'M4 5h16v11H9l-5 4z', '#34d399', 1],
+    ['nxsmile', 'Smile', '12 workouts', function (c) { return c.wo >= 12; }, 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 14c1 2 3 3 4 3s3-1 4-3M9 9h.01M15 9h.01', '#fcd34d', 1],
+    ['nxbulb', 'Idea', 'Earn Encyclopedia', function (c) { return !!c.has.ex80; }, 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10c1 1 1 3 1 3h6s0-2 1-3a6 6 0 0 0-4-10z', '#fef08a', 1],
+    ['nxmagnify', 'Detail', 'Earn 25 PRs', function (c) { return !!c.has.pr25; }, 'M10 4a6 6 0 1 0 0 12 6 6 0 0 0 0-12zM15 15l5 5', '#60a5fa', 1],
+    ['nxgame', 'Player Two', 'Earn Rack Mates', function (c) { return !!c.has.duo25; }, 'M6 8h12a4 4 0 0 1 4 4v1a3 3 0 0 1-5 2l-1-1H8l-1 1a3 3 0 0 1-5-2v-1a4 4 0 0 1 4-4zM8 11v3M6.500 12.500h3', '#a78bfa', 1],
+    ['nxphones', 'In the Zone', 'Earn Fifty Hours', function (c) { return !!c.has.cdh50; }, 'M4 15v-3a8 8 0 0 1 16 0v3M4 15h3v5H5a1 1 0 0 1-1-1zM20 15h-3v5h2a1 1 0 0 0 1-1z', '#f0abfc', 1],
+    ['nxcoffee', 'Fuel', '8 workouts', function (c) { return c.wo >= 8; }, 'M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2', '#d6a76b', 1],
+    ['xifish', 'Fish', '18 workouts', function (c) { return c.wo >= 18; }, 'M3 12c3-5 8-6 13-2l5-3v10l-5-3c-5 4-10 3-13-2zM8 11h.01', '#22d3ee', 1],
+    ['xiradiant', 'Radiant', '22 workouts', function (c) { return c.wo >= 22; }, 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zM12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.500 1.500M17.500 17.500L19 19M19 5l-1.500 1.500M6.500 17.500L5 19', '#fbbf24', 1],
+    ['xibatt', 'Charge', '14 badges', function (c) { return c.bd >= 14; }, 'M3 8h16v8H3zM21 11v2M6 11v2M9 11v2M12 11v2', '#4ade80', 1],
+    ['xitoggle', 'Switch', '33 workouts', function (c) { return c.wo >= 33; }, 'M3 12a4 4 0 0 1 4-4h10a4 4 0 0 1 0 8H7a4 4 0 0 1-4-4zM17 10a2 2 0 1 0 0 4', '#f472b6', 1],
+    ['xiscale', 'Balance', '16 badges', function (c) { return c.bd >= 16; }, 'M12 3v18M4 7h16M4 7l-2 7h6zM20 7l-2 7h6z', '#a3e635', 1],
+    ['xidial', 'Dial', '42 workouts', function (c) { return c.wo >= 42; }, 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 12l4-4M12 6v1M18 12h-1M6 12h1', '#7dd3fc', 1],
+    ['xibook', 'Logbook', '26 badges', function (c) { return c.bd >= 26; }, 'M4 5h7a3 3 0 0 1 3 3v12a2 2 0 0 0-2-2H4zM20 5h-7', '#c084fc', 1],
+    ['xicamera', 'Shutter', '48 workouts', function (c) { return c.wo >= 48; }, 'M4 8h4l2-3h4l2 3h4v11H4zM12 11a3 3 0 1 0 0 6 3 3 0 0 0 0-6z', '#fb923c', 1]],
   fm: [['ring', 'Molten', '5 workouts', function (c) { return c.wo >= 5; }], ['neon', 'Venom', '12 workouts', function (c) { return c.wo >= 12; }],
     ['orbit', 'Abyss', '20 workouts', function (c) { return c.wo >= 20; }], ['ember', 'Bloodforge', '30 workouts', function (c) { return c.wo >= 30; }],
     ['sparkle', 'Frost Wyrm', '50 workouts', function (c) { return c.wo >= 50; }], ['halo', 'Solar Wyrm', '75 workouts', function (c) { return c.wo >= 75; }],
@@ -8835,10 +8924,10 @@ var RK_TC = [['ms', 'Milestones', '#2f7bff', ['rookie', 'regular', 'adept', 'gri
   ['one', 'One of one', '#ff5a1f', ['creator', 'eye'], 1]];
 /* ONE TITLE IS NOT TEXT: Creator is a terminal that types itself, in your accent, and only on a profile. */
 /* THE NICKNAMES: each letter is its own box, and each title is three moves picked on their own (how the letters move, what plays round the word, how it is filled), so no two read alike. */
-var LF_TX = { tank: ['Tank', '#86efac', 1, 0, 0], bulldozer: ['Bulldozer', '#fbbf24', 6, 3, 2], nightcrawler: ['Nightcrawler', '#a78bfa', 7, 3, 3], specter: ['Specter', '#cbd5e1', 6, 0, 2], viper: ['Viper', '#4ade80', 9, 2, 1], maverick: ['Maverick', '#38bdf8', 2, 5, 3], outlaw: ['Outlaw', '#f59e0b', 7, 8, 5], spartan: ['Spartan', '#f87171', 12, 1, 1], gladiator: ['Gladiator', '#fcd34d', 1, 2, 5], warlord: ['Warlord', '#ef4444', 9, 7, 6], samurai: ['Samurai', '#fda4af', 11, 5, 1], ninja: ['Ninja', '#94a3b8', 6, 5, 0], pharaoh: ['Pharaoh', '#facc15', 1, 6, 4], shogun: ['Shogun', '#fb7185', 6, 9, 6], blastoff: ['Blast Off', '#fb923c', 11, 2, 2], cyclone: ['Cyclone', '#67e8f9', 4, 5, 4], volcano: ['Volcano', '#f97316', 4, 8, 3], glacier: ['Glacier', '#7dd3fc', 7, 0, 5], firebird: ['Firebird', '#fb923c', 4, 8, 1], grim: ['Grim', '#e5e7eb', 9, 9, 2], sledge: ['Sledge', '#f59e0b', 5, 0, 0], stallion: ['Stallion', '#fb7185', 10, 3, 3], bison: ['Bison', '#d97706', 3, 6, 5], cobra: ['Cobra', '#4ade80', 8, 9, 0], falcon: ['Falcon', '#38bdf8', 1, 2, 2], lonewolf: ['Lone Wolf', '#cbd5e1', 6, 5, 4], lion: ['Lion', '#fbbf24', 11, 8, 6], grizzly: ['Grizzly', '#fb923c', 4, 1, 1], shark: ['Shark', '#7dd3fc', 9, 4, 4], hawkeye: ['Hawkeye', '#fde047', 2, 7, 6], raven: ['Raven', '#a78bfa', 7, 0, 1], jaguar: ['Jaguar', '#f59e0b', 12, 3, 3], mammoth: ['Mammoth', '#cbd5e1', 5, 6, 5], rhino: ['Rhino', '#d6d3d1', 10, 9, 0], kraken: ['Kraken', '#2dd4bf', 3, 2, 2], hydra: ['Hydra', '#34d399', 8, 5, 5], minotaur: ['Minotaur', '#ef4444', 1, 8, 0], centaur: ['Centaur', '#c084fc', 6, 1, 2], cyclops: ['Cyclops', '#f472b6', 11, 4, 4], valkyrie: ['Valkyrie', '#fef08a', 4, 7, 6], berserker: ['Berserker', '#dc2626', 9, 0, 1], behemoth: ['Behemoth', '#22d3ee', 2, 3, 3], goliath: ['Goliath', '#e5e7eb', 7, 6, 6], paragon: ['Paragon', '#fcd34d', 12, 9, 1], rival: ['Rival', '#f472b6', 5, 2, 3], podiumboss: ['Podium Boss', '#fbbf24', 10, 5, 5], kingpin: ['Kingpin', '#f59e0b', 3, 8, 0], emperor: ['Emperor', '#c084fc', 10, 6, 5], immortal: ['Immortal', '#fde68a', 8, 6, 1], champ: ['Reigning Champ', '#fcd34d', 6, 7, 0], sidekick: ['Sidekick', '#34d399', 11, 0, 2], rideordie: ['Ride or Die', '#fb7185', 4, 3, 4], bonded: ['Bonded', '#67e8f9', 9, 6, 6], tagteam: ['Tag Team', '#a3e635', 2, 9, 1], recordbreaker: ['Record Breaker', '#38bdf8', 7, 2, 3], historywriter: ['History Writer', '#a78bfa', 12, 5, 5], halloffame: ['Hall of Famer', '#facc15', 3, 3, 5], millionaire: ['Millionaire', '#4ade80', 10, 1, 3], planetmover: ['Planet Mover', '#60a5fa', 3, 4, 5], repmachine: ['Rep Machine', '#f87171', 8, 7, 0], repgod: ['Rep God', '#fb923c', 1, 0, 2], setsmith: ['Set Smith', '#94a3b8', 6, 3, 4], setlord: ['Set Lord', '#e879f9', 11, 6, 6], centurion: ['Centurion', '#ef4444', 4, 9, 2], chestcmd: ['Chest Commander', '#fb7185', 9, 2, 4], backbaron: ['Back Baron', '#2dd4bf', 2, 5, 6], cannonball: ['Cannonball', '#fbbf24', 7, 8, 1], armwrestler: ['Arm Wrestler', '#f97316', 12, 1, 3], legdaylegend: ['Leg Day Legend', '#a78bfa', 5, 4, 5], absadmiral: ['Abs Admiral', '#38bdf8', 10, 7, 0], unbreakable: ['Unbreakable', '#e5e7eb', 2, 0, 5], ironstreak: ['Iron Streak', '#94a3b8', 8, 3, 5], nevermiss: ['Never Miss', '#4ade80', 1, 6, 0], thirtystrong: ['Thirty Strong', '#f59e0b', 6, 9, 2], marksman: ['Marksman', '#22d3ee', 11, 2, 4], deadeye: ['Dead Eye', '#ef4444', 4, 5, 6], perfectionist: ['Perfectionist', '#c084fc', 9, 8, 1], planmaster: ['Plan Master', '#34d399', 2, 1, 4], quartermaster: ['Quartermaster', '#fcd34d', 7, 4, 6], hothand: ['Hot Hand', '#fb923c', 12, 7, 1], dawnraider: ['Dawn Raider', '#fda4af', 3, 8, 1], daybreaker: ['Daybreaker', '#fde047', 10, 3, 5], nighthawk: ['Night Hawk', '#818cf8', 6, 3, 3], gravedigger: ['Gravedigger', '#a8a29e', 10, 9, 2], midnightrider: ['Midnight Rider', '#7c3aed', 5, 1, 3], longhauler: ['Long Hauler', '#38bdf8', 6, 6, 0], comebackkid: ['Comeback Kid', '#f472b6', 11, 8, 2], doubleheader: ['Doubleheader', '#f59e0b', 4, 1, 4], allrounder: ['Allrounder', '#4ade80', 9, 4, 6], decathlete: ['Decathlete', '#fbbf24', 2, 7, 1], pathfinder: ['Pathfinder', '#2dd4bf', 7, 0, 3], heartracer: ['Heart Racer', '#fb7185', 12, 3, 6], windbreaker: ['Windbreaker', '#7dd3fc', 5, 6, 1], stairmaster: ['Stair Master', '#a3e635', 10, 9, 3] };
+var LF_TX = { tank: ['Tank', '#86efac', 1, 0, 0, 3], bulldozer: ['Bulldozer', '#fbbf24', 6, 3, 2, 0], nightcrawler: ['Nightcrawler', '#a78bfa', 7, 3, 3, 7], specter: ['Specter', '#cbd5e1', 6, 0, 2, 4], viper: ['Viper', '#4adeac', 9, 2, 1, 1], maverick: ['Maverick', '#38bdf8', 2, 5, 3, 8], outlaw: ['Outlaw', '#f5e40b', 7, 8, 5, 5], spartan: ['Spartan', '#f87171', 12, 1, 1, 2], gladiator: ['Gladiator', '#d6fc4d', 1, 2, 5, 9], warlord: ['Warlord', '#ef7744', 9, 7, 6, 6], samurai: ['Samurai', '#fda4af', 11, 5, 1, 3], ninja: ['Ninja', '#949eb8', 6, 5, 0, 0], pharaoh: ['Pharaoh', '#9ffa15', 1, 6, 4, 7], shogun: ['Shogun', '#fb7185', 6, 9, 6, 4], blastoff: ['Blast Off', '#7ffb3c', 11, 2, 2, 1], cyclone: ['Cyclone', '#67e8f9', 4, 5, 4, 8], volcano: ['Volcano', '#2af916', 4, 8, 3, 5], glacier: ['Glacier', '#7d87fc', 7, 0, 5, 2], firebird: ['Firebird', '#3cfb4f', 4, 8, 1, 9], grim: ['Grim', '#e5e7eb', 9, 9, 2, 6], sledge: ['Sledge', '#0bf5d8', 5, 0, 0, 3], stallion: ['Stallion', '#fb7185', 10, 3, 3, 0], bison: ['Bison', '#d97706', 3, 6, 5, 7], cobra: ['Cobra', '#8f4ade', 8, 9, 0, 4], falcon: ['Falcon', '#b638f8', 1, 2, 2, 1], lonewolf: ['Lone Wolf', '#dfcbe1', 6, 5, 4, 8], lion: ['Lion', '#fb24cb', 11, 8, 6, 5], grizzly: ['Grizzly', '#fb3c92', 4, 1, 1, 2], shark: ['Shark', '#7dd3fc', 9, 4, 4, 9], hawkeye: ['Hawkeye', '#fde047', 2, 7, 6, 6], raven: ['Raven', '#a78bfa', 7, 0, 1, 3], jaguar: ['Jaguar', '#f59e0b', 12, 3, 3, 0], mammoth: ['Mammoth', '#cbd5e1', 5, 6, 5, 7], rhino: ['Rhino', '#d6d3d1', 10, 9, 0, 4], kraken: ['Kraken', '#2dd4bf', 3, 2, 2, 1], hydra: ['Hydra', '#34d399', 8, 5, 5, 8], minotaur: ['Minotaur', '#ef4444', 1, 8, 0, 5], centaur: ['Centaur', '#c084fc', 6, 1, 2, 2], cyclops: ['Cyclops', '#f472b6', 11, 4, 4, 9], valkyrie: ['Valkyrie', '#fef08a', 4, 7, 6, 6], berserker: ['Berserker', '#dc2626', 9, 0, 1, 3], behemoth: ['Behemoth', '#22d3ee', 2, 3, 3, 0], goliath: ['Goliath', '#e5e7eb', 7, 6, 6, 7], paragon: ['Paragon', '#fcd34d', 12, 9, 1, 4], rival: ['Rival', '#f472b6', 5, 2, 3, 1], podiumboss: ['Podium Boss', '#fbbf24', 10, 5, 5, 8], kingpin: ['Kingpin', '#f59e0b', 3, 8, 0, 5], emperor: ['Emperor', '#c084fc', 10, 6, 5, 2], immortal: ['Immortal', '#fde68a', 8, 6, 1, 9], champ: ['Reigning Champ', '#fcd34d', 6, 7, 0, 6], sidekick: ['Sidekick', '#34d399', 11, 0, 2, 3], rideordie: ['Ride or Die', '#fb7185', 4, 3, 4, 0], bonded: ['Bonded', '#67e8f9', 9, 6, 6, 7], tagteam: ['Tag Team', '#a3e635', 2, 9, 1, 4], recordbreaker: ['Record Breaker', '#38bdf8', 7, 2, 3, 1], historywriter: ['History Writer', '#a78bfa', 12, 5, 5, 8], halloffame: ['Hall of Famer', '#facc15', 3, 3, 5, 5], millionaire: ['Millionaire', '#4ade80', 10, 1, 3, 2], planetmover: ['Planet Mover', '#60a5fa', 3, 4, 5, 9], repmachine: ['Rep Machine', '#f87171', 8, 7, 0, 6], repgod: ['Rep God', '#fb923c', 1, 0, 2, 3], setsmith: ['Set Smith', '#94a3b8', 6, 3, 4, 0], setlord: ['Set Lord', '#e879f9', 11, 6, 6, 7], centurion: ['Centurion', '#ef4444', 4, 9, 2, 4], chestcmd: ['Chest Commander', '#fb7185', 9, 2, 4, 1], backbaron: ['Back Baron', '#2dd4bf', 2, 5, 6, 8], cannonball: ['Cannonball', '#fbbf24', 7, 8, 1, 5], armwrestler: ['Arm Wrestler', '#f97316', 12, 1, 3, 2], legdaylegend: ['Leg Day Legend', '#a78bfa', 5, 4, 5, 9], absadmiral: ['Abs Admiral', '#38bdf8', 10, 7, 0, 6], unbreakable: ['Unbreakable', '#e5e7eb', 2, 0, 5, 3], ironstreak: ['Iron Streak', '#94a3b8', 8, 3, 5, 0], nevermiss: ['Never Miss', '#4ade80', 1, 6, 0, 7], thirtystrong: ['Thirty Strong', '#f59e0b', 6, 9, 2, 4], marksman: ['Marksman', '#22d3ee', 11, 2, 4, 1], deadeye: ['Dead Eye', '#ef4444', 4, 5, 6, 8], perfectionist: ['Perfectionist', '#c084fc', 9, 8, 1, 5], planmaster: ['Plan Master', '#34d399', 2, 1, 4, 2], quartermaster: ['Quartermaster', '#fcd34d', 7, 4, 6, 9], hothand: ['Hot Hand', '#fb923c', 12, 7, 1, 6], dawnraider: ['Dawn Raider', '#fda4af', 3, 8, 1, 3], daybreaker: ['Daybreaker', '#fde047', 10, 3, 5, 0], nighthawk: ['Night Hawk', '#818cf8', 6, 3, 3, 7], gravedigger: ['Gravedigger', '#a8a29e', 10, 9, 2, 4], midnightrider: ['Midnight Rider', '#7c3aed', 5, 1, 3, 1], longhauler: ['Long Hauler', '#38bdf8', 6, 6, 0, 8], comebackkid: ['Comeback Kid', '#f472b6', 11, 8, 2, 5], doubleheader: ['Doubleheader', '#f59e0b', 4, 1, 4, 2], allrounder: ['Allrounder', '#4ade80', 9, 4, 6, 9], decathlete: ['Decathlete', '#fbbf24', 2, 7, 1, 6], pathfinder: ['Pathfinder', '#2dd4bf', 7, 0, 3, 3], heartracer: ['Heart Racer', '#fb7185', 12, 3, 6, 0], windbreaker: ['Windbreaker', '#7dd3fc', 5, 6, 1, 7], stairmaster: ['Stair Master', '#a3e635', 10, 9, 3, 4] };
 function lfTitleEl(id) {
   var sp = el('<span class="tt"></span>');
-  if (LF_TX[id]) { var X = LF_TX[id]; sp.className = 'tt tx tx-m' + X[2] + ' tx-o' + X[3] + ' tx-f' + X[4]; sp.style.setProperty('--c', X[1]); sp.innerHTML = '<em>' + X[0].split('').map(function (ch, i) { return ch === ' ' ? '<b>&nbsp;</b>' : '<b style="--i:' + i + '">' + ch + '</b>'; }).join('') + '</em>'; return sp; }
+  if (LF_TX[id]) { var X = LF_TX[id]; sp.className = 'tt tx tx-m' + X[2] + ' tx-o' + X[3] + ' tx-f' + X[4] + ' tx-s' + X[5]; sp.style.setProperty('--c', X[1]); sp.innerHTML = '<em>' + X[0].split('').map(function (ch, i) { return ch === ' ' ? '<b>&nbsp;</b>' : '<b style="--i:' + i + '">' + ch + '</b>'; }).join('') + '</em>'; return sp; }
   if (id === 'creator') { sp.className = 'tt tt-creator'; sp.innerHTML = '<em>&lt;creator/&gt;</em>'; return sp; }
   /* each letter lifts in turn, like a bar going up */
   if (id === 'hitter') { sp.className = 'tt tt-wave'; sp.innerHTML = 'Heavy Hitter'.split('').map(function (ch, i) { return ch === ' ' ? '<span>&nbsp;</span>' : '<span style="--i:' + i + '">' + ch + '</span>'; }).join(''); return sp; }
@@ -9364,7 +9453,7 @@ var RK_HEAD = { ti: 'Title', fl: 'Flair', fm: 'Frame' };
 /* the flairs, by what they do */
 function lfRkFc() {
   var nm = [], mv = [], ic = [];
-  RK.fl.forEach(function (x) { (/^nf/.test(x[0]) ? nm : /^x/.test(x[0]) ? mv : ic).push(x[0]); });
+  RK.fl.forEach(function (x) { (/^nf|^nx/.test(x[0]) ? nm : /^x/.test(x[0]) ? mv : ic).push(x[0]); });
   return [['fnm', 'Plays with your name', '#f472b6', nm], ['fmv', 'Icons that move', '#22d3ee', mv], ['fic', 'Icons', '#94a3b8', ic]];
 }
 function lfRkOnly() { try { return localStorage.getItem('lift.rkonly.v1') === '1'; } catch (e) { return false; } }
@@ -9388,7 +9477,7 @@ function lfRkAll(c) { var out = []; ['ti', 'fl', 'fm'].forEach(function (k) { RK
 function lfFlairEl(id) {
   var x = lfRkItem('fl', id); if (!x) return null;
   var i = el('<i class="lf-fl" aria-hidden="true"><svg viewBox="0 0 24 24"><path></path></svg></i>');
-  $('path', i).setAttribute('d', x[4]); i.style.setProperty('--fc', x[5]); if (x[6]) i.classList.add('is-st'); i.dataset.fl = id; return i;
+  $('path', i).setAttribute('d', x[4]); i.style.setProperty('--fc', x[5]); if (x[6]) i.classList.add('is-st'); i.dataset.fl = id; if (LF_NX[id]) i.classList.add('fi-m' + LF_NX[id][3]); return i;
 }
 /* a profile banner, dressed: frame and title; the banner itself is always the accent */
 function frDress(b, st) {
@@ -9442,8 +9531,8 @@ function lfRkPick(kind, onPick) {
     }
     var opts = RK[kind].filter(function (x) { return !(kind === 'fl' && x[0] === 'eye' && !lfOwner()) && !(kind === 'fm' && (x[0] === 'prestige' || x[0] === 'sovereign' || (RK_ORN[x[0]] && RK_ORN[x[0]].own)) && !lfOwner()); }).map(function (x) { return { id: x[0], n: x[1], q: x[2], ok: !!x[3](c) }; });
     if (kind === 'fm') { opts.unshift({ id: '', n: 'None', q: '', ok: true }); var g0 = el('<div class="rk-opts"></div>'); opts.forEach(function (x) { g0.appendChild(opt(x)); }); body.appendChild(g0); return; }
-    /* TITLES AND FLAIRS FOLD LIKE THE BADGE SHELF: what you are wearing at the top with a way off, an Unlocked-only switch, and every section shut until you open it (and left open once you do). */
-    var only = lfRkOnly(), openMap = lfBcolOpen();
+    /* TITLES AND FLAIRS ARE LAID OUT LIKE THE BADGE SHELF, BUT NEVER FOLDED: what you are wearing at the top with a way off, an Unlocked-only switch, and every section open, because here you are choosing by looking. */
+    var only = lfRkOnly();
     var bar = el('<div class="lf-bopts"><div class="lf-bshow"><span>Unlocked only</span><button type="button" class="lf-tgl" role="switch" aria-label="Show only what you have unlocked"><i></i></button></div></div>'), ob = $('button', bar);
     ob.dataset.k = 'rkonly'; ob.setAttribute('aria-checked', only ? 'true' : 'false');
     ob.addEventListener('click', function () { try { localStorage.setItem('lift.rkonly.v1', lfRkOnly() ? '0' : '1'); } catch (e) {} paint(); });
@@ -9465,12 +9554,8 @@ function lfRkPick(kind, onPick) {
       if (tc[4] && !lfOwner()) return;
       var mine = opts.filter(function (x) { return tc[3].indexOf(x.id) >= 0; }), got = mine.filter(function (x) { return x.ok; }).length, vis = only ? mine.filter(function (x) { return x.ok; }) : mine;
       if (!vis.length) return;
-      var key = 'rk' + kind + tc[0], isOpen = !!openMap[key];
-      var hd = el('<div class="lf-bcol"><div class="lf-bcol-t"><h4><button type="button" class="lf-bcol-b"></button></h4><span class="lf-num"></span>' + IC.chev + '</div><i aria-hidden="true"><i></i></i></div>');
-      hd.style.setProperty('--cc', tc[2]); var tb = $('.lf-bcol-b', hd), g = el('<div class="rk-opts"></div>'); g.id = 'rkg' + kind + tc[0];
-      tb.textContent = tc[1]; $('.lf-num', hd).textContent = got + ' / ' + mine.length; $('i i', hd).style.width = (mine.length ? got / mine.length * 100 : 0) + '%';
-      tb.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); tb.setAttribute('aria-controls', g.id); g.hidden = !isOpen; hd.classList.toggle('is-open', isOpen);
-      tb.addEventListener('click', function () { var on = g.hidden; g.hidden = !on; tb.setAttribute('aria-expanded', on ? 'true' : 'false'); hd.classList.toggle('is-open', on); lfBcolSet(key, on); });
+      var hd = el('<div class="lf-bcol is-flat"><div class="lf-bcol-t"><h4></h4><span class="lf-num"></span></div><i aria-hidden="true"><i></i></i></div>'), g = el('<div class="rk-opts"></div>');
+      hd.style.setProperty('--cc', tc[2]); $('h4', hd).textContent = tc[1]; $('.lf-num', hd).textContent = got + ' / ' + mine.length; $('i i', hd).style.width = (mine.length ? got / mine.length * 100 : 0) + '%';
       body.appendChild(hd); body.appendChild(g); vis.forEach(function (x) { g.appendChild(opt(x)); });
     });
   }
@@ -13647,6 +13732,9 @@ function lfApplyAccent() {
 /* THESE FLAIRS PLAY WITH THE NAME ITSELF: the name and its flair go inside one wrapper that the effect is drawn on (an underline that draws, a light across it, letters that wave, a dot that orbits it). Wave and Domino need each letter on its own. */
 var LF_NF = { nfink: 1, nfspot: 1, nfwave: 1, nfdomino: 1, nforbit: 1, nfcaret: 1, nfstamp: 1, nfglitch: 1, nfember: 1, nffrost: 1, nftilt: 1, nfecho: 1, nfmark: 1, nfscan: 1, nfconf: 1, nfunder: 1, nfblink: 1, nfshine: 1, nfbounce: 1, nfneon: 1, nfshake: 1, nfrain: 1, nfspark: 1, nflaser: 1, nfpulse: 1, nfflip: 1, nftype: 1, nfrainbow: 1, nfstretch: 1, nfhalo: 1 };
 var LF_NSPLIT = { nfwave: 1, nfdomino: 1, nfflip: 1, nftype: 1 };
+/* THE NEW FLAIRS: for the ones that play with the name, how the letters move, what plays round it, and a glow; every one also moves its own icon in one of eight ways. */
+var LF_NX = { nxcompass: [1, 1, 0, 1], nxhex: [6, 4, 1, 2], nxtri: [11, 7, 2, 3], nxcross: [4, 0, 0, 4], nxspiral: [9, 3, 1, 5], nxzig: [2, 6, 2, 6], nxup: [7, 9, 0, 7], nxchev: [12, 2, 1, 8], nxcloud: [5, 5, 2, 1], nxumb: [10, 8, 0, 2], nxdna: [3, 1, 1, 3], nxfeather: [8, 4, 2, 4], nxskull: [1, 7, 0, 5], nxsword: [6, 0, 1, 6], nxaxe: [11, 3, 2, 7], nxlantern: [4, 6, 0, 8], nxcandle: [9, 9, 1, 1], nxtrident: [2, 2, 2, 2], nxwings: [7, 5, 0, 3], nxhorns: [12, 8, 1, 4], nxpin: [5, 1, 2, 5], nxbubble: [10, 4, 0, 6], nxsmile: [3, 7, 1, 7], nxbulb: [8, 0, 2, 8], nxmagnify: [1, 3, 0, 1], nxgame: [6, 6, 1, 2], nxphones: [11, 9, 2, 3], nxcoffee: [4, 2, 0, 4], xifish: [0, 0, 0, 1], xiradiant: [0, 0, 0, 2], xibatt: [0, 0, 0, 3], xitoggle: [0, 0, 0, 4], xiscale: [0, 0, 0, 5], xidial: [0, 0, 0, 6], xibook: [0, 0, 0, 7], xicamera: [0, 0, 0, 8] };
+Object.keys(LF_NX).forEach(function (k) { if (LF_NX[k][0]) { LF_NF[k] = 1; LF_NSPLIT[k] = 1; } });
 function lfNameOn(node, st) {
   lfNameCol(node, st);
   if ($('.lf-nw', node)) node.textContent = node.textContent;
@@ -13654,6 +13742,7 @@ function lfNameOn(node, st) {
   var fe = st && st.fl && lfFlairEl(st.fl); if (!fe) return;
   if (!LF_NF[st.fl]) { node.appendChild(fe); return; }
   var txt = node.textContent, w = el('<span class="lf-nw"></span>'); w.dataset.nf = st.fl; node.textContent = '';
+  if (LF_NX[st.fl]) { var NXs = LF_NX[st.fl], fx = lfRkItem('fl', st.fl); w.className = 'lf-nw lf-nx nx-m' + NXs[0] + ' nx-o' + NXs[1] + ' nx-g' + NXs[2]; if (fx) w.style.setProperty('--c', fx[5]); }
   if (LF_NSPLIT[st.fl]) txt.split('').forEach(function (ch, i) { var s = document.createElement('span'); s.className = 'lf-nl'; s.style.setProperty('--i', i); s.textContent = ch; w.appendChild(s); });
   else w.appendChild(document.createTextNode(txt));
   w.appendChild(fe); node.appendChild(w);
