@@ -496,6 +496,12 @@ svg { display: block; }
 .lf-rcm-b { position: relative; background: none; border: 0; padding: 0; margin-right: 9px; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--dim); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .lf-rcm > .lf-rcm-b { display: inline-block; margin: 0; }
 .lf-rcm.is-sw > .lf-rcm-b { display: inline-block; margin: 0; color: var(--log); }
+.lf-rcm-w { position: relative; background: none; border: 0; padding: 0; margin: 0; font: inherit; color: inherit; cursor: pointer; }
+.lf-rcm-w b::after { content: '\203a'; display: inline-block; margin-left: 4px; color: var(--dim); transition: transform .2s; }
+.lf-rcm-w[aria-expanded="true"] b::after { transform: rotate(90deg); }
+.lf-rcm-w::before { content: ''; position: absolute; inset: -12px -6px; }
+.lf-rcm > .lf-rcm-why { display: block; margin: 3px 0 0; font-size: 11px; font-weight: 500; color: var(--dim); line-height: 1.4; }
+.lf-rcm > .lf-rcm-why[hidden] { display: none; }
 .lf-rcm-b::before { content: ''; position: absolute; inset: -12px -5px; }
 .lf-li.is-off { opacity: .5; }
 .lf-orig-h { color: var(--log); }
@@ -4884,10 +4890,20 @@ function lfSwapKeep(e) {
   lfSave(); lfPaintSession();
   lfToast(exName(e.id) + ' is in your program now', function () { S.sw = JSON.parse(was); if (!Object.keys(S.sw).length) delete S.sw; lfSave(); lfRender(); });
 }
+/* WHERE A RECOMMENDATION COMES FROM, said in a sentence: the target, and what it did to this exercise */
+function lfRecWhy(e) {
+  var m = String(e.fit.m).toLowerCase(), f = null;
+  S.focus.forEach(function (q) { if (q.m === e.fit.m) f = q; });
+  var tg = f ? (f.lo === f.hi ? f.lo : f.lo + '\u2013' + f.hi) + ' sets a week' : 'its weekly target';
+  var s = function (n) { return n + (n === 1 ? ' set' : ' sets'); };
+  if (e.fit.extra) return 'Your ' + m + ' target is ' + tg + ', more than this day\'s exercises can hold. This adds ' + s(e.fit.n) + '.';
+  return 'Your ' + m + ' target is ' + tg + ', so this goes from ' + s(e.fit.was) + ' to ' + e.fit.n + '.';
+}
 function lfRecEl(e, swap) {
-  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b></b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
+  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><button type="button" class="lf-rcm-w" aria-expanded="false"><b></b></button><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button><div class="lf-rcm-why" hidden></div></div>');
   $('b', r).textContent = 'RECOMMENDED';
-  if (swap) { r.classList.add('is-sw'); $('b', r).remove(); $('.lf-rcm-t', r).remove(); }
+  if (!swap) { var rw = $('.lf-rcm-w', r), ry = $('.lf-rcm-why', r); ry.textContent = lfRecWhy(e); rw.addEventListener('click', function () { var o = ry.hidden; ry.hidden = !o; rw.setAttribute('aria-expanded', o ? 'true' : 'false'); }); }
+  if (swap) { r.classList.add('is-sw'); $('.lf-rcm-w', r).remove(); $('.lf-rcm-t', r).remove(); $('.lf-rcm-why', r).remove(); }
   if (!swap) $('.lf-rcm-t', r).textContent = '–';
   $('[data-k="keep"]', r).addEventListener('click', function () { if (swap) lfSwapKeep(e); else lfFitKeep(e); });
   return r;
