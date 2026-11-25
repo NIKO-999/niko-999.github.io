@@ -4870,7 +4870,7 @@ function lfFit(rt) {
 /* AN EXERCISE THE TARGETS ADDED is recommended, never imposed: it can be swapped for another, or kept so it is part of this day from now on. */
 function lfFitKeep(e) {
   var day = act && act.rt; if (!day || !e.fit) return;
-  var was = JSON.stringify(S.keep || {}); S.keep = S.keep || {}; S.keep[day] = (S.keep[day] || []).filter(function (q) { return q[0] !== e.id; }); S.keep[day].push([e.id, Math.max(1, e.fit.n)]);
+  var was = JSON.stringify(S.keep || {}); S.keep = S.keep || {}; var kid = e.from || e.id; /* a swapped exercise keeps its place in the program under the exercise it stands in for, which the swap already maps */ S.keep[day] = (S.keep[day] || []).filter(function (q) { return q[0] !== kid; }); S.keep[day].push([kid, Math.max(1, e.fit.n)]);
   delete e.fit; lfSaveAct(); lfSave(); lfPaintSession();
   lfToast(exName(e.id) + ' is in your program now', function () { S.keep = JSON.parse(was); if (!Object.keys(S.keep).length) delete S.keep; lfSave(); lfRender(); });
 }
