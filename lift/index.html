@@ -4816,20 +4816,25 @@ function lfWithKeep(d) {
   var ks = S.keep && S.keep[d.id]; if (!ks || !ks.length || d.choice) return d;
   var o = {}; Object.keys(d).forEach(function (k) { o[k] = d[k]; });
   o.ex = d.ex.slice(); o.tg = {}; Object.keys(d.tg || {}).forEach(function (k) { o.tg[k] = d.tg[k]; });
-  ks.forEach(function (k) { if (o.ex.indexOf(k[0]) < 0 && exById(k[0])) { o.ex.push(k[0]); o.tg[k[0]] = [k[1], 10, 15]; } });
+  o.pin = {};
+  ks.forEach(function (k) { if (!exById(k[0])) return; if (o.ex.indexOf(k[0]) < 0) { o.ex.push(k[0]); o.tg[k[0]] = [k[1], 10, 15]; } else if (o.tg[k[0]]) o.tg[k[0]] = [k[1]].concat(o.tg[k[0]].slice(1)); o.pin[k[0]] = 1; });
   o.kept = 1; return o;
 }
 function lfFitMap() {
   var P = lfProg(), rows = {}, tgt = {}, out = {}, ex = {};
   S.focus.forEach(function (f) { tgt[f.m] = f; });
-  P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0] }); }); });
+  P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0], pin: !!(d.pin && d.pin[id]) }); }); });
   Object.keys(rows).forEach(function (m) {
     var f = tgt[m]; if (!f || !(f.lo >= 0)) return;
     var tot = rows[m].reduce(function (a, r) { return a + r.n; }, 0), want = tot < f.lo ? f.lo : tot > f.hi ? f.hi : tot;
     if (want === tot || !tot) return;
-    var k = want / tot, acc = 0, prev = 0, spill = {};
+    /* an exercise you kept in the program stays as you kept it; the others move round it */
+    var pinS = 0, freeS = 0; rows[m].forEach(function (r) { if (r.pin) pinS += r.n; else freeS += r.n; });
+    if (freeS <= 0) return;
+    var k = Math.max(0, want - pinS) / freeS, acc = 0, prev = 0, spill = {};
     /* a muscle that is cut far enough loses exercises: the ones the sets run out before reach */
     rows[m].forEach(function (r) {
+      if (r.pin) return;
       acc += r.n * k; var now = Math.round(acc), give = now - prev; prev = now;
       if (give > LF_FITCAP) { spill[r.d] = (spill[r.d] || 0) + give - LF_FITCAP; give = LF_FITCAP; }
       (out[r.d] = out[r.d] || {})[r.id] = { was: r.n, n: give, m: m };
@@ -4862,13 +4867,13 @@ function lfFit(rt) {
 /* AN EXERCISE THE TARGETS ADDED is recommended, never imposed: it can be swapped for another, or kept so it is part of this day from now on. */
 function lfFitKeep(e) {
   var day = act && act.rt; if (!day || !e.fit) return;
-  var was = JSON.stringify(S.keep || {}); S.keep = S.keep || {}; (S.keep[day] = S.keep[day] || []).push([e.id, Math.max(1, e.sets.length)]);
+  var was = JSON.stringify(S.keep || {}); S.keep = S.keep || {}; S.keep[day] = (S.keep[day] || []).filter(function (q) { return q[0] !== e.id; }); S.keep[day].push([e.id, Math.max(1, e.fit.n)]);
   delete e.fit; lfSaveAct(); lfSave(); lfPaintSession();
-  lfToast(e.n + ' is part of this workout now', function () { S.keep = JSON.parse(was); if (!Object.keys(S.keep).length) delete S.keep; lfSave(); lfRender(); });
+  lfToast(exName(e.id) + ' is in your program now', function () { S.keep = JSON.parse(was); if (!Object.keys(S.keep).length) delete S.keep; lfSave(); lfRender(); });
 }
 function lfRecEl(e) {
   var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b>RECOMMENDED</b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
-  $('.lf-rcm-t', r).textContent = 'From your ' + String(e.fit.m).toLowerCase() + ' target';
+  $('.lf-rcm-t', r).textContent = (e.fit.extra ? 'From your ' : e.fit.n + (e.fit.n === 1 ? ' set' : ' sets') + ' from your ') + String(e.fit.m).toLowerCase() + ' target';
   $('[data-k="keep"]', r).addEventListener('click', function () { lfFitKeep(e); });
   return r;
 }
@@ -5528,7 +5533,7 @@ function lfPaintSession() {
       aimEl.innerHTML = '<i class="lf-aim-k">Deload</i><span></span>'; $('span', aimEl).textContent = 'Try ' + fmtW(aimF.w) + ' × ' + aimF.r;
     }
     if (!aim.note) $('.lf-aim', card).remove();
-    var recOn = !!(e.fit && e.fit.extra && lfFitOn() && act && act.rt);
+    var recOn = !!(e.fit && lfFitOn() && act && act.rt);
     if (recOn) { var ca = $('.lf-aim', card), rc = lfRecEl(e); if (ca) ca.remove(); $('.lf-tg', card).insertAdjacentElement('afterend', rc); }
     else if (!$('.lf-aim', card)) { /* no coach line */ }
     else if (!aim.sets.length) { $('.lf-aim', card).classList.add('is-info'); $('.lf-aim', card).disabled = true; }
