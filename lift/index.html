@@ -5482,7 +5482,7 @@ function lfPaintSession() {
     var rs = lfRestOf(e.id);
     /* The plan's target where the day has one, the recommended dose
        for what the exercise is everywhere else. */
-    $('.lf-tg', card).textContent = (e.tg ? lfTgTxt(e.tg) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs) + (e.fit && lfFitOn() ? ' · ' + lfFitTxt(e.fit) : '');
+    $('.lf-tg', card).textContent = (e.tg ? lfTgTxt(e.tg) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs);
     $('.lf-aim', card).textContent = aim.note;
     /* the sparkle is a drawing in the accent, put in front of the words; it adds no text, so the line still reads as just the suggestion */
     if (aim.note) $('.lf-aim', card).insertAdjacentHTML('afterbegin', '<svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg>');
