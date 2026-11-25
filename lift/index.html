@@ -1447,10 +1447,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-bnone { margin: 18px 2px; font-size: 13px; color: var(--dim); }
 .lf-fit { display: block; margin-top: 2px; font-style: normal; font-size: 11px; font-weight: 600; color: var(--log); }
 .lf-bshow.lf-fit-sw { justify-content: space-between; margin: 0 0 12px; padding: 0 2px; font-size: 13px; }
-.lf-fit-sw .lf-tgl { width: 36px; height: 22px; border-radius: 11px; }
-.lf-fit-sw .lf-tgl::before { inset: -11px -4px; }
-.lf-fit-sw .lf-tgl i { top: 3px; left: 3px; width: 16px; height: 16px; }
-.lf-fit-sw .lf-tgl[aria-checked="true"] i { transform: translateX(14px); }
 .lf-bdg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; margin-top: 14px; }
 .lf-bdi { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
 .lf-bdi b { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
@@ -1858,11 +1854,11 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @keyframes tt-ti-s2 { 0%, 100% { opacity: 0; transform: scale(.3) rotate(0); } 55% { opacity: 1; transform: scale(1.1) rotate(90deg); } 75% { opacity: 0; transform: scale(.4) rotate(140deg); } }
 @media (prefers-reduced-motion: reduce) { .tt-ice em, .tt-lv em, .tt-mb em, .tt-ne em, .tt-gx em, .tt-sr em, .tt-ed em::after, .tt-cb em { animation: none; } .tt-sr em { background-size: 100% 100%; } .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
 .lf-bshow { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--dim); }
-.lf-tgl { position: relative; width: 50px; height: 30px; border-radius: 15px; background: var(--mark-off); flex: none; transition: background .2s; }
-.lf-tgl::before { content: ''; position: absolute; inset: -7px -3px; }
-.lf-tgl i { position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); transition: transform .22s var(--ease, ease); }
+.lf-tgl { position: relative; width: 36px; height: 22px; border-radius: 11px; background: var(--mark-off); flex: none; transition: background .2s; }
+.lf-tgl::before { content: ''; position: absolute; inset: -11px -4px; }
+.lf-tgl i { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--ink); transition: transform .22s var(--ease, ease); }
 .lf-tgl[aria-checked="true"] { background: var(--log); }
-.lf-tgl[aria-checked="true"] i { transform: translateX(20px); background: var(--on-log); }
+.lf-tgl[aria-checked="true"] i { transform: translateX(14px); background: var(--on-log); }
 @media (prefers-reduced-motion: reduce) { .lf-tgl, .lf-tgl i { transition: none; } }
 .lf-cu-pv { display: flex; align-items: center; gap: 12px; padding: 12px 4px 14px; }
 .lf-cu-pv b { font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
@@ -4821,6 +4817,8 @@ function lfFitMap() {
       if (give > LF_FITCAP) { spill[r.d] = (spill[r.d] || 0) + give - LF_FITCAP; give = LF_FITCAP; }
       (out[r.d] = out[r.d] || {})[r.id] = { was: r.n, n: give, m: m };
     });
+    /* one set over the cap stays on its exercise: a one-set extra exercise is not worth starting */
+    Object.keys(spill).forEach(function (d) { if (spill[d] < 2) { Object.keys(out[d] || {}).some(function (id) { var r = out[d][id]; if (r.m === m && r.n === LF_FITCAP) { r.n += spill[d]; return true; } }); delete spill[d]; } });
     /* what a day's exercises cannot hold becomes one more exercise for that muscle, at the end of the day that already trains it most */
     var day = '', most = 0; Object.keys(spill).forEach(function (d) { if (spill[d] > most) { most = spill[d]; day = d; } });
     if (day) { var dd = P.days.filter(function (x) { return x.id === day; })[0], id = dd ? lfFitExtra(m, dd.ex) : ''; if (id) (ex[day] = ex[day] || []).push({ id: id, n: Math.min(LF_FITEXTRA, most), m: m }); }
@@ -4838,6 +4836,7 @@ function lfFit(rt) {
   (xs || []).forEach(function (x) { if (o.ex.indexOf(x.id) >= 0) return; o.ex.push(x.id); o.tg[x.id] = [x.n, 10, 15]; o.fit[x.id] = { was: 0, n: x.n, m: x.m, extra: 1 }; });
   return o;
 }
+if (window.__lfHook) window.__lfHook = { fit: function (rt) { return lfFit(rt); }, prog: function () { return lfProg(); }, name: exName };
 function lfFitTxt(f) { var m = String(f.m).toLowerCase(); return f.extra ? 'added for your ' + m + ' target' : f.n + ' instead of ' + f.was + ', your ' + m + ' target'; }
 function lfStart(rt) {
   rt = lfFit(rt);
