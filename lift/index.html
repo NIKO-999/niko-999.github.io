@@ -487,6 +487,14 @@ svg { display: block; }
 .lf-vr.is-met i b { background: var(--good); }
 .lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
 .lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
+.lf-rcm { grid-column: 1 / -1; display: block; margin: 2px 0 6px; font-size: 9.5px; font-weight: 700; color: var(--log); line-height: 1.5; }
+.lf-rcm > * { display: inline-block; vertical-align: middle; }
+.lf-rcm b { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; margin-right: 7px; }
+.lf-rcm .lf-aim-s { margin-right: 4px; }
+.lf-rcm-t { margin-right: 9px; color: var(--dim); }
+.lf-rcm-b { position: relative; background: none; border: 0; padding: 0; margin-right: 9px; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--dim); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.lf-rcm-b::before { content: ''; position: absolute; inset: -12px -5px; }
+.lf-li.is-off { opacity: .5; }
 .lf-aim { appearance: none; background: none; border: 0; padding: 0; font: inherit; font-size: 9.5px; font-weight: 700; color: var(--log); margin: 2px 0 6px; text-align: left; cursor: pointer; display: flex; align-items: center; }
 .lf-aim::before { content: 'COACH'; order: -1; margin-right: 7px; font-size: 9.5px; font-weight: 700; letter-spacing: .06em; color: var(--log); }
 .lf-aim-s { order: -2; flex: none; width: 11px; height: 11px; margin-right: 4px; fill: none; stroke: var(--log); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -3312,7 +3320,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
-  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false;
+  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false; if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
   d.bwGoal = num(o.bwGoal);
   /* Health insights have been allowed on this phone */
   if (o.hkr === true) d.hkr = true;
@@ -4803,17 +4811,26 @@ function lfFitExtra(m, have) {
   var a = EXERCISES.filter(function (x) { return x.m === m && have.indexOf(x.id) < 0; });
   return a.length ? a[0].id : '';
 }
+/* WHAT YOU KEPT: a recommended exercise you chose to keep joins that day for good, like any other exercise in it. */
+function lfWithKeep(d) {
+  var ks = S.keep && S.keep[d.id]; if (!ks || !ks.length || d.choice) return d;
+  var o = {}; Object.keys(d).forEach(function (k) { o[k] = d[k]; });
+  o.ex = d.ex.slice(); o.tg = {}; Object.keys(d.tg || {}).forEach(function (k) { o.tg[k] = d.tg[k]; });
+  ks.forEach(function (k) { if (o.ex.indexOf(k[0]) < 0 && exById(k[0])) { o.ex.push(k[0]); o.tg[k[0]] = [k[1], 10, 15]; } });
+  o.kept = 1; return o;
+}
 function lfFitMap() {
   var P = lfProg(), rows = {}, tgt = {}, out = {}, ex = {};
   S.focus.forEach(function (f) { tgt[f.m] = f; });
-  P.days.forEach(function (d) { if (d.choice) return; d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0] }); }); });
+  P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0] }); }); });
   Object.keys(rows).forEach(function (m) {
     var f = tgt[m]; if (!f || !(f.lo >= 0)) return;
     var tot = rows[m].reduce(function (a, r) { return a + r.n; }, 0), want = tot < f.lo ? f.lo : tot > f.hi ? f.hi : tot;
     if (want === tot || !tot) return;
     var k = want / tot, acc = 0, prev = 0, spill = {};
+    /* a muscle that is cut far enough loses exercises: the ones the sets run out before reach */
     rows[m].forEach(function (r) {
-      acc += r.n * k; var now = Math.round(acc), give = Math.max(1, now - prev); prev = now;
+      acc += r.n * k; var now = Math.round(acc), give = now - prev; prev = now;
       if (give > LF_FITCAP) { spill[r.d] = (spill[r.d] || 0) + give - LF_FITCAP; give = LF_FITCAP; }
       (out[r.d] = out[r.d] || {})[r.id] = { was: r.n, n: give, m: m };
     });
@@ -4821,22 +4838,41 @@ function lfFitMap() {
     Object.keys(spill).forEach(function (d) { if (spill[d] < 2) { Object.keys(out[d] || {}).some(function (id) { var r = out[d][id]; if (r.m === m && r.n === LF_FITCAP) { r.n += spill[d]; return true; } }); delete spill[d]; } });
     /* what a day's exercises cannot hold becomes one more exercise for that muscle, at the end of the day that already trains it most */
     var day = '', most = 0; Object.keys(spill).forEach(function (d) { if (spill[d] > most) { most = spill[d]; day = d; } });
-    if (day) { var dd = P.days.filter(function (x) { return x.id === day; })[0], id = dd ? lfFitExtra(m, dd.ex) : ''; if (id) (ex[day] = ex[day] || []).push({ id: id, n: Math.min(LF_FITEXTRA, most), m: m }); }
+    if (day) { var dd = P.days.filter(function (x) { return x.id === day; })[0], id = dd ? lfFitExtra(m, lfWithKeep(dd).ex) : ''; if (id) (ex[day] = ex[day] || []).push({ id: id, n: Math.min(LF_FITEXTRA, most), m: m }); }
   });
   return { days: out, extra: ex };
 }
 /* a routine as the targets want it done: the same routine with the sets moved, and what changed written on it */
 function lfFit(rt) {
-  if (!rt || rt.choice || rt.fit || !lfFitOn() || !rt.tg) return rt;
+  if (!rt || rt.choice || rt.fit || rt.kept) return rt;
+  var base = lfWithKeep(rt);
+  if (!lfFitOn() || !base.tg) return base;
   var map = lfFitMap(), m = map.days[rt.id], xs = map.extra[rt.id];
-  if (!m && !xs) return rt;
-  var o = {}; Object.keys(rt).forEach(function (k) { o[k] = rt[k]; });
-  o.tg = {}; Object.keys(rt.tg).forEach(function (k) { o.tg[k] = rt.tg[k]; }); o.ex = rt.ex.slice(); o.fit = {};
-  Object.keys(m || {}).forEach(function (id) { var g = rt.tg[id], r = m[id]; if (!g) return; o.tg[id] = [r.n].concat(g.slice(1)); if (r.n !== r.was) o.fit[id] = { was: r.was, n: r.n, m: r.m }; });
+  if (!m && !xs) return base;
+  var o = {}; Object.keys(base).forEach(function (k) { o[k] = base[k]; });
+  o.tg = {}; Object.keys(base.tg).forEach(function (k) { o.tg[k] = base.tg[k]; }); o.ex = base.ex.slice(); o.fit = {}; o.drops = [];
+  Object.keys(m || {}).forEach(function (id) {
+    var g = base.tg[id], r = m[id]; if (!g) return;
+    if (r.n <= 0) { o.ex = o.ex.filter(function (q) { return q !== id; }); delete o.tg[id]; o.drops.push({ id: id, was: r.was, m: r.m }); return; }
+    o.tg[id] = [r.n].concat(g.slice(1)); if (r.n !== r.was) o.fit[id] = { was: r.was, n: r.n, m: r.m };
+  });
   (xs || []).forEach(function (x) { if (o.ex.indexOf(x.id) >= 0) return; o.ex.push(x.id); o.tg[x.id] = [x.n, 10, 15]; o.fit[x.id] = { was: 0, n: x.n, m: x.m, extra: 1 }; });
   return o;
 }
-if (window.__lfHook) window.__lfHook = { fit: function (rt) { return lfFit(rt); }, prog: function () { return lfProg(); }, name: exName };
+/* AN EXERCISE THE TARGETS ADDED is recommended, never imposed: it can be swapped for another, or kept so it is part of this day from now on. */
+function lfFitKeep(e) {
+  var day = act && act.rt; if (!day || !e.fit) return;
+  var was = JSON.stringify(S.keep || {}); S.keep = S.keep || {}; (S.keep[day] = S.keep[day] || []).push([e.id, Math.max(1, e.sets.length)]);
+  delete e.fit; lfSaveAct(); lfSave(); lfPaintSession();
+  lfToast(e.n + ' is part of this workout now', function () { S.keep = JSON.parse(was); if (!Object.keys(S.keep).length) delete S.keep; lfSave(); lfRender(); });
+}
+function lfRecEl(e) {
+  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b>RECOMMENDED</b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="chg">Change</button><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
+  $('.lf-rcm-t', r).textContent = 'From your ' + String(e.fit.m).toLowerCase() + ' target';
+  $('[data-k="chg"]', r).addEventListener('click', function () { lfSwap(e); });
+  $('[data-k="keep"]', r).addEventListener('click', function () { lfFitKeep(e); });
+  return r;
+}
 function lfFitTxt(f) { var m = String(f.m).toLowerCase(); return f.extra ? 'added for your ' + m + ' target' : f.n + ' instead of ' + f.was + ', your ' + m + ' target'; }
 function lfStart(rt) {
   rt = lfFit(rt);
@@ -5493,6 +5529,9 @@ function lfPaintSession() {
       aimEl.innerHTML = '<i class="lf-aim-k">Deload</i><span></span>'; $('span', aimEl).textContent = 'Try ' + fmtW(aimF.w) + ' × ' + aimF.r;
     }
     if (!aim.note) $('.lf-aim', card).remove();
+    var recOn = !!(e.fit && e.fit.extra && lfFitOn() && act && act.rt);
+    if (recOn) { var ca = $('.lf-aim', card), rc = lfRecEl(e); if (ca) ca.remove(); $('.lf-tg', card).insertAdjacentElement('afterend', rc); }
+    else if (!$('.lf-aim', card)) { /* no coach line */ }
     else if (!aim.sets.length) { $('.lf-aim', card).classList.add('is-info'); $('.lf-aim', card).disabled = true; }
     else $('.lf-aim', card).addEventListener('click', function () {
       /* ONE TAP FILLS WHAT IS STILL EMPTY with the aim, set by set, and leaves anything typed or ticked alone */
@@ -6963,6 +7002,11 @@ function lfDaySpec(rt) {
     if (rt.fit && rt.fit[id]) { var fn = el('<em class="lf-fit"></em>'); fn.textContent = lfFitTxt(rt.fit[id]); $('.lf-li-t', li).appendChild(fn); }
     /* a swapped slot is the only place the swap can be undone: its name is in the accent, and pressing it offers the way back */
     li.addEventListener('click', function () { if (swd) lfUnswap(rt, id, swd, s); else lfExSheet(id); });
+    $('.lf-list', b).appendChild(li);
+  });
+  (rt.drops || []).forEach(function (d) {
+    var li = el('<div class="lf-li is-off"><div class="lf-li-t"><b></b><span></span></div><span class="lf-li-r lf-num">off</span></div>');
+    $('b', li).textContent = exName(d.id); $('span', li).textContent = 'Off for now, your ' + String(d.m).toLowerCase() + ' target';
     $('.lf-list', b).appendChild(li);
   });
   var go = el('<button type="button" class="lf-btn is-log is-full"></button>');
