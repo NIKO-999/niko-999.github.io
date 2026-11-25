@@ -484,6 +484,7 @@ svg { display: block; }
 .lf-vsep { height: 1px; background: var(--line); margin: 2px 0; }
 .lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
 .lf-vr i b { display: block; height: 100%; background: var(--mark-on); border-radius: 3px; }
+.lf-vr.is-aux i b { background: color-mix(in srgb, var(--log-g, var(--good)) 50%, var(--card3)); }
 .lf-vr.is-met i b { background: var(--good); }
 .lf-vr em { font-style: normal; text-align: right; color: var(--dim); }
 .lf-tg { font-size: 12px; color: var(--dim); margin: -6px 0 2px; }
@@ -2881,14 +2882,14 @@ function lfPpl(e) {
   if (PULL_DELTS[e.id]) return 'pull';
   var m = e.m;
   if (m === 'Chest' || m === 'Shoulders' || m === 'Triceps') return 'push';
-  if (m === 'Back' || m === 'Biceps') return 'pull';
+  if (m === 'Back' || m === 'Biceps' || m === 'Rear delts') return 'pull';
   if (m === 'Quads' || m === 'Hamstrings' || m === 'Glutes' || m === 'Calves' || m === 'Legs') return 'legs';
   if (m === 'Abs' || m === 'Core' || m === 'Lower back') return 'core';
   return m === 'Arms' ? 'pull' : 'core';
 }
 /* Arms and Legs stay on the list so an exercise you made before the
    split arrived still reads; the program itself uses the finer groups. */
-var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
+var MUSCLES = ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Lower back', 'Abs', 'Chest', 'Back', 'Shoulders', 'Rear delts', 'Biceps', 'Triceps', 'Core', 'Arms', 'Legs', 'Cardio', 'Other'];
 
 /* THE SPLIT. Seven days, each exercise as [id, sets, low reps, high
    reps]. dow is the JavaScript weekday (Sunday 0), so today opens on its
@@ -3330,7 +3331,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
-  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false; if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
+  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false; if (o.aux) d.aux = 1; if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
   d.bwGoal = num(o.bwGoal);
   /* Health insights have been allowed on this phone */
   if (o.hkr === true) d.hkr = true;
@@ -4534,16 +4535,29 @@ var EX_HALF = (function () {
   Object.keys(by).forEach(function (m) { by[m].forEach(function (id) { o[id] = m; }); });
   return o;
 })();
+/* TWO MUSCLES ARE READ OFF THE NAME as well as the muscle chosen: rear delts and lower back. An exercise counts for its own muscle and, in full, for any of these its name says, so a hip hinge or a face pull you create yourself is on the bar the day it exists. */
+var LF_ALSO = [['Rear delts', /rear[- ]?delt|face ?pull|reverse (pec|fl)|rear fl/i], ['Lower back', /back ?extension|hyper ?extension|hip hinge|good ?morning|deadlift|superman|bird ?dog|reverse hyper|jefferson/i]];
+function lfAlso(x) { var o = []; LF_ALSO.forEach(function (r) { if (r[0] !== x.m && r[1].test(x.n)) o.push(r[0]); }); return o; }
 function lfMuscleSets(from, to) {
   var a = ymd(from), b = ymd(to), out = {};
-  function add(id, n) { var x = exById(id); if (!x || !n) return; out[x.m] = (out[x.m] || 0) + n; var h = EX_HALF[id]; if (h && h !== x.m) out[h] = (out[h] || 0) + n / 2; }
+  function add(id, n) { var x = exById(id); if (!x || !n) return; out[x.m] = (out[x.m] || 0) + n; lfAlso(x).forEach(function (m) { out[m] = (out[m] || 0) + n; }); var h = EX_HALF[id]; if (h && h !== x.m) out[h] = (out[h] || 0) + n / 2; }
   S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) w.x.forEach(function (e) { add(e.id, e.sets.length); }); });
   if (act && ymd(new Date(act.s)) >= a) act.x.forEach(function (e) { add(e.id, e.sets.filter(function (s) { return s.ok; }).length); });
   return out;
 }
 /* a count of sets with a half in it, written the way you would say it */
 function lfSetsN(n) { n = Math.round(n * 2) / 2; return n % 1 ? (Math.floor(n) ? Math.floor(n) : '') + '½' : String(n); }
+/* REAR DELTS AND LOWER BACK JOIN THE TARGETS ONCE. Lower back starts at what the program already does for it so nothing is fitted differently the day they arrive; rear delts at six. After that they are yours to change or take off. */
+function lfAuxMig() {
+  if (S.aux) return; S.aux = 1;
+  var P = lfProg(), lb = 0;
+  P.days.forEach(function (d) { if (d.choice || !d.tg) return; d.ex.forEach(function (id) { var x = exById(id), g = d.tg[id]; if (x && x.m === 'Lower back' && g && g[3] !== 'rounds') lb += g[0] || 0; }); });
+  if (!S.focus.some(function (f) { return f.m === 'Rear delts'; })) S.focus.push({ m: 'Rear delts', lo: 6, hi: 6, p: 0 });
+  if (!S.focus.some(function (f) { return f.m === 'Lower back'; })) { var n = Math.max(2, Math.min(12, lb || 4)); S.focus.push({ m: 'Lower back', lo: n, hi: n, p: 0 }); }
+  lfSave();
+}
 function lfLegCard() {
+  lfAuxMig();
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
   /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
@@ -4555,6 +4569,7 @@ function lfLegCard() {
   ts.forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<button type="button" class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></button>');
     row.dataset.m = t[0];
+    if (t[0] === 'Rear delts' || t[0] === 'Lower back') row.classList.add('is-aux');
     row.setAttribute('aria-label', t[0] + ': ' + lfSetsN(n) + ' of ' + lfRange(t[1], t[2]) + ' sets. Change the target');
     row.addEventListener('click', function () { lfFocusSheet(t[0]); });
     /* The first three are the specialisation, the rest keep progressing. */
@@ -6620,12 +6635,13 @@ function lfExForm(ex, onDone, seed) {
       box.appendChild(p);
     });
   }
-  pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; });
+  var mTouched = false;
+  pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; mTouched = true; });
   pills($('#lfExT', b), [['w', 'Weight × reps'], ['bw', 'Bodyweight']], t, function (v) { t = v; });
   var cOpts = [[1, 'Compound · 3 × 6–10'], [0, 'Isolation · higher reps']];
   pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; });
   /* The type follows the name until you choose it yourself. */
-  $('#lfExN', b).addEventListener('input', function () { if (cTouched) return; cp = COMPOUND_RE.test(this.value) ? 1 : 0; pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; }); });
+  $('#lfExN', b).addEventListener('input', function () { if (!mTouched && !ex) { var nm = this.value, g = /back ?extension|hyper ?extension|hip hinge|good ?morning|superman|bird ?dog|reverse hyper|jefferson/i.test(nm) ? 'Lower back' : /rear[- ]?delt|face ?pull|reverse (pec|fl)|rear fl/i.test(nm) ? 'Shoulders' : ''; if (g && g !== m) { m = g; pills($('#lfExM', b), MUSCLES.map(function (x) { return [x, x]; }), m, function (v) { m = v; mTouched = true; }); } } if (cTouched) return; cp = COMPOUND_RE.test(this.value) ? 1 : 0; pills($('#lfExC', b), cOpts, cp, function (v) { cp = v; cTouched = true; }); });
   var save = el('<button type="button" class="lf-btn is-ink is-full">Save</button>');
   var foot = [save];
   var del = null;
