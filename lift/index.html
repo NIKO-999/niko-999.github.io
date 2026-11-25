@@ -1645,7 +1645,9 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .fr-ti .tt-eb em { color: #ffd9a8; text-shadow: 0 0 8px rgba(251, 146, 60, .55); }
 .tt-eb .b-s { width: 7px; height: 7px; border-radius: 50%; background: #fdba74; box-shadow: 0 0 8px #fb923c; animation: tt-eb 3.4s ease-in-out infinite; }
 @keyframes tt-eb { 0% { transform: translateY(5px) scale(.7); opacity: .3; } 50%, 75% { transform: translateY(-2px) scale(1.1); opacity: 1; } 100% { transform: translateY(5px) scale(.7); opacity: .3; } }
-.fr-ti .tt-ti em { display: inline-block; color: #e5e7eb; transform-origin: 50% 100%; animation: tt-ti 3.2s ease-in-out infinite; }
+.fr-ti .tt-ti em { position: relative; display: inline-block; padding-right: 10px; background: linear-gradient(180deg, #f8fafc, #cbd5e1 40%, #64748b 75%, #334155); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .5)); animation: tt-ti 3.6s ease-in-out infinite, tt-ti-r .22s linear infinite alternate; }
+.tt-ti em::before { content: ''; position: absolute; left: -2px; right: 8px; bottom: -5px; height: 2px; background: repeating-linear-gradient(90deg, #94a3b8 0 5px, transparent 5px 9px); -webkit-text-fill-color: initial; animation: tt-ti-t .45s linear infinite; }
+.tt-ti em::after { content: ''; position: absolute; right: 0; top: 50%; width: 7px; height: 7px; margin-top: -4px; border-radius: 50%; background: radial-gradient(circle, #fff 0 25%, #fde68a 45%, rgba(251, 191, 36, 0) 72%); -webkit-text-fill-color: initial; animation: tt-ti-h 1.1s ease-in-out infinite; }
 /* A COMET crosses a short sky */
 .tt-cm .c-t { position: relative; width: 22px; height: 2px; overflow: hidden; border-radius: 2px; background: color-mix(in srgb, var(--dim) 25%, transparent); }
 .tt-cm .c-t b { position: absolute; top: 0; left: -12px; width: 12px; height: 2px; background: linear-gradient(90deg, transparent, #7dd3fc 60%, #fff); animation: tt-cm 2.2s cubic-bezier(.5, 0, .7, 1) infinite; }
@@ -1817,7 +1819,10 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 @media (prefers-reduced-motion: reduce) { .tt-pc em, .tt-rr .r-t b, .tt-bb em, .tt-ns span, .tt-cr .c-p, .tt-hm em, .tt-gv em, .tt-gv em::after, .tt-dg svg, .tt-ig em, .tt-mv svg { animation: none; } .tt-ns span { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .tt-ru em::after, .tt-gy svg, .tt-ax em, .tt-sg svg, .tt-bm em, .tt-mc em, .tt-mc .m-d, .tt-pd .p-e b, .tt-iw em, .tt-us em, .tt-jg em { animation: none; } .tt-sg svg { stroke-dashoffset: 0; } }
 @media (prefers-reduced-motion: reduce) { .tt-sc em, .tt-gl em, .tt-ph em, .tt-vn em, .tt-rp span, .tt-hg em, .tt-hg em::after, .tt-pl em, .tt-ch em, .tt-tp em, .tt-ob em, .tt-sv em, .tt-gd em { animation: none; } }
-@keyframes tt-ti { 0%, 78%, 100% { transform: none; text-shadow: none; } 84% { transform: scale(1.06, .9) translateY(1px); text-shadow: 0 2px 0 rgba(255, 255, 255, .25); } 90% { transform: scale(.98, 1.04) translateY(-1px); } 95% { transform: none; text-shadow: 0 0 10px rgba(255, 255, 255, .6); } }
+@keyframes tt-ti { 0%, 70%, 100% { transform: translateX(0); } 80% { transform: translateX(3px); } 90% { transform: translateX(-1px); } }
+@keyframes tt-ti-r { from { margin-top: 0; } to { margin-top: .5px; } }
+@keyframes tt-ti-t { to { background-position: -9px 0; } }
+@keyframes tt-ti-h { 0%, 100% { opacity: .55; transform: scale(.8); } 50% { opacity: 1; transform: scale(1.3); } }
 @media (prefers-reduced-motion: reduce) { .tt-ice em, .tt-lv em, .tt-mb em, .tt-ne em, .tt-gx em, .tt-sr em, .tt-ed em::after, .tt-cb em { animation: none; } .tt-sr em { background-size: 100% 100%; } .tt-cm .c-t b, .tt-td svg path, .tt-em em, .tt-em .m-e b, .tt-vo svg, .tt-vo em, .tt-fb svg, .tt-rd .d-s, .tt-rd .d-b, .tt-mt .m-p b, .tt-pr em, .tt-sn .s-b i, .tt-sn .s-b em::after, .tt-zn span, .tt-av em, .tt-av .v-k b, .tt-au em { animation: none; } .tt-zn span { opacity: 1; } .tt-rk em::after, .tt-rg svg, .tt-ad .a-d, .tt-sd .s-t b, .tt-gr svg, .tt-lf svg, .tt-co svg, .tt-cu em::before, .tt-cu em::after, .tt-en .e-b b, .tt-tw em::after, .tt-ic em, .tt-ic .i-r, .tt-ub .u-c b, .tt-nw svg, .tt-nw .n-s b, .tt-eb .b-s, .tt-ti em { animation: none; } .tt-rg svg { stroke-dashoffset: 0; } .tt-ub .u-c b { opacity: .8; } .tt-elite em::before, .tt-vet .v-s b, .tt-master em, .tt-legend .lg-st, .tt-rel .r-c b, .tt-myth em { animation: none; } .tt-master em { background-size: 100% 100%; } .tt-vet .v-s b, .tt-rel .r-c b { opacity: .7; } }
 .lf-bshow { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin: 0 0 12px; font-size: 13px; font-weight: 600; color: var(--dim); }
 .lf-tgl { position: relative; width: 50px; height: 30px; border-radius: 15px; background: var(--mark-off); flex: none; transition: background .2s; }
@@ -8379,7 +8384,7 @@ var RK = {
     ['unbroken', 'Cannot Break Me', '26 weeks on goal', function (c) { return c.run >= 26; }],
     ['nightowl', 'Night Owl', 'Earn Night Owl', function (c) { return !!c.has.owl; }],
     ['earlybird', 'Early Bird', 'Earn Early Bird', function (c) { return !!c.has.early; }],
-    ['titan', 'Tonnage King', 'Earn 20,000 kg Day', function (c) { return !!c.has.ton20; }],
+    ['titan', 'Freight Train', 'Earn 20,000 kg Day', function (c) { return !!c.has.ton20; }],
     ['comet', 'Rep Rocket', 'Earn Ten Thousand Reps', function (c) { return !!c.has.rp10k; }],
     ['tidal', 'Wave Rider', 'Earn Cardio Heart', function (c) { return !!c.has.cardio25; }],
     ['ember', 'Slow Burn', 'Earn On Fire', function (c) { return !!c.has.onfire; }],
@@ -8600,7 +8605,7 @@ function lfTitleEl(id) {
     unbroken: ['tt-ub', '<em>Cannot Break Me</em><i class="u-c" aria-hidden="true"><b></b><b></b><b></b><b></b><b></b></i>'],
     nightowl: ['tt-nw', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.500A8 8 0 1 1 9.500 4a6.500 6.500 0 0 0 10.500 10.500z"/></svg><em>Night Owl</em><i class="n-s" aria-hidden="true"><b></b><b></b><b></b></i>'],
     earlybird: ['tt-eb', '<i class="b-s" aria-hidden="true"></i><em>Early Bird</em>'],
-    titan: ['tt-ti', '<em>Tonnage King</em>'],
+    titan: ['tt-ti', '<em>Freight Train</em>'],
     comet: ['tt-cm', '<i class="c-t" aria-hidden="true"><b></b></i><em>Rep Rocket</em>'],
     tidal: ['tt-td', '<svg viewBox="0 0 24 8" aria-hidden="true"><path d="M0 4Q3.750 0 7.500 4T15 4T22.500 4T30 4T37.500 4"/></svg><em>Wave Rider</em>'],
     ember: ['tt-em', '<em>Slow Burn</em><i class="m-e" aria-hidden="true"><b></b><b></b><b></b></i>'],
