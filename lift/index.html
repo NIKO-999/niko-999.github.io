@@ -971,6 +971,11 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .fr-lg-r i { width: 10px; height: 10px; border-radius: 50%; background: var(--rc); }
 .fr-lg-r span { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fr-lg-r b { font-size: 13px; font-weight: 700; color: var(--dim); }
+.fr-lg-r.is-pass { position: relative; z-index: 1; border-radius: 8px; animation: fr-pass 1.1s cubic-bezier(.2, .8, .2, 1); }
+.fr-lg-r.is-passed { animation: fr-passed 1.1s cubic-bezier(.2, .8, .2, 1); }
+@keyframes fr-pass { 0% { transform: translateY(calc(var(--n) * var(--rh))); background: transparent; } 45% { background: color-mix(in srgb, var(--rc) 22%, transparent); box-shadow: 0 0 18px color-mix(in srgb, var(--rc) 45%, transparent); } 100% { transform: none; background: transparent; box-shadow: none; } }
+@keyframes fr-passed { 0% { transform: translateY(calc(var(--n) * var(--rh) * -1)); opacity: .55; } 100% { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .fr-lg-r.is-pass, .fr-lg-r.is-passed { animation: none; } }
 .fr-lg-r.is-lead i { box-shadow: 0 0 6px 1px var(--rc), 0 0 14px color-mix(in srgb, var(--rc) 55%, transparent); }
 .fr-lg-r.is-lead span { text-shadow: 0 0 10px color-mix(in srgb, var(--rc) 60%, transparent); }
 .fr-lg-r.is-lead b { color: var(--ink); }
@@ -9931,6 +9936,27 @@ function frRings(rows) {
       $('b', r).textContent = x.w.n + '/' + x.w.g; lg.appendChild(r);
     });
     top.appendChild(lg); c.classList.add('has-lg');
+    /* AN OVERTAKE PLAYS: whoever has moved up past somebody slides up into their place with a flash of their colour, the one they passed slides down, and the ring arc flashes. Rank is by the legend's own order, and somebody new on it has nothing to pass. */
+    var now = {}, pass = [];
+    on.forEach(function (x, i) { var k = x.f.me ? 'me' : String(x.f.c); now[k] = i; });
+    on.forEach(function (x, i) {
+      var k = x.f.me ? 'me' : String(x.f.c), was = frLgPrev[k];
+      if (was === undefined || was <= i) return;
+      var over = on.filter(function (y) { var ky = y.f.me ? 'me' : String(y.f.c); return frLgPrev[ky] !== undefined && frLgPrev[ky] < was && now[ky] > i; });
+      if (over.length) pass.push({ x: x, n: was - i, over: over });
+    });
+    frLgPrev = now; try { localStorage.setItem('lift.lgrk.v1', JSON.stringify(now)); } catch (e) {}
+    if (pass.length) {
+      var rh = lg.firstChild.offsetHeight + 4, rows = $$('.fr-lg-r', lg);
+      pass.forEach(function (q) {
+        var ro = rows[on.indexOf(q.x)]; ro.style.setProperty('--n', q.n); ro.style.setProperty('--rh', rh + 'px'); ro.classList.add('is-pass');
+        q.over.forEach(function (y) { var rp = rows[on.indexOf(y)]; if (rp && !rp.classList.contains('is-pass')) { rp.style.setProperty('--n', 1); rp.style.setProperty('--rh', rh + 'px'); rp.classList.add('is-passed'); } });
+        var key = q.x.f.me ? 'me' : String(q.x.f.c); $$('.fr-rg-a', c).forEach(function (a) { if (a.dataset.k === key) a.classList.add('is-shut'); });
+      });
+      buzz(12);
+      var pq = pass[0], nmq = function (z) { return z.f.me ? 'You' : (z.f.n || 'Friend'); };
+      if (pq.x.f.me || pq.over.some(function (y) { return y.f.me; })) setTimeout(function () { if (view === 'fr') lfBanner(IC_LINK, pq.x.f.me ? 'You passed ' + nmq(pq.over[0]) : nmq(pq.x) + ' passed you', 'Weekly goal ring', frColOf(pq.x.f.s)); }, 700);
+    }
   })();
   /* THE MIDDLE IS EMPTY: who is in front is the glow in the legend beside the ring. */
   try { localStorage.setItem('lift.rg.v1', JSON.stringify(frRgSeen)); localStorage.setItem('lift.frwo.v1', JSON.stringify(frWoSeen)); } catch (e) {}
@@ -10099,6 +10125,9 @@ function frCodeRow(onOff) {
 var frArrive = 0, frRgIn = 1, frRgMem = {}, frRgSeen = {}, frWoSeen = {}, frSyncSaid = '';
 try { frWoSeen = JSON.parse(localStorage.getItem('lift.frwo.v1') || '{}') || {}; } catch (e) {}
 try { frRgSeen = JSON.parse(localStorage.getItem('lift.rg.v1') || '{}') || {}; } catch (e) {}
+/* WHO WAS IN FRONT OF WHOM when you last looked, so an overtake since then plays */
+var frLgPrev = {};
+try { frLgPrev = JSON.parse(localStorage.getItem('lift.lgrk.v1') || '{}') || {}; } catch (e) {}
 /* where each ring's arc is on screen right now, read before the tab is cleared */
 var frRgCur = {};
 function frListSig() { return JSON.stringify([FRS.name, FRS.list.map(function (f) { return [f.c, f.n, f.s, f.gone]; })]); }
