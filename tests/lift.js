@@ -2312,8 +2312,8 @@ const freeze = (at) => `(() => {
     await swapOpen(); await page.waitForTimeout(500);
     await page.locator('.lf-sheet').last().locator('.lf-li', { hasText: /^Front squat/ }).first().click(); await page.waitForTimeout(600);
     ok('swapping puts the other exercise in its place, with the same number of sets', await first().getAttribute('data-ex') === 'frontsq' && await first().locator('.lf-set:not(.is-hd)').count() >= 3);
-    ok('and says so in a toast with no way back on it, and nothing on the card but the swap line', /Swapped to Front squat/.test(await page.locator('.lf-toast').textContent()) && await page.locator('.lf-toast button').count() === 0 && await first().locator('.lf-from').count() === 0);
-    ok('the card says it is swapped and offers to keep it in the program', /SWAPPED/.test(await first().locator('.lf-rcm b').textContent()) && /Pendulum squat/.test(await first().locator('.lf-rcm-t').textContent()) && await first().locator('.lf-rcm [data-k="keep"]').count() === 1);
+    ok('and says so in a toast you can undo, with nothing on the card about the way back', /Swapped to Front squat/.test(await page.locator('.lf-toast').textContent()) && /Undo/.test(await page.locator('.lf-toast button').textContent()) && await first().locator('.lf-from').count() === 0);
+    ok('the card just offers to keep it in the program, with no label', await first().locator('.lf-rcm b').count() === 0 && await first().locator('.lf-rcm [data-k="keep"]').count() === 1 && /Keep in program/.test(await first().locator('.lf-rcm').textContent()));
     let st = await store(page);
     ok('a swap is for this workout until you keep it', !st.sw, st.sw);
     await first().locator('.lf-rcm [data-k="keep"]').click(); await page.waitForTimeout(500);
