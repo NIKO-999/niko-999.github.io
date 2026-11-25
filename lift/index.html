@@ -1646,6 +1646,8 @@ button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
 .tt-eb .b-s { width: 7px; height: 7px; border-radius: 50%; background: #fdba74; box-shadow: 0 0 8px #fb923c; animation: tt-eb 3.4s ease-in-out infinite; }
 @keyframes tt-eb { 0% { transform: translateY(5px) scale(.7); opacity: .3; } 50%, 75% { transform: translateY(-2px) scale(1.1); opacity: 1; } 100% { transform: translateY(5px) scale(.7); opacity: .3; } }
 .fr-ti .tt-ti em { position: relative; display: inline-block; padding-right: 8px; background: linear-gradient(100deg, #b8860b 20%, #ffd54a 38%, #fffbe0 50%, #ffd54a 62%, #b8860b 80%) 100% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 6px rgba(250, 204, 21, .5)); animation: tt-ti 2.8s linear infinite, tt-ti-p 2.8s ease-in-out infinite; }
+/* HEAVYWEIGHT REACHES THE NAME: whoever wears it has their name in the same gold, on the same clock, so one sheen runs across the name and the title together */
+.fr-ban-t:has(.tt-ti) > b, .fr-t:has(.tt-ti) > b { background: linear-gradient(100deg, #b8860b 20%, #ffd54a 38%, #fffbe0 50%, #ffd54a 62%, #b8860b 80%) 100% 0 / 260% 100%; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 6px rgba(250, 204, 21, .45)); animation: tt-ti 2.8s linear infinite; }
 .tt-ti em::before { content: ''; position: absolute; right: -1px; top: -4px; width: 8px; height: 8px; background: #fff7c2; -webkit-text-fill-color: initial; clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); animation: tt-ti-s2 2.8s ease-in-out infinite; }
 /* A COMET crosses a short sky */
 .tt-cm .c-t { position: relative; width: 22px; height: 2px; overflow: hidden; border-radius: 2px; background: color-mix(in srgb, var(--dim) 25%, transparent); }
@@ -2073,7 +2075,7 @@ b:has(> .lf-nw) { padding: 5px 3px; margin: -5px -3px; }
 .lf-fl[data-fl="xdice"] { animation: nfi-di 3s ease-in-out infinite; } @keyframes nfi-di { 0%, 55%, 100% { transform: rotate(0) translateY(0); } 65% { transform: rotate(180deg) translateY(-3px); } 75% { transform: rotate(360deg) translateY(0); } }
 .lf-fl[data-fl="xmagnet"] { animation: nfi-mg 1.2s ease-in-out infinite; } @keyframes nfi-mg { 0%, 100% { transform: translateX(-1.5px) rotate(-4deg); } 50% { transform: translateX(1.5px) rotate(4deg); } }
 .lf-fl[data-fl="xradar"] { animation: nfi-ra 2.4s linear infinite; } @keyframes nfi-ra { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { [class*="tt-n-"] em, [class*="tt-n-"] em::before, [class*="tt-n-"] em::after, .lf-nw, .lf-nw::before, .lf-nw::after, .lf-nl, .lf-fl[data-fl^="nf"], .lf-fl[data-fl^="x"], .lf-fl[data-fl^="x"] path { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .fr-ban-t:has(.tt-ti) > b, .fr-t:has(.tt-ti) > b, [class*="tt-n-"] em, [class*="tt-n-"] em::before, [class*="tt-n-"] em::after, .lf-nw, .lf-nw::before, .lf-nw::after, .lf-nl, .lf-fl[data-fl^="nf"], .lf-fl[data-fl^="x"], .lf-fl[data-fl^="x"] path { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .tt-s1 em, .tt-s2 em, .tt-s3 em, .tt-s4 em, .lf-fl[data-fl^="f"] { animation: none; } }
 @media (prefers-reduced-motion: reduce) { .lf-fl, .lf-fl[data-fl] { animation: none; } }
 .fr-ban-av[class*="is-fm-"] { position: relative; }
