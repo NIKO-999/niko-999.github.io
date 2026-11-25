@@ -51,6 +51,8 @@ const freeze = (at) => `(() => {
     await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     /* frames are put away in the app for now; the suite keeps them on so everything about them is still walked */
     await c.addInitScript(`try { localStorage.setItem('lift.frames.v1', '1'); } catch (e) {}`);
+    /* the shelf folds, shut by default; the suite opens every section unless a check says otherwise */
+    await c.addInitScript(`try { if (!localStorage.getItem('lift.bcol.v1')) localStorage.setItem('lift.bcol.v1', JSON.stringify({ own: 1, ses: 1, con: 1, vol: 1, set: 1, str: 1, exr: 1, bod: 1, car: 1, tec: 1, fri: 1, pln: 1, dys: 1, more: 1 })); } catch (e) {}`);
     /* a badge earned along the way comes up over the screen; checks that
        are not about badges put it away the moment it appears */
     if (!keepBadges) await c.addInitScript(`new MutationObserver(() => { const v = document.querySelector('.lf-cv'); if (v) v.querySelector('.lf-cv-x').click(); }).observe(document, { childList: true, subtree: true });`);

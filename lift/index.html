@@ -1402,6 +1402,22 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 @media (prefers-reduced-motion: reduce) { .lf-coin.is-fx::before, .lf-coin.is-fx.is-t3::before, .lf-coin.is-fx.is-t4::before, .lf-coin.is-fx.is-t4 img, .lf-myth s, .lf-cv-stage.is-fx.is-t4::before { animation: none; } }
 .lf-coin:has(img[src]) { background: none; box-shadow: none; }
 .lf-coin:active img { transform: scale(.94); }
+/* THE SHELF FOLDS */
+.lf-bopts { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 14px; margin: 0 0 12px; }
+.lf-bopts .lf-bshow { margin: 0; }
+.lf-bcol-t { position: relative; align-items: center; }
+.lf-bcol-b { background: none; border: 0; padding: 0; margin: 0; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; text-align: left; cursor: pointer; }
+.lf-bcol-b::after { content: ''; position: absolute; inset: -12px -2px; }
+.lf-bcol-t > svg { width: 16px; height: 16px; flex: none; margin-left: -4px; color: var(--quiet); transform: rotate(90deg); transition: transform .2s; pointer-events: none; }
+.lf-bcol.is-open .lf-bcol-t > svg { transform: rotate(-90deg); }
+.lf-bcol-t .lf-num { margin-left: auto; }
+.lf-bdg[hidden] { display: none; }
+.lf-bq { margin-top: 4px; }
+.lf-bq-g .lf-bdi { position: relative; }
+.lf-bq-x { position: absolute; top: -6px; right: calc(50% - 46px); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--card3); color: var(--ink); border: 1px solid var(--hair); }
+.lf-bq-x::before { content: ''; position: absolute; inset: -9px; }
+.lf-bq-x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
+.lf-bnone { margin: 18px 2px; font-size: 13px; color: var(--dim); }
 .lf-bdg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; margin-top: 14px; }
 .lf-bdi { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
 .lf-bdi b { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
@@ -13061,23 +13077,51 @@ BD_COLL.push(['dys', 'Days tracked', '#ff7a1a', BD_DST.map(function (r) { return
   var home = {}; BD_COLL.forEach(function (c) { c[3].forEach(function (id) { home[id] = c; }); });
   BD_LAD.forEach(function (l) { var c = l[1].map(function (id) { return home[id]; }).filter(Boolean)[0]; if (!c) return; l[1].forEach(function (id) { if (!home[id] && c[3].indexOf(id) < 0) c[3].push(id); }); });
 })();
+/* THE SHELF FOLDS: every collection is a heading you press to open, shut until you do, and the ones you left open stay open. Two switches sit above them (only what you have unlocked; what friends see) and what you have equipped is the first thing on the screen, each with its own way off. */
+function lfBcolOpen() { try { return JSON.parse(localStorage.getItem('lift.bcol.v1') || '{}') || {}; } catch (e) { return {}; } }
+function lfBcolSet(id, on) { var o = lfBcolOpen(); if (on) o[id] = 1; else delete o[id]; try { localStorage.setItem('lift.bcol.v1', JSON.stringify(o)); } catch (e) {} }
+function lfOnlyGet() { try { return localStorage.getItem('lift.bonly.v1') === '1'; } catch (e) { return false; } }
+function lfOnlyBtn() {
+  var row = el('<div class="lf-bshow"><span>Unlocked only</span><button type="button" class="lf-tgl rk-show" role="switch" aria-label="Show only the badges you have unlocked"><i></i></button></div>'), sb = $('button', row);
+  sb.dataset.k = 'only'; sb.setAttribute('aria-checked', lfOnlyGet() ? 'true' : 'false');
+  sb.addEventListener('click', function () { try { localStorage.setItem('lift.bonly.v1', lfOnlyGet() ? '0' : '1'); } catch (e) {} lfRowRefresh(); lfRender(); });
+  return row;
+}
 function lfBadgeCard() {
   var all = lfBadges(), got = all.filter(function (x) { return x.d; }).length;
   return lfRow('lfBadges', 'Badges', got + ' of ' + all.length, function (bd) {
-    bd.appendChild(lfShowBtn());
+    var opts = el('<div class="lf-bopts"></div>'); opts.appendChild(lfOnlyBtn()); opts.appendChild(lfShowBtn()); bd.appendChild(opts);
     var byId = {}, used = {}; all.forEach(function (x) { byId[x.b.id] = x; });
+    /* EQUIPPED: the badges your friends see, at the very top, each with a button that takes it off */
+    var eq = lfShow().map(function (id) { return byId[id]; }).filter(Boolean);
+    if (eq.length) {
+      var eh = el('<div class="lf-bcol lf-bq" style="--cc:var(--log)"><div class="lf-bcol-t"><h4>Equipped</h4><span class="lf-num"></span></div></div>');
+      $('.lf-num', eh).textContent = eq.length + ' of 3'; bd.appendChild(eh);
+      var eg = el('<div class="lf-bdg lf-bq-g"></div>'); bd.appendChild(eg);
+      eq.forEach(function (x) {
+        var it = lfBadgeItem(x), rm = el('<button type="button" class="lf-bq-x"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>');
+        rm.setAttribute('aria-label', 'Unequip ' + x.b.n);
+        rm.addEventListener('click', function (ev) { ev.stopPropagation(); S.show = lfShow().filter(function (id) { return id !== x.b.id; }); delete S.shn; lfSave(); frPushNow(); lfRender(); });
+        it.appendChild(rm); eg.appendChild(it);
+      });
+    }
     var cols = BD_COLL.map(function (c) { var xs = c[3].filter(function (id) { return byId[id]; }).map(function (id) { used[id] = 1; return byId[id]; }); return [c[0], c[1], c[2], xs]; });
     var left = all.filter(function (x) { return !used[x.b.id]; }); if (left.length) cols.push(['more', 'More', '#94a3b8', left]);
+    var openMap = lfBcolOpen(), only = lfOnlyGet();
     cols.forEach(function (c) {
-      if (!c[3].length) return;
-      var n = c[3].filter(function (x) { return x.d; }).length;
-      var hd = el('<div class="lf-bcol"><div class="lf-bcol-t"><h4></h4><span class="lf-num"></span></div><i aria-hidden="true"><i></i></i></div>');
+      var xs = only ? c[3].filter(function (x) { return x.d; }) : c[3];
+      if (!xs.length) return;
+      var n = c[3].filter(function (x) { return x.d; }).length, isOpen = !!openMap[c[0]];
+      var hd = el('<div class="lf-bcol"><div class="lf-bcol-t"><h4><button type="button" class="lf-bcol-b"></button></h4><span class="lf-num"></span>' + IC.chev + '</div><i aria-hidden="true"><i></i></i></div>');
       hd.dataset.col = c[0]; hd.style.setProperty('--cc', c[2]);
-      $('h4', hd).textContent = c[1]; $('span', hd).textContent = n + ' / ' + c[3].length; $('i i', hd).style.width = (n / c[3].length * 100) + '%';
-      bd.appendChild(hd);
-      var g = el('<div class="lf-bdg"></div>'); bd.appendChild(g);
-      c[3].forEach(function (x) { g.appendChild(lfBadgeItem(x)); });
+      var tb = $('.lf-bcol-b', hd), g = el('<div class="lf-bdg"></div>'); g.id = 'lfBg' + c[0];
+      tb.textContent = c[1]; $('.lf-num', hd).textContent = n + ' / ' + c[3].length; $('i i', hd).style.width = (n / c[3].length * 100) + '%';
+      tb.setAttribute('aria-expanded', isOpen ? 'true' : 'false'); tb.setAttribute('aria-controls', g.id); g.hidden = !isOpen; hd.classList.toggle('is-open', isOpen);
+      tb.addEventListener('click', function () { var on = g.hidden; g.hidden = !on; tb.setAttribute('aria-expanded', on ? 'true' : 'false'); hd.classList.toggle('is-open', on); lfBcolSet(c[0], on); });
+      bd.appendChild(hd); bd.appendChild(g);
+      xs.forEach(function (x) { g.appendChild(lfBadgeItem(x)); });
     });
+    if (only && !got) bd.appendChild(el('<p class="lf-bnone">Nothing unlocked yet.</p>'));
   });
 }
 function lfBadgeItem(x) {
