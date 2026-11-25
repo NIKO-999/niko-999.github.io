@@ -1445,6 +1445,8 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-bq-x::before { content: ''; position: absolute; inset: -9px; }
 .lf-bq-x svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; }
 .lf-bnone { margin: 18px 2px; font-size: 13px; color: var(--dim); }
+.lf-fit { display: block; margin-top: 2px; font-style: normal; font-size: 11px; font-weight: 600; color: var(--log); }
+.lf-fit-sw { justify-content: space-between; margin: 4px 0 10px; }
 .lf-bdg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px 8px; margin-top: 14px; }
 .lf-bdi { display: grid; justify-items: center; gap: 6px; text-align: center; min-width: 0; }
 .lf-bdi b { font-size: 12.5px; font-weight: 600; line-height: 1.2; }
@@ -3310,7 +3312,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
-  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn;
+  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false;
   d.bwGoal = num(o.bwGoal);
   /* Health insights have been allowed on this phone */
   if (o.hkr === true) d.hkr = true;
@@ -4791,7 +4793,50 @@ var sessSheet = null, tick = null, lfPopAt = '', lfPbWas = {};
    card, and never by a stray press on a routine: the flag is set by the one
    button that asks, and spent by the start it allows. */
 var lfAgainOk = 0;
+/* THE SETS FOLLOW THE TARGETS. A muscle's weekly target decides how many sets its exercises get in the program: the program is counted per muscle, and where a muscle is over its target the sets come off its exercises, where it is under they go on. A target that is a range leaves a program that already sits inside it alone. Nothing is ever written to the program: it is worked out when a workout starts and when a day is looked at, so putting a target back puts the program back. */
+var LF_FITCAP = 6, LF_FITEXTRA = 4;
+function lfFitOn() { return S.fit !== false; }
+function lfFitExtra(m, have) {
+  var seen = {}, best = '', bn = 0;
+  S.wo.forEach(function (w) { w.x.forEach(function (e) { var x = exById(e.id); if (x && x.m === m && have.indexOf(e.id) < 0 && e.sets && e.sets.length) { seen[e.id] = (seen[e.id] || 0) + 1; if (seen[e.id] > bn) { bn = seen[e.id]; best = e.id; } } }); });
+  if (best) return best;
+  var a = EXERCISES.filter(function (x) { return x.m === m && have.indexOf(x.id) < 0; });
+  return a.length ? a[0].id : '';
+}
+function lfFitMap() {
+  var P = lfProg(), rows = {}, tgt = {}, out = {}, ex = {};
+  S.focus.forEach(function (f) { tgt[f.m] = f; });
+  P.days.forEach(function (d) { if (d.choice) return; d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0] }); }); });
+  Object.keys(rows).forEach(function (m) {
+    var f = tgt[m]; if (!f || !(f.lo >= 0)) return;
+    var tot = rows[m].reduce(function (a, r) { return a + r.n; }, 0), want = tot < f.lo ? f.lo : tot > f.hi ? f.hi : tot;
+    if (want === tot || !tot) return;
+    var k = want / tot, acc = 0, prev = 0, spill = {};
+    rows[m].forEach(function (r) {
+      acc += r.n * k; var now = Math.round(acc), give = Math.max(1, now - prev); prev = now;
+      if (give > LF_FITCAP) { spill[r.d] = (spill[r.d] || 0) + give - LF_FITCAP; give = LF_FITCAP; }
+      (out[r.d] = out[r.d] || {})[r.id] = { was: r.n, n: give, m: m };
+    });
+    /* what a day's exercises cannot hold becomes one more exercise for that muscle, at the end of the day that already trains it most */
+    var day = '', most = 0; Object.keys(spill).forEach(function (d) { if (spill[d] > most) { most = spill[d]; day = d; } });
+    if (day) { var dd = P.days.filter(function (x) { return x.id === day; })[0], id = dd ? lfFitExtra(m, dd.ex) : ''; if (id) (ex[day] = ex[day] || []).push({ id: id, n: Math.min(LF_FITEXTRA, most), m: m }); }
+  });
+  return { days: out, extra: ex };
+}
+/* a routine as the targets want it done: the same routine with the sets moved, and what changed written on it */
+function lfFit(rt) {
+  if (!rt || rt.choice || rt.fit || !lfFitOn() || !rt.tg) return rt;
+  var map = lfFitMap(), m = map.days[rt.id], xs = map.extra[rt.id];
+  if (!m && !xs) return rt;
+  var o = {}; Object.keys(rt).forEach(function (k) { o[k] = rt[k]; });
+  o.tg = {}; Object.keys(rt.tg).forEach(function (k) { o.tg[k] = rt.tg[k]; }); o.ex = rt.ex.slice(); o.fit = {};
+  Object.keys(m || {}).forEach(function (id) { var g = rt.tg[id], r = m[id]; if (!g) return; o.tg[id] = [r.n].concat(g.slice(1)); if (r.n !== r.was) o.fit[id] = { was: r.was, n: r.n, m: r.m }; });
+  (xs || []).forEach(function (x) { if (o.ex.indexOf(x.id) >= 0) return; o.ex.push(x.id); o.tg[x.id] = [x.n, 10, 15]; o.fit[x.id] = { was: 0, n: x.n, m: x.m, extra: 1 }; });
+  return o;
+}
+function lfFitTxt(f) { var m = String(f.m).toLowerCase(); return f.extra ? 'added for your ' + m + ' target' : f.n + ' instead of ' + f.was + ', your ' + m + ' target'; }
 function lfStart(rt) {
+  rt = lfFit(rt);
   /* ONE WORKOUT A DAY: a press on another session after you have trained
      must not stack a second one over it. Delete today's first. */
   var nToday = act ? 0 : woOn(ymd(today())).length;
@@ -4814,6 +4859,7 @@ function lfStart(rt) {
       if (lp && lp.length && lp.length <= tg[0] && lp.every(function (q) { return q && q.r >= tg[2]; }) && !lfStalled(id, tg[2])) { tg = [tg[0] + 1, tg[1], tg[2]].concat(tg[3] ? [tg[3]] : []); xs = 1; }
     }
     lfAddEx(id, tg);
+    if (rt.fit && rt.fit[id0]) act.x[act.x.length - 1].fit = rt.fit[id0];
     if (xs) act.x[act.x.length - 1].xs = 1;
     if (id !== id0) act.x[act.x.length - 1].from = id0;
   });
@@ -4934,6 +4980,10 @@ function lfZonesSheet() {
     inp.addEventListener('input', function () { var v = +inp.value; if (v === zVal(m, zn)) delete ed[m]; else ed[m] = v; refresh(); });
     rows[m] = { el: r, zone: $('.zo', r), fill: $('.fi', r), dot: $('.dt', r), inp: inp }; $('#lfZnRows', b).appendChild(r);
   });
+  var fr = el('<div class="lf-bshow lf-fit-sw"><span>Fit my workouts to these</span><button type="button" class="lf-tgl" role="switch" aria-label="Fit my workouts to my muscle targets"><i></i></button></div>'), fb = $('button', fr);
+  fb.dataset.k = 'fit'; fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false');
+  fb.addEventListener('click', function () { if (lfFitOn()) S.fit = false; else delete S.fit; lfSave(); fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false'); lfRender(); });
+  b.insertBefore(fr, $('.lf-zn-bs', b));
   var s = lfSheet({ title: 'Muscle targets', body: b, foot: [save, back, more] });
   back.addEventListener('click', function () { ed = {}; refresh(); });
   $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(lfZonesSheet); });
@@ -5429,7 +5479,7 @@ function lfPaintSession() {
     var rs = lfRestOf(e.id);
     /* The plan's target where the day has one, the recommended dose
        for what the exercise is everywhere else. */
-    $('.lf-tg', card).textContent = (e.tg ? lfTgTxt(e.tg) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs);
+    $('.lf-tg', card).textContent = (e.tg ? lfTgTxt(e.tg) + ' · ' + rs.rir : lfRecTxt(e.id)) + ' · rest ' + lfRestTxt(rs) + (e.fit && lfFitOn() ? ' · ' + lfFitTxt(e.fit) : '');
     $('.lf-aim', card).textContent = aim.note;
     /* the sparkle is a drawing in the accent, put in front of the words; it adds no text, so the line still reads as just the suggestion */
     if (aim.note) $('.lf-aim', card).insertAdjacentHTML('afterbegin', '<svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg>');
@@ -6884,6 +6934,7 @@ function lfUnswap(rt, id, swd, day) {
   });
 }
 function lfDaySpec(rt) {
+  rt = lfFit(rt);
   var b = el('<div><p class="lf-lab" style="margin:0 0 6px"></p><div class="lf-list"></div></div>');
   $('p', b).textContent = DOW_LONG[rt.dow] + ' · ' + rt.sp;
   var tip = DAY_TIPS[rt.id];
@@ -6906,6 +6957,7 @@ function lfDaySpec(rt) {
     if (swd) $('b', li).style.color = 'var(--log)';
     $('span', li).textContent = rs.rir + ' · rest ' + lfRestTxt(rs) + (last ? ' · last ' + fmtWS(last[0].w) + '×' + last[0].r : '');
     $('.lf-li-r', li).textContent = lfTgTxt(t);
+    if (rt.fit && rt.fit[id]) { var fn = el('<em class="lf-fit"></em>'); fn.textContent = lfFitTxt(rt.fit[id]); $('.lf-li-t', li).appendChild(fn); }
     /* a swapped slot is the only place the swap can be undone: its name is in the accent, and pressing it offers the way back */
     li.addEventListener('click', function () { if (swd) lfUnswap(rt, id, swd, s); else lfExSheet(id); });
     $('.lf-list', b).appendChild(li);
