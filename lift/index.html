@@ -834,7 +834,6 @@ svg { display: block; }
 .lf-ex.is-shift { transition: transform .18s ease; }
 .lf-swp { width: 44px; height: 44px; border-radius: 999px; display: grid; place-items: center; color: var(--dim); flex: none; margin-right: -8px; }
 .lf-swp svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.lf-from { display: block; margin: 0 0 6px; min-height: 32px; text-align: left; font-size: 12px; font-weight: 600; color: var(--today-ink); }
 .lf-ex-hd button.lf-ex-n { flex: 1; min-width: 0; text-align: left; font-weight: 600; font-size: 15px; min-height: 36px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; align-content: center; }
 /* THE LINK BUTTON TOOK 40px FROM THE NAME, which is why long ones were cut to "Smith machine incline ...": a name now takes two lines before it is cut. */
 .lf-set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) 44px; align-items: center; gap: 8px; min-height: 42px; }
@@ -3924,13 +3923,13 @@ function lfSetupFirst() {
 }
 
 var toastT = null;
-function lfToast(msg, undo) {
+function lfToast(msg, undo, label) {
   var old = $('.lf-toast'); if (old) old.remove();
   clearTimeout(toastT);
   var t = el('<div class="lf-toast" role="status"><span></span></div>');
   $('span', t).textContent = msg;
   if (undo) {
-    var u = el('<button type="button">Undo</button>');
+    var u = el('<button type="button">Undo</button>'); if (label) u.textContent = label;
     u.addEventListener('click', function () { undo(); t.remove(); });
     t.appendChild(u);
   } else t.classList.add('is-bare');
@@ -5246,7 +5245,7 @@ function lfSwapTo(e, id, quiet) {
       lfSave();
     }
     lfSaveAct(); lfPaintSession();
-    if (!quiet) lfToast(id === orig ? 'Back to ' + exName(id) : exName(id) + ' instead of ' + exName(orig) + (act.rt ? ', from now on' : ''));
+    if (!quiet) { if (id === orig) lfToast('Back to ' + exName(id)); else lfToast('Swapped to ' + exName(id), function () { lfSwapTo(e, orig, true); }, 'Back to original'); }
   };
   if (e.sets.some(function (q) { return q.ok; }) || (e.wu || []).some(function (q) { return q.ok; })) lfAsk('Swap ' + wasN + '?', 'The sets you logged for it in this workout go with it.', 'Swap', go); else go();
 }
@@ -5545,11 +5544,6 @@ function lfPaintSession() {
       e.sets.forEach(function (q, qi) { if (q.ok || (q.w !== '' && q.w != null) || (q.r !== '' && q.r != null)) return; var fl = aim.fill || aim.sets, g2 = fl[Math.min(qi, fl.length - 1)]; q.w = g2.w; q.r = g2.r; });
       buzz(8); lfSaveAct(); lfPaintSession();
     });
-    if (e.from) {
-      var fb = el('<button type="button" class="lf-from"></button>'); fb.textContent = 'Instead of ' + exName(e.from) + ' · back to original';
-      fb.addEventListener('click', function () { lfSwapTo(e, e.from); });
-      card.appendChild(fb);
-    }
     $('.lf-ex-n', card).addEventListener('click', function () { if (card.classList.contains('is-fold')) lfOpenAt(e); else lfFoldAt(e); });
     card.addEventListener('click', function (ev) { if (card.classList.contains('is-fold') && !ev.target.closest('.lf-more')) lfOpenAt(e); });
     /* WARM-UP ROWS, marked W: the same row, ticked the same way, but no
