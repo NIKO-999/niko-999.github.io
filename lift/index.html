@@ -4873,10 +4873,18 @@ function lfFitKeep(e) {
   delete e.fit; lfSaveAct(); lfSave(); lfPaintSession();
   lfToast(exName(e.id) + ' is in your program now', function () { S.keep = JSON.parse(was); if (!Object.keys(S.keep).length) delete S.keep; lfSave(); lfRender(); });
 }
-function lfRecEl(e) {
-  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b>RECOMMENDED</b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
-  $('.lf-rcm-t', r).textContent = '– ' + String(e.fit.m).toLowerCase() + ' target';
-  $('[data-k="keep"]', r).addEventListener('click', function () { lfFitKeep(e); });
+function lfSwapKept(e) { return !!(act && act.rt && e.from && S.sw && S.sw[act.rt] && S.sw[act.rt][e.from] === e.id); }
+function lfSwapKeep(e) {
+  if (!act || !act.rt || !e.from) return;
+  var was = JSON.stringify(S.sw || {}); S.sw = S.sw || {}; (S.sw[act.rt] = S.sw[act.rt] || {})[e.from] = e.id;
+  lfSave(); lfPaintSession();
+  lfToast(exName(e.id) + ' is in your program now', function () { S.sw = JSON.parse(was); if (!Object.keys(S.sw).length) delete S.sw; lfSave(); lfRender(); });
+}
+function lfRecEl(e, swap) {
+  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b></b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
+  $('b', r).textContent = swap ? 'SWAPPED' : 'RECOMMENDED';
+  $('.lf-rcm-t', r).textContent = swap ? '– instead of ' + exName(e.from) : '– ' + String(e.fit.m).toLowerCase() + ' target';
+  $('[data-k="keep"]', r).addEventListener('click', function () { if (swap) lfSwapKeep(e); else lfFitKeep(e); });
   return r;
 }
 function lfFitTxt(f) { var m = String(f.m).toLowerCase(); return f.extra ? 'added for your ' + m + ' target' : f.n + ' instead of ' + f.was + ', your ' + m + ' target'; }
@@ -5238,14 +5246,10 @@ function lfSwapTo(e, id, quiet) {
     e.id = id; e.n = exName(id); e.sets = []; delete e.wu;
     for (var i = 0; i < n; i++) e.sets.push({ w: '', r: '', ok: 0 });
     if (id === orig) delete e.from; else e.from = orig;
-    if (act.rt) {
-      S.sw = S.sw || {}; var m = (S.sw[act.rt] = S.sw[act.rt] || {});
-      if (id === orig) delete m[orig]; else m[orig] = id;
-      if (!Object.keys(m).length) delete S.sw[act.rt]; if (!Object.keys(S.sw).length) delete S.sw;
-      lfSave();
-    }
+    /* A SWAP IS FOR THIS WORKOUT. It becomes part of the program only when you keep it; swapping back by hand to the original takes a kept swap out again. */
+    if (act.rt && id === orig && S.sw && S.sw[act.rt] && S.sw[act.rt][orig]) { delete S.sw[act.rt][orig]; if (!Object.keys(S.sw[act.rt]).length) delete S.sw[act.rt]; if (!Object.keys(S.sw).length) delete S.sw; lfSave(); }
     lfSaveAct(); lfPaintSession();
-    if (!quiet) { if (id === orig) lfToast('Back to ' + exName(id)); else lfToast('Swapped to ' + exName(id), function () { lfSwapTo(e, orig, true); }, 'Back to original'); }
+    if (!quiet) lfToast(id === orig ? 'Back to ' + exName(id) : 'Swapped to ' + exName(id));
   };
   if (e.sets.some(function (q) { return q.ok; }) || (e.wu || []).some(function (q) { return q.ok; })) lfAsk('Swap ' + wasN + '?', 'The sets you logged for it in this workout go with it.', 'Swap', go); else go();
 }
@@ -5536,7 +5540,8 @@ function lfPaintSession() {
     }
     if (!aim.note) $('.lf-aim', card).remove();
     /* a swap is your own choice, so only an exercise as the targets made it is recommended */ var recOn = !!(e.fit && !e.from && lfFitOn() && act && act.rt);
-    if (recOn) { var ca = $('.lf-aim', card), rc = lfRecEl(e); if (ca) ca.remove(); $('.lf-tg', card).insertAdjacentElement('afterend', rc); }
+    var swOn = !!(e.from && act && act.rt && !lfSwapKept(e));
+    if (recOn || swOn) { var ca = $('.lf-aim', card), rc = lfRecEl(e, swOn); if (ca) ca.remove(); $('.lf-tg', card).insertAdjacentElement('afterend', rc); }
     else if (!$('.lf-aim', card)) { /* no coach line */ }
     else if (!aim.sets.length) { $('.lf-aim', card).classList.add('is-info'); $('.lf-aim', card).disabled = true; }
     else $('.lf-aim', card).addEventListener('click', function () {
