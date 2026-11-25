@@ -4867,9 +4867,8 @@ function lfFitKeep(e) {
   lfToast(e.n + ' is part of this workout now', function () { S.keep = JSON.parse(was); if (!Object.keys(S.keep).length) delete S.keep; lfSave(); lfRender(); });
 }
 function lfRecEl(e) {
-  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b>RECOMMENDED</b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="chg">Change</button><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
+  var r = el('<div class="lf-rcm"><svg class="lf-aim-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.600 4.400L18 9l-4.400 1.600L12 15l-1.600-4.400L6 9l4.400-1.600zM18 14l.8 2.200L21 17l-2.200.8L18 20l-.8-2.200L15 17l2.200-.8z"/></svg><b>RECOMMENDED</b><span class="lf-rcm-t"></span><button type="button" class="lf-rcm-b" data-k="keep">Keep in program</button></div>');
   $('.lf-rcm-t', r).textContent = 'From your ' + String(e.fit.m).toLowerCase() + ' target';
-  $('[data-k="chg"]', r).addEventListener('click', function () { lfSwap(e); });
   $('[data-k="keep"]', r).addEventListener('click', function () { lfFitKeep(e); });
   return r;
 }
