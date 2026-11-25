@@ -1412,6 +1412,16 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-bcol.is-open .lf-bcol-t > svg { transform: rotate(-90deg); }
 .lf-bcol-t .lf-num { margin-left: auto; }
 .lf-bdg[hidden] { display: none; }
+.fr-wo-h { margin: 0; }
+.fr-wo-b { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 0 18px 0 12px; border-radius: 999px; background: var(--card); color: var(--ink); font: inherit; font-weight: 600; text-align: left; }
+.fr-wo-b i { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; flex: none; background: color-mix(in srgb, #c9b6ff 22%, transparent); color: #c9b6ff; }
+.fr-wo-b i svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fr-wo-b span { flex: 1; min-width: 0; }
+.fr-wo-b em { font-style: normal; font-size: 13px; color: var(--dim); }
+.fr-wo-b > svg { width: 16px; height: 16px; flex: none; opacity: .6; transform: rotate(90deg); transition: transform .2s; }
+.fr-wo-b[aria-expanded="true"] > svg { transform: rotate(-90deg); }
+#frWoList { margin-top: 8px; }
+#frWoList[hidden] { display: none; }
 .lf-bq { margin-top: 4px; }
 .lf-bq-g .lf-bdi { position: relative; }
 .lf-bq-x { position: absolute; top: -6px; right: calc(50% - 46px); width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--card3); color: var(--ink); border: 1px solid var(--hair); }
@@ -9684,7 +9694,10 @@ function frSheet(f) {
   b.appendChild(pr);
   /* THEIR WORKOUTS, newest first; one opens on its sets. */
   var wl = Array.isArray(st.wl) ? st.wl : [];
-  var lc = el('<div class="lf-card" style="padding:4px 16px" id="frWo"><div class="lf-hd" style="padding:12px 0 2px"><span class="lf-lab">Workouts · last 30 days</span></div><div class="lf-list"></div></div>');
+  /* THEIR WORKOUTS ARE ONE PILL, shut: the same clock as Previous workouts, the count on it, and the list opens under it when you press it */
+  var lc = el('<div class="fr-wo" id="frWo"><h3 class="fr-wo-h"><button type="button" class="fr-wo-b" aria-expanded="false" aria-controls="frWoList"><i><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.500V12l3 2"/></svg></i><span>Workouts · last 30 days</span><em class="lf-num"></em>' + IC.chev + '</button></h3><div class="lf-card" id="frWoList" hidden style="padding:4px 16px"><div class="lf-list"></div></div></div>');
+  $('.fr-wo-b em', lc).textContent = wl.length;
+  $('.fr-wo-b', lc).addEventListener('click', function () { var bt = this, lst = $('#frWoList', lc), on = lst.hidden; lst.hidden = !on; bt.setAttribute('aria-expanded', on ? 'true' : 'false'); });
   if (!wl.length) $('.lf-list', lc).appendChild(el('<div class="lf-lab" style="padding:8px 0 12px">Nothing logged yet.</div>'));
   wl.forEach(function (w) {
     var sets = 0, vol = 0; w.x.forEach(function (e) { e.s.forEach(function (q) { sets++; vol += q[0] * q[1]; }); });

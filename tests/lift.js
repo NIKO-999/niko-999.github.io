@@ -1480,6 +1480,7 @@ const freeze = (at) => `(() => {
     await T.locator('#frVol').click(); await settle(A.page);
     ok('and their volume', await top(A.page).locator('#lfVolTrend').count() === 1 && /600/.test(await top(A.page).textContent()));
     await A.page.keyboard.press('Escape'); await settle(A.page);
+    await T.locator('#frWo .fr-wo-b').click(); await settle(A.page);
     ok('and their workouts', (await T.locator('#frWo .lf-li b').allTextContents()).join() === 'Lower A' && /1 sets · 600 kg/.test(await T.locator('#frWo .lf-li span').first().textContent()));
     await T.locator('#frWo .lf-li').first().click(); await settle(A.page);
     ok('a workout opens on its sets', /Hack squat/.test(await top(A.page).textContent()) && /60 × 10/.test(await top(A.page).textContent()), await top(A.page).textContent());
