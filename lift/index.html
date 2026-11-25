@@ -979,7 +979,8 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 .fr-lg-r.is-lead i { box-shadow: 0 0 6px 1px var(--rc), 0 0 14px color-mix(in srgb, var(--rc) 55%, transparent); }
 .fr-lg-r.is-lead span { text-shadow: 0 0 10px color-mix(in srgb, var(--rc) 60%, transparent); }
 .fr-lg-r.is-lead b { color: var(--ink); }
-.fr-rg-a.is-lead:not(.is-live) { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--rc) 70%, transparent)); }
+.fr-rg-a.is-lead:not(.is-live):not(.is-shut) { animation: fr-lead 3.2s ease-in-out infinite; }
+@keyframes fr-lead { 0%, 100% { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--rc) 55%, transparent)); } 50% { filter: drop-shadow(0 0 9px color-mix(in srgb, var(--rc) 85%, transparent)); } }
 #frRings #frBoard.is-compact .fr-row { padding: 9px 0; row-gap: 6px; }
 #frRings #frBoard.is-compact .fr-t { display: flex; align-items: baseline; gap: 6px; white-space: nowrap; }
 #frRings #frBoard.is-compact .fr-t b { flex: 0 1 auto; min-width: 0; }
@@ -988,7 +989,7 @@ button.fr-live::after { content: ''; position: absolute; inset: -14px -8px; }
 #frRings #frBoard.is-compact .fr-strip { margin-top: 0; gap: 1.5px; }
 #frRings #frBoard.is-compact .fr-strip i { height: 4px; }
 #frRings #frBoard.is-compact .fr-wk { font-size: 15px; }
-@media (prefers-reduced-motion: reduce) { .fr-rg-a.is-lead { filter: none; } }
+@media (prefers-reduced-motion: reduce) { .fr-rg-a.is-lead { animation: none; filter: drop-shadow(0 0 6px color-mix(in srgb, var(--rc) 70%, transparent)); } }
 #frRings .fr-row { padding: 12px 0; }
 .fr-row.is-off { display: none !important; }
 #frSearch { margin: 4px 0 10px; }
