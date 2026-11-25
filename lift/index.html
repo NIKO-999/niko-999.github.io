@@ -3302,9 +3302,11 @@ var LF_MG = [
   ['Back', /\brows?\b|pulldown|pull-?down|pull-?up|chin-?up|\blats?\b|pullover|shrug|back|deadlift/i],
   ['Chest', /bench|chest|\bpecs?\b|\bfl(y|ye|yes|ies)\b|push-?up|crossover|incline|decline|around the world|\bpress/i]
 ];
+/* THE EXERCISES MADE WHILE A SPLIT IS BEING READ belong to that split: they are in the library from the moment they are made, so the picker and the rows can use them, and they stay there only if the split is saved with them in it. */
+var spMade = [];
 function lfMakeEx(name) {
   var gm = lfMuscleGuess(name) || 'Other', nx = { id: lfId(), n: String(name).slice(0, 60), m: gm, t: LF_BW.test(name) ? 'bw' : 'w', c: COMPOUND_RE.test(name) ? 1 : 0 };
-  S.ex.push(nx); lfSave(); return nx;
+  S.ex.push(nx); spMade.push(nx.id); lfSave(); return nx;
 }
 function lfMuscleGuess(n) { n = String(n || ''); for (var i = 0; i < LF_MG.length; i++) if (LF_MG[i][1].test(n)) return LF_MG[i][0]; return ''; }
 var LF_BW = /push-?up|pull-?up|chin-?up|^dips?\b|plank|sit-?up|crunch|burpee|bodyweight|bird ?dog|superman|toe touch|mountain climber|leg raise/i;
@@ -6951,7 +6953,7 @@ function lfPlanPreview(days) {
   lfSplitForm(days.map(function (d, i) { return { w: d.w, n: d.n, ex: d.ex.map(function (x) { return { id: x.id, raw: x.raw, alts: x.alts, sets: x.sets, lo: x.lo, hi: x.hi }; }) }; }), spDraft);
 }
 function lfSplitForm(days, name) {
-  days = days || [];
+  days = days || []; if (spMade.length) S.ex = S.ex.filter(function (q) { return spMade.indexOf(q.id) < 0; }); spMade = [];
   var b = el('<div><label class="lf-flab" for="lfSpN">Name</label><input class="lf-field" id="lfSpN" maxlength="30" placeholder="My split" autocomplete="off" /><label class="lf-flab" for="lfSpPaste">Paste your whole programme</label><textarea class="lf-field" id="lfSpPaste" rows="4" placeholder="Monday&#10;Bench press 4x8&#10;Overhead press 3x10&#10;Tuesday&#10;Barbell row 4x8" autocomplete="off" autocapitalize="off" spellcheck="false" style="resize:none;font-family:inherit;min-height:104px;margin-bottom:8px"></textarea><div id="lfSpDays"></div><button type="button" class="lf-add" id="lfSpAddDay">' + IC.plus + 'Add a day</button></div>');
   $('#lfSpN', b).value = name || '';
   /* PASTE THE WHOLE THING AND THE DAYS ARE MADE. No pressing Read, no pasting a day at a time: the text is read as it arrives and the days appear under it, each on its weekday. A photo or PDF, which only the phone can read, comes in through the same form. */
@@ -7028,7 +7030,7 @@ function lfSplitForm(days, name) {
   paint();
   $('#lfSpAddDay', b).addEventListener('click', function () { var w = freeDow(); if (w === null) return; days.push({ w: w, n: '', ex: [] }); paint(); });
   var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfSpSave">Save split</button>');
-  var s = lfSheet({ title: 'New split', body: b, foot: [save] });
+  var s = lfSheet({ title: 'New split', body: b, foot: [save], onClose: function () { if (spMade.length) { S.ex = S.ex.filter(function (q) { return spMade.indexOf(q.id) < 0; }); spMade = []; lfSave(); } } });
   save.addEventListener('click', function () {
     var nm = $('#lfSpN', b).value.trim();
     if (!nm) { $('#lfSpN', b).focus(); lfToast('Name your split'); return; }
@@ -7042,6 +7044,8 @@ function lfSplitForm(days, name) {
       out.push({ w: w, n: (d.n || '').trim().slice(0, 40) || DOW_LONG[w], sp: planDaySp(rows), x: rows, ss: [] });
     });
     if (!out.length) { lfToast('Add a day with at least one exercise'); return; }
+    var inSplit = {}; out.forEach(function (d) { d.x.forEach(function (r) { inSplit[r[0]] = 1; }); });
+    S.ex = S.ex.filter(function (q) { return spMade.indexOf(q.id) < 0 || inSplit[q.id]; }); spMade = []; lfSave();
     s.close(true); lfProgAdd({ n: nm, d: out, c: [], dropped: 0 }, nm);
   });
 }
