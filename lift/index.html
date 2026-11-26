@@ -5072,7 +5072,9 @@ function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal
 /* the sheet that opens from Sets this week, from You, from Exercises and from the first split */
 function lfZonesSheet() {
   var ts = lfTargets(); if (!ts.length) { lfToast('Make a split first'); return; }
-  var zn = S.zn === 0 || S.zn === 2 ? S.zn : 1, ed = {}, now = ts.reduce(function (a, t) { return a + t[2]; }, 0), rows = {};
+  var zn = S.zn === 0 || S.zn === 2 ? S.zn : 1, ed = {}, tch = {}, zoned = false, now = ts.reduce(function (a, t) { return a + t[2]; }, 0), rows = {};
+  /* THE SHEET OPENS ON WHAT YOU SAVED. It used to open on the suggestion for every muscle and Save wrote that suggestion over each of them, so changing one figure replaced all the others with ones you never chose. A saved figure that is not the suggestion is held as yours; pressing How hard puts the suggestions back, on purpose. */
+  ts.forEach(function (t) { if (t[1] !== zVal(t[0], zn)) ed[t[0]] = t[1]; });
   var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
   var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
@@ -5092,27 +5094,27 @@ function lfZonesSheet() {
     var tot = ts.reduce(function (a, t) { return a + val(t[0]); }, 0);
     $$('#lfZnSeg button', b).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.z === zn ? 'true' : 'false'); });
     $('#lfZnSay', b).textContent = ZBLURB[zn] + ' ' + tot + ' sets a week' + (tot !== now ? ', ' + now + ' now.' : '.');
-    back.hidden = !nEd(); back.textContent = 'Back to the suggestion (' + nEd() + ' changed)';
+    back.hidden = !nEd() || !(Object.keys(tch).length || zoned); back.textContent = 'Back to the suggestion (' + nEd() + ' changed)';
   }
-  [0, 1, 2].forEach(function (z) { var x = el('<button type="button"></button>'); x.dataset.z = z; x.textContent = ZNAME[z]; x.addEventListener('click', function () { zn = z; ed = {}; refresh(); }); $('#lfZnSeg', b).appendChild(x); });
+  [0, 1, 2].forEach(function (z) { var x = el('<button type="button"></button>'); x.dataset.z = z; x.textContent = ZNAME[z]; x.addEventListener('click', function () { zn = z; ed = {}; tch = {}; zoned = true; refresh(); }); $('#lfZnSeg', b).appendChild(x); });
   ts.forEach(function (t) {
     var m = t[0], r = el('<div class="lf-zr"><div class="lf-zr-l"><span></span><span><b class="lf-num"></b> <em>sets</em></span></div><div class="lf-zt"><i class="rl"></i><i class="zo"></i><i class="fi"></i><i class="dt"></i><input type="range" min="2" max="24" step="1" /></div></div>');
     $('.lf-zr-l span', r).textContent = m;
     var inp = $('input', r); inp.setAttribute('aria-label', m + ' sets a week');
-    inp.addEventListener('input', function () { var v = +inp.value; if (v === zVal(m, zn)) delete ed[m]; else ed[m] = v; refresh(); });
+    inp.addEventListener('input', function () { var v = +inp.value; tch[m] = 1; if (v === zVal(m, zn)) delete ed[m]; else ed[m] = v; refresh(); });
     rows[m] = { el: r, zone: $('.zo', r), fill: $('.fi', r), dot: $('.dt', r), inp: inp }; $('#lfZnRows', b).appendChild(r);
   });
   var fr = el('<div class="lf-bshow lf-fit-sw"><span>Fit my workouts to these</span><button type="button" class="lf-tgl" role="switch" aria-label="Fit my workouts to my muscle targets"><i></i></button></div>'), fb = $('button', fr);
   fb.dataset.k = 'fit'; fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false');
   fb.addEventListener('click', function () { if (lfFitOn()) S.fit = false; else delete S.fit; lfSave(); fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false'); lfRender(); });
   $('.lf-zn-bs', b).insertAdjacentElement('afterend', fr);
-  var s = lfSheet({ title: 'Muscle targets', body: b, foot: [save, back, more] });
-  back.addEventListener('click', function () { ed = {}; refresh(); });
+  var s = lfSheet({ title: 'Muscle targets', body: b, foot: [save, back, more] }); s.foot.classList.add('is-wrap');
+  back.addEventListener('click', function () { ed = {}; tch = {}; zoned = true; refresh(); });
   $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(lfZonesSheet); });
   more.addEventListener('click', function () { s.close(true); var w = el('<div class="lf-rowbody" id="lfFocusBody"></div>'); w.appendChild(lfFocusBody()); lfRowShown = { id: 'lfRowFocus', w: w }; lfSheet({ title: 'Muscle targets', body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } }); });
   save.addEventListener('click', function () {
     var was = JSON.stringify({ f: S.focus, zn: S.zn === undefined ? null : S.zn });
-    S.focus.forEach(function (f) { var v = val(f.m); f.lo = v; f.hi = v; delete f.a; }); S.zn = zn; lfSave(); lfRender(); s.close(true);
+    S.focus.forEach(function (f) { var v = val(f.m); if (!zoned && !tch[f.m] && f.lo !== f.hi) return; if (v !== f.lo || v !== f.hi) delete f.a; f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); s.close(true);
     lfToast('Targets saved', function () { var o = JSON.parse(was); S.focus = o.f; if (o.zn === null) delete S.zn; else S.zn = o.zn; lfSave(); lfRender(); });
   });
   refresh();

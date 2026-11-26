@@ -309,6 +309,28 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
 
+  /* ── SAVING TARGETS SAVES WHAT YOU PUT ── */
+  {
+    const mine = [['Quads', 18, 18], ['Hamstrings', 9, 9], ['Calves', 15, 15], ['Glutes', 7, 7], ['Chest', 12, 12], ['Back', 12, 16], ['Shoulders', 20, 20]];
+    const o = await open({ focus: focus(mine) });
+    const p = o.page, saved = () => p.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => !f.a).map((f) => f.m + ':' + f.lo + '-' + f.hi).join(' '));
+    await p.click('.lf-bar [data-v="home"]'); await settle(p);
+    await p.click('#lfTgEdit'); await settle(p);
+    const shown = await p.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].map((r) => r.querySelector('.lf-zr-l span').textContent + ':' + r.querySelector('b').textContent).filter((x) => !/Rear|Lower/.test(x)).join(' '));
+    ok('the sheet opens on the targets you saved, not on the suggestion', shown === 'Quads:18 Hamstrings:9 Calves:15 Glutes:7 Chest:12 Back:12 Shoulders:20', shown);
+    ok('and no Back to the suggestion button is offered before you have touched anything', await p.locator('#lfZnBack').isHidden());
+    await p.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Glutes/.test(x.textContent)); const i = r.querySelector('input'); i.value = 10; i.dispatchEvent(new Event('input', { bubbles: true })); });
+    await p.waitForTimeout(200);
+    await p.click('#lfZnSave'); await settle(p);
+    ok('changing one figure changes that one: the others are as saved, and a range you did not touch is still a range', await saved() === 'Quads:18-18 Hamstrings:9-9 Calves:15-15 Glutes:10-10 Chest:12-12 Back:12-16 Shoulders:20-20', await saved());
+    await p.click('#lfTgEdit'); await settle(p);
+    await p.click('#lfZnSeg button >> nth=1'); await p.waitForTimeout(200);
+    await p.click('#lfZnSave'); await settle(p);
+    const z = await saved();
+    ok('pressing How hard is the one thing that puts the suggestions over all of them', z !== 'Quads:18-18 Hamstrings:9-9 Calves:15-15 Glutes:10-10 Chest:12-12 Back:12-16 Shoulders:20-20' && /Back:\d+-\d+/.test(z) && !/Back:12-16/.test(z), z);
+    await o.c.close();
+  }
+
   ok('no page errors', errors.length === 0, errors.slice(0, 3));
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
