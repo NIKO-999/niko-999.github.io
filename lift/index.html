@@ -5070,11 +5070,12 @@ function zHi(m) { return Math.min(22, zRec(m) + 3); }
 function zVal(m, z) { return [Math.max(4, Math.round(zRec(m) * .55)), zRec(m), Math.min(20, zRec(m) + 4)][z]; }
 function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal(t[0], z); }, 0); }
 /* the sheet that opens from Sets this week, from You, from Exercises and from the first split */
-function lfZonesSheet() {
+function lfZonesSheet(fresh) {
+  fresh = fresh === true; /* from the goal sheet: the suggestions have just changed under every muscle, so it opens on them */
   var ts = lfTargets(); if (!ts.length) { lfToast('Make a split first'); return; }
-  var zn = S.zn === 0 || S.zn === 2 ? S.zn : 1, ed = {}, tch = {}, zoned = false, now = ts.reduce(function (a, t) { return a + t[2]; }, 0), rows = {};
+  var zn = S.zn === 0 || S.zn === 2 ? S.zn : 1, ed = {}, tch = {}, zoned = fresh, now = ts.reduce(function (a, t) { return a + t[2]; }, 0), rows = {};
   /* THE SHEET OPENS ON WHAT YOU SAVED. It used to open on the suggestion for every muscle and Save wrote that suggestion over each of them, so changing one figure replaced all the others with ones you never chose. A saved figure that is not the suggestion is held as yours; pressing How hard puts the suggestions back, on purpose. */
-  ts.forEach(function (t) { if (t[1] !== zVal(t[0], zn)) ed[t[0]] = t[1]; });
+  if (!fresh) ts.forEach(function (t) { if (t[1] !== zVal(t[0], zn)) ed[t[0]] = t[1]; });
   var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
   var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
@@ -5110,7 +5111,7 @@ function lfZonesSheet() {
   $('.lf-zn-bs', b).insertAdjacentElement('afterend', fr);
   var s = lfSheet({ title: 'Muscle targets', body: b, foot: [save, back, more] }); s.foot.classList.add('is-wrap');
   back.addEventListener('click', function () { ed = {}; tch = {}; zoned = true; refresh(); });
-  $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(lfZonesSheet); });
+  $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(function () { lfZonesSheet(true); }); });
   more.addEventListener('click', function () { s.close(true); var w = el('<div class="lf-rowbody" id="lfFocusBody"></div>'); w.appendChild(lfFocusBody()); lfRowShown = { id: 'lfRowFocus', w: w }; lfSheet({ title: 'Muscle targets', body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } }); });
   save.addEventListener('click', function () {
     var was = JSON.stringify({ f: S.focus, zn: S.zn === undefined ? null : S.zn });
