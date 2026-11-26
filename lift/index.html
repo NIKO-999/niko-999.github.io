@@ -3361,7 +3361,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
-  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false; if (o.aux) d.aux = 1; if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
+  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false; if (o.aux) d.aux = 1; if (o.ao && typeof o.ao === 'object') { d.ao = {}; ['Rear delts', 'Lower back'].forEach(function (m) { if (o.ao[m]) d.ao[m] = 1; }); if (!Object.keys(d.ao).length) delete d.ao; } if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
   d.bwGoal = num(o.bwGoal);
   /* Health insights have been allowed on this phone */
   if (o.hkr === true) d.hkr = true;
@@ -3426,9 +3426,9 @@ function lfClean(o) {
     var seen = {};
     d.focus = o.focus.filter(function (f) { return f && MUSCLES.indexOf(f.m) >= 0 && !seen[f.m] && (seen[f.m] = 1); }).slice(0, 16).map(function (f) {
       var lo = Math.min(60, Math.max(1, Math.round(+f.lo) || 1)), hi = Math.min(60, Math.max(lo, Math.round(+f.hi) || lo));
-      return { m: f.m, lo: lo, hi: hi, p: f.p ? 1 : 0 };
+      var fr = { m: f.m, lo: lo, hi: hi, p: f.p ? 1 : 0 }; if (f.a) fr.a = 1; return fr;
     });
-    var sig = d.focus.map(function (f) { return f.m + ':' + f.lo + ':' + f.hi + ':' + f.p; }).join();
+    var sig = d.focus.filter(function (f) { return !f.a; }).map(function (f) { return f.m + ':' + f.lo + ':' + f.hi + ':' + f.p; }).join();
     if (sig === FOCUS_V1 || sig === FOCUS_V1.replace('Calves:12:12', 'Calves:15:15') || sig === FOCUS_V2 || FOCUS_V3.indexOf(sig) >= 0) d.focus = lfFocusDefault();
     /* A TARGET STILL ON THE RANGE IT SHIPPED WITH takes the single number,
        muscle by muscle, so one you changed keeps your figure and the rest
@@ -4579,15 +4579,18 @@ function lfMuscleSets(from, to) {
 function lfSetsN(n) { n = Math.round(n * 2) / 2; return n % 1 ? (Math.floor(n) ? Math.floor(n) : '') + '½' : String(n); }
 /* REAR DELTS AND LOWER BACK JOIN THE TARGETS ONCE. Lower back starts at what the program already does for it so nothing is fitted differently the day they arrive; rear delts at six. After that they are yours to change or take off. */
 function lfAuxMig() {
-  if (S.aux) return; S.aux = 1;
-  var P = lfProg(), lb = 0;
-  P.days.forEach(function (d) { if (d.choice || !d.tg) return; d.ex.forEach(function (id) { var x = exById(id), g = d.tg[id]; if (x && x.m === 'Lower back' && g && g[3] !== 'rounds') lb += g[0] || 0; }); });
-  if (!S.focus.some(function (f) { return f.m === 'Rear delts'; })) S.focus.push({ m: 'Rear delts', lo: 6, hi: 6, p: 0 });
-  if (!S.focus.some(function (f) { return f.m === 'Lower back'; })) { var n = Math.max(2, Math.min(12, lb || 4)); S.focus.push({ m: 'Lower back', lo: n, hi: n, p: 0 }); }
-  lfSave();
+  /* the first version of this wrote a flag and no marks: its two rows are marked now, so they are still the app's own */
+  if (S.aux) { S.focus.forEach(function (f) { if ((f.m === 'Rear delts' || f.m === 'Lower back') && !f.p) f.a = 1; }); delete S.aux; }
+  var lb = null, add = function (m, n) { S.focus.push({ m: m, lo: n, hi: n, p: 0, a: 1 }); };
+  ['Rear delts', 'Lower back'].forEach(function (m) {
+    if (S.focus.some(function (f) { return f.m === m; }) || (S.ao && S.ao[m])) return;
+    if (m === 'Rear delts') { add(m, 6); return; }
+    if (lb === null) { lb = 0; lfProg().days.forEach(function (d) { if (d.choice || !d.tg) return; d.ex.forEach(function (id) { var x = exById(id), g = d.tg[id]; if (x && x.m === 'Lower back' && g && g[3] !== 'rounds') lb += g[0] || 0; }); }); }
+    add(m, Math.max(2, Math.min(12, lb || 4)));
+  });
 }
 function lfLegCard() {
-  lfAuxMig();
+  var nBefore = S.focus.length, aBefore = S.aux; lfAuxMig(); if (S.focus.length !== nBefore || aBefore) lfSave();
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
   var c = el('<div class="lf-card" id="lfLegs"><div class="lf-hd"><span class="lf-lab">Sets this week</span><button type="button" class="lf-vr-ed" id="lfTgEdit">Edit targets</button></div><div class="lf-vol"></div></div>');
   /* THE TARGETS ARE YOURS: a row opens its own, the header the list. */
@@ -5109,7 +5112,7 @@ function lfZonesSheet() {
   more.addEventListener('click', function () { s.close(true); var w = el('<div class="lf-rowbody" id="lfFocusBody"></div>'); w.appendChild(lfFocusBody()); lfRowShown = { id: 'lfRowFocus', w: w }; lfSheet({ title: 'Muscle targets', body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } }); });
   save.addEventListener('click', function () {
     var was = JSON.stringify({ f: S.focus, zn: S.zn === undefined ? null : S.zn });
-    S.focus.forEach(function (f) { var v = val(f.m); f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); s.close(true);
+    S.focus.forEach(function (f) { var v = val(f.m); f.lo = v; f.hi = v; delete f.a; }); S.zn = zn; lfSave(); lfRender(); s.close(true);
     lfToast('Targets saved', function () { var o = JSON.parse(was); S.focus = o.f; if (o.zn === null) delete S.zn; else S.zn = o.zn; lfSave(); lfRender(); });
   });
   refresh();
@@ -6478,7 +6481,7 @@ function lfWeekSheet(m) {
   /* THE WEEK'S TARGETS: the workouts a week, and the sets each muscle in
      focus asked for (the priority ones, or all of them if none is). Met, the
      whole review glows; missed, it goes red and says only what fell short */
-  var mu = lfMuscleSets(m, e), fpri = S.focus.filter(function (f) { return f.p; }); if (!fpri.length) fpri = S.focus;
+  var mu = lfMuscleSets(m, e), fpri = S.focus.filter(function (f) { return f.p && !f.a; }); if (!fpri.length) fpri = S.focus.filter(function (f) { return !f.a; });
   var miss = [];
   if (S.goal > 0 && gd < S.goal) miss.push(['Workouts', gd, S.goal]);
   fpri.forEach(function (f) { if ((mu[f.m] || 0) < f.lo) miss.push([f.m + ' sets', mu[f.m] || 0, f.lo]); });
@@ -7175,7 +7178,7 @@ function lfProgSwitch(k) {
   S.fresh = false;
   var was = { prog: S.prog, focus: JSON.stringify(S.focus), pick: S.pick };
   var sig = function (l) { return JSON.stringify(lfFocusOf(l)); };
-  if (JSON.stringify(S.focus) === sig(lfProgDef(S.prog))) S.focus = lfFocusOf(lfProgDef(k));
+  if (JSON.stringify(S.focus.filter(function (f) { return !f.a; })) === sig(lfProgDef(S.prog))) S.focus = lfFocusOf(lfProgDef(k));
   S.prog = k; if (S.pick && S.pick.d === ymd(today()) && !lfProg().days.concat(S.rt).some(function (x) { return x.id === S.pick.id; })) S.pick = null;
   return was;
 }
@@ -7241,7 +7244,7 @@ function lfTargetsAsk() {
   paint();
   var keep = el('<button type="button" class="lf-btn is-ink is-full" id="lfTgKeep">Set targets</button>'), chg = el('<button type="button" class="lf-btn is-full" id="lfTgChange" style="margin-top:10px">See the numbers per muscle</button>');
   var sh = lfSheet({ title: 'What are your targets?', body: b, foot: [keep, chg] });
-  keep.addEventListener('click', function () { S.focus.forEach(function (f) { var v = zVal(f.m, zn); f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); sh.close(true); });
+  keep.addEventListener('click', function () { S.focus.forEach(function (f) { var v = zVal(f.m, zn); f.lo = v; f.hi = v; delete f.a; }); S.zn = zn; lfSave(); lfRender(); sh.close(true); });
   chg.addEventListener('click', function () { S.zn = zn; lfSave(); sh.close(true); setTimeout(lfZonesSheet, 260); });
 }
 /* ── TRAINING PLANS ─────────────────────────────────────────────────────
@@ -8315,13 +8318,13 @@ function lfFocusSheet(m) {
     var lo = parseInt($('#lfFoLo', b).value, 10), hi = parseInt($('#lfFoHi', b).value, 10);
     if (!(lo > 0)) { $('#lfFoLo', b).focus(); return; }
     lo = Math.min(60, lo); hi = Math.min(60, Math.max(lo, hi > 0 ? hi : lo));
-    if (f) { f.lo = lo; f.hi = hi; f.p = pri; } else S.focus.push({ m: cur, lo: lo, hi: hi, p: pri });
+    if (f) { f.lo = lo; f.hi = hi; f.p = pri; delete f.a; } else S.focus.push({ m: cur, lo: lo, hi: hi, p: pri });
     lfSave(); s.close(true); lfRender();
   });
   if (del) del.addEventListener('click', function () {
     var i = S.focus.indexOf(f); if (i < 0) return;
-    S.focus.splice(i, 1); lfSave(); s.close(true); lfRender();
-    lfToast('Removed ' + f.m, function () { S.focus.splice(i, 0, f); lfSave(); lfRender(); });
+    S.focus.splice(i, 1); var offAux = f.m === 'Rear delts' || f.m === 'Lower back'; if (offAux) { S.ao = S.ao || {}; S.ao[f.m] = 1; } lfSave(); s.close(true); lfRender();
+    lfToast('Removed ' + f.m, function () { S.focus.splice(i, 0, f); if (offAux && S.ao) { delete S.ao[f.m]; if (!Object.keys(S.ao).length) delete S.ao; } lfSave(); lfRender(); });
   });
 }
 
@@ -11626,7 +11629,7 @@ function lfBadges() {
   for (var i = 0; i < prDays.length; i++) { var from = ymd(addDays(parseYmd(prDays[i]), -29)), c = 0; for (var j = 0; j <= i; j++) if (prDays[j] >= from) c++; if (c >= 10) { won('pr10', prDays[i]); break; } }
   /* week by week: the goal, a full week, and the targets */
   var streak = 0, fullRun = 0, planned = lfProg().days.filter(function (x) { return !x.choice; }).length;
-  var fo = (S.focus || []).filter(function (f) { return f.lo > 0; }), pri = fo.filter(function (f) { return f.p; });
+  /* the two rows the app adds are for the bars on the card, not for what counts as a week on target */ var fo = (S.focus || []).filter(function (f) { return f.lo > 0 && !f.a; }), pri = fo.filter(function (f) { return f.p; });
   if (!pri.length) pri = fo;
   var qf = fo.filter(function (f) { return f.m === 'Quads'; })[0], tStreak = 0, qn = 0, curMet = 0, thisMon = ymd(monday(today()));
   if (ws.length) {
