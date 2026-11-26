@@ -7049,7 +7049,7 @@ function lfSplitForm(days, name) {
     if (!out.length) { lfToast('Add a day with at least one exercise'); return; }
     var inSplit = {}; out.forEach(function (d) { d.x.forEach(function (r) { inSplit[r[0]] = 1; }); });
     S.ex = S.ex.filter(function (q) { return spMade.indexOf(q.id) < 0 || inSplit[q.id]; }); spMade = []; lfSave();
-    s.close(true); lfProgAdd({ n: nm, d: out, c: [], dropped: 0 }, nm);
+    s.close(true); lfProgAdd({ n: nm, d: out, c: [], dropped: 0 }, nm, { goal: Math.min(7, out.length) });
   });
 }
 
@@ -7552,7 +7552,7 @@ function lfProgAdd(pk, name, opt) {
   lfSave(); lfRender();
   if (wasNew) setTimeout(lfTargetsAsk, 450);
   /* the first split's confirmation is the targets sheet itself: a toast over its list would cover the last rows */
-  if (!wasNew) lfToast(p.n + ' added and on', function () {
+  if (!wasNew) lfToast(p.n + ' added and on' + (opt && opt.goal && opt.goal !== was.goal ? ', goal ' + opt.goal + ' days' : ''), function () {
     S.prog = was.prog; S.focus = JSON.parse(was.focus); S.pick = was.pick; if (wasNew) delete S.hp; if (was.goal) S.goal = was.goal; else delete S.goal;
     S.pg = (S.pg || []).filter(function (q) { return q.id !== id; }); if (!S.pg.length) delete S.pg; lfProgSync(); lfSave(); lfRender();
   });
@@ -7569,7 +7569,7 @@ function lfProgPreview(pk) {
   if (pk.dropped) { var np = el('<p class="lf-lab" style="margin:10px 0 0"></p>'); np.textContent = pk.dropped + ' exercise' + (pk.dropped === 1 ? '' : 's') + ' this version of Lift does not have ' + (pk.dropped === 1 ? 'was' : 'were') + ' left out.'; b.appendChild(np); }
   var go = el('<button type="button" class="lf-btn is-ink is-full" id="lfPgAdd">Add program</button>');
   var s = lfSheet({ title: 'Add a program', body: b, foot: [go] });
-  go.addEventListener('click', function () { var nm = $('#lfPgN', b).value; s.close(true); lfProgAdd(pk, nm); });
+  go.addEventListener('click', function () { var nm = $('#lfPgN', b).value; s.close(true); lfProgAdd(pk, nm, { goal: Math.min(7, pk.d.length) }); });
 }
 function lfProgAddSheet() {
   var b = el('<div><label class="lf-flab" for="lfPgT">Paste the link or code</label><textarea class="lf-field" id="lfPgT" rows="4" style="resize:none" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea></div>');

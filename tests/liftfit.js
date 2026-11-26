@@ -292,6 +292,23 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     }
   }
 
+  /* ── A SPLIT SETS THE WEEK'S GOAL TO ITS DAYS ── */
+  {
+    const o = await open({ goal: 4, hp: ['ul'] });
+    const p = o.page;
+    await p.click('.lf-bar [data-v="lib"]'); await settle(p);
+    await p.click('#lfNewSplit'); await settle(p);
+    await p.locator('.lf-sheet').last().locator('#lfSpPaste').fill('Mon Push\nBench press 4x8\nTue Pull\nBarbell row 4x8\nWed Legs\nBack squat 4x6\nThu Upper\nOverhead press 3x8\nFri Lower\nLeg press 3x10'); await p.waitForTimeout(900);
+    const days = await p.locator('.lf-sheet').last().locator('.lf-sp-day').count();
+    await p.locator('.lf-sheet').last().locator('#lfSpN').fill('Five days'); await p.locator('.lf-sheet').last().locator('#lfSpSave').click(); await p.waitForTimeout(900);
+    const g = await p.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).goal);
+    ok('a five day split sets the goal to five instead of leaving it at four', days === 5 && g === 5, [days, g]);
+    ok('and the toast says so, with an Undo that puts the goal back', /goal 5 days/.test(await p.locator('.lf-toast').textContent()));
+    await p.locator('.lf-toast button').click(); await p.waitForTimeout(500);
+    ok('undoing the split puts the goal back to four', (await p.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).goal)) === 4);
+    await o.c.close();
+  }
+
   ok('no page errors', errors.length === 0, errors.slice(0, 3));
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
