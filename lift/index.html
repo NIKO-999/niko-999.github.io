@@ -6668,9 +6668,6 @@ function lfWrapDraw(w, ms, cv, calm) {
     }
     c.font = F(250, 800); var ns = String(lit), nw = c.measureText(ns).width;
     X(ns, 90, 560, 250, 800, acc); X('of ' + tot + ' days', 90 + nw + 30, 560, 64, 700, 'rgba(255,255,255,.8)');
-    var rows = Math.ceil((w.off + tot) / 7), by = y0 + rows * (cell + gap) + 70;
-    var gl = d.weeks.length && S.goal > 0 ? d.weeks.filter(function (q) { return q.met; }).length + ' of ' + d.weeks.length + ' weeks on goal' : d.st.wo + (d.st.wo === 1 ? ' session' : ' sessions');
-    X(gl, 90, Math.min(by, 1800), 52, 700, 'rgba(255,255,255,.8)', fade(3200));
   } else if (k === 'time') {
     X('Your average session', 90, 330, 60, 700, WHITE);
     var am = cu(300, 1500, Math.round(w.avg)), as = String(am); c.font = F(400, 800); var aw = c.measureText(as).width;
