@@ -569,6 +569,10 @@ svg { display: block; }
 .lf-card-pv { display: flex; justify-content: center; padding: 4px 0 8px; }
 .lf-card-st { width: min(100%, 320px); aspect-ratio: 9 / 16; border-radius: 18px; background: #0b0b0e; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 18px 40px rgba(0,0,0,.5); overflow: hidden; }
 .lf-card-st canvas, .lf-card-st video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lf-mw { display: flex; justify-content: center; padding: 34px 0 6px; }
+.lf-mw-st { height: calc(100dvh - var(--safe-t) - 270px); max-width: 100%; aspect-ratio: 9 / 16; border-radius: 18px; overflow: hidden; background: #0c0c0e; box-shadow: 0 0 0 1px rgba(255,255,255,.1), 0 18px 40px rgba(0,0,0,.5); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.lf-mw-st canvas { display: block; width: 100%; height: 100%; }
+.lf-mw-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .lf-ex { --ss: color-mix(in srgb, var(--log) 55%, #000); }
 .lf-ssb { appearance: none; border: 0; padding: 0; width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: transparent; color: var(--dim); cursor: pointer; position: relative; }
 .lf-ssb::before { content: ''; position: absolute; inset: -6px -3px; }
@@ -6285,10 +6289,11 @@ function lfCardMime() {
   return '';
 }
 function lfShareCardSheet(sp, name) {
+  var dr = function (q, c) { if (sp.draw) sp.draw(q, c); else lfCardDraw(sp, q, c); };
   var cv = document.createElement('canvas'), b = el('<div class="lf-card-pv"><div class="lf-card-st" aria-label="The story, as it will be shared"></div></div>');
   var holder = $('.lf-card-st', b); holder.appendChild(cv);
   /* THE STORY PLAYS ONCE, ON THE CANVAS YOU ARE LOOKING AT, AND THAT SAME CANVAS IS RECORDED. It starts blank, builds up, and stops on the finished card: nothing is swapped in afterwards, so there is no second showing and no reset. (It was drawn off screen while the finished card sat in view, which put the whole sheet up first and then wiped it to play it.) */
-  lfCardDraw(sp, 0, cv);
+  dr(0, cv);
   var foot = [], blob = null, mime = lfCardMime(), ext = /mp4/.test(mime) ? 'mp4' : 'webm', url = '', rec = null, raf = 0, dead = false;
   var mk = function (id, txt, cls) { var q = el('<button type="button" class="lf-btn ' + (cls || '') + '" id="' + id + '" disabled></button>'); q.textContent = txt; return q; };
   /* ONE button, Share video: the phone's own share sheet has Save Video, Instagram, Facebook and TikTok in it, so none of them needs a button of its own */
@@ -6317,19 +6322,19 @@ function lfShareCardSheet(sp, name) {
     } catch (e) { viaNative(); }
   });
   /* THE VIDEO TAKES ITS TIME: 7.6 seconds for the figures to count up and the lines to come in, then 2.6 held, so what is shared is a little over ten seconds. At five it was gone before you had read it. */
-  var DUR = 7600, HOLD = 2600, t0 = 0, chunks = [];
+  var DUR = sp.dur || 7600, HOLD = sp.hold || 2600, t0 = 0, chunks = [];
   var finish = function () {
     if (blob) return;
     blob = new Blob(chunks, { type: mime.split(';')[0] || 'video/webm' }); if (dead) return;
     url = URL.createObjectURL(blob);
     /* the recording is for sharing; what you see stays the finished card, and a press plays the build again */
     var replaying = false; holder.style.cursor = 'pointer'; holder.setAttribute('role', 'button'); holder.setAttribute('aria-label', 'The story, as it will be shared. Press to play it again');
-    holder.addEventListener('click', function () { if (replaying || dead) return; replaying = true; var r0 = 0; (function rp(now) { if (dead) return; if (!r0) r0 = now; var q = Math.min(1, (now - r0) / DUR); lfCardDraw(sp, q, cv); if (q < 1) requestAnimationFrame(rp); else replaying = false; })(performance.now()); });
+    holder.addEventListener('click', function () { if (replaying || dead) return; replaying = true; var r0 = 0; (function rp(now) { if (dead) return; if (!r0) r0 = now; var q = Math.min(1, (now - r0) / DUR); dr(q, cv); if (q < 1) requestAnimationFrame(rp); else replaying = false; })(performance.now()); });
     window.lfStoryBytes = blob.size; enable();
   };
   var frame = function (now) {
     if (dead) return; if (!t0) t0 = now;
-    var el0 = now - t0; lfCardDraw(sp, Math.min(1, el0 / DUR), cv);
+    var el0 = now - t0; dr(Math.min(1, el0 / DUR), cv);
     bar.style.width = Math.min(100, el0 / (DUR + HOLD) * 100) + '%';
     if (el0 < DUR + HOLD) raf = requestAnimationFrame(frame); else if (rec && rec.state !== 'inactive') rec.stop();
   };
@@ -6338,7 +6343,7 @@ function lfShareCardSheet(sp, name) {
   var begun = false;
   var begin = function () {
     if (begun || dead) return; begun = true;
-    lfCardDraw(sp, 0, cv);
+    dr(0, cv);
   try {
     if (!mime || !cv.captureStream) throw new Error('no recorder');
     rec = new MediaRecorder(cv.captureStream(30), { mimeType: mime, videoBitsPerSecond: 4500000 });
@@ -6350,7 +6355,7 @@ function lfShareCardSheet(sp, name) {
       try { if (rec.state !== 'inactive') rec.stop(); } catch (e) {}
       setTimeout(function () { if (blob || dead) return; if (chunks.length) finish(); else { bar.remove(); lfToast('The video did not finish. Close this and try again'); } }, 1500);
     }, DUR + HOLD + 2500);
-  } catch (e) { lfCardDraw(sp, 1, cv); foot.forEach(function (q) { q.disabled = true; }); bar.remove(); lfToast('This phone cannot make the video'); }
+  } catch (e) { dr(1, cv); foot.forEach(function (q) { q.disabled = true; }); bar.remove(); lfToast('This phone cannot make the video'); }
   };
   try {
     if (document.fonts && document.fonts.load) Promise.race([Promise.all([document.fonts.load('800 40px Inter'), document.fonts.load('700 30px Inter'), document.fonts.load('500 30px Inter')]), new Promise(function (res) { setTimeout(res, 1000); })]).then(begin, begin);
@@ -6360,7 +6365,7 @@ function lfShareCardSheet(sp, name) {
   if (sh.foot) sh.foot.classList.add('is-wrap');
   /* a press on the dim button lands here: say why nothing happened */
   if (sh.foot) sh.foot.addEventListener('click', function () { if (!blob && !dead && rec) lfToast('Making your video. A few more seconds'); });
-  window.lfCards = (window.lfCards || 0) + 1; window.lfCardLast = { w: cv.width, h: cv.height, mime: mime, lines: sp.lines || [] };
+  window.lfCards = (window.lfCards || 0) + 1; window.lfCardLast = { w: cv.width, h: cv.height, mime: mime, lines: sp.lines || [], ms: DUR + HOLD };
   return sh;
 }
 
@@ -6405,43 +6410,150 @@ function lfMonthData(m) {
   var mu = lfMuscleSets(f, l), top = Object.keys(mu).filter(function (x) { return x !== 'Cardio' && x !== 'Other'; }).sort(function (x, y) { return mu[y] - mu[x]; })[0];
   return { f: f, l: l, a: a, z: z, st: st, pv: pv, mins: mins, days: Object.keys(days).length, weeks: weeks, best: best, top: top, mu: mu, prs: lfPrsIn(a, z) };
 }
+/* ═══════════ THE MONTH WRAPPED ═══════════
+   The month as a short story: the days you trained, how long a session
+   took, what went up most, where the sets went, what you set a record on.
+   One canvas draws it, and the SAME drawing is the player and the video
+   you share, so what you watch is what you send. It never grades the month. */
+function lfWrapData(m) {
+  var d = lfMonthData(m), a = d.a, z = d.z, ws = S.wo.filter(function (w) { return w.d >= a && w.d <= z; }).sort(function (x, y) { return x.d < y.d ? -1 : x.d > y.d ? 1 : 0; });
+  var dys = {}, n = 0, tot = 0, lng = 0;
+  ws.forEach(function (w) { dys[+w.d.slice(8, 10)] = 1; if (w.s > 1e11 && w.e > w.s) { var mm = (w.e - w.s) / 60000; n++; tot += mm; lng = Math.max(lng, mm); } });
+  var per = {}, heavy = null;
+  ws.forEach(function (w) { w.x.forEach(function (q) {
+    var top = null; q.sets.forEach(function (st) { if (!(st.r > 0)) return; var v = +st.w || 0; if (!top || v > top.w) top = { w: v, r: st.r }; if (v > 0 && (!heavy || v > heavy.w)) heavy = { w: v, n: exName(q.id, q.n) }; });
+    if (!top) return; var o = per[q.id] = per[q.id] || { id: q.id, n: exName(q.id, q.n), f: null, l: null }; if (!o.f) o.f = top; o.l = top;
+  }); });
+  var up = Object.keys(per).map(function (k) { var o = per[k]; o.dl = o.l.w - o.f.w; return o; }).filter(function (o) { return o.dl > 1e-9 && o.f !== o.l; }).sort(function (x, y) { return y.dl - x.dl; });
+  var mu = Object.keys(d.mu).filter(function (x) { return x !== 'Cardio' && x !== 'Other' && d.mu[x] > 0; }).sort(function (x, y) { return d.mu[y] - d.mu[x]; }).slice(0, 6).map(function (x) { return [x, d.mu[x]]; });
+  var w = { d: d, name: MON[m.getMonth()], year: m.getFullYear(), nDays: d.l.getDate(), off: (d.f.getDay() + 6) % 7, days: dys, trained: Object.keys(dys).length, avg: n ? tot / n : 0, tot: tot, lng: lng, up: up, mu: mu, heavy: heavy };
+  var plan = [{ k: 'cal', dur: 6200 }];
+  if (n) plan.push({ k: 'time', dur: 4800 });
+  if (up.length) plan.push({ k: 'gain', dur: 5200 });
+  if (mu.length) plan.push({ k: 'mu', dur: 5200 });
+  plan.push({ k: 'end', dur: 5200 });
+  var s0 = 0; plan.forEach(function (q) { q.s = s0; s0 += q.dur; });
+  w.plan = plan; w.total = s0;
+  return w;
+}
+function lfWrapDraw(w, ms, cv, calm) {
+  var W = 1080, H = 1920; if (cv.width !== W) { cv.width = W; cv.height = H; }
+  var c = cv.getContext('2d'), P = w.plan, d = w.d, acc = (getComputedStyle(document.documentElement).getPropertyValue('--log') || '').trim() || '#e1d4c2';
+  ms = Math.max(0, Math.min(w.total, ms));
+  var i = 0; while (i < P.length - 1 && ms >= P[i].s + P[i].dur) i++;
+  var sl = P[i], lt = calm ? sl.dur : ms - sl.s, last = i === P.length - 1;
+  var al = calm ? 1 : Math.min(1, lt / 350) * (last ? 1 : Math.min(1, (sl.dur - lt) / 300));
+  var F = function (px, wt) { return wt + ' ' + px + 'px Inter, system-ui, sans-serif'; };
+  var clamp = function (v) { return Math.max(0, Math.min(1, v)); }, ease = function (k) { k = clamp(k); return 1 - Math.pow(1 - k, 3); };
+  var X = function (s, x, y, px, wt, col, al2, ta) { c.font = F(px, wt); c.fillStyle = col; c.textAlign = ta || 'left'; c.textBaseline = 'alphabetic'; c.globalAlpha = al * (al2 === undefined ? 1 : al2); c.fillText(s, x, y); };
+  var rr = function (x, y, ww, hh, r) { r = Math.min(r, ww / 2, hh / 2); c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + ww, y, x + ww, y + hh, r); c.arcTo(x + ww, y + hh, x, y + hh, r); c.arcTo(x, y + hh, x, y, r); c.arcTo(x, y, x + ww, y, r); c.closePath(); };
+  var wrapT = function (s, px, wt, maxW) { c.font = F(px, wt); var ws = String(s).split(' '), out = [], cur = ''; ws.forEach(function (q) { var tr = cur ? cur + ' ' + q : q; if (c.measureText(tr).width > maxW && cur) { out.push(cur); cur = q; } else cur = tr; }); if (cur) out.push(cur); return out; };
+  var fade = function (delay) { return calm ? 1 : ease((lt - delay) / 500); };
+  var cu = function (delay, dur, to) { return calm ? to : Math.round(to * ease((lt - delay) / dur)); };
+  var DIM = 'rgba(255,255,255,.55)', WHITE = '#fff';
+  c.globalAlpha = 1; c.fillStyle = '#0c0c0e'; c.fillRect(0, 0, W, H);
+  var g = c.createRadialGradient(W / 2, 0, 0, W / 2, 0, 1100); g.addColorStop(0, acc); g.addColorStop(1, 'rgba(0,0,0,0)'); c.globalAlpha = .13; c.fillStyle = g; c.fillRect(0, 0, W, H);
+  /* progress across the top: one segment a slide */
+  var seg = (W - 140 - (P.length - 1) * 12) / P.length;
+  P.forEach(function (q, j) { var x = 70 + j * (seg + 12), fr = j < i ? 1 : j === i ? (calm ? 1 : lt / sl.dur) : 0; c.globalAlpha = 1; rr(x, 64, seg, 8, 4); c.fillStyle = 'rgba(255,255,255,.2)'; c.fill(); if (fr > 0) { rr(x, 64, Math.max(8, seg * fr), 8, 4); c.fillStyle = acc; c.fill(); } });
+  X(w.name.toUpperCase() + (w.year !== today().getFullYear() ? ' ' + w.year : '') + '  ·  WRAPPED', 90, 170, 34, 700, DIM);
+  var k = sl.k;
+  if (k === 'cal') {
+    X('You trained', 90, 320, 60, 700, WHITE);
+    var cell = 124, gap = 12, x0 = 70, y0 = 790, lit = 0, tot = w.nDays;
+    var dl = ['M', 'T', 'W', 'T', 'F', 'S', 'S']; dl.forEach(function (q, j) { X(q, x0 + j * (cell + gap) + cell / 2, 750, 30, 700, 'rgba(255,255,255,.4)', 1, 'center'); });
+    for (var n = 1; n <= tot; n++) {
+      var at = 450 + (n - 1) * 62, kk = calm ? 1 : clamp((lt - at) / 260), on = !!w.days[n], pos = w.off + n - 1, cx = x0 + (pos % 7) * (cell + gap), cy = y0 + Math.floor(pos / 7) * (cell + gap);
+      if (on && kk >= 1) lit++; else if (on && kk > 0 && kk < 1) lit += 0;
+      c.globalAlpha = al; rr(cx, cy, cell, cell, 30); c.fillStyle = 'rgba(255,255,255,.05)'; c.fill();
+      if (on && kk > 0) { var sc = .7 + .3 * ease(kk), sz = cell * sc; c.globalAlpha = al * kk; rr(cx + (cell - sz) / 2, cy + (cell - sz) / 2, sz, sz, 30); c.fillStyle = acc; c.fill(); }
+      X(String(n), cx + cell / 2, cy + cell / 2 + 15, 42, 700, on && kk > .5 ? '#0c0c0e' : 'rgba(255,255,255,.38)', 1, 'center');
+    }
+    c.font = F(250, 800); var ns = String(lit), nw = c.measureText(ns).width;
+    X(ns, 90, 560, 250, 800, acc); X('of ' + tot + ' days', 90 + nw + 30, 560, 64, 700, 'rgba(255,255,255,.8)');
+    var rows = Math.ceil((w.off + tot) / 7), by = y0 + rows * (cell + gap) + 70;
+    var gl = d.weeks.length && S.goal > 0 ? d.weeks.filter(function (q) { return q.met; }).length + ' of ' + d.weeks.length + ' weeks on goal' : d.st.wo + (d.st.wo === 1 ? ' session' : ' sessions');
+    X(gl, 90, Math.min(by, 1800), 52, 700, 'rgba(255,255,255,.8)', fade(3200));
+  } else if (k === 'time') {
+    X('Your average session', 90, 330, 60, 700, WHITE);
+    var am = cu(300, 1500, Math.round(w.avg)), as = String(am); c.font = F(400, 800); var aw = c.measureText(as).width;
+    X(as, 90, 800, 400, 800, acc); X('min', 90 + aw + 30, 800, 96, 700, 'rgba(255,255,255,.8)');
+    var row = function (lab, val, y, dl2) { X(lab, 90, y, 34, 700, DIM, fade(dl2)); X(val, 90, y + 110, 100, 800, WHITE, fade(dl2)); };
+    row('TOTAL TIME', fmtDur(w.tot * 60000), 1130, 1700); row('LONGEST SESSION', fmtDur(w.lng * 60000), 1440, 2300);
+  } else if (k === 'gain') {
+    var u = w.up[0], disp = function (v) { return String(Math.round(toDisp(v) * 10) / 10); };
+    X('You went up most on', 90, 330, 60, 700, WHITE);
+    var nl = wrapT(u.n, 112, 800, 900).slice(0, 3); nl.forEach(function (q, j) { X(q, 90, 470 + j * 126, 112, 800, WHITE, fade(300)); });
+    var ny = 470 + nl.length * 126 + 330, gv = Math.round(toDisp(u.dl) * 10) / 10, gs = '+' + (calm ? gv : Math.round(gv * ease((lt - 900) / 1400) * 10) / 10);
+    c.font = F(330, 800); var gw = c.measureText(gs).width;
+    X(gs, 90, ny, 330, 800, acc, fade(800)); X(S.unit, 90 + gw + 30, ny, 90, 700, 'rgba(255,255,255,.8)', fade(800));
+    X(disp(u.f.w) + '  →  ' + disp(u.l.w) + ' ' + S.unit, 90, ny + 120, 66, 700, 'rgba(255,255,255,.8)', fade(2200));
+    X(u.f.r + ' reps  →  ' + u.l.r + ' reps', 90, ny + 200, 44, 500, DIM, fade(2200));
+    if (w.up.length > 1) X((w.up.length - 1) + (w.up.length === 2 ? ' more lift' : ' more lifts') + ' went up too', 90, Math.min(ny + 360, 1780), 48, 700, WHITE, fade(3000));
+  } else if (k === 'mu') {
+    X('Where the sets went', 90, 330, 60, 700, WHITE);
+    var mx = w.mu[0][1];
+    w.mu.forEach(function (q, j) {
+      var y = 520 + j * 170, dl3 = 300 + j * 180, kk = ease((lt - dl3) / 900);
+      X(q[0], 90, y, 48, 700, WHITE, fade(dl3)); X(lfSetsN(q[1]) + ' sets', 990, y, 44, 500, DIM, fade(dl3), 'right');
+      c.globalAlpha = al; rr(90, y + 28, 900, 34, 17); c.fillStyle = 'rgba(255,255,255,.08)'; c.fill();
+      var bw = Math.max(34, 900 * q[1] / mx * kk); if (kk > 0) { c.globalAlpha = al; rr(90, y + 28, bw, 34, 17); c.fillStyle = acc; c.fill(); }
+    });
+    var tt = d.st.sets, pv = d.pv.sets, pc = pv > 0 ? Math.round((tt - pv) / pv * 100) : null;
+    X(tt + ' sets in all' + (pc !== null ? '  ·  ' + (pc >= 0 ? '+' + pc : pc) + '% on ' + MON[(d.f.getMonth() + 11) % 12] : ''), 90, 1700, 48, 700, 'rgba(255,255,255,.8)', fade(2200));
+  } else {
+    var pr = d.prs, big = pr.length ? pr.length : d.st.wo, lab = pr.length ? (pr.length === 1 ? 'new record' : 'new records') : (d.st.wo === 1 ? 'session' : 'sessions');
+    X(pr.length ? 'You set' : 'You finished', 90, 330, 60, 700, WHITE);
+    var bs = String(cu(300, 1300, big)); c.font = F(380, 800); var bw2 = c.measureText(bs).width;
+    X(bs, 90, 760, 380, 800, acc); X(lab, 90 + bw2 + 30, 760, 76, 700, 'rgba(255,255,255,.8)');
+    pr.slice(0, 5).forEach(function (q, j) { var s = q.length > 30 ? q.slice(0, 29) + '…' : q; X(s, 90, 900 + j * 84, 56, 700, WHITE, fade(1200 + j * 220)); });
+    var vy = 1380; X(Math.round(toDisp(d.st.vol)).toLocaleString() + ' ' + S.unit, 90, vy, 96, 800, WHITE, fade(2400)); 
+    var vp = d.pv.vol > 0 ? Math.round((d.st.vol - d.pv.vol) / d.pv.vol * 100) : null;
+    X('moved' + (vp !== null ? '  ·  ' + (vp >= 0 ? '+' + vp : vp) + '% on ' + MON[(d.f.getMonth() + 11) % 12] : ''), 90, vy + 70, 46, 500, DIM, fade(2400));
+    if (w.heavy) { X('HEAVIEST LIFT', 90, 1600, 34, 700, DIM, fade(3000)); X(w.heavy.n + '  ·  ' + (Math.round(toDisp(w.heavy.w) * 10) / 10) + ' ' + S.unit, 90, 1670, 56, 700, WHITE, fade(3000)); }
+  }
+  c.globalAlpha = 1;
+}
+function lfWrapText(w) {
+  var d = w.d, st = d.st, out = [w.name + ' wrapped', st.wo + (st.wo === 1 ? ' session' : ' sessions') + ' on ' + w.trained + ' of ' + w.nDays + ' days'];
+  var nMet = d.weeks.filter(function (q) { return q.met; }).length; if (S.goal > 0 && d.weeks.length) out.push(nMet + ' of ' + d.weeks.length + ' weeks on goal');
+  if (d.best) out.push('Best week: ' + d.best.m.getDate() + ' ' + MON[d.best.m.getMonth()].slice(0, 3) + ', ' + fmtBig(toDisp(d.best.vol)) + ' ' + S.unit);
+  if (w.avg) out.push('Average session ' + Math.round(w.avg) + ' minutes');
+  if (w.up.length) out.push('Up most on ' + w.up[0].n + ', +' + (Math.round(toDisp(w.up[0].dl) * 10) / 10) + ' ' + S.unit);
+  if (w.mu.length) out.push('Most trained: ' + w.mu[0][0] + ', ' + lfSetsN(w.mu[0][1]) + ' sets');
+  if (d.prs.length) out.push(d.prs.length + (d.prs.length === 1 ? ' new record: ' : ' new records: ') + d.prs.slice(0, 8).join(', '));
+  return out;
+}
 function lfMonthSheet(m) {
-  var d = lfMonthData(m), st = d.st, name = MON[m.getMonth()];
-  var met = S.goal > 0 && d.weeks.length && d.weeks.every(function (w) { return w.met; }), nMet = d.weeks.filter(function (w) { return w.met; }).length;
-  var b = el('<div class="lf-fin lf-wk-sum" id="lfMonthSum"><div class="lf-cap lf-ws-k">Month in review</div><h3></h3><p class="lf-ws-verdict"></p>'
-    + '<div class="lf-fin-vol lf-num"><span>0</span><small></small></div><p class="lf-fin-u"></p></div>');
-  $('h3', b).textContent = name + (m.getFullYear() !== today().getFullYear() ? ' ' + m.getFullYear() : '');
-  $('.lf-ws-verdict', b).textContent = st.wo + (st.wo === 1 ? ' session' : ' sessions') + ' on ' + d.days + (d.days === 1 ? ' day' : ' days');
-  $('.lf-fin-vol small', b).textContent = S.unit + ' moved';
-  var u = $('.lf-fin-u', b);
-  if (d.pv.vol > 0) { var pc = Math.round((st.vol - d.pv.vol) / d.pv.vol * 100); u.textContent = (pc >= 0 ? '+' + pc : pc) + '% on ' + MON[(m.getMonth() + 11) % 12]; u.classList.toggle('is-up', pc > 0); } else u.remove();
-  b.appendChild(lfSum([[st.sets, 'sets'], [fmtBig(st.reps), 'reps'], [d.mins ? fmtDur(d.mins * 60000) : '—', 'time']]));
-  var ln = el('<div class="lf-ws-lines"></div>');
-  var line = function (ic, txt, cls) { var q = el('<div class="lf-ws-l"><span class="lf-ws-ic"></span><span></span></div>'); $('.lf-ws-ic', q).innerHTML = ic; $('span:last-child', q).textContent = txt; if (cls) q.classList.add(cls); ln.appendChild(q); };
-  if (S.goal > 0 && d.weeks.length) line(TAG_IC.goal, nMet + ' of ' + d.weeks.length + ' weeks on goal', met ? 'is-crown' : '');
-  if (d.best) line(IC.dumb, 'Best week: ' + d.best.m.getDate() + ' ' + MON[d.best.m.getMonth()].slice(0, 3) + ' · ' + fmtBig(toDisp(d.best.vol)) + ' ' + S.unit);
-  if (d.top) line(IC.dumb, 'Most trained: ' + d.top + ' · ' + lfSetsN(d.mu[d.top]) + ' sets');
-  b.appendChild(ln);
-  if (d.prs.length) { var pl = el('<div class="lf-fin-l" id="lfMoPr"><div class="lf-cap">Records this month</div><div class="lf-tags"></div></div>'); d.prs.slice(0, 12).forEach(function (n) { $('.lf-tags', pl).appendChild(lfTag(['pr', n])); }); b.appendChild(pl); }
-  var got = lfBadges().concat(lfMedals()).filter(function (x) { return x.d && x.d >= d.a && x.d <= d.z; });
-  if (got.length) { var bl = el('<div class="lf-fin-l" id="lfMoBg"><div class="lf-cap">Badges this month</div><div class="lf-ws-coins"></div></div>'); got.forEach(function (x) { var it = el('<div class="lf-bdi"><b></b></div>'); it.insertBefore(lfCoinBtn(x, 56), it.firstChild); $('b', it).textContent = x.b.n; $('.lf-ws-coins', bl).appendChild(it); }); b.appendChild(bl); }
-  var done = el('<button type="button" class="lf-btn is-log is-full" id="lfMoDone">On to ' + MON[(m.getMonth() + 1) % 12] + '</button>');
-  var shr = el('<button type="button" class="lf-btn is-full" id="lfMoShare">Share to story</button>');
-  var s = lfSheet({ title: '', body: b, foot: [shr, done], full: true, cls: 'lf-wsh' }); if (met) s.el.classList.add('is-met');
-  s.el.setAttribute('aria-label', 'Month in review, ' + name);
+  var w = lfWrapData(m), d = w.d, name = w.name, P = w.plan;
+  var calm = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var cv = document.createElement('canvas'), txt = lfWrapText(w);
+  var b = el('<div class="lf-mw" id="lfMonthSum"><div class="lf-mw-st" role="group" aria-label="Month wrapped. Press the right side for the next card and the left for the one before"></div><div class="lf-mw-sr"></div></div>');
+  $('.lf-mw-st', b).appendChild(cv);
+  txt.forEach(function (s) { var p = document.createElement('p'); p.textContent = s; $('.lf-mw-sr', b).appendChild(p); });
+  var done = el('<button type="button" class="lf-btn is-full" id="lfMoDone">Done</button>');
+  var shr = el('<button type="button" class="lf-btn is-log is-full" id="lfMoShare">Share video</button>');
+  var dead = false, raf = 0, t0 = 0, cur = 0, jump = -1;
+  cv.setAttribute('data-slides', P.length); cv.setAttribute('data-slide', 0);
+  var draw = function (ms) { lfWrapDraw(w, ms, cv, calm); };
+  var s = lfSheet({ title: '', body: b, foot: [shr, done], full: true, cls: 'lf-wrap', onClose: function () { dead = true; cancelAnimationFrame(raf); } });
+  s.el.setAttribute('aria-label', 'Month wrapped, ' + name);
+  /* the card you are on is the clock: a press on the right goes on, one on the left goes back, and it plays on by itself between */
+  var at = function (i) { i = Math.max(0, Math.min(P.length - 1, i)); cur = i; cv.setAttribute('data-slide', i); t0 = performance.now() - P[i].s; if (calm) draw(P[i].s); };
+  $('.lf-mw-st', b).addEventListener('click', function (e) { var r = this.getBoundingClientRect(); if (e.clientX - r.left < r.width * 0.35) at(cur - 1); else at(cur + 1); });
   done.addEventListener('click', function () { s.close(); });
   shr.addEventListener('click', function () {
-    lfShareCardSheet({ kicker: 'Workout  ·  Month in review', title: name + (m.getFullYear() !== today().getFullYear() ? ' ' + m.getFullYear() : ''),
-      sub: st.wo + (st.wo === 1 ? ' session' : ' sessions') + '  ·  ' + (S.goal > 0 && d.weeks.length ? nMet + ' of ' + d.weeks.length + ' weeks on goal' : d.days + ' days'),
-      hero: Math.round(toDisp(st.vol)).toLocaleString(), heroL: S.unit + ' moved', stats: [[String(st.wo), 'sessions'], [String(st.sets), 'sets'], [fmtBig(st.reps), 'reps']], prs: d.prs,
-      lines: d.weeks.filter(function (w) { return w.wo; }).map(function (w) { return ['Week of ' + w.m.getDate() + ' ' + MON[w.m.getMonth()].slice(0, 3), w.wo + (w.wo === 1 ? ' session' : ' sessions') + '  ·  ' + fmtBig(toDisp(w.vol)) + ' ' + S.unit + (w.met ? '  ·  goal hit' : '')]; }) }, 'lift-' + MON[m.getMonth()].toLowerCase());
+    lfShareCardSheet({ draw: function (q, c2) { lfWrapDraw(w, q * w.total, c2, false); }, dur: w.total, hold: 1800, lines: txt }, 'lift-' + name.toLowerCase() + '-wrapped');
   });
-  var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches, n = $('.lf-fin-vol span', b), vol = toDisp(st.vol);
-  buzz(met ? [20, 60, 20, 60, 40] : 12);
-  if (!calm && met) setTimeout(function () { var r0 = $('.lf-fin-vol', b).getBoundingClientRect(); if (r0.width) lfConfetti(r0.left + r0.width / 2, r0.top, getComputedStyle(document.documentElement).getPropertyValue('--log').trim() || '#e1d4c2'); }, 500);
-  if (calm) { n.textContent = Math.round(vol).toLocaleString(); return; }
-  var t0 = 0; (function step(ts) { if (!t0) t0 = ts; var k = Math.min(1, (ts - t0) / 1100), e = 1 - Math.pow(1 - k, 3); n.textContent = Math.round(vol * e).toLocaleString(); if (k < 1 && document.body.contains(n)) requestAnimationFrame(step); })(0);
-  window.lfMonths = (window.lfMonths || 0) + 1;
+  var go = function () {
+    if (dead) return; draw(0); window.lfMonths = (window.lfMonths || 0) + 1;
+    if (calm) { at(0); return; }
+    t0 = performance.now();
+    (function tick(now) { if (dead) return; var ms = now - t0; draw(ms); var i = 0; while (i < P.length - 1 && ms >= P[i].s + P[i].dur) i++; cur = i; cv.setAttribute('data-slide', i); if (ms < w.total) raf = requestAnimationFrame(tick); })(performance.now());
+  };
+  var started = false, start = function () { if (started) return; started = true; go(); };
+  try { if (document.fonts && document.fonts.load) Promise.race([Promise.all([document.fonts.load('800 40px Inter'), document.fonts.load('700 30px Inter'), document.fonts.load('500 30px Inter')]), new Promise(function (res) { setTimeout(res, 1000); })]).then(start, start); else start(); } catch (e) { start(); }
+  buzz(12);
 }
 function lfLastMonthBtn() {
   var m = lfLastMonth(); if (!lfMonthHas(m)) return null;

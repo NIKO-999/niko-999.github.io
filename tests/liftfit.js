@@ -32,10 +32,10 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
   const browser = await chromium.launch({ executablePath: chrome(), args: ['--no-sandbox'] });
   const errors = [];
 
-  async function open(seed) {
-    const c = await browser.newContext(PHONE);
+  async function open(seed, at, ctxo) {
+    const c = await browser.newContext(Object.assign({}, PHONE, ctxo || {}));
     seed = Object.assign({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul' }, seed || {});
-    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(freeze(at || '2026-10-30T18:00:00'));
     await c.addInitScript(`try { if (!localStorage.getItem('lift.v1')) localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify(seed))}); } catch (e) {} window.__lfNoIntro = 1;`);
     await c.route('https://sched.nikorapullin.workers.dev/**', (r) => r.fulfill({ status: 503, body: '{}' }));
     const page = await c.newPage();
@@ -328,6 +328,58 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await p.click('#lfZnSave'); await settle(p);
     const z = await saved();
     ok('pressing How hard is the one thing that puts the suggestions over all of them', z !== 'Quads:18-18 Hamstrings:9-9 Calves:15-15 Glutes:10-10 Chest:12-12 Back:12-16 Shoulders:20-20' && /Back:\d+-\d+/.test(z) && !/Back:12-16/.test(z), z);
+    await o.c.close();
+  }
+
+  /* ── THE MONTH WRAPPED: a story of the month, and the same story is the video ── */
+  {
+    const days = [1, 2, 4, 5, 7, 8, 10, 11, 13, 15, 16, 18, 20, 21, 23, 25, 27];
+    const wo = days.map((n, i) => { const d = '2026-10-' + String(n).padStart(2, '0'), s = new Date(2026, 9, n, 18).getTime(); return { id: 'w' + i, d, s, e: s + 60 * 60000, n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60 + i * 2, r: 8 }, { w: 60 + i * 2, r: 8 }] }, { id: 'curl', n: 'Dumbbell curl', sets: [{ w: 14, r: 10 }] }] }; });
+    const o = await open({ wo, goal: 3 }, '2026-11-01T10:00:00');
+    const p = o.page;
+    await p.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
+    const cvs = '#lfMonthSum canvas';
+    ok('it opens on its own on the first, as a canvas story of 1080 by 1920 with a card for the days, the time, what went up, the sets and the end', await p.evaluate((s) => { const c = document.querySelector(s); return !!c && c.width === 1080 && c.height === 1920 && c.dataset.slides === '5'; }, cvs));
+    ok('it is read out as words too: the days, the average, what went up', await p.evaluate(() => { const t = document.querySelector('#lfMonthSum .lf-mw-sr').textContent; return /October wrapped/.test(t) && /17 of 31 days/.test(t) && /Average session 60 minutes/.test(t) && /Up most on Bench press/.test(t); }));
+    await p.waitForTimeout(3200);
+    /* the calendar: 1 October 2026 is a Thursday, so the first cell sits in the fourth column; 1 is a day you trained and 3 is not */
+    const px = (x, y) => p.evaluate(([s, x, y]) => Array.from(document.querySelector(s).getContext('2d').getImageData(x, y, 1, 1).data), [cvs, x, y]);
+    const lit = await px(70 + 3 * 136 + 8, 790 + 8), rest = await px(70 + 5 * 136 + 8, 790 + 8);
+    ok('the calendar lights the days you trained and leaves the others dark', lit[0] > 200 && rest[0] < 60, { lit, rest });
+    ok('and the count under the title is the days that lit', await p.evaluate(() => /17/.test(document.querySelector('#lfMonthSum .lf-mw-sr').textContent)));
+    const idx = () => p.evaluate((s) => +document.querySelector(s).dataset.slide, cvs);
+    ok('it starts on the first card', await idx() === 0);
+    const r = await p.locator('#lfMonthSum .lf-mw-st').boundingBox();
+    await p.mouse.click(r.x + r.width * 0.8, r.y + r.height / 2); await p.waitForTimeout(150);
+    ok('a press on the right goes on to the next card', await idx() === 1);
+    await p.mouse.click(r.x + r.width * 0.1, r.y + r.height / 2); await p.waitForTimeout(150);
+    ok('and a press on the left goes back', await idx() === 0);
+    await p.waitForTimeout(6600);
+    ok('left alone it plays on by itself', await idx() >= 1, await idx());
+    await p.click('#lfMoShare'); await settle(p);
+    ok('Share video makes the whole story, not a card: it is over twenty seconds long', await p.evaluate(() => window.lfCardLast && window.lfCardLast.ms > 20000 && window.lfCardLast.w === 1080 && window.lfCardLast.h === 1920), await p.evaluate(() => window.lfCardLast));
+    await p.keyboard.press('Escape'); await settle(p);
+    await p.click('#lfMoDone'); await settle(p);
+    ok('Done puts it away: it is built and removed, not hidden', await p.locator('#lfMonthSum').count() === 0);
+    await o.c.close();
+  }
+  {
+    const s = new Date(2026, 9, 6, 18).getTime();
+    const o = await open({ goal: 3, wo: [{ id: 'a', d: '2026-10-06', s: 0, e: 0, n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }] }] }, { id: 'b', d: '2026-10-13', s: 0, e: 0, n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8 }] }] }] }, '2026-11-01T10:00:00');
+    await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
+    ok('a month with no times and nothing that went up skips those cards instead of drawing them empty', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides < 5 && !/Average session/.test(document.querySelector('.lf-mw-sr').textContent) && !/Up most/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    await o.c.close();
+  }
+  {
+    const wo = [1, 8, 15].map((n, i) => ({ id: 'r' + i, d: '2026-10-' + String(n).padStart(2, '0'), s: new Date(2026, 9, n, 18).getTime(), e: new Date(2026, 9, n, 19).getTime(), n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60 + i * 5, r: 8 }] }] }));
+    const o = await open({ goal: 3, wo }, '2026-11-01T10:00:00', { reducedMotion: 'reduce' });
+    await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
+    await o.page.waitForTimeout(2500);
+    const idx = () => o.page.evaluate(() => +document.querySelector('#lfMonthSum canvas').dataset.slide);
+    ok('with reduced motion it does not play on by itself: it waits on the first card', await idx() === 0);
+    const r = await o.page.locator('#lfMonthSum .lf-mw-st').boundingBox();
+    await o.page.mouse.click(r.x + r.width * 0.8, r.y + r.height / 2); await o.page.waitForTimeout(150);
+    ok('and a press goes on to the next', await idx() === 1);
     await o.c.close();
   }
 
