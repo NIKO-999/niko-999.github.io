@@ -168,8 +168,8 @@ svg { display: block; }
 .lf-zn-bs button { background: none; border: 0; color: var(--log); font-weight: 700; padding: 8px 0 8px 12px; }
 .lf-zn-lg { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; margin: 0 0 4px; }
 .lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
-.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 3px 0 0; font-size: 8px; line-height: 1.25; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; }
-:root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
+.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vn { position: relative; z-index: 2; } .lf-vnt { display: block; margin: -3px 0 -3px; padding: 6px 0; min-height: 0; background: none; border: 0; text-align: left; font: inherit; font-size: 8px; line-height: 1.25; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-orange { color: #fb923c; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; } .lf-vnd { margin: 3px 0 0; font-size: 8px; line-height: 1.3; color: var(--dim); }
+:root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-orange { color: #b45309; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
 .lf-zn-cus { margin-left: 8px; padding: 1px 7px; border-radius: 999px; font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); background: color-mix(in srgb, var(--ink) 12%, transparent); vertical-align: 1px; } .lf-seg.is-cus button[aria-pressed="true"] { opacity: .6; }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
@@ -5236,8 +5236,10 @@ function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal
    EFFECTIVE SETS = direct sets + indirect sets x 0.5 (LF_VOL.ind). Indirect sets are the program's sets on other exercises that give a muscle real secondary work (a press for triceps, a row for biceps), counted at half so a compound lift is not a whole set for every muscle it touches. THE TARGETS ARE ALREADY EFFECTIVE SETS: the bars on Home count that half credit, so a target of 12 for triceps is 12 effective sets, of which some come from pressing. Reading it as direct sets and adding the indirect again would count it twice. Warm-ups are never in the program's counts.
    THE BANDS ARE STARTING POINTS, NOT LIMITS. 0-3 very low, 4-6 low, 7-10 moderate, 11-15 productive, 16-20 high, 21-24 very high, 25+ potentially excessive. A band says where a number sits; whether it is a problem depends on how long you have trained, whether the muscle is a priority, the mode, how many days it is spread over and how much lands on one day. More sets help with diminishing returns and the best amount differs from person to person, so a high number is a notice, never a verdict. Recovery data (sleep, soreness) is not collected yet: until it is, everything here is an estimate from training information alone. */
 var LF_VOL_ON = (function () { try { return localStorage.getItem('lift.vol.v1') !== '0'; } catch (e) { return true; } })();
-var LF_VOL = { ind: 0.5, bands: [[4, 'Very low'], [7, 'Low'], [11, 'Moderate'], [16, 'Productive'], [21, 'High'], [25, 'Very high'], [1e9, 'Potentially excessive']], caution: { new: 13, some: 18, adv: 21 }, cap: { new: 12, some: 16, adv: 20 }, sess: 12 };
-function lfVolBand(v) { for (var i = 0; i < LF_VOL.bands.length; i++) if (v < LF_VOL.bands[i][0]) return LF_VOL.bands[i][1]; return ''; }
+var LF_VOL = { ind: 0.5 };
+/* WHY EVERY MUSCLE USED TO SAY THE SAME THING: the status was worked out against one set of cut-offs for the whole body (high from 18 or 21, by experience), and anything under them fell through to one hard-coded positive line. A target of 19 for chest, hamstrings and lower back therefore read the same, because the muscle never entered the sum.
+   NOW EACH MUSCLE HAS ITS OWN RANGE, the same one the slider's zone is drawn from: its recommended figure for how long you have trained and your goal, times what that muscle takes (zRec: back takes more than glutes, lower back about half of chest), moved to the mode you are in. A muscle is judged only against that range. Above the top of it, the distance decides the word: up to 3 sets over is high, up to 6 very high, past that potentially excessive. 21 sets is never less than very high and 25 is always excessive, for any muscle, because past that the range stops mattering. A priority muscle in Push has two more sets of room, since that is what Push is for. */
+function lfVolRange(m, zn, pri) { var c = zVal(m, zn); return { lo: Math.max(2, c - 2), hi: Math.min(22, c + 3) + (pri && zn === 2 ? 2 : 0) }; }
 /* what the program asks of each muscle across the week: direct sets, indirect sets, and which days they fall on */
 function lfVolPlan() {
   var o = { prim: {}, ind: {}, days: {} };
@@ -5252,28 +5254,35 @@ function lfVolPlan() {
   });
   return o;
 }
-var LF_XP_N = { new: 'someone newer to lifting', some: 'your level', adv: 'an experienced lifter' };
-/* one muscle at a target of v direct sets: its effective sets, its band, and what is worth saying about it */
+/* THE PROGRAMME IS NOT THE TARGET. The slider is what you mean to do in a week; the exercises decide what each muscle actually gets. lfVolWeek works out the second from the first, the way the fit will lay it out: every exercise's sets (scaled to the targets when the fit is on, with what it adds), counted as direct sets for its own muscle and as indirect sets, at half, for the muscles it gives secondary work. Effective volume = direct + indirect x 0.5, once, with no exercise counted in full for every muscle it touches. It runs on the figures in the sheet, not the saved ones, so it moves as the slider does. */
+function lfVolWeek(vals) {
+  var P = lfProg(), keep = S.focus.map(function (f) { return [f.lo, f.hi]; }), out = {};
+  try {
+    if (vals) S.focus.forEach(function (f) { if (vals[f.m] !== undefined) { f.lo = vals[f.m]; f.hi = vals[f.m]; } });
+    P.days.forEach(function (d0) {
+      if (d0.choice) return; var d = lfFit(d0);
+      d.ex.forEach(function (id) {
+        var g = d.tg && d.tg[id], x = exById(id); if (!g || !x || g[3] === 'rounds' || !(g[0] > 0)) return;
+        var o = out[x.m] = out[x.m] || { d: 0, i: 0 }; o.d += g[0];
+        lfAlso(x).forEach(function (m) { var q = out[m] = out[m] || { d: 0, i: 0 }; q.d += g[0]; });
+        var h = EX_HALF[id]; if (h && h !== x.m) { var q = out[h] = out[h] || { d: 0, i: 0 }; q.i += g[0]; }
+      });
+    });
+  } finally { S.focus.forEach(function (f, i) { f.lo = keep[i][0]; f.hi = keep[i][1]; }); }
+  Object.keys(out).forEach(function (m) { out[m].eff = out[m].d + out[m].i * LF_VOL.ind; });
+  return out;
+}
+/* one muscle at a target of v: where it sits in its own range, in a word, a colour and a short sentence; `prog` is what the exercises give it */
 function lfVolAssess(m, v, c) {
-  var pl = c.plan, ind = pl.ind[m] || 0, eff = v, direct = Math.max(0, Math.round((v - ind * LF_VOL.ind) * 2) / 2), days = pl.days[m] || {}, dk = Object.keys(days), tot = pl.prim[m] || 0;
-  var mx = dk.reduce(function (a, k) { return Math.max(a, days[k]); }, 0), per = tot ? Math.round(v * mx / tot * 2) / 2 : 0, exp = dk.length, xp = LF_VOL.caution[c.xp] ? c.xp : 'some', ct = LF_VOL.caution[xp];
-  var N = [], add = function (lv, id, txt) { N.push({ lv: lv, id: id, t: txt }); }, nm = m.toLowerCase(), s = function (n) { return lfSetsN(n); };
-  if (eff >= 25) add('high', 'excess', 'Your ' + nm + ' are at ' + s(eff) + ' effective sets a week. That is past what most people recover from, and extra sets are likely to add little. Think about easing it back, or spreading it so there is a rest day between.');
-  else if (eff >= 21) add(c.pri && c.zn === 2 && xp !== 'new' ? 'info' : 'caution', 'vhigh', 'Your ' + nm + ' are at ' + s(eff) + ' effective sets a week, a very high volume' + (c.pri ? '. You have made them a priority, so keep an eye on how they recover before going further.' : '. Extra sets are likely to give diminishing returns; check how they recover before adding more.'));
-  else if (eff >= ct) add('caution', 'high', s(eff) + ' effective sets a week is a high volume for ' + LF_XP_N[xp] + '. More sets will give diminishing returns.' + (c.pri ? '' : ' If ' + nm + ' are not a priority, some of these could go elsewhere.'));
-  if (eff < 7 && (c.pri || (c.zn >= 1 && eff < 4))) add('rec', 'low', 'Your ' + nm + ' get ' + s(eff) + ' effective sets a week.' + (c.pri ? ' If they are a priority, they need more than this to grow.' : ' That is very little for building.') + (direct < 3 ? ' Dedicated ' + nm + ' work would help.' : ''));
-  var extra = Math.min(v, ind * LF_VOL.ind);
-  if (v > 0 && extra >= 3 && extra >= v * 0.25) add('info', 'ind', 'About ' + s(extra) + ' of these ' + nm + ' sets come from other exercises, like presses and rows, which leaves ' + s(direct) + ' for dedicated ' + nm + ' work.');
-  if (per >= LF_VOL.sess) add('caution', 'sess', 'About ' + s(per) + ' ' + nm + ' sets land on one day. Consider moving some to another training day.');
-  else if (per >= 9 && exp === 1) add('rec', 'sess', 'All your ' + nm + ' work is on one day, around ' + s(per) + ' sets. Spreading it over two days usually recovers better.');
-  if (exp >= 4 && eff >= 16) add('caution', 'rec', 'Your ' + nm + ' are trained on ' + exp + ' days with ' + s(eff) + ' effective sets. Check recovery between those days before adding more.');
-  var rank = { high: 3, caution: 2, rec: 1, info: 0 }; N.sort(function (a, b) { return rank[b.lv] - rank[a.lv]; });
-  /* WHAT IS SHOWN IS ONE SHORT LINE IN ONE COLOUR: red when it is a lot, yellow when it is too little, green when it is right. The rest (the figures, the indirect share, the reasons) stays in the notes for anything that wants them. You can still set any number you like. */
-  var has = function (id) { return N.some(function (x) { return x.id === id; }); }, say;
-  if (has('excess') || has('vhigh') || has('high') || N.some(function (x) { return x.id === 'rec' && x.lv === 'caution'; })) say = { c: 'red', t: 'Quite a lot of volume. Keep an eye on recovery.' };
-  else if (has('low') || (c.zn === 0 ? eff < 4 : eff < 7)) say = { c: 'yellow', t: c.zn === 0 ? 'Below what it takes to maintain.' : 'Not enough volume to grow much.' };
-  else say = { c: 'green', t: c.zn === 0 ? 'Enough to hold what you have.' : 'Perfect for growth and progression.' };
-  return { say: say, m: m, v: v, ind: ind, direct: direct, eff: eff, band: lfVolBand(eff), notes: N, per: per, exposures: exp };
+  var r = lfVolRange(m, c.zn, !!c.pri), over = v - r.hi, maint = c.zn === 0, st, tx, col;
+  if (v >= 25 || over > 6) { st = 'excess'; col = 'red'; tx = 'Potentially excessive. Consider recovery.'; }
+  else if (v >= 21 || over > 3) { st = 'vhigh'; col = 'red'; tx = 'Very high volume. Consider recovery.'; }
+  else if (over > 0) { st = 'high'; col = 'orange'; tx = 'High weekly volume.'; }
+  else if (v < r.lo) { st = 'below'; col = 'yellow'; tx = v < 4 ? 'Very low volume.' : maint ? 'Below maintenance volume.' : 'Below recommended volume.'; }
+  else { st = 'within'; col = 'green'; tx = maint ? 'Within maintenance range.' : 'Within recommended range.'; }
+  var pg = (c.prog && c.prog[m]) || { d: 0, i: 0, eff: 0 }, s = lfSetsN;
+  return { m: m, v: v, lo: r.lo, hi: r.hi, status: st, say: { c: col, t: tx }, prog: pg,
+    detail: 'Range ' + r.lo + '–' + r.hi + '. The exercises give it ' + s(pg.d) + ' direct' + (pg.i ? ' and ' + s(pg.i) + ' indirect (counted at half)' : '') + ', ' + s(pg.eff) + ' effective.' };
 }
 function lfZonesSheet(fresh) {
   fresh = fresh === true; /* from the goal sheet: the suggestions have just changed under every muscle, so it opens on them */
@@ -5290,26 +5299,30 @@ function lfZonesSheet(fresh) {
   function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
   function nEd() { return Object.keys(ed).length; }
   var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfZnSave">Save targets</button>'), back = el('<button type="button" class="lf-btn is-full" id="lfZnBack" hidden></button>'), more = el('<button type="button" class="lf-btn is-full" id="lfZnMore">Priorities and muscles</button>');
-  var vctx = { plan: lfVolPlan(), xp: S.xp, get zn() { return zn; } };
-  /* every change to a figure, the mode or the priorities recalculates every muscle, because one muscle's sets are another's indirect work */
+  /* every change to a figure, the mode or the priorities recalculates every muscle, and the programme under them, because one muscle's sets are another's indirect work */
+  var openD = {};
   function paintVol() {
-    var n = { red: 0, yellow: 0, green: 0 };
+    var vals = {}; ts.forEach(function (t) { vals[t[0]] = val(t[0]); });
+    var prog = lfVolWeek(vals), n = { high: 0, low: 0 };
     ts.forEach(function (t) {
-      var m = t[0], a = lfVolAssess(m, val(m), { plan: vctx.plan, xp: S.xp, zn: zn, pri: !!t[3] }), box = $('.lf-vn', rows[m].el);
+      var m = t[0], a = lfVolAssess(m, vals[m], { zn: zn, pri: !!t[3], prog: prog }), box = $('.lf-vn', rows[m].el);
       box.textContent = '';
-      var p = el('<p class="lf-vnt is-' + a.say.c + '"></p>'); p.textContent = a.say.t; box.appendChild(p); n[a.say.c]++;
-      rows[m].el.dataset.band = a.band; rows[m].el.dataset.eff = a.eff; rows[m].el.dataset.direct = a.direct;
-      $('.lf-zr-l span', rows[m].el).setAttribute('title', a.band + ' · ' + a.eff + ' effective sets, ' + a.direct + ' direct');
+      var p = el('<button type="button" class="lf-vnt is-' + a.say.c + '" aria-expanded="' + (openD[m] ? 'true' : 'false') + '"></button>'); p.textContent = a.say.t; box.appendChild(p);
+      if (openD[m]) { var dd = el('<p class="lf-vnd"></p>'); dd.textContent = a.detail; box.appendChild(dd); }
+      p.addEventListener('click', function () { openD[m] = !openD[m]; paintVol(); });
+      if (a.status === 'high' || a.status === 'vhigh' || a.status === 'excess') n.high++; else if (a.status === 'below') n.low++;
+      var r = rows[m], pc = function (x) { return Math.min(100, x / 24 * 100); }; r.zone.style.left = pc(a.lo) + '%'; r.zone.style.width = (pc(a.hi) - pc(a.lo)) + '%';
+      r.el.dataset.status = a.status; r.el.dataset.range = a.lo + '-' + a.hi; r.el.dataset.eff = a.prog.eff;
     });
     var say = $('#lfVolSay', b); if (!say) return;
-    var parts = []; if (n.red) parts.push(n.red + ' high'); if (n.yellow) parts.push(n.yellow + ' low');
-    say.textContent = parts.length ? 'Volume check: ' + parts.join(', ') + '.' : 'Volume check: all in a good range.';
+    var parts = []; if (n.high) parts.push(n.high + ' high'); if (n.low) parts.push(n.low + ' low');
+    say.textContent = parts.length ? 'Volume check: ' + parts.join(', ') + '.' : 'Volume check: all within range.';
   }
   function refresh() {
     ts.forEach(function (t) {
       var m = t[0], v = val(m), r = rows[m], pc = function (x) { return Math.min(100, x / 24 * 100); };
       $('b', r.el).textContent = v; r.el.classList.toggle('is-ed', ed[m] !== undefined);
-      r.zone.style.left = pc(zLo(m)) + '%'; r.zone.style.width = (pc(zHi(m)) - pc(zLo(m))) + '%'; r.fill.style.width = pc(v) + '%'; r.dot.style.left = pc(v) + '%'; r.inp.value = v;
+      r.fill.style.width = pc(v) + '%'; r.dot.style.left = pc(v) + '%'; r.inp.value = v;
       r.inp.setAttribute('aria-valuetext', v + ' sets a week');
     });
     var tot = ts.reduce(function (a, t) { return a + val(t[0]); }, 0);

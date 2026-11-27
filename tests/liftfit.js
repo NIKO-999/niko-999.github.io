@@ -470,66 +470,71 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
 
-  /* ── THE VOLUME CHECK: the targets are read before they are applied, and nothing is ever changed without you ── */
+  /* ── THE VOLUME CHECK: every muscle is judged against its own range, worked out, never a fixed line of text ── */
   {
     const c = await browser.newContext(PHONE);
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
-    await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul', xp: 'some', zn: 1 }))}); } catch (e) {} window.__lfNoIntro = 1;`);
+    await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul', xp: 'adv', zn: 1 }))}); } catch (e) {} window.__lfNoIntro = 1;`);
     const p = await c.newPage(); p.on('pageerror', (e) => errors.push(String(e)));
-    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolPlan:lfVolPlan,lfVolBand:lfVolBand,lfTargets:lfTargets,zVal:zVal};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolRange:lfVolRange,lfVolWeek:lfVolWeek,lfVolPlan:lfVolPlan,zVal:zVal,zRec:zRec};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
     await p.goto(`${BASE}/lift/`); await p.waitForTimeout(700);
-    const ev = (fn, arg) => p.evaluate(fn, arg);
-    const asses = (m, v, o) => ev(([m, v, o]) => { const V = window.__vv; return V.lfVolAssess(m, v, Object.assign({ plan: V.lfVolPlan(), xp: 'some', zn: 1, pri: false }, o)); }, [m, v, o || {}]);
-    const sy = async (m, v, o) => (await asses(m, v, o)).say;
-    const MS = ['Quads', 'Hamstrings', 'Calves', 'Glutes', 'Chest', 'Back', 'Shoulders', 'Triceps', 'Biceps', 'Abs'];
-    const zv = (xp, zn) => ev(([xp, zn, MS]) => { const V = window.__vv; V.S.xp = xp; const o = {}; MS.forEach((m) => { o[m] = V.zVal(m, zn); }); return o; }, [xp, zn, MS]);
-    const sum = (o) => Object.keys(o).reduce((a, k) => a + o[k], 0);
-    /* the three modes are the only suggestion there is: Maintain below Build below Push, and how long you have trained moves where each starts */
-    const nb = await zv('new', 1), ib = await zv('some', 1), ab = await zv('adv', 1), mn = await zv('some', 0), pu = await zv('some', 2);
-    ok('a beginner on Build starts conservatively, below an experienced lifter, and nobody is handed the ceiling', sum(nb) < sum(ib) && sum(ib) < sum(ab) && Math.max(...Object.values(ab)) < 24, [nb, ab]);
-    ok('Maintain is lighter than Build, and Push is heavier, for every muscle', MS.every((m) => mn[m] <= ib[m] && ib[m] <= pu[m]) && sum(mn) < sum(ib) && sum(ib) < sum(pu), [mn, ib, pu]);
-    ok('there is no Optimise button: the modes are the only options', await ev(() => !/Optimise for me/.test(document.body.innerHTML)));
-    /* 4: indirect work */
-    const plan = await ev(() => window.__vv.lfVolPlan());
-    ok('the program\'s presses and rows are read as indirect work for triceps and biceps', (plan.ind.Triceps || 0) > 0 && (plan.ind.Biceps || 0) > 0, plan.ind);
-    const tri = await asses('Triceps', 12);
-    ok('so the check says part of the triceps target already comes from other exercises, and it is an information notice, not a warning', tri.notes.some((n) => n.id === 'ind' && n.lv === 'info'), tri.notes);
-    ok('an effective set count is the target itself, with the indirect half taken out to give the dedicated work', tri.eff === 12 && tri.direct < 12 && tri.direct >= 0, [tri.eff, tri.direct]);
-    /* 5: excess, and warnings that depend on the person */
-    const x25 = await asses('Chest', 26, {}), x22a = await asses('Quads', 22, { xp: 'adv', zn: 2, pri: true }), x22b = await asses('Quads', 22, { xp: 'adv', zn: 2, pri: false });
-    ok('26 effective sets is flagged as potentially excessive, at the top severity', x25.band === 'Potentially excessive' && x25.notes[0] && x25.notes[0].lv === 'high', x25);
-    ok('22 sets is not automatically a problem: it is a notice for an experienced lifter who made it a priority in Push, and a caution for the same number on a muscle that is not', x22a.notes.every((n) => n.lv !== 'caution' && n.lv !== 'high') && x22b.notes.some((n) => n.lv === 'caution'), [x22a.notes, x22b.notes]);
-    ok('and 10 sets is not called optimal either: it is moderate, and a priority at 10 is told it needs more', (await asses('Chest', 10)).band === 'Moderate' && (await asses('Chest', 5, { pri: true })).notes.some((n) => n.lv === 'rec' && n.id === 'low'));
-    ok('the same 16 sets reads as high for a beginner and carries no warning for an experienced lifter', (await asses('Back', 16, { xp: 'new' })).notes.some((n) => n.id === 'high') && !(await asses('Back', 16, { xp: 'adv' })).notes.some((n) => n.id === 'high'));
-    /* 6: distribution */
-    const dist = (days, v) => ev(([days, v]) => { const V = window.__vv; const pl = { prim: { Quads: Object.values(days).reduce((a, b) => a + b, 0) }, days: { Quads: days }, ind: {} }; return V.lfVolAssess('Quads', v, { plan: pl, xp: 'some', zn: 1, pri: false }); }, [days, v]);
-    const one = await dist({ a: 18 }, 18), three = await dist({ a: 6, b: 6, c: 6 }, 18);
-    ok('how the sets fall across the days is worked out but never shown as a line: no muscle says anything about one day', !(await ev(() => document.body.innerHTML)).includes('Lots of sets in one day'));
-    ok('18 weekly sets in one session is flagged as concentrated, with the figure', one.per === 18 && one.notes.some((n) => n.id === 'sess' && n.lv === 'caution' && /18 quads sets land on one day/.test(n.t)), one.notes);
-    ok('the same 18 spread over three days is not', three.per === 6 && !three.notes.some((n) => n.id === 'sess') && three.exposures === 3, three);
-    ok('the line is red when it is a lot, yellow when it is too little, green when it is right', (await sy('Chest', 22, { xp: 'some' })).c === 'red' && (await sy('Chest', 4, { pri: true })).c === 'yellow' && (await sy('Chest', 12)).c === 'green');
-    ok('and it is a short sentence each time: keep an eye on recovery, not enough to grow, perfect for growth', /Quite a lot of volume.*recovery/.test((await sy('Chest', 22)).t) && /Not enough volume/.test((await sy('Chest', 4, { pri: true })).t) && /Perfect for growth and progression/.test((await sy('Chest', 12)).t) && (await sy('Chest', 22)).t.length < 60);
-    ok('Maintain says maintain: enough to hold what you have, never perfect for growth', /hold what you have/.test((await sy('Chest', 6, { zn: 0 })).t) && !/growth/.test((await sy('Chest', 6, { zn: 0 })).t));
-    ok('a beginner is told it is a lot much sooner: 13 sets is red for someone new, green for someone experienced', (await sy('Chest', 13, { xp: 'new' })).c === 'red' && (await sy('Chest', 13, { xp: 'adv' })).c === 'green' && (await sy('Chest', 12, { xp: 'new' })).c === 'green' && (await sy('Chest', 18, { xp: 'adv' })).c === 'green');
-    /* 9 and 12: the sheet recalculates as you change a figure, and never saves for you */
-    const o2 = await open({ prog: 'ul', xp: 'some', zn: 1, focus: focus(BASE_TG) });
+    const asses = (m, v, o) => p.evaluate(([m, v, o]) => { const V = window.__vv; if (o.xp) V.S.xp = o.xp; const prog = V.lfVolWeek(); return V.lfVolAssess(m, v, Object.assign({ zn: 1, pri: false, prog }, o)); }, [m, v, o || {}]);
+    const SCREEN = { Quads: 19, Hamstrings: 20, Calves: 20, Glutes: 19, Abs: 20, Chest: 19, Back: 20, Triceps: 19, Biceps: 19, 'Rear delts': 20, 'Lower back': 20 };
+    const all = {}; for (const m of Object.keys(SCREEN)) all[m] = await asses(m, SCREEN[m], { xp: 'adv' });
+    const st = Object.keys(all).map((m) => all[m].status), tx = Object.keys(all).map((m) => all[m].say.t);
+    ok('the eleven targets on your screen do not all get the same message: they are judged one by one', new Set(st).size >= 3 && new Set(tx).size >= 3, Object.keys(all).map((m) => m + ' ' + SCREEN[m] + ' ' + all[m].status));
+    ok('each muscle has its own range, and the ranges differ: back takes more than glutes, lower back about half of chest', all.Back.hi > all.Glutes.hi && all['Lower back'].hi < all.Chest.hi && new Set(Object.keys(all).map((m) => all[m].lo + '-' + all[m].hi)).size >= 5, Object.keys(all).map((m) => m + ' ' + all[m].lo + '-' + all[m].hi));
+    ok('the same 20 sets is within range for back, very high for hamstrings and calves, and potentially excessive for lower back', all.Back.status === 'within' && all.Hamstrings.status === 'vhigh' && all.Calves.status === 'vhigh' && all['Lower back'].status === 'excess', ['Back', 'Hamstrings', 'Calves', 'Lower back'].map((m) => m + ' ' + all[m].status));
+    ok('19 quads and 19 chest are only high, not very high, because their ranges are higher', all.Quads.status === 'high' && all.Chest.status === 'high' && all.Glutes.status === 'vhigh', [all.Quads.status, all.Chest.status, all.Glutes.status]);
+    ok('and there is no generic "perfect for growth" anywhere in the app', !/Perfect for growth/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
+    /* the statuses, in order, for one muscle: below, within, high, very high, excessive */
+    const ladder = []; for (const v of [3, 5, 13, 18, 19, 22, 26]) ladder.push((await asses('Chest', v, { xp: 'adv' })).status);
+    ok('one muscle walks through the statuses as its target rises: very low and below, within, high, very high, excessive', ladder.join() === 'below,below,within,within,high,vhigh,excess', ladder);
+    ok('a short, different sentence for each', (await asses('Chest', 5, { xp: 'adv' })).say.t === 'Below recommended volume.' && (await asses('Chest', 13, { xp: 'adv' })).say.t === 'Within recommended range.' && (await asses('Chest', 19, { xp: 'adv' })).say.t === 'High weekly volume.' && /Very high volume\. Consider recovery/.test((await asses('Chest', 21, { xp: 'adv' })).say.t) && /Potentially excessive/.test((await asses('Chest', 26, { xp: 'adv' })).say.t) && (await asses('Chest', 3, { xp: 'adv' })).say.t === 'Very low volume.');
+    /* how long you have trained moves every range */
+    const nb = await asses('Chest', 13, { xp: 'new' }), ad = await asses('Chest', 13, { xp: 'adv' });
+    ok('how long you have trained moves the range: 13 chest sets is high for a beginner and within range for an experienced lifter', nb.status !== 'within' && ad.status === 'within' && nb.hi < ad.hi, [nb.status, nb.lo + '-' + nb.hi, ad.status, ad.lo + '-' + ad.hi]);
+    /* the mode moves it too */
+    const mn = await asses('Chest', 13, { xp: 'adv', zn: 0 }), pu = await asses('Chest', 19, { xp: 'adv', zn: 2 }), bu = await asses('Chest', 19, { xp: 'adv', zn: 1 }), pp = await asses('Chest', 19, { xp: 'adv', zn: 2, pri: true });
+    ok('Maintain judges against a maintenance range: 13 chest sets is above it, and the wording says maintenance', ['high', 'vhigh'].indexOf(mn.status) >= 0 && mn.hi < ad.hi && (await asses('Chest', 7, { xp: 'adv', zn: 0 })).say.t === 'Within maintenance range.', [mn.status, mn.lo + '-' + mn.hi]);
+    ok('Push moves the range up: the same 19 chest sets is high on Build and within range on Push, and a priority muscle on Push has room beyond that', bu.status === 'high' && pu.status === 'within' && pp.hi === pu.hi + 2, [bu.status, pu.status, pu.hi, pp.hi]);
+    /* the target is not the programme */
+    const w = await p.evaluate(() => { const V = window.__vv, a = V.lfVolWeek({ Chest: 12 }), b = V.lfVolWeek({ Chest: 20 }); return { lo: a.Chest, hi: b.Chest, tri: [a.Triceps, b.Triceps] }; });
+    ok('the programme is worked out separately from the target and moves with it: more chest asked of the week gives the chest more sets', w.hi.d > w.lo.d && w.lo.d >= 0, w);
+    ok('effective volume is direct plus half the indirect, once', Math.abs(w.hi.eff - (w.hi.d + w.hi.i * 0.5)) < 1e-9 && w.hi.i >= 0, w.hi);
+    ok('and it leaves the saved targets alone while it works', await p.evaluate(() => { const V = window.__vv; const before = JSON.stringify(V.S.focus); V.lfVolWeek({ Chest: 3, Back: 3 }); return JSON.stringify(V.S.focus) === before; }));
+    /* the screen: statuses are drawn from all that, live */
+    const o2 = await open({ prog: 'ul', xp: 'adv', zn: 1, focus: Object.keys(SCREEN).map((m) => ({ m, lo: SCREEN[m], hi: SCREEN[m], p: 0 })) });
     const q = o2.page;
     await q.click('.lf-bar [data-v="home"]'); await settle(q); await q.click('#lfTgEdit'); await settle(q);
-    const say0 = await q.textContent('#lfVolSay'), notes0 = await q.locator('#lfZnRows .lf-vnt').count();
-    await q.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)); const i = r.querySelector('input'); i.value = 24; i.dispatchEvent(new Event('input', { bubbles: true })); }); await q.waitForTimeout(200);
-    const say1 = await q.textContent('#lfVolSay'), chestNote = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('.lf-vn').textContent);
-    ok('moving a target recalculates at once: the summary changes, and that muscle shows one short red line', say1 !== say0 && /Quite a lot of volume/.test(chestNote) && chestNote.length < 60, [say0, say1, chestNote]);
-    ok('and it is only a warning: the figure is the one you set, and nothing is saved', await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent) === '24' && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 16);
-    ok('moving a slider makes the targets Custom on its own: a small tag, no extra step', await q.isVisible('#lfZnCus') && /Custom/.test(await q.textContent('#lfZnCus')));
+    const rows = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].map((r) => ({ m: r.querySelector('.lf-zr-l span').textContent, s: r.dataset.status, r: r.dataset.range, t: r.querySelector('.lf-vnt').textContent })));
+    ok('on the actual screen the muscles show different statuses, each from its own range', new Set(rows.map((x) => x.s)).size >= 3 && new Set(rows.map((x) => x.t)).size >= 3 && rows.every((x) => x.t && x.r), rows.map((x) => x.m + ' ' + x.s + ' ' + x.r));
+    ok('and each shows one short line, never a paragraph', rows.every((x) => x.t.length < 50) && await q.locator('#lfZnRows .lf-vnt').count() === rows.length);
+    const move = async (m, v) => q.evaluate(([m, v]) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); const i = r.querySelector('input'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); }, [m, v]);
+    const rowOf = (m) => q.evaluate((m) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); return { s: r.dataset.status, t: r.querySelector('.lf-vnt').textContent, zone: r.querySelector('.zo').style.width, eff: r.dataset.eff }; }, m);
+    const sumBefore = await q.textContent('#lfVolSay'), cb = await rowOf('Chest'), hb = await rowOf('Hamstrings');
+    await move('Chest', 10); await q.waitForTimeout(150);
+    const ca = await rowOf('Chest'), ha = await rowOf('Hamstrings');
+    ok('moving a slider updates that muscle at once: its status, its text and the programme under it', ca.s !== cb.s && ca.t !== cb.t && ca.s === 'below' && ca.eff !== cb.eff, [cb, ca]);
+    ok('and the overall summary changes with it, without saving anything', (await q.textContent('#lfVolSay')) !== sumBefore && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 19);
+    ok('muscles that were not touched keep their own assessment', ha.s === hb.s && ha.t === hb.t);
+    await q.click('#lfZnSeg button >> nth=2'); await q.waitForTimeout(200);
+    const pr = await rowOf('Chest');
+    ok('changing the mode re-judges every muscle: Push has its own ranges', pr.zone !== ca.zone || pr.s !== ca.s);
+    await q.locator('#lfZnRows .lf-vnt').first().click(); await q.waitForTimeout(150);
+    ok('a detailed explanation is behind a tap, and only then: range, direct, indirect and effective', await q.locator('#lfZnRows .lf-vnd').count() === 1 && /Range \d+.\d+\. The exercises give it .* effective\./.test(await q.textContent('#lfZnRows .lf-vnd')));
+    await q.locator('#lfZnRows .lf-vnt').first().click(); await q.waitForTimeout(150);
+    ok('and a second tap puts it away', await q.locator('#lfZnRows .lf-vnd').count() === 0);
+    ok('a preset alone is not Custom', await q.isHidden('#lfZnCus'));
+    await move('Chest', 12); await q.waitForTimeout(150);
+    ok('moving a slider makes the targets Custom on its own: a small tag, no extra step', await q.isVisible('#lfZnCus'));
     await q.click('#lfZnBack'); await q.waitForTimeout(200);
-    ok('Back to the suggestion restores the preset and the Custom tag goes', await q.isHidden('#lfZnCus') && await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent) !== '24');
-    await q.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)); const i = r.querySelector('input'); i.value = 24; i.dispatchEvent(new Event('input', { bubbles: true })); }); await q.waitForTimeout(150);
+    ok('Back to the suggestion restores the preset and the Custom tag goes', await q.isHidden('#lfZnCus'));
     await q.click('#lfZnSeg button >> nth=1'); await q.waitForTimeout(150);
-    ok('pressing a preset again regenerates it and clears Custom', await q.isHidden('#lfZnCus'));
-    await q.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)); const i = r.querySelector('input'); i.value = 24; i.dispatchEvent(new Event('input', { bubbles: true })); }); await q.waitForTimeout(150);
+    ok('there is no Optimise button: the modes are the only options', await q.evaluate(() => !/Optimise for me/.test(document.body.innerHTML)));
+    await move('Chest', 24); await q.waitForTimeout(150);
     await q.click('#lfZnSave'); await settle(q);
-    ok('Save writes what the sheet holds', await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) !== 16);
-    ok('saved targets that are your own are remembered as Custom, and reopening the sheet still says so, with your figure kept', await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).zc === 1) && await (async () => { await q.click('#lfTgEdit'); await settle(q); const v = await q.isVisible('#lfZnCus'); const ch = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent); await q.keyboard.press('Escape'); await settle(q); return v && ch === '24'; })());
+    ok('Save writes what the sheet holds, remembered as Custom, and reopening still says so with your figure', await q.evaluate(() => { const o = JSON.parse(localStorage.getItem('lift.v1')); return o.zc === 1 && o.focus.filter((f) => f.m === 'Chest')[0].lo === 24; }) && await (async () => { await q.click('#lfTgEdit'); await settle(q); const v = await q.isVisible('#lfZnCus'); const ch = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent); await q.keyboard.press('Escape'); await settle(q); return v && ch === '24'; })());
     await o2.c.close();
     await c.close();
   }
