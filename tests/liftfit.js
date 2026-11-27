@@ -391,9 +391,9 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const mkT = (h, mi, n) => Array.from({ length: n }, (_, i) => ({ id: 't' + h + i, d: '2026-10-' + String(2 + i * 3).padStart(2, '0'), s: new Date(2026, 9, 2 + i * 3, h, mi).getTime(), e: new Date(2026, 9, 2 + i * 3, h, mi + 50).getTime(), n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8, ok: true }] }] }));
     const read = async (wo) => { const o = await open({ goal: 3, wo }, '2026-11-01T10:00:00'); await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {}); const t = await o.page.evaluate(() => (document.querySelector('#lfMonthSum .lf-mw-sr') || {}).textContent || ''); await o.c.close(); return t; };
     const early = await read(mkT(4, 50, 6)), owl = await read(mkT(19, 35, 6)), aft = await read(mkT(14, 10, 6)), few = await read(mkT(7, 0, 2));
-    ok('an early riser is told so, with the time most sessions started at', /Early bird: 6 of 6 sessions before 9 am, most around 0?4:50/.test(early), early.slice(0, 300));
-    ok('a night owl is told so', /Night owl: 6 of 6 sessions after 5 pm, most around (7|19):35/.test(owl), owl.slice(0, 300));
-    ok('and so is an afternoon trainer', /Afternoon: 6 of 6 sessions between noon and 5 pm, most around (2|14):10/.test(aft), aft.slice(0, 300));
+    ok('an early riser is told so, with the time most sessions started at', /Early bird: most sessions started around 0?4:50\. You loved your sunrises\./.test(early), early.slice(0, 300));
+    ok('a night owl is told so', /Night owl: most sessions started around (7|19):35\. You trained when the day was done\./.test(owl), owl.slice(0, 300));
+    ok('and so is an afternoon trainer', /Afternoon: most sessions started around (2|14):10\. You took the heart of the day\./.test(aft), aft.slice(0, 300));
     ok('two sessions are not enough to say anything about when you train', !/Early bird|Night owl|Afternoon|Late morning/.test(few), few.slice(0, 200));
   }
   {

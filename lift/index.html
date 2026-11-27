@@ -6763,13 +6763,13 @@ function lfWrapData(m) {
   var cdl = Object.keys(cdk).sort(function (x, y) { return cdk[y] - cdk[x]; }).slice(0, 4).map(function (x) { return [CARDIO_N[x] || x, cdk[x]]; });
   var cardio = cdn >= 4 && cdm >= 180 ? { n: cdn, m: cdm, k: cdl } : null;
   /* WHEN IN THE DAY YOU TRAIN: the part of the day most of the month's sessions started in, and the usual time inside it. Only for sessions with a start time, and only with three or more of them, because a clock time out of one session is a fact about that session. */
-  var TM = [['Early bird', 'before 9 am', 0, 540], ['Late morning', 'between 9 am and noon', 540, 720], ['Afternoon', 'between noon and 5 pm', 720, 1020], ['Night owl', 'after 5 pm', 1020, 1441]], tmv = [], tmb = [0, 0, 0, 0];
+  var TM = [['Early bird', 'You loved your sunrises.', 0, 540], ['Late morning', 'You made the most of your mornings.', 540, 720], ['Afternoon', 'You took the heart of the day.', 720, 1020], ['Night owl', 'You trained when the day was done.', 1020, 1441]], tmv = [], tmb = [0, 0, 0, 0];
   ws.forEach(function (x) { if (x.s > 1e11) { var dt = new Date(x.s), mn = dt.getHours() * 60 + dt.getMinutes(); tmv.push(mn); TM.forEach(function (q, j) { if (mn >= q[2] && mn < q[3]) tmb[j]++; }); } });
   var tm = null;
   if (tmv.length >= 3) {
     var tj = 0; tmb.forEach(function (c0, j) { if (c0 > tmb[tj]) tj = j; });
     var inb = tmv.filter(function (mn) { return mn >= TM[tj][2] && mn < TM[tj][3]; }).sort(function (x, y) { return x - y; }), med = inb[Math.floor(inb.length / 2)], r5 = Math.round(med / 5) * 5, dd = new Date(2000, 0, 1, Math.floor(r5 / 60) % 24, r5 % 60);
-    tm = { name: TM[tj][0], when: TM[tj][1], n: tmb[tj], of: tmv.length, at: dd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) };
+    tm = { name: TM[tj][0], note: TM[tj][1], at: dd.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) };
   }
   var w = { tm: tm, d: d, cardio: cardio, name: MON[m.getMonth()], year: m.getFullYear(), nDays: d.l.getDate(), off: (d.f.getDay() + 6) % 7, days: dys, trained: Object.keys(dys).length, avg: n ? tot / n : 0, tot: tot, lng: lng, up: up, mu: mu, heavy: heavy };
   var plan = [{ k: 'cal', dur: 6200 }];
@@ -6820,12 +6820,12 @@ function lfWrapDraw(w, ms, cv, calm) {
     X(ns, 90, 560, 250, 800, acc); X('of ' + tot + ' days', 90 + nw + 30, 560, 64, 700, 'rgba(255,255,255,.8)');
   } else if (k === 'tm') {
     X('When you train', 90, 330, 60, 700, WHITE);
-    var tl = wrapT(w.tm.name, 200, 800, 900).slice(0, 2); tl.forEach(function (q, j) { X(q, 90, 560 + j * 210, 200, 800, acc, fade(200)); });
+    var tl = wrapT(w.tm.name, 200, 800, 900).slice(0, 2); tl.forEach(function (q, j) { X(q, 90, 560 + j * 210, 200, 800, WHITE, fade(200)); });
     var ty = 560 + tl.length * 210 + 120;
     X('Most of your sessions started around', 90, ty, 50, 700, DIM, fade(900));
     var tmain = w.tm.at.replace(/\s*[AaPp]\.?\s?[Mm]\.?$/, ''), tmer = w.tm.at.slice(tmain.length).trim(); c.font = F(230, 800); var tw0 = c.measureText(tmain).width;
-    X(tmain, 90, ty + 250, 230, 800, WHITE, fade(1200)); if (tmer) X(tmer.toLowerCase(), 90 + tw0 + 24, ty + 250, 90, 700, 'rgba(255,255,255,.8)', fade(1200));
-    X(w.tm.n + ' of ' + w.tm.of + ' sessions ' + w.tm.when, 90, ty + 400, 50, 700, DIM, fade(1800));
+    X(tmain, 90, ty + 250, 230, 800, acc, fade(1200)); if (tmer) X(tmer.toLowerCase(), 90 + tw0 + 24, ty + 250, 90, 700, acc, fade(1200));
+    wrapT(w.tm.note, 54, 700, 900).slice(0, 2).forEach(function (q, j) { X(q, 90, ty + 400 + j * 70, 54, 700, 'rgba(255,255,255,.8)', fade(1800)); });
   } else if (k === 'time') {
     X('Your average session', 90, 330, 60, 700, WHITE);
     var am = cu(300, 1500, Math.round(w.avg)), as = String(am); c.font = F(400, 800); var aw = c.measureText(as).width;
@@ -6883,7 +6883,7 @@ function lfWrapText(w) {
   var d = w.d, st = d.st, out = [w.name + ' wrapped', st.wo + (st.wo === 1 ? ' session' : ' sessions') + ' on ' + w.trained + ' of ' + w.nDays + ' days'];
   var nMet = d.weeks.filter(function (q) { return q.met; }).length; if (S.goal > 0 && d.weeks.length) out.push(nMet + ' of ' + d.weeks.length + ' weeks on goal');
   if (d.best) out.push('Best week: ' + d.best.m.getDate() + ' ' + MON[d.best.m.getMonth()].slice(0, 3) + ', ' + fmtBig(toDisp(d.best.vol)) + ' ' + S.unit);
-  if (w.tm) out.push(w.tm.name + ': ' + w.tm.n + ' of ' + w.tm.of + ' sessions ' + w.tm.when + ', most around ' + w.tm.at);
+  if (w.tm) out.push(w.tm.name + ': most sessions started around ' + w.tm.at + '. ' + w.tm.note);
   if (w.avg) out.push('Average session ' + Math.round(w.avg) + ' minutes');
   if (w.up.length) out.push('Up most on ' + w.up[0].n + ', +' + (Math.round(toDisp(w.up[0].dl) * 10) / 10) + ' ' + S.unit);
   if (w.mu.length) out.push('Most trained: ' + w.mu[0][0] + ', ' + lfSetsN(w.mu[0][1]) + ' sets');
