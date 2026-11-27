@@ -559,7 +559,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('and each shows one short line, never a paragraph', rows.every((x) => x.t.length < 50) && await q.locator('#lfZnRows .lf-vnt').count() === rows.length);
     const move = async (m, v) => q.evaluate(([m, v]) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); const i = r.querySelector('input'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); }, [m, v]);
     const rowOf = (m) => q.evaluate((m) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); return { s: r.dataset.status, t: r.querySelector('.lf-vnt').textContent, zone: r.querySelector('.zo').style.width, eff: r.dataset.eff }; }, m);
-    ok('the regional line is one short line inside the existing volume check, or absent', await q.locator('#lfVolReg .lf-vnt').count() <= 1 && (await q.locator('#lfVolReg').textContent()).length < 110 && await q.locator('#lfZnRows .lf-vnt').count() === rows.length);
+    ok('the regional line is not drawn on the sheet for now: only each muscle\'s own status and the summary', await q.locator('#lfVolReg').count() === 0 && await q.locator('#lfZnRows .lf-vnt').count() === rows.length);
     const sumBefore = await q.textContent('#lfVolSay'), cb = await rowOf('Chest'), hb = await rowOf('Hamstrings');
     await move('Chest', 10); await q.waitForTimeout(150);
     const ca = await rowOf('Chest'), ha = await rowOf('Hamstrings');

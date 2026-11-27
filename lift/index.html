@@ -5390,7 +5390,7 @@ function lfZonesSheet(fresh) {
   var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
   var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
-    + '<span class="lf-flab" style="margin-top:0">How hard<em class="lf-zn-cus" id="lfZnCus" hidden>Custom</em></span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p><div id="lfVolReg"></div></div>' : '') + '<div id="lfZnRows"></div></div>');
+    + '<span class="lf-flab" style="margin-top:0">How hard<em class="lf-zn-cus" id="lfZnCus" hidden>Custom</em></span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p></div>' : '') + '<div id="lfZnRows"></div></div>');
   $('.lf-zn-h b', b).textContent = P.n; $('.lf-zn-h span', b).textContent = P.days.filter(function (r) { return !r.choice; }).length + ' days a week';
   $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(zg()[0]) + '</b> · ' + esc(zx()[0]);
   function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
@@ -5411,16 +5411,7 @@ function lfZonesSheet(fresh) {
       var r = rows[m], pc = function (x) { return Math.min(100, x / 24 * 100); }; r.zone.style.left = pc(a.lo) + '%'; r.zone.style.width = (pc(a.hi) - pc(a.lo)) + '%';
       r.el.dataset.status = a.status; r.el.dataset.range = a.lo + '-' + a.hi; r.el.dataset.eff = a.prog.eff;
     });
-    var reg = $('#lfVolReg', b); if (reg) {
-      reg.textContent = '';
-      var pm = {}; ts.forEach(function (t) { pm[t[0]] = !!t[3]; });
-      var rg = lfRegionNow(vals, prog, zn, pm);
-      if (rg.issue) {
-        var rb = el('<button type="button" class="lf-vnt is-' + rg.c + '" aria-expanded="' + (openD.__reg ? 'true' : 'false') + '"></button>'); rb.textContent = rg.msg; rb.dataset.kind = rg.kind; reg.appendChild(rb);
-        if (openD.__reg) { var rd = el('<p class="lf-vnd"></p>'); rd.textContent = rg.detail; reg.appendChild(rd); }
-        lfSlide(rb, function () { openD.__reg = !openD.__reg; paintVol(); });
-      }
-    }
+    /* THE REGIONAL LINE IS NOT DRAWN FOR NOW: lfRegion still works out the balance across related muscles, but what it said on the sheet (a lower-back line, a redistribution line) was not reliable enough to leave on the screen. It comes back when the read can be trusted. */
     var say = $('#lfVolSay', b); if (!say) return;
     var parts = []; if (n.high) parts.push(n.high + ' high'); if (n.low) parts.push(n.low + ' low');
     say.textContent = parts.length ? 'Volume check: ' + parts.join(', ') + '.' : 'Volume check: all within range.';
