@@ -4970,15 +4970,54 @@ var sessSheet = null, tick = null, lfPopAt = '', lfPbWas = {};
    button that asks, and spent by the start it allows. */
 var lfAgainOk = 0;
 /* THE SETS FOLLOW THE TARGETS. A muscle's weekly target decides how many sets its exercises get in the program: the program is counted per muscle, and where a muscle is over its target the sets come off its exercises, where it is under they go on. A target that is a range leaves a program that already sits inside it alone. Nothing is ever written to the program: it is worked out when a workout starts and when a day is looked at, so putting a target back puts the program back. */
+/* ═══════════ WHAT EACH EXERCISE IS ═══════════
+   The machine behind the targets. Every built-in exercise has a movement pattern, so the fitting can see what a week already covers before it reaches for anything new: whether chest has a flat press, an incline press and a fly, whether hamstrings have a hinge and a curl. The compound flag on each exercise says compound or isolation. An exercise you made yourself is read off its name, and one the name says nothing about is left unclassified rather than guessed at. Nothing here is shown on the targets screen: it decides which exercise a workout is offered, and why. */
+var LF_PAT = {};
+[['hpush', 'bench dbbench mchest decline dips pushup'], ['ipush', 'incdb incmach inclbb smithinc'], ['chiso', 'pecdeck cfly cablecross dbfly lowfly'],
+ ['vpull', 'pullup latpd pullupbw chinup cgpd ngpd wgpd sapd'], ['hpull', 'csrow seatrow sarow bbrow dbrow tbar sealrow mrow'], ['latiso', 'straight pullover cpullover'], ['traps', 'shrug rackpull'],
+ ['vpush', 'mshp ohp dbshp arnold seatshp'], ['latr', 'cablat latraise mlat uprow'], ['front', 'frontr'], ['rear', 'rdfly facepull revpec'],
+ ['curl', 'incurl curl preacher bbcurl'], ['hammer', 'hammer ropeham cabham'],
+ ['pushdown', 'tripush ropepush sapush kickback ropeext'], ['ohext', 'triover ohcable ohdb triext'], ['skull', 'skull ezskull'], ['tpress', 'cgbench dipmach'],
+ ['squat', 'hack squat pendulum frontsq smithsq beltsq gobletsq vsquat heelsmith legpress lunge stepup'], ['kext', 'legext sissy spanish'],
+ ['hinge', 'rdl deadlift sldl dbrdl goodam slrdl'], ['kflex', 'seatcurl lyingcurl stdcurl nordic'],
+ ['hipext', 'hipthrust glutebr cablekb'], ['gsquat', 'bss revlunge elevlunge cablestep'], ['abd', 'abduct cableabd'], ['add', 'adduct copen'],
+ ['gastroc', 'calfstand calf smithcalf donkey'], ['soleus', 'calfseat'], ['dorsi', 'tibraise'],
+ ['flex', 'cablecrunch hlr hkr'], ['antiext', 'abwheel deadbug'], ['antirot', 'farmer'], ['erect', 'backext revhyper']].forEach(function (r) { r[1].split(' ').forEach(function (id) { LF_PAT[id] = r[0]; }); });
+var LF_PAT_RX = [['chiso', /fly|crossover|pec deck/i], ['ipush', /incline/i], ['hpush', /bench|chest press|push-?up|dip/i], ['vpull', /pull ?down|pull-?up|chin/i], ['hpull', /\brow/i], ['latr', /lateral/i], ['rear', /rear|face ?pull|reverse pec/i], ['vpush', /shoulder press|overhead press|arnold|military/i],
+  ['hammer', /hammer/i], ['curl', /curl/i], ['ohext', /overhead.*ext/i], ['pushdown', /pushdown|kickback/i], ['skull', /skull/i], ['kext', /leg ext/i], ['kflex', /leg curl|nordic/i], ['hinge', /deadlift|rdl|good ?morning|hinge/i],
+  ['hipext', /thrust|bridge|kickback/i], ['abd', /abduct/i], ['add', /adduct|copenhagen/i], ['squat', /squat|leg press|lunge|step-?up/i], ['soleus', /seated calf/i], ['gastroc', /calf/i], ['erect', /back ext|hyper/i], ['flex', /crunch|leg raise|knee raise/i]];
+function lfPat(id) { if (LF_PAT[id]) return LF_PAT[id]; var x = exById(id); if (!x) return ''; for (var i = 0; i < LF_PAT_RX.length; i++) if (LF_PAT_RX[i][1].test(x.n)) return LF_PAT_RX[i][0]; return ''; }
+/* the patterns that make up full coverage of a muscle, most basic first */
+var LF_COVER = { Chest: ['hpush', 'ipush', 'chiso'], Back: ['vpull', 'hpull', 'latiso'], Shoulders: ['vpush', 'latr', 'rear'], Biceps: ['curl', 'hammer'], Triceps: ['pushdown', 'ohext', 'skull'], Quads: ['squat', 'kext'], Hamstrings: ['hinge', 'kflex'], Glutes: ['hipext', 'gsquat', 'abd'], Calves: ['gastroc', 'soleus'], Abs: ['flex', 'antiext'], 'Lower back': ['erect'], Legs: ['add'] };
+var LF_PAT_N = { hpush: 'a flat press', ipush: 'an incline press', chiso: 'a chest fly', vpull: 'a pulldown or pull-up', hpull: 'a row', latiso: 'a lat isolation', traps: 'trap work', vpush: 'an overhead press', latr: 'a lateral raise', front: 'a front raise', rear: 'rear-delt work', curl: 'a curl', hammer: 'a hammer curl', pushdown: 'a pushdown', ohext: 'an overhead extension', skull: 'a skull crusher', tpress: 'a close-grip press', squat: 'a squat or press', kext: 'a leg extension', hinge: 'a hip hinge', kflex: 'a leg curl', hipext: 'a hip thrust or bridge', gsquat: 'a single-leg squat', abd: 'abduction', add: 'adduction', gastroc: 'a standing calf raise', soleus: 'a seated calf raise', dorsi: 'a tibialis raise', flex: 'a crunch or leg raise', antiext: 'an ab wheel or dead bug', antirot: 'a carry', erect: 'a back extension' };
+var LF_ISO_P = { chiso: 1, latiso: 1, latr: 1, front: 1, rear: 1, curl: 1, hammer: 1, pushdown: 1, ohext: 1, skull: 1, kext: 1, kflex: 1, abd: 1, add: 1, gastroc: 1, soleus: 1, dorsi: 1, flex: 1, antiext: 1, erect: 1, traps: 1 };
+/* a beginner is offered the simpler version of a pattern first: a machine or a cable before a barbell */
+var LF_HARD = /barbell|deadlift|good morning|front squat|nordic|seal row|t-bar|weighted pull|sissy|pendulum|rack pull/i;
+/* WHICH EXERCISE A MUSCLE IS OFFERED, chosen from the whole week rather than the day. It looks at every exercise in the program for that muscle and its pattern, then:
+   a pattern the muscle has no exercise for at all comes first, and if the muscle already has its compound work the missing ISOLATION comes before another compound (bench and incline already there, chest short: a fly, not a third press);
+   with every pattern covered, it takes the one least covered, and never one already done twice in the week, because a third flat press adds overlap rather than anything new;
+   inside the pattern, what you have done before comes first, and a beginner gets the simpler version.
+   It returns nothing rather than a duplicate, and nothing in Maintain, where extra exercises are exactly what that mode avoids. */
+function lfFitPick(m, dayEx, weekEx, why) {
+  if (S.zn === 0) return '';
+  var cov = LF_COVER[m]; if (!cov) return '';
+  var cnt = {}, hasComp = false;
+  weekEx.forEach(function (id) { var x = exById(id); if (!x || x.m !== m) return; var p = lfPat(id); if (p) cnt[p] = (cnt[p] || 0) + 1; if (x.c) hasComp = true; });
+  var miss = cov.filter(function (p) { return !cnt[p]; });
+  if (miss.length) miss.sort(function (a, b) { var ia = LF_ISO_P[a] ? 1 : 0, ib = LF_ISO_P[b] ? 1 : 0; return hasComp ? ib - ia || cov.indexOf(a) - cov.indexOf(b) : ia - ib || cov.indexOf(a) - cov.indexOf(b); });
+  var order = miss.length ? miss : cov.filter(function (p) { return (cnt[p] || 0) < 2; }).sort(function (a, b) { return (cnt[a] || 0) - (cnt[b] || 0); });
+  var seen = {}; S.wo.forEach(function (w) { w.x.forEach(function (e) { if (e.sets && e.sets.length) seen[e.id] = (seen[e.id] || 0) + 1; }); });
+  for (var i = 0; i < order.length; i++) {
+    var p = order[i], c = EXERCISES.concat(S.ex || []).filter(function (x) { return x.m === m && lfPat(x.id) === p && dayEx.indexOf(x.id) < 0 && weekEx.indexOf(x.id) < 0; });
+    if (!c.length) continue;
+    c.sort(function (a, b) { return (seen[b.id] || 0) - (seen[a.id] || 0) || (S.xp === 'new' ? (LF_HARD.test(a.n) ? 1 : 0) - (LF_HARD.test(b.n) ? 1 : 0) : 0); });
+    if (why) { why.p = p; why.miss = !!miss.length; why.iso = !!LF_ISO_P[p]; why.comp = hasComp; }
+    return c[0].id;
+  }
+  return '';
+}
 var LF_FITCAP = 6, LF_FITEXTRA = 4;
 function lfFitOn() { return S.fit !== false; }
-function lfFitExtra(m, have) {
-  var seen = {}, best = '', bn = 0;
-  S.wo.forEach(function (w) { w.x.forEach(function (e) { var x = exById(e.id); if (x && x.m === m && have.indexOf(e.id) < 0 && e.sets && e.sets.length) { seen[e.id] = (seen[e.id] || 0) + 1; if (seen[e.id] > bn) { bn = seen[e.id]; best = e.id; } } }); });
-  if (best) return best;
-  var a = EXERCISES.filter(function (x) { return x.m === m && have.indexOf(x.id) < 0; });
-  return a.length ? a[0].id : '';
-}
 /* WHAT YOU KEPT: a recommended exercise you chose to keep joins that day for good, like any other exercise in it. */
 function lfWithKeep(d) {
   var ks = S.keep && S.keep[d.id]; if (!ks || !ks.length || d.choice) return d;
@@ -4992,9 +5031,12 @@ function lfFitMap() {
   var P = lfProg(), rows = {}, tgt = {}, out = {}, ex = {};
   S.focus.forEach(function (f) { tgt[f.m] = f; });
   P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0], pin: !!(d.pin && d.pin[id]) }); }); });
+  /* THE WHOLE WEEK, NOT THE DAY: a target is effective sets, the way the bars count them, so the half a row gives the biceps or a press gives the triceps is already part of what the muscle gets, wherever in the week it happens. Only what is still missing is asked of the muscle's own exercises; a muscle that already has enough is left alone. */
+  var indW = {}, weekEx = [];
+  P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { weekEx.push(id); var g = d.tg && d.tg[id], h = EX_HALF[id], x = exById(id); if (!g || g[3] === 'rounds' || !(g[0] > 0) || !h || !x || h === x.m) return; indW[h] = (indW[h] || 0) + g[0]; }); });
   Object.keys(rows).forEach(function (m) {
     var f = tgt[m]; if (!f || !(f.lo >= 0)) return;
-    var tot = rows[m].reduce(function (a, r) { return a + r.n; }, 0), want = tot < f.lo ? f.lo : tot > f.hi ? f.hi : tot;
+    var half = (indW[m] || 0) / 2, tot = rows[m].reduce(function (a, r) { return a + r.n; }, 0), eff = tot + half, wantE = eff < f.lo ? f.lo : eff > f.hi ? f.hi : eff, want = Math.max(0, Math.round(wantE - half));
     if (want === tot || !tot) return;
     /* an exercise you kept in the program stays as you kept it; the others move round it */
     var pinS = 0, freeS = 0; rows[m].forEach(function (r) { if (r.pin) pinS += r.n; else freeS += r.n; });
@@ -5013,7 +5055,14 @@ function lfFitMap() {
     Object.keys(spill).forEach(function (d) { if (spill[d] < 2) { Object.keys(out[d] || {}).some(function (id) { var r = out[d][id]; if (r.m === m && r.n === LF_FITCAP) { r.n += spill[d]; return true; } }); delete spill[d]; } });
     /* what a day's exercises cannot hold becomes one more exercise for that muscle, at the end of the day that already trains it most */
     var day = '', most = 0; Object.keys(spill).forEach(function (d) { if (spill[d] > most) { most = spill[d]; day = d; } });
-    if (day) { var dd = P.days.filter(function (x) { return x.id === day; })[0], id = dd ? lfFitExtra(m, lfWithKeep(dd).ex) : ''; if (id) (ex[day] = ex[day] || []).push({ id: id, n: Math.min(LF_FITEXTRA, most), m: m }); }
+    /* the sets that are left go to an exercise chosen from the week's coverage; in Push a priority muscle can take a second one for the rest, in a different pattern again */
+    if (day) {
+      var dd = P.days.filter(function (x) { return x.id === day; })[0], dayEx = dd ? lfWithKeep(dd).ex.slice() : [], left = most, room = S.zn === 2 && f.p ? 2 : 1, wk = weekEx.slice();
+      while (left >= 2 && room-- > 0) {
+        var why = {}, id = lfFitPick(m, dayEx, wk, why); if (!id) break;
+        var n = Math.min(LF_FITEXTRA, left); (ex[day] = ex[day] || []).push({ id: id, n: n, m: m, why: why }); dayEx.push(id); wk.push(id); left -= n;
+      }
+    }
   });
   return { days: out, extra: ex };
 }
@@ -5031,7 +5080,7 @@ function lfFit(rt) {
     if (r.n <= 0) { o.ex = o.ex.filter(function (q) { return q !== id; }); delete o.tg[id]; o.drops.push({ id: id, was: r.was, m: r.m }); return; }
     o.tg[id] = [r.n].concat(g.slice(1)); if (r.n !== r.was) o.fit[id] = { was: r.was, n: r.n, m: r.m };
   });
-  (xs || []).forEach(function (x) { if (o.ex.indexOf(x.id) >= 0) return; o.ex.push(x.id); o.tg[x.id] = [x.n, 10, 15]; o.fit[x.id] = { was: 0, n: x.n, m: x.m, extra: 1 }; });
+  (xs || []).forEach(function (x) { if (o.ex.indexOf(x.id) >= 0) return; o.ex.push(x.id); o.tg[x.id] = [x.n, 10, 15]; o.fit[x.id] = { was: 0, n: x.n, m: x.m, extra: 1, why: x.why || null }; });
   return o;
 }
 /* AN EXERCISE THE TARGETS ADDED is recommended, never imposed: it can be swapped for another, or kept so it is part of this day from now on. */
@@ -5054,7 +5103,7 @@ function lfRecWhy(e) {
   S.focus.forEach(function (q) { if (q.m === e.fit.m) f = q; });
   var tg = f ? (f.lo === f.hi ? f.lo : f.lo + '\u2013' + f.hi) + ' sets a week' : 'its weekly target';
   var s = function (n) { return n + (n === 1 ? ' set' : ' sets'); };
-  if (e.fit.extra) return 'Your ' + m + ' target is ' + tg + ', more than this day\'s exercises can hold. This adds ' + s(e.fit.n) + '.';
+  if (e.fit.extra) { var w = e.fit.why, pn = w && LF_PAT_N[w.p]; return 'Your ' + m + ' target is ' + tg + ', more than your exercises can hold. ' + (pn ? (w.miss ? (w.iso && w.comp ? 'Your week has ' + m + ' compound work but no ' + pn.replace(/^an? /, '') + ', so this adds ' + pn + '.' : 'Your week has no ' + pn.replace(/^an? /, '') + ' for ' + m + ', so this adds one.') : 'Every pattern is covered, so this adds ' + pn + ' without repeating what is there.') + ' ' : '') + s(e.fit.n) + '.'; }
   return 'Your ' + m + ' target is ' + tg + ', so this goes from ' + s(e.fit.was) + ' to ' + e.fit.n + '.';
 }
 function lfRecEl(e, swap) {

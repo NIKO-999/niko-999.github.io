@@ -23,7 +23,8 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 1, isM
 const freeze = (at) => `(() => { const F = new Date('${at}').getTime(); const R = Date; window.Date = class extends R { constructor(...a) { super(...(a.length ? a : [F])); } static now() { return F; } }; })();`;
 const focus = (rows) => rows.map((r) => ({ m: r[0], lo: r[1], hi: r[2] === undefined ? r[1] : r[2], p: 0 }));
 /* the program's own: every figure the day shows with the switch off */
-const BASE_TG = [['Quads', 16], ['Hamstrings', 14], ['Calves', 15], ['Glutes', 6], ['Chest', 16], ['Back', 16], ['Shoulders', 16], ['Triceps', 10], ['Biceps', 10], ['Abs', 11]];
+/* the program's own, in EFFECTIVE sets, the way the bars count them: each muscle's direct sets plus half of what other exercises give it (presses for triceps, rows for biceps, squats for glutes) */
+const BASE_TG = [['Quads', 17], ['Hamstrings', 16], ['Calves', 15], ['Glutes', 11], ['Chest', 16], ['Back', 16], ['Shoulders', 16], ['Triceps', 14], ['Biceps', 17], ['Abs', 11]];
 /* which exercises of the seeded program are which muscle, by the names the days print */
 const HAM = ['Romanian deadlift', 'Seated leg curls', 'Lying leg curls'];
 const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench press', 'Pec deck'];
@@ -75,7 +76,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
 
   /* ── LEFT ALONE: a target the program already meets changes nothing ── */
   {
-    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Hamstrings' ? ['Hamstrings', 14] : r))) });
+    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Hamstrings' ? ['Hamstrings', 16] : r))) });
     const ds = await days(o.page);
     ok('a target the program already meets changes nothing: no notes and every row as written', notes(ds).length === 0 && JSON.stringify(rowsOf(ds).map((r) => r.sets)) === JSON.stringify(rowsOf(base).map((r) => r.sets)), notes(ds));
     await o.c.close();
@@ -91,7 +92,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
   {
     const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Hamstrings' ? ['Hamstrings', 7] : r))) });
     const ds = await days(o.page), s = sumOf(ds, HAM), n = notes(ds).filter((r) => HAM.indexOf(r.n) >= 0);
-    ok('lowering hamstrings to 7 takes the week down towards it', s < baseHam && s >= 7, [baseHam, s]);
+    ok('lowering hamstrings to 7 takes the week down towards it, counting the half that hip thrusts already give them', s < baseHam && s >= 5, [baseHam, s]);
     ok('and says on each row that moved what it moved from and why', n.length >= 2 && n.every((r) => /instead of \d+, your hamstrings target/.test(r.fit)), n);
     ok('nothing else moved: the chest rows are as written', sumOf(ds, CHEST) === baseChest, sumOf(ds, CHEST));
     ok('and no exercise is left with one set', rowsOf(ds).every((r) => r.sets !== 1), rowsOf(ds).filter((r) => r.sets === 1));
@@ -107,7 +108,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
   {
-    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Glutes' ? ['Glutes', 14] : r))) });
+    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Glutes' ? ['Glutes', 20] : r))) });
     const ds = await days(o.page), add = notes(ds).filter((r) => /added for your glutes target/.test(r.fit));
     ok('pushing glutes past what a day holds adds another exercise for them, and says so', add.length === 1, notes(ds));
     ok('which is a real exercise with sets of its own', add.length === 1 && add[0].sets >= 2 && add[0].sets <= 4, add);
@@ -179,7 +180,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
 
   /* ── ADDED EXERCISES ARE RECOMMENDED TOO, AND A KEEP ADDS THEM ── */
   {
-    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Glutes' ? ['Glutes', 14] : r))) });
+    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Glutes' ? ['Glutes', 20] : r))) });
     const p = o.page;
     await p.click('.lf-bar [data-v="lib"]'); await settle(p);
     await p.click('text=Your split'); await settle(p);
@@ -539,6 +540,49 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('putting one away shuts just that one', a1.filter((x) => !x.open).map((x) => x.k).join() === 'vol' && a1.filter((x) => x.open).length === a0.length - 1, a1.filter((x) => !x.open));
     ok('and it stays put away across a reload, while the rest are still open', await (async () => { await p.reload(); await p.waitForTimeout(700); await p.click('.lf-bar [data-v="you"]'); await settle(p); await p.click('#lfBadges'); await settle(p); const a2 = await st(); return a2.filter((x) => !x.open).map((x) => x.k).join() === 'vol'; })());
     await o.c.close();
+  }
+
+  /* ── THE MACHINE BEHIND THE TARGETS: which exercise a muscle is offered, chosen from the whole week ── */
+  {
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul', xp: 'some' }))}); } catch (e) {} window.__lfNoIntro = 1;`);
+    const p = await c.newPage(); p.on('pageerror', (e) => errors.push(String(e)));
+    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__mm={S:S,lfFitPick:lfFitPick,lfFitMap:lfFitMap,lfPat:lfPat,lfProg:lfProg,lfWithKeep:lfWithKeep,EX_HALF:EX_HALF,exById:exById};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p.goto(`${BASE}/lift/`); await p.waitForTimeout(700);
+    const pick = (m, day, week, o) => p.evaluate(([m, day, week, o]) => { const M = window.__mm; M.S.zn = o.zn === undefined ? 1 : o.zn; M.S.xp = o.xp || 'some'; const w = {}; const id = M.lfFitPick(m, day, week, w); return { id, p: id ? M.lfPat(id) : '', why: w }; }, [m, day, week, o || {}]);
+    /* 1: bench and incline are there, chest is short */
+    const t1 = await pick('Chest', [], ['bench', 'incdb']);
+    ok('with a flat press and an incline press already in the week, chest is offered a fly rather than another press', t1.p === 'chiso' && t1.why.iso && t1.why.comp, t1);
+    /* 7: several presses that overlap */
+    const t7 = await pick('Chest', [], ['bench', 'dbbench', 'mchest', 'incdb']);
+    ok('three flat presses already in the week: what is offered is not a fourth', t7.p !== 'hpush' && t7.id, t7);
+    const full = await pick('Calves', [], ['calfstand', 'calf', 'calfseat', 'smithcalf']);
+    ok('when every pattern is already covered, nothing is offered rather than a duplicate', full.id === '', full);
+    const gap = await pick('Hamstrings', [], ['seatcurl', 'lyingcurl']);
+    ok('a missing pattern is filled first: two leg curls and no hinge gets a hinge', gap.p === 'hinge' && gap.why.miss, gap);
+    /* 5: Maintain */
+    ok('Maintain offers no extra exercise at all', (await pick('Chest', [], ['bench'], { zn: 0 })).id === '');
+    /* 3: experience changes what is offered */
+    const nb = await pick('Chest', ['incdb', 'incmach'], ['bench'], { xp: 'new' }), ex = await pick('Chest', ['incdb', 'incmach'], ['bench'], { xp: 'adv' });
+    ok('a beginner is offered the simpler version of the same pattern, a machine before a barbell', nb.p === 'ipush' && !/barbell/i.test(nb.id + ' ' + nb.p) && nb.id !== ex.id && ex.id === 'inclbb', [nb, ex]);
+    /* 2: the week's indirect work counts */
+    const t2 = await p.evaluate(() => {
+      const M = window.__mm, P = M.lfProg(); let dir = 0, ind = 0;
+      P.days.forEach((d0) => { if (d0.choice) return; const d = M.lfWithKeep(d0); d.ex.forEach((id) => { const g = d.tg && d.tg[id], x = M.exById(id); if (!g || !x) return; if (x.m === 'Biceps') dir += g[0]; else if (M.EX_HALF[id] === 'Biceps') ind += g[0]; }); });
+      M.S.zn = 1;
+      const run = (lo) => { M.S.focus = [{ m: 'Biceps', lo, hi: lo, p: 0 }]; const f = M.lfFitMap(); let n = 0, ch = false; Object.keys(f.days).forEach((k) => Object.keys(f.days[k]).forEach((id) => { const r = f.days[k][id]; if (r.m === 'Biceps') { n += r.n; ch = ch || r.n !== r.was; } })); return { n, ch }; };
+      return { dir, ind, met: run(dir + Math.round(ind / 2)), low: run(dir) };
+    });
+    ok('rows and pulldowns count toward biceps: a target the week meets with them changes nothing', t2.ind > 0 && !t2.met.ch, t2);
+    ok('and a target equal to the direct sets alone is already beaten by the indirect half, so biceps work is trimmed rather than added', t2.low.ch && t2.low.n < t2.dir, t2);
+    /* 6: priority in Push takes a second exercise, Build one */
+    const t6 = await p.evaluate(() => { const M = window.__mm; const run = (zn, pri) => { M.S.zn = zn; M.S.focus = [{ m: 'Glutes', lo: 24, hi: 24, p: pri }]; const f = M.lfFitMap(); return [].concat(...Object.values(f.extra)).filter((x) => x.m === 'Glutes').map((x) => M.lfPat(x.id)); }; return { build: run(1, 1), push: run(2, 1), pushNo: run(2, 0) }; });
+    ok('in Push a priority muscle can be offered a second exercise, in a different pattern; Build and a non-priority get one', t6.push.length === 2 && new Set(t6.push).size === 2 && t6.build.length === 1 && t6.pushNo.length === 1, t6);
+    /* 8: something you add changes what is offered */
+    const t8 = await p.evaluate(() => { const M = window.__mm; M.S.zn = 1; M.S.focus = [{ m: 'Glutes', lo: 24, hi: 24, p: 0 }]; const a = [].concat(...Object.values(M.lfFitMap().extra)).map((x) => x.id); const d = M.lfProg().days.filter((x) => !x.choice)[0]; M.S.keep = { [d.id]: [[a[0], 3]] }; const b = [].concat(...Object.values(M.lfFitMap().extra)).map((x) => x.id); delete M.S.keep; return { a, b }; });
+    ok('an exercise you keep in the program is part of the week straight away: it is not offered again', t8.a.length && t8.b.indexOf(t8.a[0]) < 0, t8);
+    await c.close();
   }
 
   ok('no page errors', errors.length === 0, errors.slice(0, 3));
