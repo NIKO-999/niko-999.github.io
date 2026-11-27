@@ -398,10 +398,10 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
 
-  /* ── THE FIGHT NAMES: sixteen titles, each earned by a challenge of its own, each with its own motion, and a flair that plays with the name and comes with it ── */
+  /* ── THE FIGHT NAMES: fifteen titles, each earned by a challenge of its own, each with its own motion, and a flair that plays with the name and comes with it ── */
   {
-    const ids = ['bxnotorious', 'bxmike', 'bxgolden', 'bxhitman', 'bxiceman', 'bxspider', 'bxeagle', 'bxdiamond', 'bxnatural', 'bxphenom', 'bxpredator', 'bxemperor', 'bxstyle', 'bxhighlight', 'bxdeal', 'bxstone'];
-    const WORDS = ['The Notorious', 'Iron Mike', 'The Golden Boy', 'The Hitman', 'The Iceman', 'The Spider', 'The Eagle', 'The Diamond', 'The Natural', 'The Phenom', 'The Predator', 'The Last Emperor', 'The Last Stylebender', 'The Highlight', 'The Real Deal', 'Hands of Stone'];
+    const ids = ['bxnotorious', 'bxgolden', 'bxhitman', 'bxiceman', 'bxspider', 'bxeagle', 'bxdiamond', 'bxnatural', 'bxphenom', 'bxpredator', 'bxemperor', 'bxstyle', 'bxhighlight', 'bxdeal', 'bxstone'];
+    const WORDS = ['The Notorious', 'The Golden Boy', 'The Hitman', 'The Iceman', 'The Spider', 'The Eagle', 'The Diamond', 'The Natural', 'The Phenom', 'The Predator', 'The Last Emperor', 'The Last Stylebender', 'The Highlight', 'The Real Deal', 'Hands of Stone'];
     const c = await browser.newContext(PHONE);
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
     await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [] }))}); } catch (e) {} window.__lfNoIntro = 1;`);
@@ -426,14 +426,14 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
       out.fc = T.lfRkFc()[0][3].filter((i) => ids.some((d) => 'nf' + d === i)).length;
       return out;
     }, ids);
-    ok('all sixteen fight names move, and no two do it the same way', ids.every((i) => r.ti[i]) && new Set(ids.map((i) => r.ti[i])).size === 16, r.ti);
+    ok('all fifteen fight names move, and no two do it the same way', ids.every((i) => r.ti[i]) && new Set(ids.map((i) => r.ti[i])).size === 15, r.ti);
     ok('every title reads as its name', JSON.stringify(r.words) === JSON.stringify(WORDS.map((w) => w.toLowerCase())), r.words);
-    ok('each comes with a flair that plays with the name, and no two flairs do it the same way', ids.every((i) => r.fl[i]) && new Set(ids.map((i) => r.fl[i])).size === 16 && r.fc === 16, [r.fl, r.fc]);
+    ok('each comes with a flair that plays with the name, and no two flairs do it the same way', ids.every((i) => r.fl[i]) && new Set(ids.map((i) => r.fl[i])).size === 15 && r.fc === 15, [r.fl, r.fc]);
     ok('and every flair is its own drawing: no other flair shares its picture', r.paths.every((n) => n === 1), r.paths);
     const badges = ids.map((i) => r.un[i] && r.un[i][0]);
-    ok('each is earned by a challenge of its own: sixteen different ones', badges.every(Boolean) && new Set(badges).size === 16, badges);
+    ok('each is earned by a challenge of its own: fifteen different ones', badges.every(Boolean) && new Set(badges).size === 15, badges);
     ok('the title and its flair come from the same challenge: locked without it, unlocked with it', ids.every((i) => r.un[i] && r.un[i][1] === r.un[i][2] && r.un[i][3] === false && r.un[i][4] === true && r.un[i][5] === false && r.un[i][6] === true), r.un);
-    ok('they are filed under Challenges', r.col.length === 1 && r.col[0] === 16, r.col);
+    ok('they are filed under Challenges', r.col.length === 1 && r.col[0] === 15, r.col);
     await c.close();
   }
 
