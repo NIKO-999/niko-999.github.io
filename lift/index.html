@@ -480,7 +480,7 @@ svg { display: block; }
 .lf-vol { display: flex; flex-direction: column; gap: 9px; margin-top: 12px; }
 .lf-vr { display: grid; grid-template-columns: 86px minmax(0, 1fr) 64px; align-items: center; gap: 10px; font-size: 12.5px; }
 .lf-vr span { color: var(--dim); }
-.lf-vr:nth-child(-n+3) span { color: var(--ink); font-weight: 600; }
+.lf-vr.is-pri span { color: var(--ink); font-weight: 600; }
 .lf-vsep { height: 1px; background: var(--line); margin: 2px 0; }
 .lf-vr i { display: block; height: 6px; border-radius: 3px; background: var(--card3); overflow: hidden; }
 .lf-vr i b { display: block; height: 100%; background: var(--mark-on); border-radius: 3px; }
@@ -1570,6 +1570,10 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv-h { color: var(--quiet); font-size: 12px; margin-top: 14px; }
 .lf-recd { font-size: 13px; color: var(--dim); margin: 10px 2px 0; }
 button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
+.lf-vr.is-sub span::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); opacity: .55; transition: transform .2s; } .lf-vr.is-open span::after { transform: translateY(0) rotate(225deg); }
+.lf-sub { margin: 0 0 4px 12px; padding: 8px 0 6px 12px; border-left: 2px solid var(--card3); display: grid; gap: 7px; }
+.lf-sb { display: grid; grid-template-columns: 96px minmax(0, 1fr) max-content; align-items: center; gap: 10px; font-size: 12.5px; } .lf-sb span { color: var(--dim); } .lf-sb i { display: block; height: 4px; border-radius: 2px; background: var(--card3); overflow: hidden; } .lf-sb i b { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; } .lf-sb em { font-style: normal; text-align: right; min-width: 60px; color: var(--dim); font-size: 11px; } .lf-sb.is-none span, .lf-sb.is-none em { opacity: .55; }
+.lf-sb-f { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--spent); } .lf-sb-f button { font-size: 12px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px 0; padding: 0 4px; }
 .lf-vr-ed { font-size: 13px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px -4px -12px 0; padding: 0 4px; }
 .fr-p { font-size: 13px; line-height: 1.45; color: var(--dim); margin: 10px 0 0; }
 .fr-pend { color: var(--ink); }
@@ -4641,6 +4645,39 @@ function lfAuxMig() {
     add(m, Math.max(2, Math.min(12, lb || 4)));
   });
 }
+/* THE SMALLER MUSCLES INSIDE A TARGET: press a muscle in the list and it opens into the parts that are doing the work, so you can see that adductors are being trained and which head of the triceps. Nothing here is a target and nothing here changes what the targets count: it reads the same sets the bars read and splits each one by the kind of exercise it is. A set is split on its NAME (an incline press is upper chest, a seated raise is soleus), and where the name says nothing it goes to the main part, so this is an estimate by exercise type, said so on the card. Halves only, like the bars. */
+var LF_SUB = {
+  Chest: { k: ['Upper chest', 'Mid chest', 'Lower chest'], r: [[/incline|low[- ]to[- ]high/i, 0], [/decline|dip|high[- ]to[- ]low/i, 2]], d: 1 },
+  Back: { k: ['Lats', 'Upper back', 'Traps'], r: [[/pull ?down|pull-?up|chin|\blat\b|pullover/i, 0], [/shrug|rack pull|upright/i, 2]], d: 1 },
+  Shoulders: { k: ['Front delts', 'Side delts'], r: [[/lateral|side raise|upright/i, 1], [/front raise/i, 0]], d: -1 },
+  Biceps: { k: ['Biceps', 'Brachialis'], r: [[/hammer|reverse curl|cross[- ]?body|zottman/i, 1]], d: 0 },
+  Triceps: { k: ['Long head', 'Lateral and medial heads'], r: [[/overhead|skull|french|jm press|(?<!push)(?<!pull)extension/i, 0]], d: 1 },
+  Calves: { k: ['Gastrocnemius', 'Soleus'], r: [[/seated/i, 1]], d: 0 },
+  Abs: { k: ['Upper abs', 'Lower abs', 'Obliques'], r: [[/leg raise|reverse crunch|hanging|knee raise|toe/i, 1], [/oblique|side|wood ?chop|twist|pallof|russian|suitcase/i, 2]], d: 0 },
+  Hamstrings: { k: ['Knee flexion', 'Hip hinge'], r: [[/rdl|romanian|deadlift|good ?morning|hip hinge|back extension|hyper/i, 1]], d: 0 },
+  Glutes: { k: ['Glute max', 'Glute med/min', 'Adductors'], r: [[/abduct|side[- ]?lying|clam|lateral band|lateral lunge|fire hydrant/i, 1], [/adductor|sumo|copenhagen|cossack/i, 2]], d: 0 }
+};
+/* the inner thigh is hit by squatting and lunging as well as by its own work: half a set for those, a whole one for the exercises that are about it */
+var LF_ADD_IN = /squat|leg press|lunge|split squat|step-?up|deadlift|hack/i;
+function lfSubIdx(parent, name) {
+  var S0 = LF_SUB[parent]; if (!S0) return -1;
+  for (var i = 0; i < S0.r.length; i++) if (S0.r[i][0].test(name)) return S0.r[i][1];
+  return S0.d;
+}
+function lfSubSets(from, to) {
+  var a = ymd(from), b = ymd(to), out = {};
+  function put(parent, i, n, ind) { var S0 = LF_SUB[parent]; if (!S0 || !n) return; var o = out[parent] = out[parent] || {}, k = S0.k[i < 0 ? 0 : i], c = o[k] = o[k] || { d: 0, i: 0 }; if (ind) c.i += n; else c.d += n; }
+  function add(id, n) {
+    var x = exById(id); if (!x || !n) return;
+    var idx = lfSubIdx(x.m, x.n);
+    if (idx === -1 && LF_SUB[x.m]) { put(x.m, 0, n / 2, false); put(x.m, 1, n / 2, false); } else put(x.m, idx, n, false);
+    var h = EX_HALF[id]; if (h && h !== x.m) { var hi = lfSubIdx(h, x.n); if (hi === -1 && LF_SUB[h]) { put(h, 0, n / 4, true); put(h, 1, n / 4, true); } else put(h, hi, n / 2, true); }
+    if (LF_ADD_IN.test(x.n) && !/adductor|sumo|copenhagen|cossack/i.test(x.n)) put('Glutes', 2, n / 2, true);
+  }
+  S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) w.x.forEach(function (e) { add(e.id, e.sets.length); }); });
+  if (act && ymd(new Date(act.s)) >= a) act.x.forEach(function (e) { add(e.id, e.sets.filter(function (s) { return s.ok; }).length); });
+  return out;
+}
 function lfLegCard() {
   var nBefore = S.focus.length, aBefore = S.aux; lfAuxMig(); if (S.focus.length !== nBefore || aBefore) lfSave();
   var m = monday(today()), got = lfMuscleSets(m, addDays(m, 6));
@@ -4653,10 +4690,29 @@ function lfLegCard() {
   if (!ts.length) $('.lf-vol', c).appendChild(el('<div class="lf-lab">Nothing in focus. Add a muscle under You.</div>'));
   ts.forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<button type="button" class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></button>');
-    row.dataset.m = t[0];
+    row.dataset.m = t[0]; if (i < 3) row.classList.add('is-pri');
     if (t[0] === 'Rear delts' || t[0] === 'Lower back') row.classList.add('is-aux');
     row.setAttribute('aria-label', t[0] + ': ' + lfSetsN(n) + ' of ' + lfRange(t[1], t[2]) + ' sets. Change the target');
-    row.addEventListener('click', function () { lfFocusSheet(t[0]); });
+    var sb = LF_SUB[t[0]], box = null;
+    if (!sb) row.addEventListener('click', function () { lfFocusSheet(t[0]); });
+    else {
+      /* built when it opens and taken away when it shuts, never kept hidden; and the target is still one press away, inside it */
+      row.setAttribute('aria-expanded', 'false'); row.classList.add('is-sub');
+      row.addEventListener('click', function () {
+        if (box) { box.remove(); box = null; row.setAttribute('aria-expanded', 'false'); row.classList.remove('is-open'); return; }
+        var sx = lfSubSets(m, addDays(m, 6))[t[0]] || {}, top = Math.max.apply(null, sb.k.map(function (k) { var c = sx[k]; return c ? c.d + c.i : 0; }).concat([1]));
+        box = el('<div class="lf-sub" role="group"></div>'); box.setAttribute('aria-label', t[0] + ' by part');
+        sb.k.forEach(function (k) {
+          var c = sx[k] || { d: 0, i: 0 }, v = c.d + c.i, r = el('<div class="lf-sb"><span></span><i><b></b></i><em class="lf-num"></em></div>');
+          r.dataset.k = k; $('span', r).textContent = k; $('b', r).style.width = Math.min(100, v / top * 100) + '%';
+          $('em', r).textContent = v ? lfSetsN(v) + (c.i && c.d ? ' (' + lfSetsN(c.i) + ' indirect)' : c.i ? ' indirect' : '') : '0';
+          if (!v) r.classList.add('is-none'); box.appendChild(r);
+        });
+        var ft = el('<div class="lf-sb-f"><span>Split by the kind of exercise</span><button type="button">Edit target</button></div>');
+        $('button', ft).addEventListener('click', function () { lfFocusSheet(t[0]); }); box.appendChild(ft);
+        row.after(box); row.setAttribute('aria-expanded', 'true'); row.classList.add('is-open');
+      });
+    }
     /* The first three are the specialisation, the rest keep progressing. */
     if (i && !t[3] && ts[i - 1][3]) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
     $('span', row).textContent = t[0];

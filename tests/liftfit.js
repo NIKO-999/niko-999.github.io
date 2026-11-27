@@ -437,6 +437,38 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await c.close();
   }
 
+  /* ── THE SMALLER MUSCLES INSIDE A TARGET: press a muscle and it opens into the parts doing the work ── */
+  {
+    const mon = '2026-10-26', d1 = '2026-10-26', d2 = '2026-10-27';
+    const SS = (w, n) => Array.from({ length: n }, () => ({ w, r: 10 }));
+    const wo = [
+      { id: 'a', d: d1, s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Barbell squat', sets: SS(80, 4) }, { id: 'hipthrust', n: 'Hip thrusts', sets: SS(80, 4) }, { id: 'legpress', n: 'Leg press', sets: SS(120, 2) }] },
+      { id: 'b', d: d2, s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: SS(60, 4) }, { id: 'inclbb', n: 'Incline barbell press', sets: SS(50, 3) }, { id: 'dips', n: 'Dips', sets: SS(0, 2) }] },
+    ];
+    const o = await open({ wo });
+    const p = o.page;
+    await p.click('.lf-bar [data-v="home"]'); await settle(p);
+    const rowsOf = (m) => p.evaluate((m) => [...document.querySelectorAll('#lfLegs .lf-vr[data-m="' + m + '"] + .lf-sub .lf-sb')].map((r) => r.dataset.k + '=' + r.querySelector('em').textContent), m);
+    ok('nothing is open until you press a muscle', await p.locator('#lfLegs .lf-sub').count() === 0 && await p.getAttribute('#lfLegs .lf-vr[data-m="Glutes"]', 'aria-expanded') === 'false');
+    await p.click('#lfLegs .lf-vr[data-m="Glutes"]'); await settle(p);
+    const g = await rowsOf('Glutes');
+    ok('Glutes opens into glute max, glute med and min, and adductors', g.length === 3 && /^Glute max=/.test(g[0]) && /^Glute med\/min=/.test(g[1]) && /^Adductors=/.test(g[2]), g);
+    ok('and the adductors show what squatting and pressing give them, as indirect sets', /^Adductors=3 indirect$/.test(g[2]), g);
+    ok('the hip thrusts are glute max, and the glute max figure carries the squats as indirect', /^Glute max=7 \(3 indirect\)$/.test(g[0]), g);
+    ok('it is a button that says it is open', await p.getAttribute('#lfLegs .lf-vr[data-m="Glutes"]', 'aria-expanded') === 'true');
+    await p.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(p);
+    const c = await rowsOf('Chest');
+    ok('Chest splits by the kind of press: incline is upper, flat is mid, dips are lower', JSON.stringify(c) === JSON.stringify(['Upper chest=3', 'Mid chest=4', 'Lower chest=2']), c);
+    ok('both can be open at once, and the bars above are untouched by it', await p.locator('#lfLegs .lf-sub').count() === 2 && /\/ /.test(await p.textContent('#lfLegs .lf-vr[data-m="Chest"] em')));
+    await p.click('#lfLegs .lf-vr[data-m="Glutes"]'); await settle(p);
+    ok('pressing it again takes it away, built and removed rather than hidden', await p.locator('#lfLegs .lf-vr[data-m="Glutes"] + .lf-sub').count() === 0 && await p.locator('#lfLegs .lf-sub').count() === 1 && await p.getAttribute('#lfLegs .lf-vr[data-m="Glutes"]', 'aria-expanded') === 'false');
+    await p.click('#lfLegs .lf-sub .lf-sb-f button'); await settle(p);
+    ok('Edit target inside it opens that muscle\'s target', await p.locator('.lf-sheet').last().locator('#lfFoLo').count() === 1);
+    await p.keyboard.press('Escape'); await settle(p);
+    ok('a muscle with no parts to show still opens its target on a press', await (async () => { await p.click('#lfLegs .lf-vr[data-m="Quads"]'); await settle(p); const n = await p.locator('.lf-sheet').last().locator('#lfFoLo').count(); await p.keyboard.press('Escape'); await settle(p); return n === 1; })());
+    await o.c.close();
+  }
+
   ok('no page errors', errors.length === 0, errors.slice(0, 3));
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

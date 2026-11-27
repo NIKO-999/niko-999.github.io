@@ -865,10 +865,10 @@ const freeze = (at) => `(() => {
     await page.keyboard.press('Escape'); await settle(page);
     /* the weekly targets are edited from the home card itself */
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
-    await page.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(page);
+    await page.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(page); await page.click('#lfLegs .lf-sb-f button'); await settle(page);
     await top(page).locator('#lfFoLo').fill('10'); await top(page).locator('#lfFoHi').fill('12');
     await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
-    ok('a row on Sets this week opens its target and saves it', (await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em')).endsWith('/ 10–12'), await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em'));
+    ok('a row on Sets this week opens into its parts, and Edit target inside it opens its target and saves it', (await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em')).endsWith('/ 10–12'), await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em'));
     await page.click('#lfTgEdit'); await settle(page);
     ok('Edit targets opens Zones, and Priorities and muscles goes on to the list', await page.locator('.lf-sheet #lfZn').count() === 1); await page.click('#lfZnMore'); await settle(page); ok('the list is still there for priorities and adding a muscle', await page.locator('.lf-sheet #lfFocus .lf-li').count() > 0 && await page.locator('#lfFocusAdd').count() === 1); await page.keyboard.press('Escape'); await settle(page);
     await c.close();
