@@ -6820,11 +6820,11 @@ function lfWrapDraw(w, ms, cv, calm) {
     X(ns, 90, 560, 250, 800, acc); X('of ' + tot + ' days', 90 + nw + 30, 560, 64, 700, 'rgba(255,255,255,.8)');
   } else if (k === 'tm') {
     X('When you train', 90, 330, 60, 700, WHITE);
-    var tl = wrapT(w.tm.name, 200, 800, 900).slice(0, 2); tl.forEach(function (q, j) { X(q, 90, 560 + j * 210, 200, 800, WHITE, fade(200)); });
+    var tl = wrapT(w.tm.name, 200, 800, 900).slice(0, 2); tl.forEach(function (q, j) { X(q, 90, 560 + j * 210, 200, 800, acc, fade(200)); });
     var ty = 560 + tl.length * 210 + 120;
     X('Most of your sessions started around', 90, ty, 50, 700, DIM, fade(900));
     var tmain = w.tm.at.replace(/\s*[AaPp]\.?\s?[Mm]\.?$/, ''), tmer = w.tm.at.slice(tmain.length).trim(); c.font = F(230, 800); var tw0 = c.measureText(tmain).width;
-    X(tmain, 90, ty + 250, 230, 800, acc, fade(1200)); if (tmer) X(tmer.toLowerCase(), 90 + tw0 + 24, ty + 250, 90, 700, acc, fade(1200));
+    X(tmain, 90, ty + 250, 230, 800, WHITE, fade(1200)); if (tmer) X(tmer.toLowerCase(), 90 + tw0 + 24, ty + 250, 90, 700, 'rgba(255,255,255,.8)', fade(1200));
     wrapT(w.tm.note, 54, 700, 900).slice(0, 2).forEach(function (q, j) { X(q, 90, ty + 400 + j * 70, 54, 700, 'rgba(255,255,255,.8)', fade(1800)); });
   } else if (k === 'time') {
     X('Your average session', 90, 330, 60, 700, WHITE);
