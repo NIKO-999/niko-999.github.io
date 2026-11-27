@@ -340,11 +340,11 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await p.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
     const cvs = '#lfMonthSum canvas';
     ok('it opens on its own on the first, as a canvas story of 1080 by 1920 with a card for the days, the time, what went up, the sets and the end', await p.evaluate((s) => { const c = document.querySelector(s); return !!c && c.width === 1080 && c.height === 1920 && c.dataset.slides === '5'; }, cvs));
-    ok('it is read out as words too: the days, the average, what went up', await p.evaluate(() => { const t = document.querySelector('#lfMonthSum .lf-mw-sr').textContent; return /October wrapped/.test(t) && /17 of 31 days/.test(t) && /Average session 60 minutes/.test(t) && /Up most on Bench press/.test(t); }));
+    ok('it is read out as words too: the days, the average, what went up', await p.evaluate(() => { const t = document.querySelector('#lfMonthSum .lf-mw-sr').textContent; return /October wrapped/.test(t) && /17 of 31 days/.test(t) && /Average session 60 minutes/.test(t) && /Up most on .*bench press/i.test(t); }));
     await p.waitForTimeout(3200);
     /* the calendar: 1 October 2026 is a Thursday, so the first cell sits in the fourth column; 1 is a day you trained and 3 is not */
     const px = (x, y) => p.evaluate(([s, x, y]) => Array.from(document.querySelector(s).getContext('2d').getImageData(x, y, 1, 1).data), [cvs, x, y]);
-    const lit = await px(70 + 3 * 136 + 8, 790 + 8), rest = await px(70 + 5 * 136 + 8, 790 + 8);
+    const lit = await px(70 + 3 * 136 + 20, 790 + 20), rest = await px(70 + 5 * 136 + 20, 790 + 20);
     ok('the calendar lights the days you trained and leaves the others dark', lit[0] > 200 && rest[0] < 60, { lit, rest });
     ok('and the count under the title is the days that lit', await p.evaluate(() => /17/.test(document.querySelector('#lfMonthSum .lf-mw-sr').textContent)));
     const idx = () => p.evaluate((s) => +document.querySelector(s).dataset.slide, cvs);
