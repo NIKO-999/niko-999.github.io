@@ -5275,8 +5275,8 @@ function lfVolWeek(vals) {
 /* one muscle at a target of v: where it sits in its own range, in a word, a colour and a short sentence; `prog` is what the exercises give it */
 function lfVolAssess(m, v, c) {
   var r = lfVolRange(m, c.zn, !!c.pri), over = v - r.hi, maint = c.zn === 0, st, tx, col;
-  if (v >= 25 || over > 6) { st = 'excess'; col = 'red'; tx = 'Potentially excessive. Consider recovery.'; }
-  else if (v >= 21 || over > 3) { st = 'vhigh'; col = 'red'; tx = 'Very high volume. Consider recovery.'; }
+  if (v >= 25 || over > 6) { st = 'excess'; col = 'red'; tx = 'Potentially excessive. Consider lowering volume.'; }
+  else if (v >= 21 || over > 3) { st = 'vhigh'; col = 'red'; tx = 'Very high volume. Consider lowering volume.'; }
   else if (over > 0) { st = 'high'; col = 'orange'; tx = 'High weekly volume.'; }
   else if (v < r.lo) { st = 'below'; col = 'yellow'; tx = v < 4 ? 'Very low volume.' : maint ? 'Below maintenance volume.' : 'Below recommended volume.'; }
   else { st = 'within'; col = 'green'; tx = maint ? 'Within maintenance range.' : 'Within recommended range.'; }
