@@ -168,7 +168,8 @@ svg { display: block; }
 .lf-zn-bs button { background: none; border: 0; color: var(--log); font-weight: 700; padding: 8px 0 8px 12px; }
 .lf-zn-lg { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; margin: 0 0 4px; }
 .lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
-.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vwhy { font-size: 13px; color: var(--ink); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 6px 0 0; font-size: 12.5px; color: var(--dim); } .lf-vnt.is-caution, .lf-vnt.is-high { color: var(--ink); } .lf-vnt.is-high { font-weight: 600; } .lf-vnt::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--dim); vertical-align: 1px; } .lf-vnt.is-caution::before { background: #f5b942; } .lf-vnt.is-high::before { background: #ff7a7a; } .lf-vnt.is-rec::before { background: var(--mark-on); }
+.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vwhy { font-size: 13px; color: var(--ink); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 6px 0 0; font-size: 12.5px; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; }
+:root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
 .lf-zr-l { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 15px; }
@@ -5216,7 +5217,13 @@ function lfVolAssess(m, v, c) {
   else if (per >= 9 && exp === 1) add('rec', 'sess', 'All your ' + nm + ' work is on one day, around ' + s(per) + ' sets. Spreading it over two days usually recovers better.');
   if (exp >= 4 && eff >= 16) add('caution', 'rec', 'Your ' + nm + ' are trained on ' + exp + ' days with ' + s(eff) + ' effective sets. Check recovery between those days before adding more.');
   var rank = { high: 3, caution: 2, rec: 1, info: 0 }; N.sort(function (a, b) { return rank[b.lv] - rank[a.lv]; });
-  return { m: m, v: v, ind: ind, direct: direct, eff: eff, band: lfVolBand(eff), notes: N, per: per, exposures: exp };
+  /* WHAT IS SHOWN IS ONE SHORT LINE IN ONE COLOUR: red when it is a lot, yellow when it is too little, green when it is right. The rest (the figures, the indirect share, the reasons) stays in the notes for anything that wants them. You can still set any number you like. */
+  var has = function (id) { return N.some(function (x) { return x.id === id; }); }, say;
+  if (has('excess') || has('vhigh') || has('high') || N.some(function (x) { return x.id === 'rec' && x.lv === 'caution'; })) say = { c: 'red', t: 'Quite a lot of volume. Keep an eye on recovery.' };
+  else if (has('sess') && N.some(function (x) { return x.id === 'sess' && x.lv === 'caution'; })) say = { c: 'red', t: 'Lots of sets in one day. Try spreading them.' };
+  else if (has('low') || (c.zn === 0 ? eff < 4 : eff < 7)) say = { c: 'yellow', t: c.zn === 0 ? 'Below what it takes to maintain.' : 'Not enough volume to grow much.' };
+  else say = { c: 'green', t: c.zn === 0 ? 'Enough to hold what you have.' : 'Perfect for growth and progression.' };
+  return { say: say, m: m, v: v, ind: ind, direct: direct, eff: eff, band: lfVolBand(eff), notes: N, per: per, exposures: exp };
 }
 /* THE SUGGESTION: where each muscle should sit given how long you have trained, the mode and which muscles you put first. It credits the indirect work already in the program, and it moves volume towards the priorities rather than adding it everywhere: in Push the others come down to maintenance, in Build they ease a little, in Maintain only the priorities are kept up. Nothing leaves the sheet until you save. */
 function lfVolRec(ts, zn, c) {
@@ -5252,19 +5259,17 @@ function lfZonesSheet(fresh) {
   var vctx = { plan: lfVolPlan(), xp: S.xp, get zn() { return zn; } };
   /* every change to a figure, the mode or the priorities recalculates every muscle, because one muscle's sets are another's indirect work */
   function paintVol() {
-    var n = { high: 0, caution: 0, rec: 0 };
+    var n = { red: 0, yellow: 0, green: 0 };
     ts.forEach(function (t) {
       var m = t[0], a = lfVolAssess(m, val(m), { plan: vctx.plan, xp: S.xp, zn: zn, pri: !!t[3] }), box = $('.lf-vn', rows[m].el);
       box.textContent = '';
-      var top = a.notes.filter(function (x) { return x.lv !== 'info' || a.notes.length === 1; }).slice(0, 2);
-      top.forEach(function (x) { var p = el('<p class="lf-vnt is-' + x.lv + '"></p>'); p.textContent = x.t; box.appendChild(p); });
-      a.notes.forEach(function (x) { if (n[x.lv] !== undefined) n[x.lv]++; });
+      var p = el('<p class="lf-vnt is-' + a.say.c + '"></p>'); p.textContent = a.say.t; box.appendChild(p); n[a.say.c]++;
       rows[m].el.dataset.band = a.band; rows[m].el.dataset.eff = a.eff; rows[m].el.dataset.direct = a.direct;
       $('.lf-zr-l span', rows[m].el).setAttribute('title', a.band + ' · ' + a.eff + ' effective sets, ' + a.direct + ' direct');
     });
     var say = $('#lfVolSay', b); if (!say) return;
-    var parts = []; if (n.high) parts.push(n.high + (n.high === 1 ? ' high-priority warning' : ' high-priority warnings')); if (n.caution) parts.push(n.caution + (n.caution === 1 ? ' caution' : ' cautions')); if (n.rec) parts.push(n.rec + (n.rec === 1 ? ' recommendation' : ' recommendations'));
-    say.textContent = (parts.length ? 'Volume check: ' + parts.join(', ') + '.' : 'Volume check: nothing stands out.') + ' Based on your training, not on how you are recovering.';
+    var parts = []; if (n.red) parts.push(n.red + ' high'); if (n.yellow) parts.push(n.yellow + ' low');
+    say.textContent = parts.length ? 'Volume check: ' + parts.join(', ') + '.' : 'Volume check: all in a good range.';
   }
   function refresh() {
     ts.forEach(function (t) {

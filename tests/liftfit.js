@@ -513,6 +513,10 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const one = await dist({ a: 18 }, 18), three = await dist({ a: 6, b: 6, c: 6 }, 18);
     ok('18 weekly sets in one session is flagged as concentrated, with the figure', one.per === 18 && one.notes.some((n) => n.id === 'sess' && n.lv === 'caution' && /18 quads sets land on one day/.test(n.t)), one.notes);
     ok('the same 18 spread over three days is not', three.per === 6 && !three.notes.some((n) => n.id === 'sess') && three.exposures === 3, three);
+    const sy = async (m, v, o) => (await asses(m, v, o)).say;
+    ok('the line is red when it is a lot, yellow when it is too little, green when it is right', (await sy('Chest', 22, { xp: 'some' })).c === 'red' && (await sy('Chest', 4, { pri: true })).c === 'yellow' && (await sy('Chest', 12)).c === 'green');
+    ok('and it is a short sentence each time: keep an eye on recovery, not enough to grow, perfect for growth', /Quite a lot of volume.*recovery/.test((await sy('Chest', 22)).t) && /Not enough volume/.test((await sy('Chest', 4, { pri: true })).t) && /Perfect for growth and progression/.test((await sy('Chest', 12)).t) && (await sy('Chest', 22)).t.length < 60);
+    ok('Maintain says maintain: enough to hold what you have, never perfect for growth', /hold what you have/.test((await sy('Chest', 6, { zn: 0 })).t) && !/growth/.test((await sy('Chest', 6, { zn: 0 })).t));
     /* 9 and 12: the sheet recalculates as you change a figure, and never saves for you */
     const o2 = await open({ prog: 'ul', xp: 'some', zn: 1, focus: focus(BASE_TG) });
     const q = o2.page;
@@ -520,7 +524,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const say0 = await q.textContent('#lfVolSay'), notes0 = await q.locator('#lfZnRows .lf-vnt').count();
     await q.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)); const i = r.querySelector('input'); i.value = 24; i.dispatchEvent(new Event('input', { bubbles: true })); }); await q.waitForTimeout(200);
     const say1 = await q.textContent('#lfVolSay'), chestNote = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('.lf-vn').textContent);
-    ok('moving a target recalculates at once: the summary and that muscle\'s notes change', say1 !== say0 && /very high|effective sets a week/.test(chestNote), [say0, say1, chestNote]);
+    ok('moving a target recalculates at once: the summary changes, and that muscle shows one short red line', say1 !== say0 && /Quite a lot of volume/.test(chestNote) && chestNote.length < 60, [say0, say1, chestNote]);
     ok('and it is only a warning: the figure is the one you set, and nothing is saved', await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent) === '24' && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 16);
     await q.click('#lfVolOpt'); await q.waitForTimeout(250);
     ok('Optimise for me fills the sheet and says what it did, and still saves nothing until you press Save', /Suggested|already look right/.test(await q.textContent('#lfVolWhy')) && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 16);
