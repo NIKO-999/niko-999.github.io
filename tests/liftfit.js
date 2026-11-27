@@ -445,7 +445,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const SS = (w, n) => Array.from({ length: n }, () => ({ w, r: 10 }));
     const wo = [
       { id: 'a', d: d1, s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Barbell squat', sets: SS(80, 4) }, { id: 'hipthrust', n: 'Hip thrusts', sets: SS(80, 4) }, { id: 'legpress', n: 'Leg press', sets: SS(120, 2) }] },
-      { id: 'b', d: d2, s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: SS(60, 4) }, { id: 'inclbb', n: 'Incline barbell press', sets: SS(50, 3) }, { id: 'dips', n: 'Dips', sets: SS(0, 2) }] },
+      { id: 'b', d: d2, s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: SS(60, 4) }, { id: 'inclbb', n: 'Incline barbell press', sets: SS(50, 3) }, { id: 'dips', n: 'Dips', sets: SS(0, 2) }, { id: 'mshp', n: 'Machine shoulder press', sets: SS(40, 3) }, { id: 'latraise', n: 'Lateral raises', sets: SS(8, 3) }, { id: 'facepull', n: 'Face pulls', sets: SS(20, 3) }] },
     ];
     const o = await open({ wo, xp: 'adv', zn: 1 });
     const p = o.page;
@@ -471,6 +471,15 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const bk = await parts();
     ok('Back shows its lats, upper back and traps, and its lower back with the target it keeps', bk.length === 4 && /^Lats=/.test(bk[0]) && /^Lower back=.*target \d/.test(bk[3]), bk);
     await p.keyboard.press('Escape'); await settle(p);
+    /* shoulders and back, in their parts, with nothing counted twice */
+    const bar = (m) => p.evaluate((m) => parseFloat(document.querySelector('#lfLegs .lf-vr[data-m="' + m + '"] em').textContent), m);
+    ok('a face pull counts once: for Rear delts, not for Shoulders as well', await bar('Rear delts') === 3 && await bar('Shoulders') === 6, [await bar('Rear delts'), await bar('Shoulders')]);
+    await p.click('#lfLegs .lf-vr[data-m="Shoulders"]'); await settle(p); await p.click('#lfMsStats'); await p.waitForTimeout(200);
+    const sh = await parts();
+    ok('Shoulders opens into front delts, side delts and rear delts, and the rear delts are the face pulls only', sh.length === 3 && /^Front delts=/.test(sh[0]) && /^Side delts=/.test(sh[1]) && /^Rear delts=3/.test(sh[2]), sh);
+    ok('the parts add up to the parent: front plus side plus the press is the 6 on the list, with the rear delts held apart', await p.evaluate(() => { const v = (k) => { const r = [...document.querySelectorAll('.lf-ms-parts .lf-sb')].find((x) => x.querySelector('span').textContent === k); return parseFloat(r.querySelector('em').textContent.replace('\u00bd', '.5')) || 0; }; return v('Front delts') + v('Side delts') === 6; }));
+    ok('each part is coloured against its own range', await p.locator('.lf-ms-parts .lf-sb em[class*="is-c-"]').count() === 3);
+    await p.keyboard.press('Escape'); await settle(p);
     await p.click('#lfLegs .lf-vr[data-m="Quads"]'); await settle(p);
     ok('a muscle with no parts to show has no Stats button, just its status and target', await p.locator('#lfMsStats').count() === 0 && await p.locator('#lfMsSay').count() === 1 && await p.locator('#lfFoLo').count() === 1);
     const before = await p.textContent('#lfMsSay');
@@ -485,7 +494,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
     await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul', xp: 'adv', zn: 1 }))}); } catch (e) {} window.__lfNoIntro = 1;`);
     const p = await c.newPage(); p.on('pageerror', (e) => errors.push(String(e)));
-    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolRange:lfVolRange,lfVolWeek:lfVolWeek,lfVolPlan:lfVolPlan,zVal:zVal,zRec:zRec};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolRange:lfVolRange,lfVolWeek:lfVolWeek,lfVolPlan:lfVolPlan,zVal:zVal,LF_REF:LF_REF,zRange:zRange};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
     await p.goto(`${BASE}/lift/`); await p.waitForTimeout(700);
     const asses = (m, v, o) => p.evaluate(([m, v, o]) => { const V = window.__vv; if (o.xp) V.S.xp = o.xp; const prog = V.lfVolWeek(); return V.lfVolAssess(m, v, Object.assign({ zn: 1, pri: false, prog }, o)); }, [m, v, o || {}]);
     const SCREEN = { Quads: 19, Hamstrings: 20, Calves: 20, Glutes: 19, Abs: 20, Chest: 19, Back: 20, Triceps: 19, Biceps: 19, 'Rear delts': 20, 'Lower back': 20 };
@@ -493,20 +502,28 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const st = Object.keys(all).map((m) => all[m].status), tx = Object.keys(all).map((m) => all[m].say.t);
     ok('the eleven targets on your screen do not all get the same message: they are judged one by one', new Set(st).size >= 3 && new Set(tx).size >= 3, Object.keys(all).map((m) => m + ' ' + SCREEN[m] + ' ' + all[m].status));
     ok('each muscle has its own range, and the ranges differ: back takes more than glutes, lower back about half of chest', all.Back.hi > all.Glutes.hi && all['Lower back'].hi < all.Chest.hi && new Set(Object.keys(all).map((m) => all[m].lo + '-' + all[m].hi)).size >= 5, Object.keys(all).map((m) => m + ' ' + all[m].lo + '-' + all[m].hi));
-    ok('the same 20 sets is within range for back, very high for hamstrings and calves, and potentially excessive for lower back', all.Back.status === 'within' && all.Hamstrings.status === 'vhigh' && all.Calves.status === 'vhigh' && all['Lower back'].status === 'excess', ['Back', 'Hamstrings', 'Calves', 'Lower back'].map((m) => m + ' ' + all[m].status));
+    ok('the same 20 sets is high for back and calves, very high for hamstrings, and potentially excessive for lower back: each against its own range', all.Back.status === 'high' && all.Calves.status === 'high' && all.Hamstrings.status === 'vhigh' && all['Lower back'].status === 'excess', ['Back', 'Hamstrings', 'Calves', 'Lower back'].map((m) => m + ' ' + all[m].status));
     ok('19 quads and 19 chest are only high, not very high, because their ranges are higher', all.Quads.status === 'high' && all.Chest.status === 'high' && all.Glutes.status === 'vhigh', [all.Quads.status, all.Chest.status, all.Glutes.status]);
     ok('and there is no generic "perfect for growth" anywhere in the app', !/Perfect for growth/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
     /* the statuses, in order, for one muscle: below, within, high, very high, excessive */
-    const ladder = []; for (const v of [3, 5, 13, 18, 19, 22, 26]) ladder.push((await asses('Chest', v, { xp: 'adv' })).status);
+    const ladder = []; for (const v of [3, 5, 13, 16, 19, 23, 28]) ladder.push((await asses('Chest', v, { xp: 'adv' })).status);
     ok('one muscle walks through the statuses as its target rises: very low and below, within, high, very high, excessive', ladder.join() === 'below,below,within,within,high,vhigh,excess', ladder);
-    ok('a short, different sentence for each', (await asses('Chest', 5, { xp: 'adv' })).say.t === 'Below recommended volume.' && (await asses('Chest', 13, { xp: 'adv' })).say.t === 'Within recommended range.' && (await asses('Chest', 19, { xp: 'adv' })).say.t === 'High weekly volume.' && /Very high volume\. Consider lowering volume/.test((await asses('Chest', 21, { xp: 'adv' })).say.t) && /Potentially excessive\. Consider lowering volume/.test((await asses('Chest', 26, { xp: 'adv' })).say.t) && (await asses('Chest', 3, { xp: 'adv' })).say.t === 'Very low volume.');
+    ok('a short, different sentence for each', (await asses('Chest', 5, { xp: 'adv' })).say.t === 'Below recommended volume.' && (await asses('Chest', 13, { xp: 'adv' })).say.t === 'Within recommended range.' && (await asses('Chest', 19, { xp: 'adv' })).say.t === 'High weekly volume.' && /Very high volume\. Consider lowering volume/.test((await asses('Chest', 23, { xp: 'adv' })).say.t) && /Potentially excessive\. Consider lowering volume/.test((await asses('Chest', 28, { xp: 'adv' })).say.t) && (await asses('Chest', 3, { xp: 'adv' })).say.t === 'Very low volume.');
     /* how long you have trained moves every range */
-    const nb = await asses('Chest', 13, { xp: 'new' }), ad = await asses('Chest', 13, { xp: 'adv' });
-    ok('how long you have trained moves the range: 13 chest sets is high for a beginner and within range for an experienced lifter', nb.status !== 'within' && ad.status === 'within' && nb.hi < ad.hi, [nb.status, nb.lo + '-' + nb.hi, ad.status, ad.lo + '-' + ad.hi]);
+    const nb = await asses('Chest', 19, { xp: 'new' }), ad = await asses('Chest', 19, { xp: 'adv' });
+    ok('how long you have trained moves the range: 19 chest sets is very high for a beginner and only high for an experienced lifter, and the beginner\'s range and ceiling sit lower', nb.status === 'vhigh' && ad.status === 'high' && nb.hi < ad.hi && nb.ceil < ad.ceil, [nb.status, nb.lo + '-' + nb.hi, ad.status, ad.lo + '-' + ad.hi]);
     /* the mode moves it too */
     const mn = await asses('Chest', 13, { xp: 'adv', zn: 0 }), pu = await asses('Chest', 19, { xp: 'adv', zn: 2 }), bu = await asses('Chest', 19, { xp: 'adv', zn: 1 }), pp = await asses('Chest', 19, { xp: 'adv', zn: 2, pri: true });
     ok('Maintain judges against a maintenance range: 13 chest sets is above it, and the wording says maintenance', ['high', 'vhigh'].indexOf(mn.status) >= 0 && mn.hi < ad.hi && (await asses('Chest', 7, { xp: 'adv', zn: 0 })).say.t === 'Within maintenance range.', [mn.status, mn.lo + '-' + mn.hi]);
-    ok('Push moves the range up: the same 19 chest sets is high on Build and within range on Push, and a priority muscle on Push has room beyond that', bu.status === 'high' && pu.status === 'within' && pp.hi === pu.hi + 2, [bu.status, pu.status, pu.hi, pp.hi]);
+    ok('Push moves the range up: the same 19 chest sets is high on Build and within range on Push, and a priority muscle on Push has more room, never past the ceiling', bu.status === 'high' && pu.status === 'within' && pp.hi > pu.hi && pp.hi <= pp.ceil, [bu.status, pu.status, pu.hi, pp.hi]);
+    /* the reference table: every muscle, in order, with a justification kept beside it */
+    const tbl = await p.evaluate(() => { const V = window.__vv; return Object.keys(V.LF_REF).map((m) => [m].concat(V.LF_REF[m])); });
+    ok('the reference table is five ordered points for every muscle: maintenance, minimum effective, productive low, productive high, ceiling', tbl.length >= 17 && tbl.every((r) => r[1] <= r[2] && r[2] <= r[3] && r[3] < r[4] && r[4] < r[5]), tbl.filter((r) => !(r[1] <= r[2] && r[2] <= r[3] && r[3] < r[4] && r[4] < r[5])));
+    ok('the table says it is a recommendation, not a limit, and names its evidence', /not physiological limits/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /Pelland/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')) && /ACSM/.test(require('fs').readFileSync(require('path').join(__dirname, '..', 'lift', 'index.html'), 'utf8')));
+    const grid = await p.evaluate(() => { const V = window.__vv, o = {}; ['new', 'some', 'adv'].forEach((x) => [0, 1, 2].forEach((z) => { o[x + z] = V.zRange('Chest', z, false, x); })); return o; });
+    ok('every mode and every level has its own chest range: Beginner, Intermediate and Experienced sit progressively higher on Build and on Push', grid.new1.hi < grid.some1.hi && grid.some1.hi < grid.adv1.hi && grid.new2.hi < grid.some2.hi && grid.some2.hi < grid.adv2.hi && grid.adv0.hi < grid.adv1.lo + 2 && grid.adv1.hi <= grid.adv2.hi, grid);
+    ok('and Maintain sits below Build for everyone', ['new', 'some', 'adv'].every((x) => grid[x + '0'].hi <= grid[x + '1'].lo + 1 && grid[x + '0'].lo < grid[x + '1'].lo));
+    ok('the levels are named Beginner, Intermediate and Experienced', await p.evaluate(() => { const t = document.documentElement.innerHTML; return /Beginner/.test(t) && /Intermediate/.test(t) && /Experienced/.test(t); }));
     /* the target is not the programme */
     const w = await p.evaluate(() => { const V = window.__vv, a = V.lfVolWeek({ Chest: 12 }), b = V.lfVolWeek({ Chest: 20 }); return { lo: a.Chest, hi: b.Chest, tri: [a.Triceps, b.Triceps] }; });
     ok('the programme is worked out separately from the target and moves with it: more chest asked of the week gives the chest more sets', w.hi.d > w.lo.d && w.lo.d >= 0, w);

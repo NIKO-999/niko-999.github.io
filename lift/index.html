@@ -171,7 +171,7 @@ svg { display: block; }
 .lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vn { position: relative; z-index: 2; } .lf-vnt { display: block; margin: -3px 0 -3px; padding: 6px 0; min-height: 0; background: none; border: 0; text-align: left; font: inherit; font-size: 8px; line-height: 1.25; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-orange { color: #fb923c; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; } .lf-vnd { margin: 3px 0 0; font-size: 8px; line-height: 1.3; color: var(--dim); }
 :root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-orange { color: #b45309; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
 .lf-ms-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 4px 12px; margin: 0 0 6px; } .lf-ms-l { min-width: 0; flex: 1; } .lf-ms-l .lf-vnt { font-size: 12px; padding: 4px 0; margin: 0; } .lf-ms-w { display: block; font-size: 12px; color: var(--dim); } .lf-ms-top .lf-vnd { flex-basis: 100%; font-size: 11px; margin: 0; } .lf-ms-sb { flex: none; min-height: 44px; margin: -10px -4px -10px 0; padding: 0 4px; font-size: 13px; font-weight: 600; color: var(--ink); } .lf-ms-sb[aria-expanded="true"] { color: var(--dim); } .lf-ms-parts { display: grid; gap: 8px; margin: 4px 0 8px; padding: 10px 0; border-top: 1px solid var(--card3); border-bottom: 1px solid var(--card3); }
-.lf-sb { display: grid; grid-template-columns: 96px minmax(0, 1fr) max-content; align-items: center; gap: 10px; font-size: 12.5px; } .lf-sb span { color: var(--dim); } .lf-sb i { display: block; height: var(--trk); border-radius: 2px; background: var(--card3); overflow: hidden; } .lf-sb i b { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; } .lf-sb em { font-style: normal; text-align: right; color: var(--dim); font-size: 11px; min-width: 60px; } .lf-sb.is-none span, .lf-sb.is-none em { opacity: .55; }
+.lf-sb { display: grid; grid-template-columns: 96px minmax(0, 1fr) max-content; align-items: center; gap: 10px; font-size: 12.5px; } .lf-sb span { color: var(--dim); } .lf-sb i { display: block; height: var(--trk); border-radius: 2px; background: var(--card3); overflow: hidden; } .lf-sb i b { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; } .lf-sb em { font-style: normal; text-align: right; color: var(--dim); font-size: 11px; min-width: 60px; } .lf-sb.is-none span, .lf-sb.is-none em { opacity: .55; } .lf-sb em.is-c-green { color: #4ade80; } .lf-sb em.is-c-yellow { color: #f5b942; } .lf-sb em.is-c-orange { color: #fb923c; } .lf-sb em.is-c-red { color: #ff6b6b; }
 .lf-zn-cus { margin-left: 8px; padding: 1px 7px; border-radius: 999px; font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); background: color-mix(in srgb, var(--ink) 12%, transparent); vertical-align: 1px; } .lf-seg.is-cus button[aria-pressed="true"] { opacity: .6; }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
@@ -4624,10 +4624,12 @@ var EX_HALF = (function () {
 })();
 /* TWO MUSCLES ARE READ OFF THE NAME as well as the muscle chosen: rear delts and lower back. An exercise counts for its own muscle and, in full, for any of these its name says, so a hip hinge or a face pull you create yourself is on the bar the day it exists. */
 var LF_ALSO = [['Rear delts', /rear[- ]?delt|face ?pull|reverse (pec|fl)|rear fl/i], ['Lower back', /back ?extension|hyper ?extension|hip hinge|good ?morning|deadlift|superman|bird ?dog|reverse hyper|jefferson/i]];
+/* THE MUSCLE A SET COUNTS FOR AS ITS OWN: a face pull or a rear-delt fly is filed under Shoulders in the library, but it is rear-delt work, so it counts for Rear delts only. Counting it for Shoulders as well is the parent-and-part double count: the same set bought the parent and the child a full set each. */
+function lfEffM(x) { return x && x.m === 'Shoulders' && lfAlso(x).indexOf('Rear delts') >= 0 ? 'Rear delts' : x ? x.m : ''; }
 function lfAlso(x) { var o = []; LF_ALSO.forEach(function (r) { if (r[0] !== x.m && r[1].test(x.n)) o.push(r[0]); }); return o; }
 function lfMuscleSets(from, to) {
   var a = ymd(from), b = ymd(to), out = {};
-  function add(id, n) { var x = exById(id); if (!x || !n) return; out[x.m] = (out[x.m] || 0) + n; lfAlso(x).forEach(function (m) { out[m] = (out[m] || 0) + n; }); var h = EX_HALF[id]; if (h && h !== x.m) out[h] = (out[h] || 0) + n / 2; }
+  function add(id, n) { var x = exById(id); if (!x || !n) return; var em = lfEffM(x); out[em] = (out[em] || 0) + n; lfAlso(x).forEach(function (m) { if (m !== em) out[m] = (out[m] || 0) + n; }); var h = EX_HALF[id]; if (h && h !== x.m) out[h] = (out[h] || 0) + n / 2; }
   S.wo.forEach(function (w) { if (w.d >= a && w.d <= b) w.x.forEach(function (e) { add(e.id, e.sets.length); }); });
   if (act && ymd(new Date(act.s)) >= a) act.x.forEach(function (e) { add(e.id, e.sets.filter(function (s) { return s.ok; }).length); });
   return out;
@@ -4670,6 +4672,7 @@ function lfSubSets(from, to) {
   function put(parent, i, n, ind) { var S0 = LF_SUB[parent]; if (!S0 || !n) return; var o = out[parent] = out[parent] || {}, k = S0.k[i < 0 ? 0 : i], c = o[k] = o[k] || { d: 0, i: 0 }; if (ind) c.i += n; else c.d += n; }
   function add(id, n) {
     var x = exById(id); if (!x || !n) return;
+    if (lfEffM(x) !== x.m) return; /* it is rear-delt work: not front or side delts */
     var idx = lfSubIdx(x.m, x.n);
     if (idx === -1 && LF_SUB[x.m]) { put(x.m, 0, n / 2, false); put(x.m, 1, n / 2, false); } else put(x.m, idx, n, false);
     var h = EX_HALF[id]; if (h && h !== x.m) { var hi = lfSubIdx(h, x.n); if (hi === -1 && LF_SUB[h]) { put(h, 0, n / 4, true); put(h, 1, n / 4, true); } else put(h, hi, n / 2, true); }
@@ -4969,7 +4972,7 @@ var LF_PAT_RX = [['chiso', /fly|crossover|pec deck/i], ['ipush', /incline/i], ['
   ['hipext', /thrust|bridge|kickback/i], ['abd', /abduct/i], ['add', /adduct|copenhagen/i], ['squat', /squat|leg press|lunge|step-?up/i], ['soleus', /seated calf/i], ['gastroc', /calf/i], ['erect', /back ext|hyper/i], ['flex', /crunch|leg raise|knee raise/i]];
 function lfPat(id) { if (LF_PAT[id]) return LF_PAT[id]; var x = exById(id); if (!x) return ''; for (var i = 0; i < LF_PAT_RX.length; i++) if (LF_PAT_RX[i][1].test(x.n)) return LF_PAT_RX[i][0]; return ''; }
 /* the patterns that make up full coverage of a muscle, most basic first */
-var LF_COVER = { Chest: ['hpush', 'ipush', 'chiso'], Back: ['vpull', 'hpull', 'latiso'], Shoulders: ['vpush', 'latr', 'rear'], Biceps: ['curl', 'hammer'], Triceps: ['pushdown', 'ohext', 'skull'], Quads: ['squat', 'kext'], Hamstrings: ['hinge', 'kflex'], Glutes: ['hipext', 'gsquat', 'abd'], Calves: ['gastroc', 'soleus'], Abs: ['flex', 'antiext'], 'Lower back': ['erect'], Legs: ['add'] };
+var LF_COVER = { Chest: ['hpush', 'ipush', 'chiso'], Back: ['vpull', 'hpull', 'latiso'], Shoulders: ['vpush', 'latr'], 'Rear delts': ['rear'], Biceps: ['curl', 'hammer'], Triceps: ['pushdown', 'ohext', 'skull'], Quads: ['squat', 'kext'], Hamstrings: ['hinge', 'kflex'], Glutes: ['hipext', 'gsquat', 'abd'], Calves: ['gastroc', 'soleus'], Abs: ['flex', 'antiext'], 'Lower back': ['erect'], Legs: ['add'] };
 var LF_PAT_N = { hpush: 'a flat press', ipush: 'an incline press', chiso: 'a chest fly', vpull: 'a pulldown or pull-up', hpull: 'a row', latiso: 'a lat isolation', traps: 'trap work', vpush: 'an overhead press', latr: 'a lateral raise', front: 'a front raise', rear: 'rear-delt work', curl: 'a curl', hammer: 'a hammer curl', pushdown: 'a pushdown', ohext: 'an overhead extension', skull: 'a skull crusher', tpress: 'a close-grip press', squat: 'a squat or press', kext: 'a leg extension', hinge: 'a hip hinge', kflex: 'a leg curl', hipext: 'a hip thrust or bridge', gsquat: 'a single-leg squat', abd: 'abduction', add: 'adduction', gastroc: 'a standing calf raise', soleus: 'a seated calf raise', dorsi: 'a tibialis raise', flex: 'a crunch or leg raise', antiext: 'an ab wheel or dead bug', antirot: 'a carry', erect: 'a back extension' };
 var LF_ISO_P = { chiso: 1, latiso: 1, latr: 1, front: 1, rear: 1, curl: 1, hammer: 1, pushdown: 1, ohext: 1, skull: 1, kext: 1, kflex: 1, abd: 1, add: 1, gastroc: 1, soleus: 1, dorsi: 1, flex: 1, antiext: 1, erect: 1, traps: 1 };
 /* a beginner is offered the simpler version of a pattern first: a machine or a cable before a barbell */
@@ -4983,13 +4986,13 @@ function lfFitPick(m, dayEx, weekEx, why) {
   if (S.zn === 0) return '';
   var cov = LF_COVER[m]; if (!cov) return '';
   var cnt = {}, hasComp = false;
-  weekEx.forEach(function (id) { var x = exById(id); if (!x || x.m !== m) return; var p = lfPat(id); if (p) cnt[p] = (cnt[p] || 0) + 1; if (x.c) hasComp = true; });
+  weekEx.forEach(function (id) { var x = exById(id); if (!x || lfEffM(x) !== m) return; var p = lfPat(id); if (p) cnt[p] = (cnt[p] || 0) + 1; if (x.c) hasComp = true; });
   var miss = cov.filter(function (p) { return !cnt[p]; });
   if (miss.length) miss.sort(function (a, b) { var ia = LF_ISO_P[a] ? 1 : 0, ib = LF_ISO_P[b] ? 1 : 0; return hasComp ? ib - ia || cov.indexOf(a) - cov.indexOf(b) : ia - ib || cov.indexOf(a) - cov.indexOf(b); });
   var order = miss.length ? miss : cov.filter(function (p) { return (cnt[p] || 0) < 2; }).sort(function (a, b) { return (cnt[a] || 0) - (cnt[b] || 0); });
   var seen = {}; S.wo.forEach(function (w) { w.x.forEach(function (e) { if (e.sets && e.sets.length) seen[e.id] = (seen[e.id] || 0) + 1; }); });
   for (var i = 0; i < order.length; i++) {
-    var p = order[i], c = EXERCISES.concat(S.ex || []).filter(function (x) { return x.m === m && lfPat(x.id) === p && dayEx.indexOf(x.id) < 0 && weekEx.indexOf(x.id) < 0; });
+    var p = order[i], c = EXERCISES.concat(S.ex || []).filter(function (x) { return lfEffM(x) === m && lfPat(x.id) === p && dayEx.indexOf(x.id) < 0 && weekEx.indexOf(x.id) < 0; });
     if (!c.length) continue;
     c.sort(function (a, b) { return (seen[b.id] || 0) - (seen[a.id] || 0) || (S.xp === 'new' ? (LF_HARD.test(a.n) ? 1 : 0) - (LF_HARD.test(b.n) ? 1 : 0) : 0); });
     if (why) { why.p = p; why.miss = !!miss.length; why.iso = !!LF_ISO_P[p]; why.comp = hasComp; }
@@ -5011,7 +5014,7 @@ function lfWithKeep(d) {
 function lfFitMap() {
   var P = lfProg(), rows = {}, tgt = {}, out = {}, ex = {};
   S.focus.forEach(function (f) { tgt[f.m] = f; });
-  P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[x.m] = rows[x.m] || []).push({ d: d.id, id: id, n: g[0], pin: !!(d.pin && d.pin[id]) }); }); });
+  P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { var x = exById(id), g = d.tg && d.tg[id]; if (!x || !g || g[3] === 'rounds' || !(g[0] > 0)) return; (rows[lfEffM(x)] = rows[lfEffM(x)] || []).push({ d: d.id, id: id, n: g[0], pin: !!(d.pin && d.pin[id]) }); }); });
   /* THE WHOLE WEEK, NOT THE DAY: a target is effective sets, the way the bars count them, so the half a row gives the biceps or a press gives the triceps is already part of what the muscle gets, wherever in the week it happens. Only what is still missing is asked of the muscle's own exercises; a muscle that already has enough is left alone. */
   var indW = {}, weekEx = [];
   P.days.forEach(function (d0) { if (d0.choice) return; var d = lfWithKeep(d0); d.ex.forEach(function (id) { weekEx.push(id); var g = d.tg && d.tg[id], h = EX_HALF[id], x = exById(id); if (!g || g[3] === 'rounds' || !(g[0] > 0) || !h || !x || h === x.m) return; indW[h] = (indW[h] || 0) + g[0]; }); });
@@ -5198,17 +5201,33 @@ function lfAim0(e, last) {
 }
 function lfRange(a, b) { return a === b ? String(a) : a + '–' + b; }
 /* ZONES: the weekly sets for each muscle, worked out from your goal and how long you have trained, and set by one choice, Maintain, Build or Push. A muscle's track is shaded where it works; drag it anywhere and it stays yours. About ten to twenty hard sets a muscle a week builds, six to eight holds, and past twenty returns shrink; bigger muscles take more. */
-var ZN = { Chest: 1, Back: 1.15, Shoulders: 1, Quads: 1, Hamstrings: .8, Glutes: .7, Biceps: .7, Triceps: .8, Calves: .8, Abs: .7, Core: .7, 'Lower back': .5 };
 var ZG = { build: ['Build muscle', 1], strength: ['Get stronger', .75], lean: ['Stay lean', .85], keep: ['Maintain', .55] };
-var ZX = { new: ['New', 8], some: ['1–2 years', 12], adv: ['Experienced', 15] };
+var ZX = { new: ['Beginner', 'Under 2 years of consistent training'], some: ['Intermediate', '2 to 3 years'], adv: ['Experienced', 'More than 3 years'] };
 var ZNAME = ['Maintain', 'Build', 'Push'], ZBLURB = ['Hold what you have with the fewest sets.', 'The sweet spot for most people. Steady growth.', 'More volume. Needs good sleep and food.'];
-/* a record that has never been through the repair has no goal or experience yet: the defaults answer for it */
+/* ═══════════ THE REFERENCE RANGES ═══════════
+   WHAT THEY ARE. Weekly EFFECTIVE sets per muscle (direct sets + indirect x 0.5, the way the bars count them), as five reference points: [maintenance, minimum effective, productive low, productive high, practical ceiling]. They are configurable programming recommendations, not physiological limits: there is no single best number for everyone, and the editable table below is the one place to change a muscle's.
+   WHY THESE SHAPES. (1) Growth rises with weekly sets but with diminishing returns, and the gain per set falls well before the ceiling (Pelland et al., dose-response meta-regressions of weekly volume and frequency; Schoenfeld and colleagues' volume work, where roughly 10 or more hard sets a week per muscle beats fewer, with smaller returns beyond ~20). (2) Maintaining muscle takes far less than building it, about a third of the volume that built it (the maintenance literature, e.g. Bickel et al. 2011; Spiering et al. 2021), so Maintain sits between the first two points. (3) Muscles that other lifts train heavily need fewer DIRECT sets to reach the same total: triceps and front delts through pressing, biceps through rows and pull-downs, glutes through squats and hinges, so their effective ranges are lower and the half-credit for indirect work is what fills them. (4) Muscles that are only lightly hit by compound lifts and recover quickly, lateral and rear delts, calves, abs, take direct work well and sit higher. (5) Spinal erectors and hamstrings under hinges carry a lot of systemic fatigue per set, so their ceilings are lower. (6) The ACSM position stand on resistance training: multiple sets per muscle, 2-3 or more days a week, close to failure for hypertrophy, progressed gradually.
+   EXPERIENCE AND MODE MOVE WHERE YOU SIT INSIDE THE RANGE, not the range itself: a beginner (under 2 years) is judged against the lower part, with a lower practical ceiling, because gains come from little and recovery from a lot is not yet built; an experienced lifter (3 years or more) against the upper part with the full ceiling. Maintain is maintenance to minimum-effective; Build is the productive band; Push is the upper productive band to near the ceiling. Experience is an input and never a promise: nobody is told the top of a range is theirs by right, and recovery data, when there is some, should override all of this. */
+var LF_REF = {
+  Chest: [6, 8, 10, 16, 22], Back: [6, 8, 10, 18, 24], Shoulders: [4, 6, 8, 14, 20], 'Rear delts': [2, 4, 6, 12, 18], Quads: [6, 8, 10, 16, 20], Hamstrings: [4, 6, 8, 14, 18],
+  Glutes: [2, 4, 6, 14, 18], Calves: [6, 8, 10, 16, 20], Biceps: [4, 6, 8, 14, 20], Triceps: [4, 6, 8, 14, 18], Abs: [2, 4, 6, 14, 20], Core: [2, 4, 6, 12, 18], 'Lower back': [2, 3, 4, 8, 12],
+  'Front delts': [0, 2, 4, 8, 12], 'Side delts': [3, 6, 8, 16, 22], Lats: [4, 6, 8, 16, 22], 'Upper back': [4, 6, 8, 14, 20], Traps: [0, 2, 4, 10, 16]
+};
+var LF_REF_DEF = [4, 6, 8, 14, 18];
 function zg() { return ZG[S.gx] || ZG.build; }
 function zx() { return ZX[S.xp] || ZX.some; }
-function zRec(m) { return Math.max(4, Math.min(20, Math.round(zx()[1] * zg()[1] * (ZN[m] || .8)))); }
-function zLo(m) { return Math.max(3, zRec(m) - 2); }
-function zHi(m) { return Math.min(22, zRec(m) + 3); }
-function zVal(m, z) { return [Math.max(4, Math.round(zRec(m) * .55)), zRec(m), Math.min(20, zRec(m) + 4)][z]; }
+/* the range a muscle is judged against, for a mode and how long you have trained: { lo, hi } is the band to aim at, `ceil` the practical ceiling, above which it is very high */
+function zRange(m, zn, pri, xp) {
+  var R = LF_REF[m] || LF_REF_DEF, gf = zg()[1], mv = R[0], mev = R[1], lo0 = Math.max(mev, Math.round(R[2] * gf)), hi0 = Math.max(lo0 + 2, Math.round(R[3] * gf)), mrv = Math.max(hi0, Math.round(R[4] * gf));
+  var tier = { new: 0, some: 1, adv: 2 }[xp || S.xp]; if (tier === undefined) tier = 1; var span = hi0 - lo0, lo, hi;
+  var ceil = Math.round([hi0 + (mrv - hi0) * 0.35, hi0 + (mrv - hi0) * 0.7, mrv][tier]);
+  if (zn === 0) { lo = mv; hi = Math.max(mev, mv + 2); ceil = Math.min(ceil, hi0); }
+  else if (zn === 2) { lo = Math.round(lo0 + [0.4, 0.55, 0.7][tier] * span); hi = Math.round([hi0, (hi0 + mrv) / 2, mrv - 1][tier]); if (pri) hi = Math.min(mrv, hi + 2); }
+  else { lo = [mev, lo0, Math.round(lo0 + 0.4 * span)][tier]; hi = Math.round([lo0 + 0.45 * span, lo0 + 0.8 * span, hi0][tier]); }
+  hi = Math.max(hi, lo + 2); ceil = Math.max(ceil, hi);
+  return { lo: lo, hi: hi, ceil: ceil };
+}
+function zVal(m, z) { var r = zRange(m, z, false); return Math.max(2, Math.min(24, Math.round((r.lo + r.hi) / 2))); }
 function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal(t[0], z); }, 0); }
 /* the sheet that opens from Sets this week, from You, from Exercises and from the first split */
 /* ═══════════ THE VOLUME CHECK ═══════════
@@ -5217,9 +5236,8 @@ function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal
    THE BANDS ARE STARTING POINTS, NOT LIMITS. 0-3 very low, 4-6 low, 7-10 moderate, 11-15 productive, 16-20 high, 21-24 very high, 25+ potentially excessive. A band says where a number sits; whether it is a problem depends on how long you have trained, whether the muscle is a priority, the mode, how many days it is spread over and how much lands on one day. More sets help with diminishing returns and the best amount differs from person to person, so a high number is a notice, never a verdict. Recovery data (sleep, soreness) is not collected yet: until it is, everything here is an estimate from training information alone. */
 var LF_VOL_ON = (function () { try { return localStorage.getItem('lift.vol.v1') !== '0'; } catch (e) { return true; } })();
 var LF_VOL = { ind: 0.5 };
-/* WHY EVERY MUSCLE USED TO SAY THE SAME THING: the status was worked out against one set of cut-offs for the whole body (high from 18 or 21, by experience), and anything under them fell through to one hard-coded positive line. A target of 19 for chest, hamstrings and lower back therefore read the same, because the muscle never entered the sum.
-   NOW EACH MUSCLE HAS ITS OWN RANGE, the same one the slider's zone is drawn from: its recommended figure for how long you have trained and your goal, times what that muscle takes (zRec: back takes more than glutes, lower back about half of chest), moved to the mode you are in. A muscle is judged only against that range. Above the top of it, the distance decides the word: up to 3 sets over is high, up to 6 very high, past that potentially excessive. 21 sets is never less than very high and 25 is always excessive, for any muscle, because past that the range stops mattering. A priority muscle in Push has two more sets of room, since that is what Push is for. */
-function lfVolRange(m, zn, pri) { var c = zVal(m, zn); return { lo: Math.max(2, c - 2), hi: Math.min(22, c + 3) + (pri && zn === 2 ? 2 : 0) }; }
+/* WHY EVERY MUSCLE USED TO SAY THE SAME THING: the status was once worked out against one set of cut-offs for the whole body. Now each muscle has its own range from LF_REF, moved by the mode and by how long you have trained (zRange), and a muscle is judged only against that. Above the top of it the distance to the practical ceiling decides the word: high, very high, then potentially excessive. A priority muscle in Push has two more sets of room, since that is what Push is for. */
+function lfVolRange(m, zn, pri) { return zRange(m, zn, pri); }
 /* what the program asks of each muscle across the week: direct sets, indirect sets, and which days they fall on */
 function lfVolPlan() {
   var o = { prim: {}, ind: {}, days: {} };
@@ -5228,7 +5246,7 @@ function lfVolPlan() {
     d.ex.forEach(function (id) {
       var x = exById(id), g = d.tg[id]; if (!x || !g || g[3] === 'rounds') return; var s = g[0] || 0; if (!s) return;
       var dir = function (m) { o.prim[m] = (o.prim[m] || 0) + s; (o.days[m] = o.days[m] || {})[d.id] = ((o.days[m] || {})[d.id] || 0) + s; };
-      dir(x.m); lfAlso(x).forEach(dir);
+      dir(lfEffM(x)); lfAlso(x).forEach(function (m) { if (m !== lfEffM(x)) dir(m); });
       var h = EX_HALF[id]; if (h && h !== x.m) o.ind[h] = (o.ind[h] || 0) + s;
     });
   });
@@ -5243,8 +5261,8 @@ function lfVolWeek(vals) {
       if (d0.choice) return; var d = lfFit(d0);
       d.ex.forEach(function (id) {
         var g = d.tg && d.tg[id], x = exById(id); if (!g || !x || g[3] === 'rounds' || !(g[0] > 0)) return;
-        var o = out[x.m] = out[x.m] || { d: 0, i: 0 }; o.d += g[0];
-        lfAlso(x).forEach(function (m) { var q = out[m] = out[m] || { d: 0, i: 0 }; q.d += g[0]; });
+        var em = lfEffM(x), o = out[em] = out[em] || { d: 0, i: 0 }; o.d += g[0];
+        lfAlso(x).forEach(function (m) { if (m === em) return; var q = out[m] = out[m] || { d: 0, i: 0 }; q.d += g[0]; });
         var h = EX_HALF[id]; if (h && h !== x.m) { var q = out[h] = out[h] || { d: 0, i: 0 }; q.i += g[0]; }
       });
     });
@@ -5253,16 +5271,20 @@ function lfVolWeek(vals) {
   return out;
 }
 /* one muscle at a target of v: where it sits in its own range, in a word, a colour and a short sentence; `prog` is what the exercises give it */
-function lfVolAssess(m, v, c) {
-  var r = lfVolRange(m, c.zn, !!c.pri), over = v - r.hi, maint = c.zn === 0, st, tx, col;
-  if (v >= 25 || over > 6) { st = 'excess'; col = 'red'; tx = 'Potentially excessive. Consider lowering volume.'; }
-  else if (v >= 21 || over > 3) { st = 'vhigh'; col = 'red'; tx = 'Very high volume. Consider lowering volume.'; }
-  else if (over > 0) { st = 'high'; col = 'orange'; tx = 'High weekly volume.'; }
+function lfVolClass(v, r, maint) {
+  var st, tx, col;
+  if (v >= r.ceil + 5 || v >= 25) { st = 'excess'; col = 'red'; tx = 'Potentially excessive. Consider lowering volume.'; }
+  else if (v > r.ceil) { st = 'vhigh'; col = 'red'; tx = 'Very high volume. Consider lowering volume.'; }
+  else if (v > r.hi) { st = 'high'; col = 'orange'; tx = 'High weekly volume.'; }
   else if (v < r.lo) { st = 'below'; col = 'yellow'; tx = v < 4 ? 'Very low volume.' : maint ? 'Below maintenance volume.' : 'Below recommended volume.'; }
   else { st = 'within'; col = 'green'; tx = maint ? 'Within maintenance range.' : 'Within recommended range.'; }
-  var pg = (c.prog && c.prog[m]) || { d: 0, i: 0, eff: 0 }, s = lfSetsN;
-  return { m: m, v: v, lo: r.lo, hi: r.hi, status: st, say: { c: col, t: tx }, prog: pg,
-    detail: 'Range ' + r.lo + '–' + r.hi + '. The exercises give it ' + s(pg.d) + ' direct' + (pg.i ? ' and ' + s(pg.i) + ' indirect (counted at half)' : '') + ', ' + s(pg.eff) + ' effective.' };
+  return { status: st, say: { c: col, t: tx } };
+}
+/* THE TARGET TABLE JUDGES THE TARGET ONLY: the figure on the slider against the muscle's range. What the exercises actually give the muscle is a different question, answered by lfVolWeek and shown only when you ask for it (the detail line and the Stats on a muscle's page), so a number you chose is never marked down for the exercises you have today. */
+function lfVolAssess(m, v, c) {
+  var r = zRange(m, c.zn, !!c.pri), k = lfVolClass(v, r, c.zn === 0), pg = (c.prog && c.prog[m]) || { d: 0, i: 0, eff: 0 }, s = lfSetsN;
+  return { m: m, v: v, lo: r.lo, hi: r.hi, ceil: r.ceil, status: k.status, say: k.say, prog: pg,
+    detail: 'Range ' + r.lo + '\u2013' + r.hi + '. The exercises give it ' + s(pg.d) + ' direct' + (pg.i ? ' and ' + s(pg.i) + ' indirect (counted at half)' : '') + ', ' + s(pg.eff) + ' effective.' };
 }
 function lfZonesSheet(fresh) {
   fresh = fresh === true; /* from the goal sheet: the suggestions have just changed under every muscle, so it opens on them */
@@ -8685,14 +8707,17 @@ function lfFocusSheet(m) {
       if (old) { old.remove(); return; }
       var sx = lfSubSets(mon, addDays(mon, 6))[f.m] || {}, ks = LF_SUB[f.m] ? LF_SUB[f.m].k.slice() : [];
       var rows0 = ks.map(function (k) { var c = sx[k] || { d: 0, i: 0 }; return [k, c.d + c.i, c.i && c.d ? lfSetsN(c.i) + ' indirect' : c.i ? 'indirect' : '']; });
-      var lb = f.m === 'Back' ? S.focus.filter(function (x) { return x.m === 'Lower back'; })[0] : null;
-      if (lb) rows0.push(['Lower back', got0['Lower back'] || 0, 'target ' + (lb.lo === lb.hi ? lb.lo : lb.lo + '\u2013' + lb.hi)]);
+      /* the part with a target of its own is shown with it, counted once and never added into the parent */
+      var kid = f.m === 'Back' ? 'Lower back' : f.m === 'Shoulders' ? 'Rear delts' : '', lb = kid ? S.focus.filter(function (x) { return x.m === kid; })[0] : null;
+      if (lb) rows0.push([kid, got0[kid] || 0, 'target ' + (lb.lo === lb.hi ? lb.lo : lb.lo + '\u2013' + lb.hi)]);
       var mx = Math.max.apply(null, rows0.map(function (r) { return r[1]; }).concat([1])), box = el('<div class="lf-ms-parts" role="group"></div>');
       box.setAttribute('aria-label', f.m + ' by part');
       rows0.forEach(function (r) {
         var q = el('<div class="lf-sb"><span></span><i><b></b></i><em class="lf-num"></em></div>');
         $('span', q).textContent = r[0]; $('b', q).style.width = Math.min(100, r[1] / mx * 100) + '%';
         $('em', q).textContent = r[1] ? lfSetsN(r[1]) + (r[2] ? ' \u00b7 ' + r[2] : '') : (r[2] || '0');
+        /* each part is read against its own range for the mode and how long you have trained: green in range, yellow under, orange high, red very high */
+        if (LF_REF[r[0]]) { var kc = lfVolClass(Math.round(r[1]), zRange(r[0], zn0, false), zn0 === 0); q.dataset.status = kc.status; $('em', q).classList.add('is-c-' + kc.say.c); }
         if (!r[1]) q.classList.add('is-none');
         box.appendChild(q);
       });
