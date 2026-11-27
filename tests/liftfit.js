@@ -82,7 +82,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
   {
-    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Hamstrings' ? ['Hamstrings', 12, 16] : r))) });
+    const o = await open({ focus: focus(BASE_TG.map((r) => (r[0] === 'Hamstrings' ? ['Hamstrings', 14, 18] : r))) });
     const ds = await days(o.page);
     ok('a range the program sits inside leaves it alone', notes(ds).length === 0 && sumOf(ds, HAM) === baseHam, [notes(ds).length, sumOf(ds, HAM)]);
     await o.c.close();

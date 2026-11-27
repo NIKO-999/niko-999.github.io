@@ -5103,7 +5103,8 @@ function lfRecWhy(e) {
   S.focus.forEach(function (q) { if (q.m === e.fit.m) f = q; });
   var tg = f ? (f.lo === f.hi ? f.lo : f.lo + '\u2013' + f.hi) + ' sets a week' : 'its weekly target';
   var s = function (n) { return n + (n === 1 ? ' set' : ' sets'); };
-  if (e.fit.extra) { var w = e.fit.why, pn = w && LF_PAT_N[w.p]; return 'Your ' + m + ' target is ' + tg + ', more than your exercises can hold. ' + (pn ? (w.miss ? (w.iso && w.comp ? 'Your week has ' + m + ' compound work but no ' + pn.replace(/^an? /, '') + ', so this adds ' + pn + '.' : 'Your week has no ' + pn.replace(/^an? /, '') + ' for ' + m + ', so this adds one.') : 'Every pattern is covered, so this adds ' + pn + ' without repeating what is there.') + ' ' : '') + s(e.fit.n) + '.'; }
+  /* SHORT: one line, behind a tap. What the week was missing, and how many sets. */
+  if (e.fit.extra) { var w = e.fit.why, pn = w && LF_PAT_N[w.p]; return (pn && w.miss ? 'Your week has no ' + pn.replace(/^an? /, '') + ' for ' + m + '. ' : 'For your ' + m + ' target of ' + tg + '. ') + s(e.fit.n) + '.'; }
   return 'Your ' + m + ' target is ' + tg + ', so this goes from ' + s(e.fit.was) + ' to ' + e.fit.n + '.';
 }
 function lfRecEl(e, swap) {
