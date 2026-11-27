@@ -520,8 +520,16 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const say1 = await q.textContent('#lfVolSay'), chestNote = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('.lf-vn').textContent);
     ok('moving a target recalculates at once: the summary changes, and that muscle shows one short red line', say1 !== say0 && /Quite a lot of volume/.test(chestNote) && chestNote.length < 60, [say0, say1, chestNote]);
     ok('and it is only a warning: the figure is the one you set, and nothing is saved', await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent) === '24' && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 16);
+    ok('moving a slider makes the targets Custom on its own: a small tag, no extra step', await q.isVisible('#lfZnCus') && /Custom/.test(await q.textContent('#lfZnCus')));
+    await q.click('#lfZnBack'); await q.waitForTimeout(200);
+    ok('Back to the suggestion restores the preset and the Custom tag goes', await q.isHidden('#lfZnCus') && await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent) !== '24');
+    await q.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)); const i = r.querySelector('input'); i.value = 24; i.dispatchEvent(new Event('input', { bubbles: true })); }); await q.waitForTimeout(150);
+    await q.click('#lfZnSeg button >> nth=1'); await q.waitForTimeout(150);
+    ok('pressing a preset again regenerates it and clears Custom', await q.isHidden('#lfZnCus'));
+    await q.evaluate(() => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)); const i = r.querySelector('input'); i.value = 24; i.dispatchEvent(new Event('input', { bubbles: true })); }); await q.waitForTimeout(150);
     await q.click('#lfZnSave'); await settle(q);
     ok('Save writes what the sheet holds', await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) !== 16);
+    ok('saved targets that are your own are remembered as Custom, and reopening the sheet still says so, with your figure kept', await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).zc === 1) && await (async () => { await q.click('#lfTgEdit'); await settle(q); const v = await q.isVisible('#lfZnCus'); const ch = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent); await q.keyboard.press('Escape'); await settle(q); return v && ch === '24'; })());
     await o2.c.close();
     await c.close();
   }
@@ -564,7 +572,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     /* 5: Maintain */
     ok('Maintain offers no extra exercise at all', (await pick('Chest', [], ['bench'], { zn: 0 })).id === '');
     /* 3: experience changes what is offered */
-    const nb = await pick('Chest', ['incdb', 'incmach'], ['bench'], { xp: 'new' }), ex = await pick('Chest', ['incdb', 'incmach'], ['bench'], { xp: 'adv' });
+    const nb = await pick('Chest', ['incdb', 'incmach'], ['bench', 'pecdeck'], { xp: 'new' }), ex = await pick('Chest', ['incdb', 'incmach'], ['bench', 'pecdeck'], { xp: 'adv' });
     ok('a beginner is offered the simpler version of the same pattern, a machine before a barbell', nb.p === 'ipush' && !/barbell/i.test(nb.id + ' ' + nb.p) && nb.id !== ex.id && ex.id === 'inclbb', [nb, ex]);
     /* 2: the week's indirect work counts */
     const t2 = await p.evaluate(() => {

@@ -170,6 +170,7 @@ svg { display: block; }
 .lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
 .lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 3px 0 0; font-size: 8px; line-height: 1.25; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; }
 :root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
+.lf-zn-cus { margin-left: 8px; padding: 1px 7px; border-radius: 999px; font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); background: color-mix(in srgb, var(--ink) 12%, transparent); vertical-align: 1px; } .lf-seg.is-cus button[aria-pressed="true"] { opacity: .6; }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
 .lf-zr-l { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 15px; }
@@ -3418,7 +3419,7 @@ function lfClean(o) {
   d.unit = o.unit === 'lb' ? 'lb' : 'kg';
   d.goal = Math.min(7, Math.max(1, Math.round(+o.goal) || 4));
   /* what Zones works the targets out from: your goal, how long you have trained, and the zone you last saved */
-  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.fit === false) d.fit = false; if (o.aux) d.aux = 1; if (o.ao && typeof o.ao === 'object') { d.ao = {}; ['Rear delts', 'Lower back'].forEach(function (m) { if (o.ao[m]) d.ao[m] = 1; }); if (!Object.keys(d.ao).length) delete d.ao; } if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
+  d.gx = /^(build|strength|lean|keep)$/.test(o.gx) ? o.gx : 'build'; d.xp = /^(new|some|adv)$/.test(o.xp) ? o.xp : 'some'; if (o.zn === 0 || o.zn === 1 || o.zn === 2) d.zn = o.zn; if (o.zc) d.zc = 1; if (o.fit === false) d.fit = false; if (o.aux) d.aux = 1; if (o.ao && typeof o.ao === 'object') { d.ao = {}; ['Rear delts', 'Lower back'].forEach(function (m) { if (o.ao[m]) d.ao[m] = 1; }); if (!Object.keys(d.ao).length) delete d.ao; } if (o.keep && typeof o.keep === 'object') { d.keep = {}; Object.keys(o.keep).slice(0, 40).forEach(function (k) { var l = Array.isArray(o.keep[k]) ? o.keep[k].filter(function (q) { return Array.isArray(q) && typeof q[0] === 'string' && q[1] > 0 && q[1] <= 12; }).slice(0, 6).map(function (q) { return [q[0], Math.round(q[1])]; }) : []; if (l.length) d.keep[k] = l; }); if (!Object.keys(d.keep).length) delete d.keep; }
   d.bwGoal = num(o.bwGoal);
   /* Health insights have been allowed on this phone */
   if (o.hkr === true) d.hkr = true;
@@ -5283,7 +5284,7 @@ function lfZonesSheet(fresh) {
   var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
   var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
-    + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p></div>' : '') + '<div id="lfZnRows"></div></div>');
+    + '<span class="lf-flab" style="margin-top:0">How hard<em class="lf-zn-cus" id="lfZnCus" hidden>Custom</em></span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p></div>' : '') + '<div id="lfZnRows"></div></div>');
   $('.lf-zn-h b', b).textContent = P.n; $('.lf-zn-h span', b).textContent = P.days.filter(function (r) { return !r.choice; }).length + ' days a week';
   $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(zg()[0]) + '</b> · ' + esc(zx()[0]);
   function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
@@ -5314,7 +5315,9 @@ function lfZonesSheet(fresh) {
     var tot = ts.reduce(function (a, t) { return a + val(t[0]); }, 0);
     if (LF_VOL_ON) paintVol();
     $$('#lfZnSeg button', b).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.z === zn ? 'true' : 'false'); });
-    $('#lfZnSay', b).textContent = ZBLURB[zn] + ' ' + tot + ' sets a week' + (tot !== now ? ', ' + now + ' now.' : '.');
+    /* CUSTOM IS NOT A BUTTON: it is what the targets are the moment one of them is not the preset's. The preset stays lit underneath, because Back to the suggestion returns to it; pressing a preset again regenerates it. */
+    var cus = nEd() > 0; $('#lfZnCus', b).hidden = !cus; $('#lfZnSeg', b).classList.toggle('is-cus', cus);
+    $('#lfZnSay', b).textContent = (cus ? 'Your own targets, still checked.' : ZBLURB[zn]) + ' ' + tot + ' sets a week' + (tot !== now ? ', ' + now + ' now.' : '.');
     back.hidden = !nEd() || !(Object.keys(tch).length || zoned); back.textContent = 'Back to the suggestion (' + nEd() + ' changed)';
   }
   [0, 1, 2].forEach(function (z) { var x = el('<button type="button"></button>'); x.dataset.z = z; x.textContent = ZNAME[z]; x.addEventListener('click', function () { zn = z; ed = {}; tch = {}; zoned = true; refresh(); }); $('#lfZnSeg', b).appendChild(x); });
@@ -5334,9 +5337,9 @@ function lfZonesSheet(fresh) {
   $('#lfZnBasis', b).addEventListener('click', function () { s.close(true); lfZBasis(function () { lfZonesSheet(true); }); });
   more.addEventListener('click', function () { s.close(true); var w = el('<div class="lf-rowbody" id="lfFocusBody"></div>'); w.appendChild(lfFocusBody()); lfRowShown = { id: 'lfRowFocus', w: w }; lfSheet({ title: 'Muscle targets', body: w, onClose: function () { if (lfRowShown && lfRowShown.w === w) lfRowShown = null; } }); });
   save.addEventListener('click', function () {
-    var was = JSON.stringify({ f: S.focus, zn: S.zn === undefined ? null : S.zn });
-    S.focus.forEach(function (f) { var v = val(f.m); if (!zoned && !tch[f.m] && f.lo !== f.hi) return; if (v !== f.lo || v !== f.hi) delete f.a; f.lo = v; f.hi = v; }); S.zn = zn; lfSave(); lfRender(); s.close(true);
-    lfToast('Targets saved', function () { var o = JSON.parse(was); S.focus = o.f; if (o.zn === null) delete S.zn; else S.zn = o.zn; lfSave(); lfRender(); });
+    var was = JSON.stringify({ f: S.focus, zn: S.zn === undefined ? null : S.zn, zc: S.zc ? 1 : 0 });
+    S.focus.forEach(function (f) { var v = val(f.m); if (!zoned && !tch[f.m] && f.lo !== f.hi) return; if (v !== f.lo || v !== f.hi) delete f.a; f.lo = v; f.hi = v; }); S.zn = zn; if (nEd()) S.zc = 1; else delete S.zc; lfSave(); lfRender(); s.close(true);
+    lfToast('Targets saved', function () { var o = JSON.parse(was); S.focus = o.f; if (o.zn === null) delete S.zn; else S.zn = o.zn; if (o.zc) S.zc = 1; else delete S.zc; lfSave(); lfRender(); });
   });
   refresh();
 }
@@ -5354,7 +5357,7 @@ function lfTgCard() {
   var c = el('<button type="button" class="lf-tgc" id="lfTgCard"><b class="lf-num"></b><span class="lf-tgc-s">sets a week</span><span class="lf-tgc-b" aria-hidden="true"></span><svg class="lf-tgc-c" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>');
   $('b', c).textContent = tot;
   ts.forEach(function (t) { var i = document.createElement('i'); i.style.height = Math.max(8, Math.min(100, t[2] / 20 * 100)) + '%'; $('.lf-tgc-b', c).appendChild(i); });
-  c.setAttribute('aria-label', 'Weekly targets, ' + (S.zn === 0 || S.zn === 1 || S.zn === 2 ? ZNAME[S.zn] + ', ' : '') + tot + ' sets a week across ' + ts.length + ' muscles. Edit targets');
+  c.setAttribute('aria-label', 'Weekly targets, ' + (S.zc ? 'Custom, ' : S.zn === 0 || S.zn === 1 || S.zn === 2 ? ZNAME[S.zn] + ', ' : '') + tot + ' sets a week across ' + ts.length + ' muscles. Edit targets');
   c.addEventListener('click', lfZonesSheet);
   return c;
 }
