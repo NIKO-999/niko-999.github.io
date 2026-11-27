@@ -205,15 +205,16 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const o = await open({ wo, focus: focus(BASE_TG) });
     const bars = await o.page.evaluate(() => [...document.querySelectorAll('#lfLegs .lf-vr')].map((r) => ({ m: r.dataset.m, em: r.querySelector('em').textContent, aux: r.classList.contains('is-aux'), met: r.classList.contains('is-met') })));
     const rd = bars.filter((b) => b.m === 'Rear delts')[0], lb = bars.filter((b) => b.m === 'Lower back')[0];
-    ok('rear delts and lower back join the targets, once, as bars of their own', rd && lb && rd.aux && lb.aux, bars.map((b) => b.m));
+    ok('rear delts join the targets as a bar of their own, and lower back is not a line on the list: it is a part of Back', rd && rd.aux && !lb, bars.map((b) => b.m));
     ok('rear delts count the rear delt flyes and the face pulls: 4 sets', rd && /^4 \//.test(rd.em), rd);
-    ok('and lower back counts the back extensions', lb && /^1 \//.test(lb.em), lb);
+    const lbOf = async (pg) => { await pg.click('#lfLegs .lf-vr[data-m="Back"]'); await settle(pg); await pg.click('#lfMsStats'); await pg.waitForTimeout(200); const t = await pg.evaluate(() => { const r = [...document.querySelectorAll('.lf-ms-parts .lf-sb')].find((x) => /Lower back/.test(x.textContent)); return r ? r.querySelector('em').textContent : ''; }); await pg.keyboard.press('Escape'); await settle(pg); return t; };
+    ok('and lower back, on Back\'s page behind Stats, counts the back extensions', /^1 /.test(await lbOf(o.page)));
     const st = await o.page.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')));
     ok('the targets are written once, and marked as the app\'s own', st.focus.filter((f) => f.m === 'Rear delts').length === 1 && st.focus.filter((f) => f.a).length === 2 && !('aux' in st), st.focus);
     ok('an exercise made by the user, with its name saying hip hinge, counts toward lower back', await (async () => {
       const o2 = await open({ focus: focus(BASE_TG), ex: [{ id: 'mine', n: 'Hip hinge drill', m: 'Hamstrings', t: 'w', c: 1 }], wo: [{ id: 'h2', d: ymd, s: d.getTime(), e: d.getTime() + 3600000, n: 'x', x: [{ id: 'mine', n: 'Hip hinge drill', sets: sets(3) }] }] });
-      const em = await o2.page.evaluate(() => { const r = document.querySelector('#lfLegs .lf-vr[data-m="Lower back"]'); return r ? r.querySelector('em').textContent : ''; });
-      await o2.c.close(); return /^3 \//.test(em);
+      const em = await lbOf(o2.page);
+      await o2.c.close(); return /^3 /.test(em);
     })());
     await o.c.close();
   }
@@ -244,7 +245,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await p.evaluate(() => { const b = [...document.querySelectorAll('.lf-sheet')].pop(); const m = [...b.querySelectorAll('button')].find((x) => /more|every|muscle|list/i.test(x.textContent)); if (m) m.click(); });
     await p.waitForTimeout(500);
     await p.keyboard.press('Escape'); await settle(p);
-    ok('editing happens in the sheets; here only that the bars are on the card', await p.locator('#lfLegs .lf-vr[data-m="Rear delts"]').count() === 1 && await p.locator('#lfLegs .lf-vr[data-m="Lower back"]').count() === 1);
+    ok('editing happens in the sheets; here only that the bars are on the card', await p.locator('#lfLegs .lf-vr[data-m="Rear delts"]').count() === 1 && await p.locator('#lfLegs .lf-vr[data-m="Lower back"]').count() === 0);
     await o.c.close();
   }
 
@@ -438,35 +439,43 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await c.close();
   }
 
-  /* ── THE SMALLER MUSCLES INSIDE A TARGET: press a muscle and it opens into the parts doing the work ── */
+  /* ── A MUSCLE'S PAGE: press a muscle and it opens on its status; Stats, top right, opens the parts doing the work ── */
   {
-    const mon = '2026-10-26', d1 = '2026-10-26', d2 = '2026-10-27';
+    const d1 = '2026-10-26', d2 = '2026-10-27';
     const SS = (w, n) => Array.from({ length: n }, () => ({ w, r: 10 }));
     const wo = [
       { id: 'a', d: d1, s: 1, e: 2, n: 'Legs', x: [{ id: 'squat', n: 'Barbell squat', sets: SS(80, 4) }, { id: 'hipthrust', n: 'Hip thrusts', sets: SS(80, 4) }, { id: 'legpress', n: 'Leg press', sets: SS(120, 2) }] },
       { id: 'b', d: d2, s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Barbell bench press', sets: SS(60, 4) }, { id: 'inclbb', n: 'Incline barbell press', sets: SS(50, 3) }, { id: 'dips', n: 'Dips', sets: SS(0, 2) }] },
     ];
-    const o = await open({ wo });
+    const o = await open({ wo, xp: 'adv', zn: 1 });
     const p = o.page;
     await p.click('.lf-bar [data-v="home"]'); await settle(p);
-    const rowsOf = (m) => p.evaluate((m) => [...document.querySelectorAll('#lfLegs .lf-vr[data-m="' + m + '"] + .lf-sub .lf-sb')].map((r) => r.dataset.k + '=' + r.querySelector('em').textContent), m);
-    ok('nothing is open until you press a muscle', await p.locator('#lfLegs .lf-sub').count() === 0 && await p.getAttribute('#lfLegs .lf-vr[data-m="Glutes"]', 'aria-expanded') === 'false');
+    const parts = () => p.evaluate(() => [...document.querySelectorAll('.lf-ms-parts .lf-sb')].map((r) => r.querySelector('span').textContent + '=' + r.querySelector('em').textContent));
+    ok('the list is plain rows: no chevrons and nothing opens inline', await p.locator('#lfLegs .lf-sub').count() === 0 && await p.locator('#lfLegs .lf-vr[aria-expanded]').count() === 0);
+    ok('Lower back is not a line on the list, it lives under Back', await p.locator('#lfLegs .lf-vr[data-m="Lower back"]').count() === 0 && await p.locator('#lfLegs .lf-vr[data-m="Back"]').count() === 1);
     await p.click('#lfLegs .lf-vr[data-m="Glutes"]'); await settle(p);
-    const g = await rowsOf('Glutes');
-    ok('Glutes opens into glute max, glute med and min, and adductors', g.length === 3 && /^Glute max=/.test(g[0]) && /^Glute med\/min=/.test(g[1]) && /^Adductors=/.test(g[2]), g);
-    ok('and the adductors show what squatting and pressing give them, as indirect sets', /^Adductors=3 indirect$/.test(g[2]), g);
-    ok('the hip thrusts are glute max, and the glute max figure carries the squats as indirect', /^Glute max=7 \(3 indirect\)$/.test(g[0]), g);
-    ok('it is a button that says it is open', await p.getAttribute('#lfLegs .lf-vr[data-m="Glutes"]', 'aria-expanded') === 'true');
-    await p.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(p);
-    const c = await rowsOf('Chest');
-    ok('Chest splits by the kind of press: incline is upper, flat is mid, dips are lower', JSON.stringify(c) === JSON.stringify(['Upper chest=3', 'Mid chest=4', 'Lower chest=2']), c);
-    ok('both can be open at once, and the bars above are untouched by it', await p.locator('#lfLegs .lf-sub').count() === 2 && /\/ /.test(await p.textContent('#lfLegs .lf-vr[data-m="Chest"] em')));
-    await p.click('#lfLegs .lf-vr[data-m="Glutes"]'); await settle(p);
-    ok('pressing it again takes it away, built and removed rather than hidden', await p.locator('#lfLegs .lf-vr[data-m="Glutes"] + .lf-sub').count() === 0 && await p.locator('#lfLegs .lf-sub').count() === 1 && await p.getAttribute('#lfLegs .lf-vr[data-m="Glutes"]', 'aria-expanded') === 'false');
-    await p.click('#lfLegs .lf-sub .lf-sb-f button'); await settle(p);
-    ok('Edit target inside it opens that muscle\'s target', await p.locator('.lf-sheet').last().locator('#lfFoLo').count() === 1);
+    ok('a press opens the muscle\'s own page, on its status first: one coloured line and this week\'s sets', await p.locator('#lfMsSay').count() === 1 && /^lf-vnt is-(green|orange|red|yellow)$/.test(await p.getAttribute('#lfMsSay', 'class')) && /sets this week/.test(await p.textContent('#lfMsWk')));
+    ok('and the stats are not there until you ask for them', await p.locator('.lf-ms-parts').count() === 0 && await p.getAttribute('#lfMsStats', 'aria-expanded') === 'false');
+    await p.click('#lfMsStats'); await p.waitForTimeout(200);
+    const g = await parts();
+    ok('Stats, top right, opens Glutes into glute max, glute med/min and adductors', g.length === 3 && /^Glute max=/.test(g[0]) && /^Glute med\/min=/.test(g[1]) && /^Adductors=/.test(g[2]), g);
+    ok('the adductors show what squatting and pressing give them as indirect sets, and the hip thrusts are glute max', /^Adductors=3 \u00b7 indirect$/.test(g[2]) && /^Glute max=7 \u00b7 3 indirect$/.test(g[0]), g);
+    await p.click('#lfMsStats'); await p.waitForTimeout(150);
+    ok('a second press puts them away: built and removed, not hidden', await p.locator('.lf-ms-parts').count() === 0 && await p.getAttribute('#lfMsStats', 'aria-expanded') === 'false');
+    ok('the same page edits the target: the figures and Save are on it', await p.locator('#lfFoLo').count() === 1 && await p.locator('.lf-sheet').last().locator('button', { hasText: 'Save' }).count() === 1);
     await p.keyboard.press('Escape'); await settle(p);
-    ok('a muscle with no parts to show still opens its target on a press', await (async () => { await p.click('#lfLegs .lf-vr[data-m="Quads"]'); await settle(p); const n = await p.locator('.lf-sheet').last().locator('#lfFoLo').count(); await p.keyboard.press('Escape'); await settle(p); return n === 1; })());
+    await p.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(p); await p.click('#lfMsStats'); await p.waitForTimeout(200);
+    ok('Chest splits by the kind of press: incline is upper, flat is mid, dips are lower', JSON.stringify(await parts()) === JSON.stringify(['Upper chest=3', 'Mid chest=4', 'Lower chest=2']), await parts());
+    await p.keyboard.press('Escape'); await settle(p);
+    await p.click('#lfLegs .lf-vr[data-m="Back"]'); await settle(p); await p.click('#lfMsStats'); await p.waitForTimeout(200);
+    const bk = await parts();
+    ok('Back shows its lats, upper back and traps, and its lower back with the target it keeps', bk.length === 4 && /^Lats=/.test(bk[0]) && /^Lower back=.*target \d/.test(bk[3]), bk);
+    await p.keyboard.press('Escape'); await settle(p);
+    await p.click('#lfLegs .lf-vr[data-m="Quads"]'); await settle(p);
+    ok('a muscle with no parts to show has no Stats button, just its status and target', await p.locator('#lfMsStats').count() === 0 && await p.locator('#lfMsSay').count() === 1 && await p.locator('#lfFoLo').count() === 1);
+    const before = await p.textContent('#lfMsSay');
+    await p.fill('#lfFoLo', '3'); await p.fill('#lfFoHi', '3'); await p.waitForTimeout(150);
+    ok('the status on that page follows the figure as it is typed, without saving', (await p.textContent('#lfMsSay')) !== before && /Very low|Below/.test(await p.textContent('#lfMsSay')));
     await o.c.close();
   }
 

@@ -170,6 +170,8 @@ svg { display: block; }
 .lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
 .lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vn { position: relative; z-index: 2; } .lf-vnt { display: block; margin: -3px 0 -3px; padding: 6px 0; min-height: 0; background: none; border: 0; text-align: left; font: inherit; font-size: 8px; line-height: 1.25; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-orange { color: #fb923c; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; } .lf-vnd { margin: 3px 0 0; font-size: 8px; line-height: 1.3; color: var(--dim); }
 :root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-orange { color: #b45309; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
+.lf-ms-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 4px 12px; margin: 0 0 6px; } .lf-ms-l { min-width: 0; flex: 1; } .lf-ms-l .lf-vnt { font-size: 12px; padding: 4px 0; margin: 0; } .lf-ms-w { display: block; font-size: 12px; color: var(--dim); } .lf-ms-top .lf-vnd { flex-basis: 100%; font-size: 11px; margin: 0; } .lf-ms-sb { flex: none; min-height: 44px; margin: -10px -4px -10px 0; padding: 0 4px; font-size: 13px; font-weight: 600; color: var(--ink); } .lf-ms-sb[aria-expanded="true"] { color: var(--dim); } .lf-ms-parts { display: grid; gap: 8px; margin: 4px 0 8px; padding: 10px 0; border-top: 1px solid var(--card3); border-bottom: 1px solid var(--card3); }
+.lf-sb { display: grid; grid-template-columns: 96px minmax(0, 1fr) max-content; align-items: center; gap: 10px; font-size: 12.5px; } .lf-sb span { color: var(--dim); } .lf-sb i { display: block; height: var(--trk); border-radius: 2px; background: var(--card3); overflow: hidden; } .lf-sb i b { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; } .lf-sb em { font-style: normal; text-align: right; color: var(--dim); font-size: 11px; min-width: 60px; } .lf-sb.is-none span, .lf-sb.is-none em { opacity: .55; }
 .lf-zn-cus { margin-left: 8px; padding: 1px 7px; border-radius: 999px; font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); background: color-mix(in srgb, var(--ink) 12%, transparent); vertical-align: 1px; } .lf-seg.is-cus button[aria-pressed="true"] { opacity: .6; }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
@@ -1573,10 +1575,6 @@ svg.is-draw { animation: lf-reveal 1s var(--ease) both; }
 .lf-cv-h { color: var(--quiet); font-size: 12px; margin-top: 14px; }
 .lf-recd { font-size: 13px; color: var(--dim); margin: 10px 2px 0; }
 button.lf-vr { width: 100%; text-align: left; min-height: 32px; }
-.lf-vr.is-sub span::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); opacity: .55; transition: transform .2s; } .lf-vr.is-open span::after { transform: translateY(0) rotate(225deg); }
-.lf-sub { margin: 0 0 4px 12px; padding: 8px 0 6px 12px; border-left: 2px solid var(--card3); display: grid; gap: 7px; }
-.lf-sb { display: grid; grid-template-columns: 96px minmax(0, 1fr) max-content; align-items: center; gap: 10px; font-size: 12.5px; } .lf-sb span { color: var(--dim); } .lf-sb i { display: block; height: 4px; border-radius: 2px; background: var(--card3); overflow: hidden; } .lf-sb i b { display: block; height: 100%; background: var(--mark-on); border-radius: 2px; } .lf-sb em { font-style: normal; text-align: right; min-width: 60px; color: var(--dim); font-size: 11px; } .lf-sb.is-none span, .lf-sb.is-none em { opacity: .55; }
-.lf-sb-f { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--spent); } .lf-sb-f button { font-size: 12px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px 0; padding: 0 4px; }
 .lf-vr-ed { font-size: 13px; font-weight: 600; color: var(--ink); min-height: 44px; margin: -12px -4px -12px 0; padding: 0 4px; }
 .fr-p { font-size: 13px; line-height: 1.45; color: var(--dim); margin: 10px 0 0; }
 .fr-pend { color: var(--ink); }
@@ -4691,31 +4689,13 @@ function lfLegCard() {
   S.wo.forEach(function (w) { if (w.cd && w.d >= a0 && w.d <= a1) cdm += w.cd.m; });
   if (act && act.cd && ymd(new Date(act.s)) >= a0) cdm += act.cd.m;
   if (!ts.length) $('.lf-vol', c).appendChild(el('<div class="lf-lab">Nothing in focus. Add a muscle under You.</div>'));
-  ts.forEach(function (t, i) {
+  /* LOWER BACK IS A PART OF BACK on this list: it keeps its own target and its own bar, and you see both on Back's page, but it is not a line of its own here */
+  ts.filter(function (t) { return t[0] !== 'Lower back'; }).forEach(function (t, i) {
     var n = got[t[0]] || 0, row = el('<button type="button" class="lf-vr"><span></span><i><b></b></i><em class="lf-num"></em></button>');
     row.dataset.m = t[0]; if (i < 3) row.classList.add('is-pri');
     if (t[0] === 'Rear delts' || t[0] === 'Lower back') row.classList.add('is-aux');
     row.setAttribute('aria-label', t[0] + ': ' + lfSetsN(n) + ' of ' + lfRange(t[1], t[2]) + ' sets. Change the target');
-    var sb = LF_SUB[t[0]], box = null;
-    if (!sb) row.addEventListener('click', function () { lfFocusSheet(t[0]); });
-    else {
-      /* built when it opens and taken away when it shuts, never kept hidden; and the target is still one press away, inside it */
-      row.setAttribute('aria-expanded', 'false'); row.classList.add('is-sub');
-      row.addEventListener('click', function () {
-        if (box) { box.remove(); box = null; row.setAttribute('aria-expanded', 'false'); row.classList.remove('is-open'); return; }
-        var sx = lfSubSets(m, addDays(m, 6))[t[0]] || {}, top = Math.max.apply(null, sb.k.map(function (k) { var c = sx[k]; return c ? c.d + c.i : 0; }).concat([1]));
-        box = el('<div class="lf-sub" role="group"></div>'); box.setAttribute('aria-label', t[0] + ' by part');
-        sb.k.forEach(function (k) {
-          var c = sx[k] || { d: 0, i: 0 }, v = c.d + c.i, r = el('<div class="lf-sb"><span></span><i><b></b></i><em class="lf-num"></em></div>');
-          r.dataset.k = k; $('span', r).textContent = k; $('b', r).style.width = Math.min(100, v / top * 100) + '%';
-          $('em', r).textContent = v ? lfSetsN(v) + (c.i && c.d ? ' (' + lfSetsN(c.i) + ' indirect)' : c.i ? ' indirect' : '') : '0';
-          if (!v) r.classList.add('is-none'); box.appendChild(r);
-        });
-        var ft = el('<div class="lf-sb-f"><span>Split by the kind of exercise</span><button type="button">Edit target</button></div>');
-        $('button', ft).addEventListener('click', function () { lfFocusSheet(t[0]); }); box.appendChild(ft);
-        row.after(box); row.setAttribute('aria-expanded', 'true'); row.classList.add('is-open');
-      });
-    }
+    row.addEventListener('click', function () { lfFocusSheet(t[0]); });
     /* The first three are the specialisation, the rest keep progressing. */
     if (i && !t[3] && ts[i - 1][3]) $('.lf-vol', c).appendChild(el('<div class="lf-vsep" aria-hidden="true"></div>'));
     $('span', row).textContent = t[0];
@@ -8684,6 +8664,41 @@ function lfFocusSheet(m) {
   paintP();
   var save = el('<button type="button" class="lf-btn is-ink is-full">Save</button>'), foot = [save], del = null;
   if (f) { del = el('<button type="button" class="lf-btn is-bad">Remove</button>'); foot.unshift(del); }
+  /* THE MUSCLE'S PAGE OPENS ON ITS STATUS, not on figures: one coloured line from the same check the targets sheet runs, with this week's sets beside it. The breakdown (its parts, and for Back its lower back) is behind Stats, top right, and is built when it is opened and taken away when it is shut. */
+  if (f) {
+    var top = el('<div class="lf-ms-top"><div class="lf-ms-l"><button type="button" class="lf-vnt" id="lfMsSay"></button><span class="lf-ms-w lf-num" id="lfMsWk"></span></div></div>');
+    var hasParts = !!LF_SUB[f.m] || f.m === 'Back';
+    if (hasParts) { var sb = el('<button type="button" class="lf-ms-sb" id="lfMsStats" aria-expanded="false">Stats</button>'); top.appendChild(sb); }
+    b.insertBefore(top, b.firstChild);
+    var mon = monday(today()), got0 = lfMuscleSets(mon, addDays(mon, 6)), zn0 = S.zn === 0 || S.zn === 2 ? S.zn : 1, prog0 = lfVolWeek();
+    var paintSay = function () {
+      var hi = parseInt($('#lfFoHi', b).value, 10) || parseInt($('#lfFoLo', b).value, 10) || f.hi, a0 = lfVolAssess(f.m, hi, { zn: zn0, pri: pri === 1, prog: prog0 });
+      var sy = $('#lfMsSay', b); sy.className = 'lf-vnt is-' + a0.say.c; sy.textContent = a0.say.t;
+      sy.onclick = function () { var d0 = $('.lf-vnd', top); if (d0) d0.remove(); else { var q = el('<p class="lf-vnd"></p>'); q.textContent = a0.detail; top.appendChild(q); } };
+      $('#lfMsWk', b).textContent = lfSetsN(got0[f.m] || 0) + ' / ' + hi + ' sets this week';
+    };
+    $('#lfFoLo', b).addEventListener('input', paintSay); $('#lfFoHi', b).addEventListener('input', paintSay);
+    $$('#lfFoP button', b).forEach(function (x) { x.addEventListener('click', paintSay); });
+    paintSay();
+    if (hasParts) $('#lfMsStats', b).addEventListener('click', function () {
+      var old = $('.lf-ms-parts', b); this.setAttribute('aria-expanded', old ? 'false' : 'true');
+      if (old) { old.remove(); return; }
+      var sx = lfSubSets(mon, addDays(mon, 6))[f.m] || {}, ks = LF_SUB[f.m] ? LF_SUB[f.m].k.slice() : [];
+      var rows0 = ks.map(function (k) { var c = sx[k] || { d: 0, i: 0 }; return [k, c.d + c.i, c.i && c.d ? lfSetsN(c.i) + ' indirect' : c.i ? 'indirect' : '']; });
+      var lb = f.m === 'Back' ? S.focus.filter(function (x) { return x.m === 'Lower back'; })[0] : null;
+      if (lb) rows0.push(['Lower back', got0['Lower back'] || 0, 'target ' + (lb.lo === lb.hi ? lb.lo : lb.lo + '\u2013' + lb.hi)]);
+      var mx = Math.max.apply(null, rows0.map(function (r) { return r[1]; }).concat([1])), box = el('<div class="lf-ms-parts" role="group"></div>');
+      box.setAttribute('aria-label', f.m + ' by part');
+      rows0.forEach(function (r) {
+        var q = el('<div class="lf-sb"><span></span><i><b></b></i><em class="lf-num"></em></div>');
+        $('span', q).textContent = r[0]; $('b', q).style.width = Math.min(100, r[1] / mx * 100) + '%';
+        $('em', q).textContent = r[1] ? lfSetsN(r[1]) + (r[2] ? ' \u00b7 ' + r[2] : '') : (r[2] || '0');
+        if (!r[1]) q.classList.add('is-none');
+        box.appendChild(q);
+      });
+      top.insertAdjacentElement('afterend', box);
+    });
+  }
   var s = lfSheet({ title: f ? f.m : 'Add a muscle', body: b, foot: foot, key: 'focus' });
   save.addEventListener('click', function () {
     if (!cur) { lfToast('Pick a muscle'); return; }
