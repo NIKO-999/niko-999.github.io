@@ -168,6 +168,7 @@ svg { display: block; }
 .lf-zn-bs button { background: none; border: 0; color: var(--log); font-weight: 700; padding: 8px 0 8px 12px; }
 .lf-zn-lg { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; margin: 0 0 4px; }
 .lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
+.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vwhy { font-size: 13px; color: var(--ink); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 6px 0 0; font-size: 12.5px; color: var(--dim); } .lf-vnt.is-caution, .lf-vnt.is-high { color: var(--ink); } .lf-vnt.is-high { font-weight: 600; } .lf-vnt::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--dim); vertical-align: 1px; } .lf-vnt.is-caution::before { background: #f5b942; } .lf-vnt.is-high::before { background: #ff7a7a; } .lf-vnt.is-rec::before { background: var(--mark-on); }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
 .lf-zr-l { display: flex; justify-content: space-between; align-items: baseline; font-weight: 600; font-size: 15px; }
@@ -5178,6 +5179,61 @@ function zHi(m) { return Math.min(22, zRec(m) + 3); }
 function zVal(m, z) { return [Math.max(4, Math.round(zRec(m) * .55)), zRec(m), Math.min(20, zRec(m) + 4)][z]; }
 function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal(t[0], z); }, 0); }
 /* the sheet that opens from Sets this week, from You, from Exercises and from the first split */
+/* ═══════════ THE VOLUME CHECK ═══════════
+   Reads the weekly targets before they are applied and says what they ask of you. It never changes a target on its own: it explains, and "Optimise for me" only fills the sheet, which you can still change before saving. Every figure is worked out here from the targets, the program and your experience, so the same inputs always give the same answer.
+   EFFECTIVE SETS = direct sets + indirect sets x 0.5 (LF_VOL.ind). Indirect sets are the program's sets on other exercises that give a muscle real secondary work (a press for triceps, a row for biceps), counted at half so a compound lift is not a whole set for every muscle it touches. THE TARGETS ARE ALREADY EFFECTIVE SETS: the bars on Home count that half credit, so a target of 12 for triceps is 12 effective sets, of which some come from pressing. Reading it as direct sets and adding the indirect again would count it twice. Warm-ups are never in the program's counts.
+   THE BANDS ARE STARTING POINTS, NOT LIMITS. 0-3 very low, 4-6 low, 7-10 moderate, 11-15 productive, 16-20 high, 21-24 very high, 25+ potentially excessive. A band says where a number sits; whether it is a problem depends on how long you have trained, whether the muscle is a priority, the mode, how many days it is spread over and how much lands on one day. More sets help with diminishing returns and the best amount differs from person to person, so a high number is a notice, never a verdict. Recovery data (sleep, soreness) is not collected yet: until it is, everything here is an estimate from training information alone. */
+var LF_VOL_ON = (function () { try { return localStorage.getItem('lift.vol.v1') !== '0'; } catch (e) { return true; } })();
+var LF_VOL = { ind: 0.5, bands: [[4, 'Very low'], [7, 'Low'], [11, 'Moderate'], [16, 'Productive'], [21, 'High'], [25, 'Very high'], [1e9, 'Potentially excessive']], caution: { new: 14, some: 18, adv: 21 }, cap: { new: 12, some: 16, adv: 20 }, sess: 12 };
+function lfVolBand(v) { for (var i = 0; i < LF_VOL.bands.length; i++) if (v < LF_VOL.bands[i][0]) return LF_VOL.bands[i][1]; return ''; }
+/* what the program asks of each muscle across the week: direct sets, indirect sets, and which days they fall on */
+function lfVolPlan() {
+  var o = { prim: {}, ind: {}, days: {} };
+  lfProg().days.forEach(function (d) {
+    if (d.choice || !d.tg) return;
+    d.ex.forEach(function (id) {
+      var x = exById(id), g = d.tg[id]; if (!x || !g || g[3] === 'rounds') return; var s = g[0] || 0; if (!s) return;
+      var dir = function (m) { o.prim[m] = (o.prim[m] || 0) + s; (o.days[m] = o.days[m] || {})[d.id] = ((o.days[m] || {})[d.id] || 0) + s; };
+      dir(x.m); lfAlso(x).forEach(dir);
+      var h = EX_HALF[id]; if (h && h !== x.m) o.ind[h] = (o.ind[h] || 0) + s;
+    });
+  });
+  return o;
+}
+var LF_XP_N = { new: 'someone newer to lifting', some: 'your level', adv: 'an experienced lifter' };
+/* one muscle at a target of v direct sets: its effective sets, its band, and what is worth saying about it */
+function lfVolAssess(m, v, c) {
+  var pl = c.plan, ind = pl.ind[m] || 0, eff = v, direct = Math.max(0, Math.round((v - ind * LF_VOL.ind) * 2) / 2), days = pl.days[m] || {}, dk = Object.keys(days), tot = pl.prim[m] || 0;
+  var mx = dk.reduce(function (a, k) { return Math.max(a, days[k]); }, 0), per = tot ? Math.round(v * mx / tot * 2) / 2 : 0, exp = dk.length, xp = LF_VOL.caution[c.xp] ? c.xp : 'some', ct = LF_VOL.caution[xp];
+  var N = [], add = function (lv, id, txt) { N.push({ lv: lv, id: id, t: txt }); }, nm = m.toLowerCase(), s = function (n) { return lfSetsN(n); };
+  if (eff >= 25) add('high', 'excess', 'Your ' + nm + ' are at ' + s(eff) + ' effective sets a week. That is past what most people recover from, and extra sets are likely to add little. Think about easing it back, or spreading it so there is a rest day between.');
+  else if (eff >= 21) add(c.pri && c.zn === 2 && xp !== 'new' ? 'info' : 'caution', 'vhigh', 'Your ' + nm + ' are at ' + s(eff) + ' effective sets a week, a very high volume' + (c.pri ? '. You have made them a priority, so keep an eye on how they recover before going further.' : '. Extra sets are likely to give diminishing returns; check how they recover before adding more.'));
+  else if (eff >= ct && eff >= 16) add('caution', 'high', s(eff) + ' effective sets a week is a high volume for ' + LF_XP_N[xp] + '. More sets will give diminishing returns.' + (c.pri ? '' : ' If ' + nm + ' are not a priority, some of these could go elsewhere.'));
+  if (eff < 7 && (c.pri || (c.zn >= 1 && eff < 4))) add('rec', 'low', 'Your ' + nm + ' get ' + s(eff) + ' effective sets a week.' + (c.pri ? ' If they are a priority, they need more than this to grow.' : ' That is very little for building.') + (direct < 3 ? ' Dedicated ' + nm + ' work would help.' : ''));
+  var extra = Math.min(v, ind * LF_VOL.ind);
+  if (v > 0 && extra >= 3 && extra >= v * 0.25) add('info', 'ind', 'About ' + s(extra) + ' of these ' + nm + ' sets come from other exercises, like presses and rows, which leaves ' + s(direct) + ' for dedicated ' + nm + ' work.');
+  if (per >= LF_VOL.sess) add('caution', 'sess', 'About ' + s(per) + ' ' + nm + ' sets land on one day. Consider moving some to another training day.');
+  else if (per >= 9 && exp === 1) add('rec', 'sess', 'All your ' + nm + ' work is on one day, around ' + s(per) + ' sets. Spreading it over two days usually recovers better.');
+  if (exp >= 4 && eff >= 16) add('caution', 'rec', 'Your ' + nm + ' are trained on ' + exp + ' days with ' + s(eff) + ' effective sets. Check recovery between those days before adding more.');
+  var rank = { high: 3, caution: 2, rec: 1, info: 0 }; N.sort(function (a, b) { return rank[b.lv] - rank[a.lv]; });
+  return { m: m, v: v, ind: ind, direct: direct, eff: eff, band: lfVolBand(eff), notes: N, per: per, exposures: exp };
+}
+/* THE SUGGESTION: where each muscle should sit given how long you have trained, the mode and which muscles you put first. It credits the indirect work already in the program, and it moves volume towards the priorities rather than adding it everywhere: in Push the others come down to maintenance, in Build they ease a little, in Maintain only the priorities are kept up. Nothing leaves the sheet until you save. */
+function lfVolRec(ts, zn, c) {
+  var out = {}, why = [], xp = LF_VOL.cap[c.xp] ? c.xp : 'some', cap = LF_VOL.cap[xp], anyPri = ts.some(function (t) { return t[3]; });
+  ts.forEach(function (t) {
+    var m = t[0], pri = !!t[3], base = zVal(m, zn), eff = base, why1 = '';
+    if (anyPri) {
+      if (zn === 2) { if (pri) { eff = Math.min(cap + 4, Math.max(base, zVal(m, 1) + 3)); why1 = 'priority'; } else { eff = Math.min(base, Math.max(zVal(m, 0), 6)); why1 = 'maintenance'; } }
+      else if (zn === 1) { if (pri) { eff = Math.min(cap, base + 2); why1 = 'priority'; } else { eff = Math.max(6, Math.round(base * 0.85)); why1 = 'eased'; } }
+      else { if (pri) { eff = Math.max(base, zVal(m, 1) - 2); why1 = 'priority'; } else { eff = base; } }
+    }
+    if (!pri || zn !== 2) eff = Math.min(eff, cap);
+    var v = Math.max(2, Math.min(24, Math.round(eff)));
+    out[m] = v; if (v !== t[1] && why1) why.push([m, why1]);
+  });
+  return { v: out, why: why };
+}
 function lfZonesSheet(fresh) {
   fresh = fresh === true; /* from the goal sheet: the suggestions have just changed under every muscle, so it opens on them */
   var ts = lfTargets(); if (!ts.length) { lfToast('Make a split first'); return; }
@@ -5187,12 +5243,29 @@ function lfZonesSheet(fresh) {
   var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
   var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
-    + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div><div id="lfZnRows"></div></div>');
+    + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p><button type="button" class="lf-btn is-full" id="lfVolOpt">Optimise for me</button><p class="lf-vwhy" id="lfVolWhy" hidden></p></div>' : '') + '<div id="lfZnRows"></div></div>');
   $('.lf-zn-h b', b).textContent = P.n; $('.lf-zn-h span', b).textContent = P.days.filter(function (r) { return !r.choice; }).length + ' days a week';
   $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(zg()[0]) + '</b> · ' + esc(zx()[0]);
   function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
   function nEd() { return Object.keys(ed).length; }
   var save = el('<button type="button" class="lf-btn is-ink is-full" id="lfZnSave">Save targets</button>'), back = el('<button type="button" class="lf-btn is-full" id="lfZnBack" hidden></button>'), more = el('<button type="button" class="lf-btn is-full" id="lfZnMore">Priorities and muscles</button>');
+  var vctx = { plan: lfVolPlan(), xp: S.xp, get zn() { return zn; } };
+  /* every change to a figure, the mode or the priorities recalculates every muscle, because one muscle's sets are another's indirect work */
+  function paintVol() {
+    var n = { high: 0, caution: 0, rec: 0 };
+    ts.forEach(function (t) {
+      var m = t[0], a = lfVolAssess(m, val(m), { plan: vctx.plan, xp: S.xp, zn: zn, pri: !!t[3] }), box = $('.lf-vn', rows[m].el);
+      box.textContent = '';
+      var top = a.notes.filter(function (x) { return x.lv !== 'info' || a.notes.length === 1; }).slice(0, 2);
+      top.forEach(function (x) { var p = el('<p class="lf-vnt is-' + x.lv + '"></p>'); p.textContent = x.t; box.appendChild(p); });
+      a.notes.forEach(function (x) { if (n[x.lv] !== undefined) n[x.lv]++; });
+      rows[m].el.dataset.band = a.band; rows[m].el.dataset.eff = a.eff; rows[m].el.dataset.direct = a.direct;
+      $('.lf-zr-l span', rows[m].el).setAttribute('title', a.band + ' · ' + a.eff + ' effective sets, ' + a.direct + ' direct');
+    });
+    var say = $('#lfVolSay', b); if (!say) return;
+    var parts = []; if (n.high) parts.push(n.high + (n.high === 1 ? ' high-priority warning' : ' high-priority warnings')); if (n.caution) parts.push(n.caution + (n.caution === 1 ? ' caution' : ' cautions')); if (n.rec) parts.push(n.rec + (n.rec === 1 ? ' recommendation' : ' recommendations'));
+    say.textContent = (parts.length ? 'Volume check: ' + parts.join(', ') + '.' : 'Volume check: nothing stands out.') + ' Based on your training, not on how you are recovering.';
+  }
   function refresh() {
     ts.forEach(function (t) {
       var m = t[0], v = val(m), r = rows[m], pc = function (x) { return Math.min(100, x / 24 * 100); };
@@ -5201,17 +5274,26 @@ function lfZonesSheet(fresh) {
       r.inp.setAttribute('aria-valuetext', v + ' sets a week');
     });
     var tot = ts.reduce(function (a, t) { return a + val(t[0]); }, 0);
+    if (LF_VOL_ON) paintVol();
     $$('#lfZnSeg button', b).forEach(function (x) { x.setAttribute('aria-pressed', +x.dataset.z === zn ? 'true' : 'false'); });
     $('#lfZnSay', b).textContent = ZBLURB[zn] + ' ' + tot + ' sets a week' + (tot !== now ? ', ' + now + ' now.' : '.');
     back.hidden = !nEd() || !(Object.keys(tch).length || zoned); back.textContent = 'Back to the suggestion (' + nEd() + ' changed)';
   }
   [0, 1, 2].forEach(function (z) { var x = el('<button type="button"></button>'); x.dataset.z = z; x.textContent = ZNAME[z]; x.addEventListener('click', function () { zn = z; ed = {}; tch = {}; zoned = true; refresh(); }); $('#lfZnSeg', b).appendChild(x); });
   ts.forEach(function (t) {
-    var m = t[0], r = el('<div class="lf-zr"><div class="lf-zr-l"><span></span><span><b class="lf-num"></b> <em>sets</em></span></div><div class="lf-zt"><i class="rl"></i><i class="zo"></i><i class="fi"></i><i class="dt"></i><input type="range" min="2" max="24" step="1" /></div></div>');
+    var m = t[0], r = el('<div class="lf-zr"><div class="lf-zr-l"><span></span><span><b class="lf-num"></b> <em>sets</em></span></div><div class="lf-zt"><i class="rl"></i><i class="zo"></i><i class="fi"></i><i class="dt"></i><input type="range" min="2" max="24" step="1" /></div><div class="lf-vn" aria-live="polite"></div></div>');
     $('.lf-zr-l span', r).textContent = m;
     var inp = $('input', r); inp.setAttribute('aria-label', m + ' sets a week');
     inp.addEventListener('input', function () { var v = +inp.value; tch[m] = 1; if (v === zVal(m, zn)) delete ed[m]; else ed[m] = v; refresh(); });
     rows[m] = { el: r, zone: $('.zo', r), fill: $('.fi', r), dot: $('.dt', r), inp: inp }; $('#lfZnRows', b).appendChild(r);
+  });
+  if (LF_VOL_ON) $('#lfVolOpt', b).addEventListener('click', function () {
+    var rc = lfVolRec(ts, zn, { plan: vctx.plan, xp: S.xp }), ch = 0, lines = [];
+    ed = {}; tch = {};
+    ts.forEach(function (t) { var m = t[0], v = rc.v[m]; if (v !== zVal(m, zn)) ed[m] = v; tch[m] = 1; if (v !== t[1]) { ch++; lines.push(m + ' ' + t[1] + ' to ' + v); } });
+    zoned = true; refresh();
+    var w = $('#lfVolWhy', b); w.hidden = false;
+    w.textContent = ch ? 'Suggested: ' + lines.join(', ') + '. Nothing is saved until you press Save targets, and you can change any of them.' : 'These targets already look right for you. Nothing to change.';
   });
   var fr = el('<div class="lf-bshow lf-fit-sw"><span>Fit my workouts to these</span><button type="button" class="lf-tgl" role="switch" aria-label="Fit my workouts to my muscle targets"><i></i></button></div>'), fb = $('button', fr);
   fb.dataset.k = 'fit'; fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false');
