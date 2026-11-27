@@ -5279,6 +5279,15 @@ function lfVolWeek(vals) {
   Object.defineProperty(out, '__sub', { value: sub }); Object.defineProperty(out, '__days', { value: dys }); Object.defineProperty(out, '__hard', { value: hard }); Object.defineProperty(out, '__dn', { value: dn });
   return out;
 }
+/* A STATUS LINE IS SLID, NOT TAPPED: a swipe along it, either way, opens or shuts the reason under it, so brushing past it while scrolling or moving a slider never opens anything. A button for a keyboard or a screen reader still works: its own Enter and Space arrive as a click with no pointer behind it (detail 0), while a finger's tap (detail 1 or more) does nothing. */
+function lfSlide(node, fn) {
+  var x0 = 0, y0 = 0, on = false;
+  node.style.touchAction = 'pan-y';
+  node.addEventListener('pointerdown', function (e) { x0 = e.clientX; y0 = e.clientY; on = true; try { node.setPointerCapture(e.pointerId); } catch (x) {} });
+  node.addEventListener('pointerup', function (e) { if (!on) return; on = false; var dx = e.clientX - x0, dy = e.clientY - y0; if (Math.abs(dx) >= 28 && Math.abs(dx) >= Math.abs(dy) * 1.5) fn(); });
+  node.addEventListener('pointercancel', function () { on = false; });
+  node.addEventListener('click', function (e) { if (e.detail === 0) fn(); });
+}
 /* one muscle at a target of v: where it sits in its own range, in a word, a colour and a short sentence; `prog` is what the exercises give it */
 function lfVolClass(v, r, maint) {
   var st, tx, col;
@@ -5299,7 +5308,7 @@ function lfVolAssess(m, v, c) {
    A SECOND QUESTION ABOUT THE SAME NUMBERS: not "is each muscle in its range" (lfVolAssess answers that, under every slider) but "does the week hang together": a lot on one muscle while a related one is short, a lot of one muscle's work in a single session, or a muscle getting most of its stimulus from a lift that is really about another. Lower body (quads, hamstrings, glutes with their med/min and inner thigh, calves), upper body (chest, back with its lats, upper back and traps, the three delts, biceps, triceps) and the core with the lower back, which shares hinges with the hamstrings.
    IT NEVER COMPARES SET COUNTS. 20 quad sets and 12 hamstring sets are not an imbalance: each is read against ITS OWN range for the mode and how long you have trained (zRange), and only an over-range muscle beside an under-range one in the same region is a finding. Nothing is assumed equal. Parents and parts are never both counted: where the programme gives a muscle's parts, the parts stand in for the parent in this read.
    IT READS WHAT THE EXERCISES DELIVER, not only the slider: the stimulus is the programme's effective sets (direct plus half the indirect, the way the bars count), with the target kept for what it is, a shortfall against it. It changes nothing: a custom target is a figure you chose and is only read.
-   ONE LINE, THE MOST IMPORTANT ONE: an over-and-under pair first, then an overlap (front delts from pressing, triceps from pressing, lower back from hinging), then a muscle left short, then a session carrying most of one muscle's week, then heavy lower work stacked in one session. Wording is a programming assessment, never a prediction of how anybody will look. Forearms and brachialis are not tracked as their own muscles here: brachialis is a part of the biceps and forearms get no count at all, so nothing is said about either. */
+   ONE LINE, THE MOST IMPORTANT ONE: an over-and-under pair first, then an overlap (front delts from pressing, triceps from pressing, lower back from hinging), then a muscle left short. Wording is a programming assessment, never a prediction of how anybody will look. Forearms and brachialis are not tracked as their own muscles here: brachialis is a part of the biceps and forearms get no count at all, so nothing is said about either. */
 var LF_RP = { Lower: ['Quads', 'Hamstrings', 'Glutes', 'Calves'], Upper: ['Chest', 'Back', 'Shoulders', 'Rear delts', 'Biceps', 'Triceps'], Core: ['Abs', 'Core', 'Lower back'] };
 var LF_RPART = { Glutes: ['Glute max', 'Glute med/min', 'Adductors'], Back: ['Lats', 'Upper back', 'Traps'], Shoulders: ['Front delts', 'Side delts'] };
 var LF_RN = { Quads: 'quad', Hamstrings: 'hamstring', Glutes: 'glute', 'Glute max': 'glute', 'Glute med/min': 'glute med', Adductors: 'adductor', Calves: 'calf', Chest: 'chest', Back: 'back', Lats: 'lat', 'Upper back': 'upper-back', Traps: 'trap', Shoulders: 'shoulder', 'Front delts': 'front-delt', 'Side delts': 'lateral-delt', 'Rear delts': 'rear-delt', Biceps: 'bicep', Triceps: 'tricep', Abs: 'ab', Core: 'core', 'Lower back': 'lower-back' };
@@ -5358,27 +5367,7 @@ function lfRegion(o) {
       msg: sh.m + ' below target. Consider additional direct work.', detail: LF_RLAB[reg] + ': ' + look(us) + '. ' + sh.m + ' is below its range' + (sh.t !== undefined ? ' and the exercises give it ' + lfSetsN(Math.round((sh.xs !== undefined ? sh.xs : sh.x) * 2) / 2) + ' of the ' + sh.t + ' you aimed at' : '') + '.' + indNote(sh) });
     if (!over.length && !under.length) balanced.push(reg);
   });
-  /* the week as sessions: one session carrying most of a muscle's sets, and the heavy lower lifts all on one day */
-  var days = o.days || {}, dn = o.dn || {}, hard = o.hard || {};
-  ['Lower', 'Upper'].forEach(function (reg) {
-    var sess = {}; LF_RP[reg].forEach(function (m) { var d = days[m]; if (d) Object.keys(d).forEach(function (k) { sess[k] = (sess[k] || 0) + d[k]; }); });
-    var nSess = Object.keys(sess).length; if (nSess < 2) return;
-    LF_RP[reg].forEach(function (m) {
-      var d = days[m]; if (!d) return; var ks = Object.keys(d), w = ks.reduce(function (a, k) { return a + d[k]; }, 0); if (w < 8) return;
-      var top = ks.sort(function (a, b) { return d[b] - d[a]; })[0];
-      if (d[top] / w >= 0.65) {
-        var light = Object.keys(sess).filter(function (k) { return k !== top; }).sort(function (a, b) { return (d[a] || 0) - (d[b] || 0); })[0];
-        found.push({ score: 60, c: 'yellow', kind: 'session', region: reg, muscle: m,
-          msg: cap(LF_RN[m]) + ' work sits in one session. Consider spreading it across the week.',
-          detail: (dn[top] || 'One session') + ' holds ' + lfSetsN(d[top]) + ' of the ' + lfSetsN(w) + ' ' + LF_RN[m] + ' sets. Moving some to ' + (dn[light] || 'another session') + ' keeps the same weekly volume with more recovery between sets.' });
-      }
-    });
-    if (reg === 'Lower') {
-      var hk = Object.keys(hard), ht = hk.reduce(function (a, k) { return a + hard[k]; }, 0);
-      if (ht >= 2 && hk.length === 1) found.push({ score: 55, c: 'yellow', kind: 'heavy', region: reg,
-        msg: 'Heavy lower work is stacked in one session. Consider spreading it out.', detail: (dn[hk[0]] || 'One session') + ' carries all ' + ht + ' of the demanding lower-body lifts, and the other lower sessions have none. One of them in another session keeps the fatigue spread.' });
-    }
-  });
+  /* THE WEEK AS SESSIONS IS NOT A FINDING HERE. One session carrying most of a muscle's sets, or the heavy lifts on one day, were flagged and then sat on the screen for an ordinary two-day split, where it is simply how the split is built. Where a muscle's work sits is the split's decision; this read only says what the muscles are getting. */
   found.sort(function (a, b) { return b.score - a.score; });
   var top0 = found[0];
   return { msg: top0 ? top0.msg : '', c: top0 ? top0.c : 'green', detail: top0 ? top0.detail : '', kind: top0 ? top0.kind : '', issue: top0 || null, all: found, balanced: balanced,
@@ -5417,7 +5406,7 @@ function lfZonesSheet(fresh) {
       box.textContent = '';
       var p = el('<button type="button" class="lf-vnt is-' + a.say.c + '" aria-expanded="' + (openD[m] ? 'true' : 'false') + '"></button>'); p.textContent = a.say.t; box.appendChild(p);
       if (openD[m]) { var dd = el('<p class="lf-vnd"></p>'); dd.textContent = a.detail; box.appendChild(dd); }
-      p.addEventListener('click', function () { openD[m] = !openD[m]; paintVol(); });
+      lfSlide(p, function () { openD[m] = !openD[m]; paintVol(); });
       if (a.status === 'high' || a.status === 'vhigh' || a.status === 'excess') n.high++; else if (a.status === 'below') n.low++;
       var r = rows[m], pc = function (x) { return Math.min(100, x / 24 * 100); }; r.zone.style.left = pc(a.lo) + '%'; r.zone.style.width = (pc(a.hi) - pc(a.lo)) + '%';
       r.el.dataset.status = a.status; r.el.dataset.range = a.lo + '-' + a.hi; r.el.dataset.eff = a.prog.eff;
@@ -5429,7 +5418,7 @@ function lfZonesSheet(fresh) {
       if (rg.issue) {
         var rb = el('<button type="button" class="lf-vnt is-' + rg.c + '" aria-expanded="' + (openD.__reg ? 'true' : 'false') + '"></button>'); rb.textContent = rg.msg; rb.dataset.kind = rg.kind; reg.appendChild(rb);
         if (openD.__reg) { var rd = el('<p class="lf-vnd"></p>'); rd.textContent = rg.detail; reg.appendChild(rd); }
-        rb.addEventListener('click', function () { openD.__reg = !openD.__reg; paintVol(); });
+        lfSlide(rb, function () { openD.__reg = !openD.__reg; paintVol(); });
       }
     }
     var say = $('#lfVolSay', b); if (!say) return;
@@ -8812,7 +8801,7 @@ function lfFocusSheet(m) {
     var paintSay = function () {
       var hi = parseInt($('#lfFoHi', b).value, 10) || parseInt($('#lfFoLo', b).value, 10) || f.hi, a0 = lfVolAssess(f.m, hi, { zn: zn0, pri: pri === 1, prog: prog0 });
       var sy = $('#lfMsSay', b); sy.className = 'lf-vnt is-' + a0.say.c; sy.textContent = a0.say.t;
-      sy.onclick = function () { var d0 = $('.lf-vnd', top); if (d0) d0.remove(); else { var q = el('<p class="lf-vnd"></p>'); q.textContent = a0.detail; top.appendChild(q); } };
+      lfSlide(sy, function () { var d0 = $('.lf-vnd', top); if (d0) d0.remove(); else { var q = el('<p class="lf-vnd"></p>'); q.textContent = a0.detail; top.appendChild(q); } });
       $('#lfMsWk', b).textContent = lfSetsN(got0[f.m] || 0) + ' / ' + hi + ' sets this week';
     };
     $('#lfFoLo', b).addEventListener('input', paintSay); $('#lfFoHi', b).addEventListener('input', paintSay);

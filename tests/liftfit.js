@@ -530,6 +530,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('effective volume is direct plus half the indirect, once', Math.abs(w.hi.eff - (w.hi.d + w.hi.i * 0.5)) < 1e-9 && w.hi.i >= 0, w.hi);
     ok('and it leaves the saved targets alone while it works', await p.evaluate(() => { const V = window.__vv; const before = JSON.stringify(V.S.focus); V.lfVolWeek({ Chest: 3, Back: 3 }); return JSON.stringify(V.S.focus) === before; }));
     /* ── REGIONAL BALANCE: related muscles read against their own ranges, one line, nothing changed ── */
+    const slide = async (pg, sel) => { const bb = await pg.locator(sel).first().boundingBox(); await pg.mouse.move(bb.x + 20, bb.y + bb.height / 2); await pg.mouse.down(); await pg.mouse.move(bb.x + 80, bb.y + bb.height / 2, { steps: 4 }); await pg.mouse.up(); };
     const reg = (o) => p.evaluate((o) => { const r = window.__vv.lfRegion(o); return { msg: r.msg, kind: r.kind, over: r.issue && r.issue.over, under: r.issue && r.issue.under, detail: r.detail, balanced: r.balanced, issue: !!r.issue, n: r.all.length }; }, o);
     const A = await reg({ v: { Quads: 20, Hamstrings: 12, Glutes: 5, Calves: 15 }, zn: 1, xp: 'some' });
     ok('TEST A: quads 20, hamstrings 12, glutes 5, calves 15 reads as one lower-body finding: high quads, low glutes, and only those two', A.kind === 'pair' && A.over === 'Quads' && A.under === 'Glutes' && /quad/.test(A.msg) && /glute/.test(A.msg) && !/hamstring|calf|calves/i.test(A.msg), A);
@@ -539,13 +540,8 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('TEST B: chest 20, back 10, front delts 18, rear delts 5 reads as front-delt overlap from pressing with the rear delts low, and counts the indirect work', B.kind === 'pair' && /front-delt overlap from pressing/i.test(B.msg) && /rear-delts low/.test(B.msg) && /indirect/.test(B.detail), B);
     const C = await reg({ v: { Quads: 12, Hamstrings: 10, Glutes: 8, Calves: 12, Chest: 12, Back: 12, Shoulders: 9, 'Rear delts': 7, Biceps: 10, Triceps: 9 }, zn: 1, xp: 'some' });
     ok('TEST C: muscles that are each inside their own range are not an imbalance because their set counts differ', !C.issue && C.n === 0 && C.balanced.indexOf('Lower') >= 0 && C.balanced.indexOf('Upper') >= 0, C);
-    const D1 = await reg({ days: { Quads: { d1: 12, d2: 2, d3: 2 }, Glutes: { d2: 4, d3: 4 } }, dn: { d1: 'Lower A', d2: 'Lower B', d3: 'Lower C' }, zn: 1, xp: 'some' });
-    const D2 = await reg({ days: { Quads: { d1: 6, d2: 5, d3: 5 }, Glutes: { d1: 3, d2: 3, d3: 3 } }, zn: 1, xp: 'some' });
-    ok('TEST D: three lower sessions with most of the quad work in one are told so, naming the session and another to move it to', D1.kind === 'session' && /Quad work sits in one session/.test(D1.msg) && /Lower A/.test(D1.detail), D1);
-    ok('TEST D: the same sets spread across the three sessions are left alone', !D2.issue, D2);
-    const D3 = await reg({ days: { Quads: { d1: 6, d2: 5, d3: 5 } }, hard: { d1: 3 }, dn: { d1: 'Lower A' }, zn: 1, xp: 'some' });
-    const D4 = await reg({ days: { Quads: { d1: 6, d2: 5, d3: 5 } }, hard: { d1: 1, d2: 1, d3: 1 }, zn: 1, xp: 'some' });
-    ok('TEST D: every demanding lower lift on one day is flagged, and one on each of the three is not', D3.kind === 'heavy' && !D4.issue, [D3, D4]);
+    const D1 = await reg({ days: { Quads: { d1: 12, d2: 2, d3: 2 }, Glutes: { d2: 4, d3: 4 } }, hard: { d1: 3 }, dn: { d1: 'Lower A', d2: 'Lower B', d3: 'Lower C' }, zn: 1, xp: 'some' });
+    ok('which session a muscle\'s sets sit in is the split\'s business: a session holding most of the quad work, or every heavy lift, is never a finding', !D1.issue && D1.n === 0, D1);
     ok('and the programme reports its sessions and parts alongside the totals', await p.evaluate(() => { const w = window.__vv.lfVolWeek(); return !!w.__days && !!w.__sub && !!w.__hard && !Object.keys(w).some((k) => k.indexOf('__') === 0); }));
     /* custom targets are read, never replaced */
     ok('TEST E: custom figures are judged as written and the saved targets are not touched', await p.evaluate(() => { const V = window.__vv, before = JSON.stringify(V.S.focus), r = V.lfRegionNow({ Quads: 22, Glutes: 3, Hamstrings: 9 }, V.lfVolWeek({ Quads: 22, Glutes: 3, Hamstrings: 9 }), 1, {}); return !!r.msg && JSON.stringify(V.S.focus) === before; }));
@@ -574,9 +570,14 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const pr = await rowOf('Chest');
     ok('changing the mode re-judges every muscle: Push has its own ranges', pr.zone !== ca.zone || pr.s !== ca.s);
     await q.locator('#lfZnRows .lf-vnt').first().click(); await q.waitForTimeout(150);
-    ok('a detailed explanation is behind a tap, and only then: range, direct, indirect and effective', await q.locator('#lfZnRows .lf-vnd').count() === 1 && /Range \d+.\d+\. The exercises give it .* effective\./.test(await q.textContent('#lfZnRows .lf-vnd')));
-    await q.locator('#lfZnRows .lf-vnt').first().click(); await q.waitForTimeout(150);
-    ok('and a second tap puts it away', await q.locator('#lfZnRows .lf-vnd').count() === 0);
+    ok('a plain tap on a status line opens nothing: it is slid, so brushing past it while scrolling or moving a slider does not', await q.locator('#lfZnRows .lf-vnd').count() === 0);
+    await q.locator('#lfZnRows .lf-vnt').first().focus(); await q.keyboard.press('Enter'); await q.waitForTimeout(150);
+    ok('but the keyboard still opens it, for anyone not using a finger', await q.locator('#lfZnRows .lf-vnd').count() === 1);
+    await slide(q, '#lfZnRows .lf-vnt'); await q.waitForTimeout(150);
+    await slide(q, '#lfZnRows .lf-vnt'); await q.waitForTimeout(150);
+    ok('a detailed explanation is behind a slide, and only then: range, direct, indirect and effective', await q.locator('#lfZnRows .lf-vnd').count() === 1 && /Range \d+.\d+\. The exercises give it .* effective\./.test(await q.textContent('#lfZnRows .lf-vnd')));
+    await slide(q, '#lfZnRows .lf-vnt'); await q.waitForTimeout(150);
+    ok('and a second slide puts it away', await q.locator('#lfZnRows .lf-vnd').count() === 0);
     ok('a preset alone is not Custom', await q.isHidden('#lfZnCus'));
     await move('Chest', 12); await q.waitForTimeout(150);
     ok('moving a slider makes the targets Custom on its own: a small tag, no extra step', await q.isVisible('#lfZnCus'));
