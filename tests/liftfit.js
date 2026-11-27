@@ -341,7 +341,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const p = o.page;
     await p.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
     const cvs = '#lfMonthSum canvas';
-    ok('it opens on its own on the first, as a canvas story of 1080 by 1920 with a card for the days, the time, what went up, the sets and the end', await p.evaluate((s) => { const c = document.querySelector(s); return !!c && c.width === 1080 && c.height === 1920 && c.dataset.slides === '5'; }, cvs));
+    ok('it opens on its own on the first, as a canvas story of 1080 by 1920 with a card for the days, when you train, the time, what went up, the sets and the end', await p.evaluate((s) => { const c = document.querySelector(s); return !!c && c.width === 1080 && c.height === 1920 && c.dataset.slides === '6'; }, cvs));
     ok('it is read out as words too: the days, the average, what went up', await p.evaluate(() => { const t = document.querySelector('#lfMonthSum .lf-mw-sr').textContent; return /October wrapped/.test(t) && /17 of 31 days/.test(t) && /Average session 60 minutes/.test(t) && /Up most on .*bench press/i.test(t); }));
     await p.waitForTimeout(3200);
     /* the calendar: 1 October 2026 is a Thursday, so the first cell sits in the fourth column; 1 is a day you trained and 3 is not */
@@ -369,15 +369,15 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const mk = (cdm) => [1, 8, 15, 22].map((n, i) => ({ id: 'c' + i, d: '2026-10-' + String(n).padStart(2, '0'), s: new Date(2026, 9, n, 18).getTime(), e: new Date(2026, 9, n, 19).getTime(), n: 'Push', cd: cdm ? { k: i % 2 ? 'run' : 'bike', m: cdm } : undefined, x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60 + i * 5, r: 8 }] }] }));
     let o = await open({ goal: 3, wo: mk(45) }, '2026-11-01T10:00:00');
     await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
-    ok('a month with a good amount of cardio gets a card of its own, and it is read out', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 6 && /Cardio: 180 minutes over 4 sessions/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    ok('a month with a good amount of cardio gets a card of its own, and it is read out', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 7 && /Cardio: 180 minutes over 4 sessions/.test(document.querySelector('.lf-mw-sr').textContent); }));
     await o.c.close();
     o = await open({ goal: 3, wo: mk(30) }, '2026-11-01T10:00:00');
     await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
-    ok('a modest amount of cardio is not enough for a card: two hours over four sessions is skipped', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 5 && !/Cardio:/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    ok('a modest amount of cardio is not enough for a card: two hours over four sessions is skipped', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 6 && !/Cardio:/.test(document.querySelector('.lf-mw-sr').textContent); }));
     await o.c.close();
     o = await open({ goal: 3, wo: mk(0) }, '2026-11-01T10:00:00');
     await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
-    ok('no cardio at all: no cardio card and no mention of it', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 5 && !/ardio/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    ok('no cardio at all: no cardio card and no mention of it', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 6 && !/ardio/.test(document.querySelector('.lf-mw-sr').textContent); }));
     await o.c.close();
   }
   {
@@ -386,6 +386,15 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
     ok('a month with no times and nothing that went up skips those cards instead of drawing them empty', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides < 5 && !/Average session/.test(document.querySelector('.lf-mw-sr').textContent) && !/Up most/.test(document.querySelector('.lf-mw-sr').textContent); }));
     await o.c.close();
+  }
+  {
+    const mkT = (h, mi, n) => Array.from({ length: n }, (_, i) => ({ id: 't' + h + i, d: '2026-10-' + String(2 + i * 3).padStart(2, '0'), s: new Date(2026, 9, 2 + i * 3, h, mi).getTime(), e: new Date(2026, 9, 2 + i * 3, h, mi + 50).getTime(), n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60, r: 8, ok: true }] }] }));
+    const read = async (wo) => { const o = await open({ goal: 3, wo }, '2026-11-01T10:00:00'); await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {}); const t = await o.page.evaluate(() => (document.querySelector('#lfMonthSum .lf-mw-sr') || {}).textContent || ''); await o.c.close(); return t; };
+    const early = await read(mkT(4, 50, 6)), owl = await read(mkT(19, 35, 6)), aft = await read(mkT(14, 10, 6)), few = await read(mkT(7, 0, 2));
+    ok('an early riser is told so, with the time most sessions started at', /Early bird: 6 of 6 sessions before 9 am, most around 0?4:50/.test(early), early.slice(0, 300));
+    ok('a night owl is told so', /Night owl: 6 of 6 sessions after 5 pm, most around (7|19):35/.test(owl), owl.slice(0, 300));
+    ok('and so is an afternoon trainer', /Afternoon: 6 of 6 sessions between noon and 5 pm, most around (2|14):10/.test(aft), aft.slice(0, 300));
+    ok('two sessions are not enough to say anything about when you train', !/Early bird|Night owl|Afternoon|Late morning/.test(few), few.slice(0, 200));
   }
   {
     const wo = [1, 8, 15].map((n, i) => ({ id: 'r' + i, d: '2026-10-' + String(n).padStart(2, '0'), s: new Date(2026, 9, n, 18).getTime(), e: new Date(2026, 9, n, 19).getTime(), n: 'Push', x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60 + i * 5, r: 8 }] }] }));
@@ -455,6 +464,10 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('Lower back is not a line on the list, it lives under Back', await p.locator('#lfLegs .lf-vr[data-m="Lower back"]').count() === 0 && await p.locator('#lfLegs .lf-vr[data-m="Back"]').count() === 1);
     await p.click('#lfLegs .lf-vr[data-m="Glutes"]'); await settle(p);
     ok('a press opens the muscle\'s own page, on its status first: one coloured line and this week\'s sets', await p.locator('#lfMsSay').count() === 1 && /^lf-vnt is-(green|orange|red|yellow)$/.test(await p.getAttribute('#lfMsSay', 'class')) && /sets this week/.test(await p.textContent('#lfMsWk')));
+    ok('there is no Priority / Keep progressing choice on the muscle\'s page, and one pill takes you to the targets', await p.locator('#lfFoP').count() === 0 && !/Keep progressing|How hard/.test(await p.evaluate(() => document.body.innerText)) && await p.locator('#lfFoSet').count() === 1);
+    await p.click('#lfFoSet'); await settle(p);
+    ok('Set targets closes this page and opens the targets sheet', await p.locator('#lfZn').count() === 1 && await p.locator('#lfFoLo').count() === 0);
+    await p.keyboard.press('Escape'); await settle(p); await p.click('#lfLegs .lf-vr[data-m="Glutes"]'); await settle(p);
     ok('and the stats are not there until you ask for them', await p.locator('.lf-ms-parts').count() === 0 && await p.getAttribute('#lfMsStats', 'aria-expanded') === 'false');
     await p.click('#lfMsStats'); await p.waitForTimeout(200);
     const g = await parts();
@@ -462,7 +475,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('the adductors show what squatting and pressing give them as indirect sets, and the hip thrusts are glute max', /^Adductors=3 \u00b7 indirect$/.test(g[2]) && /^Glute max=7 \u00b7 3 indirect$/.test(g[0]), g);
     await p.click('#lfMsStats'); await p.waitForTimeout(150);
     ok('a second press puts them away: built and removed, not hidden', await p.locator('.lf-ms-parts').count() === 0 && await p.getAttribute('#lfMsStats', 'aria-expanded') === 'false');
-    ok('the same page edits the target: the figures and Save are on it', await p.locator('#lfFoLo').count() === 1 && await p.locator('.lf-sheet').last().locator('button', { hasText: 'Save' }).count() === 1);
+    ok('the muscle\'s page has no figures to type and no Save: the targets are set on the targets sheet', await p.locator('#lfFoLo').count() === 0 && await p.locator('.lf-sheet').last().locator('button', { hasText: 'Save' }).count() === 0 && await p.locator('#lfFoSet').count() === 1);
     await p.keyboard.press('Escape'); await settle(p);
     await p.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(p); await p.click('#lfMsStats'); await p.waitForTimeout(200);
     ok('Chest splits by the kind of press: incline is upper, flat is mid, dips are lower', JSON.stringify(await parts()) === JSON.stringify(['Upper chest=3', 'Mid chest=4', 'Lower chest=2']), await parts());
@@ -481,10 +494,8 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('each part is coloured against its own range', await p.locator('.lf-ms-parts .lf-sb em[class*="is-c-"]').count() === 3);
     await p.keyboard.press('Escape'); await settle(p);
     await p.click('#lfLegs .lf-vr[data-m="Quads"]'); await settle(p);
-    ok('a muscle with no parts to show has no Stats button, just its status and target', await p.locator('#lfMsStats').count() === 0 && await p.locator('#lfMsSay').count() === 1 && await p.locator('#lfFoLo').count() === 1);
-    const before = await p.textContent('#lfMsSay');
-    await p.fill('#lfFoLo', '3'); await p.fill('#lfFoHi', '3'); await p.waitForTimeout(150);
-    ok('the status on that page follows the figure as it is typed, without saving', (await p.textContent('#lfMsSay')) !== before && /Very low|Below/.test(await p.textContent('#lfMsSay')));
+    ok('a muscle with no parts to show has no Stats button, just its status and target', await p.locator('#lfMsStats').count() === 0 && await p.locator('#lfMsSay').count() === 1 && await p.locator('#lfFoSet').count() === 1);
+    ok('the status on that page is the saved figure judged against its range, in one short line', (await p.textContent('#lfMsSay')).length > 0 && (await p.textContent('#lfMsSay')).length < 60);
     await o.c.close();
   }
 

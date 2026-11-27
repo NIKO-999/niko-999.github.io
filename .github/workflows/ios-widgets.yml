@@ -1,6 +1,6 @@
 name: Lift for iPhone with widgets (TestFlight)
 
-# Builds the iPhone app WITH its widgets (version 1.18) on a GitHub Mac and sends it to TestFlight.
+# Builds the iPhone app WITH its widgets (version 1.19) on a GitHub Mac and sends it to TestFlight.
 # The plain 1.0 workflow, ios-testflight.yml, is left as it was.
 # Run it from the Actions tab: "Lift for iPhone (TestFlight)" > Run workflow.
 # One-time setup is in ios-wrapper/SETUP-CLOUD.md.
@@ -62,7 +62,7 @@ jobs:
         working-directory: ios-wrapper
         env:
           BUILD_NUMBER: ${{ github.run_number }}
-          MARKETING_VERSION: '1.18'
+          MARKETING_VERSION: '1.19'
         run: |
           gem list xcodeproj -i >/dev/null 2>&1 || sudo gem install xcodeproj --no-document
           ruby native/add-widgets.rb
@@ -102,7 +102,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
             DEVELOPMENT_TEAM="$TEAM_ID" \
             TARGETED_DEVICE_FAMILY=1 \
-            MARKETING_VERSION=1.18 CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+            MARKETING_VERSION=1.19 CURRENT_PROJECT_VERSION="${{ github.run_number }}"
 
       # The archive is unsigned, so nothing in it says which capabilities the app has (the App Group the widgets read
       # the app's data through, Health). Stamping the entitlements in here, and printing them, is what the export keeps.

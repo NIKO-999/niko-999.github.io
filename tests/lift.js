@@ -37,7 +37,7 @@ const freeze = (at) => `(() => {
      visit only, so this does it each time one appears. The one check
      about folding uses newCtx and starts them shut. */
   const newCtx = browser.newContext.bind(browser);
-  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`window.__lfNoIntro = 1; window.__lfNoFold = 1; window.__lfPrMin = 1; (() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); if (!('tour' in o)) { o.tour = true; v = JSON.stringify(o); } } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript('window.__lfInline = 1;'); await c.addInitScript(`new MutationObserver(() => { if (window.__keepCol) return; const d = document.getElementById('lfColDone'); if (d) d.click(); }).observe(document, { childList: true, subtree: true });`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
+  browser.newContext = async (o) => { const c = await newCtx(o); /* the workout guide opens over a first workout: a seed that says nothing about it has seen it */ await c.addInitScript(`window.__lfNoIntro = 1; window.__lfNoFold = 1; window.__lfPrMin = 1; (() => { const set = Storage.prototype.setItem; Storage.prototype.setItem = function (k, v) { if (k === 'lift.v1' && typeof v === 'string' && v.charAt(0) === '{') { try { const o = JSON.parse(v); let ch = false; if (!('tour' in o)) { o.tour = true; ch = true; } if (!('fit' in o)) { o.fit = false; ch = true; } /* these checks describe the program as written: the fit that reshapes it to the targets has its own file */ if (ch) v = JSON.stringify(o); } catch (e) {} } return set.call(this, k, v); }; })();`); await c.addInitScript('window.__lfInline = 1;'); await c.addInitScript(`new MutationObserver(() => { if (window.__keepCol) return; const d = document.getElementById('lfColDone'); if (d) d.click(); }).observe(document, { childList: true, subtree: true });`); await c.addInitScript(`(() => { const ids = ['lfSet', 'lfBadges', 'lfTheme']; new MutationObserver(() => { ids.forEach((id) => { const b = document.querySelector('#' + id + ' h3 > button[aria-expanded="false"]'); if (b && !b.dataset.auto) { b.dataset.auto = 1; b.click(); } }); }).observe(document, { childList: true, subtree: true }); })();`); return c; };
   const errors = [], offOrigin = [];
   async function ctx(seed, at, keepBadges) {
     const c = await browser.newContext(PHONE);
@@ -80,7 +80,7 @@ const freeze = (at) => `(() => {
   ok('and lines up with the label above it', await page.evaluate(() => Math.abs(document.querySelector('#lfPick').getBoundingClientRect().left - document.querySelector('.lf-today .lf-lab').getBoundingClientRect().left) < 1));
   ok('with its five exercises', /5 exercises/.test(await page.textContent('.lf-chips')));
   const legs = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
-  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 16,Hamstrings:0 / 14,Calves:0 / 15,Glutes:0 / 6,Chest:0 / 16,Back:0 / 16,Shoulders:0 / 16,Triceps:0 / 10,Biceps:0 / 10,Abs:0 / 11,Rear delts:0 / 6,Lower back:0 / 4', legs);
+  ok('leg sets this week start at nought against the targets', legs.join() === 'Quads:0 / 16,Hamstrings:0 / 14,Calves:0 / 15,Glutes:0 / 6,Chest:0 / 16,Back:0 / 16,Shoulders:0 / 16,Triceps:0 / 10,Biceps:0 / 10,Abs:0 / 11,Rear delts:0 / 6', legs);
   ok('three stat tiles, each nought', (await page.$$eval('.lf-stat b', (b) => b.map((x) => x.textContent))).join() === '0,0,0');
   const days = await page.$$eval('.lf-day', (d) => ({ n: d.length, now: d.filter((x) => x.classList.contains('is-now')).length, last: d[d.length - 1].dataset.d }));
   ok('the last 30 days are thirty marks ending today', days.n === 30 && days.now === 1 && days.last === '2026-10-30', days);
@@ -94,7 +94,7 @@ const freeze = (at) => `(() => {
   ok('the split is seven days, Monday first', split.length === 7 && split[0] === 'Mon · Quad strength' && split[6] === 'Sun · Choice day', split);
   await page.click('#lfSplit .lf-li >> nth=0'); await settle(page);
   const mon = await top(page).textContent();
-  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('4 × 6–10') && mon.includes('1 RIR') && mon.includes('2 × 10–12 each side') && mon.includes('Linear hack calf raises'), mon.slice(0, 160));
+  ok('a day of the split reads its sets × reps', mon.includes('Hack squat') && mon.includes('4 × 6–10') && mon.includes('1 RIR') && mon.includes('Bulgarian split squats') && mon.includes('Linear hack calf raises'), mon.slice(0, 160));
   ok('a day of the split says what it is for', /^Quad strength/.test(await top(page).locator('#lfTip b').textContent())
     && /75–90 minutes/.test(await top(page).locator('#lfTip').textContent()) && /Double progression/.test(await top(page).locator('#lfTip').textContent()));
   ok('the focus comes before the exercises', await top(page).evaluate((s) => !!(s.querySelector('#lfTip').compareDocumentPosition(s.querySelector('.lf-list')) & 4)));
@@ -116,29 +116,30 @@ const freeze = (at) => `(() => {
   ok('and opens on its four choices', (await top(page).locator('.lf-ch-o b').allTextContents()).join() === 'Weak points,Leg technique,Recovery,More volume' && /never another heavy quad session/.test(await top(page).textContent()));
   await page.keyboard.press('Escape'); await settle(page);
   /* WHAT YOU WORK ON IS YOURS: calves are a row you edit, not a switch. */
-  async function setFocus(m, lo, hi) {
-    await page.click('#lfFocus .lf-li[data-m="' + m + '"]'); await settle(page);
-    await top(page).locator('#lfFoLo').fill(String(lo)); await top(page).locator('#lfFoHi').fill(String(hi));
-    await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
+  /* a muscle's figure is set on the targets sheet now: the muscle's own page has no fields, just a pill that goes there */
+  async function setFocus(m, v) {
+    await page.click('.lf-bar [data-v="home"]'); await settle(page); await page.click('#lfTgEdit'); await settle(page);
+    await page.evaluate(([m, v]) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); const i = r.querySelector('input'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); }, [m, v]);
+    await page.waitForTimeout(150); await page.click('#lfZnSave'); await settle(page);
+    await page.click('.lf-bar [data-v="you"]'); await settle(page);
   }
   await page.click('.lf-bar [data-v="you"]');
   ok('there is no calves switch any more', await page.locator('#lfCalf').count() === 0);
   const foc = await page.$$eval('#lfFocus .lf-li', (r) => r.map((x) => x.dataset.m + ':' + x.querySelector('em').textContent));
   ok('focus lists every muscle and its weekly sets', foc.join() === 'Quads:16,Hamstrings:14,Calves:15,Glutes:6,Chest:16,Back:16,Shoulders:16,Triceps:10,Biceps:10,Abs:11,Rear delts:6,Lower back:4', foc);
-  await setFocus('Calves', 12, 14);
+  await setFocus('Calves', 13);
   await page.click('.lf-bar [data-v="home"]');
-  ok('a target edited under You moves the week', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 12–14');
-  await page.click('.lf-bar [data-v="you"]'); await setFocus('Calves', 15, 15);
+  ok('a target edited under You moves the week', (await page.textContent('#lfLegs [data-m="Calves"] em')) === '0 / 13');
+  await page.click('.lf-bar [data-v="you"]'); await setFocus('Calves', 15);
   /* Add one, make it a priority, and it leads the week's card. */
   await page.click('#lfFocusAdd'); await settle(page);
   await top(page).locator('.lf-pill', { hasText: /^Core$/ }).click();
   await top(page).locator('#lfFoLo').fill('10'); await top(page).locator('#lfFoHi').fill('14');
-  await top(page).locator('#lfFoP [data-p="1"]').click();
   await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
   await page.click('.lf-bar [data-v="home"]');
   const legs2 = await page.$$eval('#lfLegs .lf-vr', (r) => r.map((x) => x.dataset.m));
-  ok('an added priority joins the week, among the priorities', legs2.join() === 'Quads,Hamstrings,Calves,Glutes,Core,Chest,Back,Shoulders,Triceps,Biceps,Abs,Rear delts,Lower back', legs2);
-  ok('a separator still splits priorities from the rest', await page.$$eval('#lfLegs .lf-vol > *', (k) => k[5].classList.contains('lf-vsep')));
+  ok('an added muscle joins the week, among the rest', legs2.join() === 'Quads,Hamstrings,Calves,Glutes,Chest,Back,Shoulders,Triceps,Biceps,Abs,Rear delts,Core', legs2);
+  ok('a separator still splits priorities from the rest', await page.$$eval('#lfLegs .lf-vol > *', (k) => k[4].classList.contains('lf-vsep')));
   /* Remove it, and Undo puts it back where it was. */
   await page.click('.lf-bar [data-v="you"]');
   await page.click('#lfFocus .lf-li[data-m="Core"]'); await settle(page);
@@ -866,9 +867,10 @@ const freeze = (at) => `(() => {
     /* the weekly targets are edited from the home card itself */
     await page.click('.lf-bar [data-v="home"]'); await settle(page);
     await page.click('#lfLegs .lf-vr[data-m="Chest"]'); await settle(page);
-    await top(page).locator('#lfFoLo').fill('10'); await top(page).locator('#lfFoHi').fill('12');
-    await top(page).locator('button', { hasText: 'Save' }).click(); await settle(page);
-    ok('a row on Sets this week opens that muscle\'s page, which edits its target and saves it', (await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em')).endsWith('/ 10–12'), await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em'));
+    ok('a row on Sets this week opens that muscle\'s page, and its one pill goes on to the targets', await top(page).locator('#lfFoSet').count() === 1 && await top(page).locator('#lfFoLo').count() === 0);
+    await top(page).locator('#lfFoSet').click(); await settle(page);
+    ok('Set targets lands on the targets sheet', await page.locator('.lf-sheet #lfZn').count() === 1); await page.keyboard.press('Escape'); await settle(page);
+    ok('a row on Sets this week opens that muscle\'s page (kept)', (await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em')).length > 0, await page.textContent('#lfLegs .lf-vr[data-m="Chest"] em'));
     await page.click('#lfTgEdit'); await settle(page);
     ok('Edit targets opens Zones, and Priorities and muscles goes on to the list', await page.locator('.lf-sheet #lfZn').count() === 1); await page.click('#lfZnMore'); await settle(page); ok('the list is still there for priorities and adding a muscle', await page.locator('.lf-sheet #lfFocus .lf-li').count() > 0 && await page.locator('#lfFocusAdd').count() === 1); await page.keyboard.press('Escape'); await settle(page);
     await c.close();
