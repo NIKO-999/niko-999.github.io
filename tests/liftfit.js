@@ -398,6 +398,45 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
 
+  /* ── THE FIGHT NAMES: sixteen titles, each earned by a challenge of its own, each with its own motion, and a flair that plays with the name and comes with it ── */
+  {
+    const ids = ['bxnotorious', 'bxmike', 'bxgolden', 'bxhitman', 'bxiceman', 'bxspider', 'bxeagle', 'bxdiamond', 'bxnatural', 'bxphenom', 'bxpredator', 'bxemperor', 'bxstyle', 'bxhighlight', 'bxdeal', 'bxstone'];
+    const WORDS = ['The Notorious', 'Iron Mike', 'The Golden Boy', 'The Hitman', 'The Iceman', 'The Spider', 'The Eagle', 'The Diamond', 'The Natural', 'The Phenom', 'The Predator', 'The Last Emperor', 'The Last Stylebender', 'The Highlight', 'The Real Deal', 'Hands of Stone'];
+    const c = await browser.newContext(PHONE);
+    await c.addInitScript(freeze('2026-10-30T18:00:00'));
+    await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [] }))}); } catch (e) {} window.__lfNoIntro = 1;`);
+    const p = await c.newPage(); p.on('pageerror', (e) => errors.push(String(e)));
+    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__tt={lfTitleEl:lfTitleEl,lfNameOn:lfNameOn,RK:RK,RK_TC:RK_TC,lfRkFc:lfRkFc,lfRkName:lfRkName};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p.goto(`${BASE}/lift/`); await p.waitForTimeout(700);
+    const r = await p.evaluate((ids) => {
+      const box = document.createElement('div'); box.style.cssText = 'position:fixed;top:0;left:0'; document.body.appendChild(box);
+      const anim = (n) => [...n.querySelectorAll('*'), n].map((q) => [getComputedStyle(q).animationName, getComputedStyle(q, '::before').animationName, getComputedStyle(q, '::after').animationName]).flat().filter((x) => x && x !== 'none').sort().join('+');
+      const T = window.__tt, out = { ti: {}, fl: {}, un: {}, col: [], paths: [], words: [] };
+      const all = T.RK.fl.map((x) => x[4]);
+      ids.forEach((id) => {
+        const a = document.createElement('div'); a.className = 'fr-ti'; const te = T.lfTitleEl(id); a.appendChild(te); box.appendChild(a); out.ti[id] = anim(te);
+        const nm = document.createElement('b'); nm.textContent = 'Niko'; T.lfNameOn(nm, { fl: 'nf' + id }); box.appendChild(nm); out.fl[id] = anim(nm);
+        const ti = T.RK.ti.filter((x) => x[0] === id)[0], fl = T.RK.fl.filter((x) => x[0] === 'nf' + id)[0];
+        const bd = ti && /c\.has\.(\w+)/.exec(String(ti[3]));
+        out.un[id] = ti && fl && bd && [bd[1], ti[2], fl[2], ti[3]({ has: {} }), ti[3]({ has: { [bd[1]]: 1 } }), fl[3]({ has: {} }), fl[3]({ has: { [bd[1]]: 1 } })];
+        out.paths.push(fl ? all.filter((x) => x === fl[4]).length : 0);
+        out.words.push(te.textContent.replace(/\u00a0/g, ' ').trim().toLowerCase());
+      });
+      out.col = T.RK_TC.filter((c) => c[0] === 'nkc').map((c) => ids.filter((i) => c[3].indexOf(i) >= 0).length);
+      out.fc = T.lfRkFc()[0][3].filter((i) => ids.some((d) => 'nf' + d === i)).length;
+      return out;
+    }, ids);
+    ok('all sixteen fight names move, and no two do it the same way', ids.every((i) => r.ti[i]) && new Set(ids.map((i) => r.ti[i])).size === 16, r.ti);
+    ok('every title reads as its name', JSON.stringify(r.words) === JSON.stringify(WORDS.map((w) => w.toLowerCase())), r.words);
+    ok('each comes with a flair that plays with the name, and no two flairs do it the same way', ids.every((i) => r.fl[i]) && new Set(ids.map((i) => r.fl[i])).size === 16 && r.fc === 16, [r.fl, r.fc]);
+    ok('and every flair is its own drawing: no other flair shares its picture', r.paths.every((n) => n === 1), r.paths);
+    const badges = ids.map((i) => r.un[i] && r.un[i][0]);
+    ok('each is earned by a challenge of its own: sixteen different ones', badges.every(Boolean) && new Set(badges).size === 16, badges);
+    ok('the title and its flair come from the same challenge: locked without it, unlocked with it', ids.every((i) => r.un[i] && r.un[i][1] === r.un[i][2] && r.un[i][3] === false && r.un[i][4] === true && r.un[i][5] === false && r.un[i][6] === true), r.un);
+    ok('they are filed under Challenges', r.col.length === 1 && r.col[0] === 16, r.col);
+    await c.close();
+  }
+
   ok('no page errors', errors.length === 0, errors.slice(0, 3));
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
