@@ -5220,7 +5220,6 @@ function lfVolAssess(m, v, c) {
   /* WHAT IS SHOWN IS ONE SHORT LINE IN ONE COLOUR: red when it is a lot, yellow when it is too little, green when it is right. The rest (the figures, the indirect share, the reasons) stays in the notes for anything that wants them. You can still set any number you like. */
   var has = function (id) { return N.some(function (x) { return x.id === id; }); }, say;
   if (has('excess') || has('vhigh') || has('high') || N.some(function (x) { return x.id === 'rec' && x.lv === 'caution'; })) say = { c: 'red', t: 'Quite a lot of volume. Keep an eye on recovery.' };
-  else if (has('sess') && N.some(function (x) { return x.id === 'sess' && x.lv === 'caution'; })) say = { c: 'red', t: 'Lots of sets in one day. Try spreading them.' };
   else if (has('low') || (c.zn === 0 ? eff < 4 : eff < 7)) say = { c: 'yellow', t: c.zn === 0 ? 'Below what it takes to maintain.' : 'Not enough volume to grow much.' };
   else say = { c: 'green', t: c.zn === 0 ? 'Enough to hold what you have.' : 'Perfect for growth and progression.' };
   return { say: say, m: m, v: v, ind: ind, direct: direct, eff: eff, band: lfVolBand(eff), notes: N, per: per, exposures: exp };

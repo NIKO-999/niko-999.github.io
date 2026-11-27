@@ -503,6 +503,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     /* 6: distribution */
     const dist = (days, v) => ev(([days, v]) => { const V = window.__vv; const pl = { prim: { Quads: Object.values(days).reduce((a, b) => a + b, 0) }, days: { Quads: days }, ind: {} }; return V.lfVolAssess('Quads', v, { plan: pl, xp: 'some', zn: 1, pri: false }); }, [days, v]);
     const one = await dist({ a: 18 }, 18), three = await dist({ a: 6, b: 6, c: 6 }, 18);
+    ok('how the sets fall across the days is worked out but never shown as a line: no muscle says anything about one day', !(await ev(() => document.body.innerHTML)).includes('Lots of sets in one day'));
     ok('18 weekly sets in one session is flagged as concentrated, with the figure', one.per === 18 && one.notes.some((n) => n.id === 'sess' && n.lv === 'caution' && /18 quads sets land on one day/.test(n.t)), one.notes);
     ok('the same 18 spread over three days is not', three.per === 6 && !three.notes.some((n) => n.id === 'sess') && three.exposures === 3, three);
     ok('the line is red when it is a lot, yellow when it is too little, green when it is right', (await sy('Chest', 22, { xp: 'some' })).c === 'red' && (await sy('Chest', 4, { pri: true })).c === 'yellow' && (await sy('Chest', 12)).c === 'green');
