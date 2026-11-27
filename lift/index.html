@@ -168,7 +168,7 @@ svg { display: block; }
 .lf-zn-bs button { background: none; border: 0; color: var(--log); font-weight: 700; padding: 8px 0 8px 12px; }
 .lf-zn-lg { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 12px; margin: 0 0 4px; }
 .lf-zn-lg i { display: inline-block; width: 22px; height: 10px; border-radius: 5px; background: color-mix(in srgb, var(--log) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--log) 36%, transparent); }
-.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vwhy { font-size: 13px; color: var(--ink); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 6px 0 0; font-size: 12.5px; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; }
+.lf-vsum { margin: 10px 0 8px; display: grid; gap: 8px; } .lf-vsum > p { font-size: 13px; color: var(--dim); } .lf-vn { display: grid; gap: 4px; } .lf-vn:empty { display: none; } .lf-vnt { margin: 6px 0 0; font-size: 12.5px; font-weight: 600; } .lf-vnt.is-red { color: #ff6b6b; } .lf-vnt.is-yellow { color: #f5b942; } .lf-vnt.is-green { color: #4ade80; }
 :root[data-mode="light"] .lf-vnt.is-red { color: #c62828; } :root[data-mode="light"] .lf-vnt.is-yellow { color: #8a5a00; } :root[data-mode="light"] .lf-vnt.is-green { color: #1b7f3b; }
 .lf-zr { padding: 8px 0; border-top: 1px solid color-mix(in srgb, var(--ink) 9%, transparent); }
 .lf-zr:first-child { border-top: 0; }
@@ -5181,7 +5181,7 @@ function zVal(m, z) { return [Math.max(4, Math.round(zRec(m) * .55)), zRec(m), M
 function zTotal(z) { return lfTargets().reduce(function (a, t) { return a + zVal(t[0], z); }, 0); }
 /* the sheet that opens from Sets this week, from You, from Exercises and from the first split */
 /* ═══════════ THE VOLUME CHECK ═══════════
-   Reads the weekly targets before they are applied and says what they ask of you. It never changes a target on its own: it explains, and "Optimise for me" only fills the sheet, which you can still change before saving. Every figure is worked out here from the targets, the program and your experience, so the same inputs always give the same answer.
+   Reads the weekly targets before they are applied and says what they ask of you. It never changes a target on its own: it only explains. The three modes (Maintain, Build, Push) are the only way the suggested figures move, and there is no separate optimise step: that would only repeat what the goal already decides. Every figure is worked out here from the targets, the program and your experience, so the same inputs always give the same answer.
    EFFECTIVE SETS = direct sets + indirect sets x 0.5 (LF_VOL.ind). Indirect sets are the program's sets on other exercises that give a muscle real secondary work (a press for triceps, a row for biceps), counted at half so a compound lift is not a whole set for every muscle it touches. THE TARGETS ARE ALREADY EFFECTIVE SETS: the bars on Home count that half credit, so a target of 12 for triceps is 12 effective sets, of which some come from pressing. Reading it as direct sets and adding the indirect again would count it twice. Warm-ups are never in the program's counts.
    THE BANDS ARE STARTING POINTS, NOT LIMITS. 0-3 very low, 4-6 low, 7-10 moderate, 11-15 productive, 16-20 high, 21-24 very high, 25+ potentially excessive. A band says where a number sits; whether it is a problem depends on how long you have trained, whether the muscle is a priority, the mode, how many days it is spread over and how much lands on one day. More sets help with diminishing returns and the best amount differs from person to person, so a high number is a notice, never a verdict. Recovery data (sleep, soreness) is not collected yet: until it is, everything here is an estimate from training information alone. */
 var LF_VOL_ON = (function () { try { return localStorage.getItem('lift.vol.v1') !== '0'; } catch (e) { return true; } })();
@@ -5225,22 +5225,6 @@ function lfVolAssess(m, v, c) {
   else say = { c: 'green', t: c.zn === 0 ? 'Enough to hold what you have.' : 'Perfect for growth and progression.' };
   return { say: say, m: m, v: v, ind: ind, direct: direct, eff: eff, band: lfVolBand(eff), notes: N, per: per, exposures: exp };
 }
-/* THE SUGGESTION: where each muscle should sit given how long you have trained, the mode and which muscles you put first. It credits the indirect work already in the program, and it moves volume towards the priorities rather than adding it everywhere: in Push the others come down to maintenance, in Build they ease a little, in Maintain only the priorities are kept up. Nothing leaves the sheet until you save. */
-function lfVolRec(ts, zn, c) {
-  var out = {}, why = [], xp = LF_VOL.cap[c.xp] ? c.xp : 'some', cap = LF_VOL.cap[xp], anyPri = ts.some(function (t) { return t[3]; });
-  ts.forEach(function (t) {
-    var m = t[0], pri = !!t[3], base = zVal(m, zn), eff = base, why1 = '';
-    if (anyPri) {
-      if (zn === 2) { if (pri) { eff = Math.min(cap + 4, Math.max(base, zVal(m, 1) + 3)); why1 = 'priority'; } else { eff = Math.min(base, Math.max(zVal(m, 0), 6)); why1 = 'maintenance'; } }
-      else if (zn === 1) { if (pri) { eff = Math.min(cap, base + 2); why1 = 'priority'; } else { eff = Math.max(6, Math.round(base * 0.85)); why1 = 'eased'; } }
-      else { if (pri) { eff = Math.max(base, zVal(m, 1) - 2); why1 = 'priority'; } else { eff = base; } }
-    }
-    if (!pri || zn !== 2) eff = Math.min(eff, cap);
-    var v = Math.max(2, Math.min(24, Math.round(eff)));
-    out[m] = v; if (v !== t[1] && why1) why.push([m, why1]);
-  });
-  return { v: out, why: why };
-}
 function lfZonesSheet(fresh) {
   fresh = fresh === true; /* from the goal sheet: the suggestions have just changed under every muscle, so it opens on them */
   var ts = lfTargets(); if (!ts.length) { lfToast('Make a split first'); return; }
@@ -5250,7 +5234,7 @@ function lfZonesSheet(fresh) {
   var P = lfProg(), pips = [1, 2, 3, 4, 5, 6, 0].map(function (w, i) { var r = P.days.filter(function (x) { return x.dow === w; })[0]; return '<div class="' + (r ? '' : 'is-off') + '">' + 'MTWTFSS'[i] + '<i>' + (r ? esc(String(r.n).split(/\s+/)[0].slice(0, 5)) : '·') + '</i></div>'; }).join('');
   var b = el('<div id="lfZn"><div class="lf-card lf-zn-sp"><div class="lf-zn-h"><b></b><span></span></div><div class="lf-zn-d">' + pips + '</div></div>'
     + '<div class="lf-zn-bs"><span></span><button type="button" id="lfZnBasis">Change</button></div>'
-    + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p><button type="button" class="lf-btn is-full" id="lfVolOpt">Optimise for me</button><p class="lf-vwhy" id="lfVolWhy" hidden></p></div>' : '') + '<div id="lfZnRows"></div></div>');
+    + '<span class="lf-flab" style="margin-top:0">How hard</span><div class="lf-seg" id="lfZnSeg" style="--n:3"></div><p class="lf-lab" id="lfZnSay" style="margin:8px 0 6px"></p><div class="lf-zn-lg"><i></i>what works for you</div>' + (LF_VOL_ON ? '<div class="lf-vsum" id="lfVolSum"><p id="lfVolSay"></p></div>' : '') + '<div id="lfZnRows"></div></div>');
   $('.lf-zn-h b', b).textContent = P.n; $('.lf-zn-h span', b).textContent = P.days.filter(function (r) { return !r.choice; }).length + ' days a week';
   $('.lf-zn-bs span', b).innerHTML = '<b>' + esc(zg()[0]) + '</b> · ' + esc(zx()[0]);
   function val(m) { return ed[m] !== undefined ? ed[m] : zVal(m, zn); }
@@ -5291,14 +5275,6 @@ function lfZonesSheet(fresh) {
     var inp = $('input', r); inp.setAttribute('aria-label', m + ' sets a week');
     inp.addEventListener('input', function () { var v = +inp.value; tch[m] = 1; if (v === zVal(m, zn)) delete ed[m]; else ed[m] = v; refresh(); });
     rows[m] = { el: r, zone: $('.zo', r), fill: $('.fi', r), dot: $('.dt', r), inp: inp }; $('#lfZnRows', b).appendChild(r);
-  });
-  if (LF_VOL_ON) $('#lfVolOpt', b).addEventListener('click', function () {
-    var rc = lfVolRec(ts, zn, { plan: vctx.plan, xp: S.xp }), ch = 0, lines = [];
-    ed = {}; tch = {};
-    ts.forEach(function (t) { var m = t[0], v = rc.v[m]; if (v !== zVal(m, zn)) ed[m] = v; tch[m] = 1; if (v !== t[1]) { ch++; lines.push(m + ' ' + t[1] + ' to ' + v); } });
-    zoned = true; refresh();
-    var w = $('#lfVolWhy', b); w.hidden = false;
-    w.textContent = ch ? 'Suggested: ' + lines.join(', ') + '. Nothing is saved until you press Save targets, and you can change any of them.' : 'These targets already look right for you. Nothing to change.';
   });
   var fr = el('<div class="lf-bshow lf-fit-sw"><span>Fit my workouts to these</span><button type="button" class="lf-tgl" role="switch" aria-label="Fit my workouts to my muscle targets"><i></i></button></div>'), fb = $('button', fr);
   fb.dataset.k = 'fit'; fb.setAttribute('aria-checked', lfFitOn() ? 'true' : 'false');

@@ -475,27 +475,17 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
     await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul', xp: 'some', zn: 1 }))}); } catch (e) {} window.__lfNoIntro = 1;`);
     const p = await c.newPage(); p.on('pageerror', (e) => errors.push(String(e)));
-    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolRec:lfVolRec,lfVolPlan:lfVolPlan,lfVolBand:lfVolBand,lfTargets:lfTargets,zVal:zVal};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolPlan:lfVolPlan,lfVolBand:lfVolBand,lfTargets:lfTargets,zVal:zVal};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
     await p.goto(`${BASE}/lift/`); await p.waitForTimeout(700);
     const ev = (fn, arg) => p.evaluate(fn, arg);
     const MS = ['Quads', 'Hamstrings', 'Calves', 'Glutes', 'Chest', 'Back', 'Shoulders', 'Triceps', 'Biceps', 'Abs'];
-    const rec = (xp, zn, pri) => ev(([xp, zn, pri, MS]) => { const V = window.__vv; V.S.xp = xp; const ts = MS.map((m) => [m, 10, 10, pri.indexOf(m) >= 0 ? 1 : 0]); const r = V.lfVolRec(ts, zn, { plan: V.lfVolPlan(), xp: xp }); return r.v; }, [xp, zn, pri, MS]);
+    const zv = (xp, zn) => ev(([xp, zn, MS]) => { const V = window.__vv; V.S.xp = xp; const o = {}; MS.forEach((m) => { o[m] = V.zVal(m, zn); }); return o; }, [xp, zn, MS]);
     const sum = (o) => Object.keys(o).reduce((a, k) => a + o[k], 0);
-    const asses = (m, v, o) => ev(([m, v, o]) => { const V = window.__vv; return V.lfVolAssess(m, v, Object.assign({ plan: V.lfVolPlan(), xp: 'some', zn: 1, pri: false }, o)); }, [m, v, o || {}]);
-    ok('the bands are the reference ones: 3 is very low, 5 low, 9 moderate, 13 productive, 18 high, 22 very high, 25 excessive', JSON.stringify(await ev(() => [3, 5, 9, 13, 18, 22, 25].map(window.__vv.lfVolBand))) === JSON.stringify(['Very low', 'Low', 'Moderate', 'Productive', 'High', 'Very high', 'Potentially excessive']));
-    /* 1 and 2: how long you have trained changes where it starts, and nobody is handed the maximum */
-    const nb = await rec('new', 1, []), ib = await rec('some', 1, []), ab = await rec('adv', 1, []);
-    ok('a beginner on Build starts conservatively: nothing above 12 a week, and less than an experienced lifter', Math.max(...Object.values(nb)) <= 12 && sum(nb) < sum(ab), [nb, ab]);
-    ok('an experienced lifter on Build is not handed the ceiling: nothing at 24, and everything inside what experienced lifters usually run', Math.max(...Object.values(ab)) <= 20 && Math.max(...Object.values(ab)) < 24, ab);
-    /* 3 and 8: priorities move volume instead of adding it */
-    const mn0 = await rec('some', 0, []);
-    const bp = await rec('some', 1, ['Quads', 'Glutes']), pp = await rec('some', 2, ['Quads', 'Glutes']), np = await rec('some', 1, []);
-    ok('prioritising quads and glutes lifts them above the same muscles with no priority, and eases the ones that are not', bp.Quads > np.Quads && bp.Glutes >= np.Glutes && bp.Chest < np.Chest && bp.Back < np.Back, [bp, np]);
-    ok('Push goes further for the priorities and brings the rest down to maintenance rather than adding everywhere', pp.Quads > bp.Quads && pp.Chest <= bp.Chest && pp.Chest <= Math.max(mn0.Chest, 6) && sum(pp) <= sum(np) + 8, [pp, bp]);
-    ok('and Push never goes past the experience ceiling plus a margin for the priorities alone', Math.max(...Object.values(pp)) <= 16 + 4, pp);
-    /* 7: Maintain */
-    const mn = await rec('some', 0, []), mp = await rec('some', 0, ['Quads']);
-    ok('Maintain is lighter than Build everywhere, with only the priority kept up', MS.every((m) => mn[m] <= ib[m] || mn[m] <= 6) && sum(mn) < sum(ib) && mp.Quads >= mn.Quads && mp.Chest <= mn.Chest + 0, [mn, mp]);
+    /* the three modes are the only suggestion there is: Maintain below Build below Push, and how long you have trained moves where each starts */
+    const nb = await zv('new', 1), ib = await zv('some', 1), ab = await zv('adv', 1), mn = await zv('some', 0), pu = await zv('some', 2);
+    ok('a beginner on Build starts conservatively, below an experienced lifter, and nobody is handed the ceiling', sum(nb) < sum(ib) && sum(ib) < sum(ab) && Math.max(...Object.values(ab)) < 24, [nb, ab]);
+    ok('Maintain is lighter than Build, and Push is heavier, for every muscle', MS.every((m) => mn[m] <= ib[m] && ib[m] <= pu[m]) && sum(mn) < sum(ib) && sum(ib) < sum(pu), [mn, ib, pu]);
+    ok('there is no Optimise button: the modes are the only options', await ev(() => !/Optimise for me/.test(document.body.innerHTML)));
     /* 4: indirect work */
     const plan = await ev(() => window.__vv.lfVolPlan());
     ok('the program\'s presses and rows are read as indirect work for triceps and biceps', (plan.ind.Triceps || 0) > 0 && (plan.ind.Biceps || 0) > 0, plan.ind);
@@ -526,8 +516,6 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const say1 = await q.textContent('#lfVolSay'), chestNote = await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('.lf-vn').textContent);
     ok('moving a target recalculates at once: the summary changes, and that muscle shows one short red line', say1 !== say0 && /Quite a lot of volume/.test(chestNote) && chestNote.length < 60, [say0, say1, chestNote]);
     ok('and it is only a warning: the figure is the one you set, and nothing is saved', await q.evaluate(() => [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => /Chest/.test(x.textContent)).querySelector('b').textContent) === '24' && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 16);
-    await q.click('#lfVolOpt'); await q.waitForTimeout(250);
-    ok('Optimise for me fills the sheet and says what it did, and still saves nothing until you press Save', /Suggested|already look right/.test(await q.textContent('#lfVolWhy')) && await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) === 16);
     await q.click('#lfZnSave'); await settle(q);
     ok('Save writes what the sheet holds', await q.evaluate(() => JSON.parse(localStorage.getItem('lift.v1')).focus.filter((f) => f.m === 'Chest')[0].lo) !== 16);
     await o2.c.close();
