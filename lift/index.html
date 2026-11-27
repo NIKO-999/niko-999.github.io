@@ -4195,6 +4195,7 @@ function lfRenderHome() {
   root.appendChild(r);
   var lw = lfLastWeekBtn(); if (lw) root.appendChild(lw);
   var lm = lfLastMonthBtn(); if (lm) root.appendChild(lm);
+  var tm = lfThisMonthBtn(); if (tm) root.appendChild(tm);
 }
 
 /* LAST WEEK, AGAIN. The week in review comes up once and was then gone for
@@ -6554,6 +6555,14 @@ function lfMonthSheet(m) {
   var started = false, start = function () { if (started) return; started = true; go(); };
   try { if (document.fonts && document.fonts.load) Promise.race([Promise.all([document.fonts.load('800 40px Inter'), document.fonts.load('700 30px Inter'), document.fonts.load('500 30px Inter')]), new Promise(function (res) { setTimeout(res, 1000); })]).then(start, start); else start(); } catch (e) { start(); }
   buzz(12);
+}
+/* THIS MONTH SO FAR: the same wrap on the month you are in, so you can watch it before the month is over */
+function lfThisMonthBtn() {
+  var t = today(), m = new Date(t.getFullYear(), t.getMonth(), 1); if (!lfMonthHas(m)) return null;
+  var b = el('<button type="button" class="lf-card lf-tap lf-lw" id="lfThisMonth"><span class="lf-lab">This month so far</span><b></b>' + IC.chev + '</button>');
+  $('b', b).textContent = MON[m.getMonth()];
+  b.addEventListener('click', function () { lfMonthSheet(m); });
+  return b;
 }
 function lfLastMonthBtn() {
   var m = lfLastMonth(); if (!lfMonthHas(m)) return null;
