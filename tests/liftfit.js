@@ -364,14 +364,18 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await o.c.close();
   }
   {
-    const mk = (cdm) => [1, 8, 15].map((n, i) => ({ id: 'c' + i, d: '2026-10-' + String(n).padStart(2, '0'), s: new Date(2026, 9, n, 18).getTime(), e: new Date(2026, 9, n, 19).getTime(), n: 'Push', cd: cdm ? { k: i % 2 ? 'run' : 'bike', m: cdm } : undefined, x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60 + i * 5, r: 8 }] }] }));
-    let o = await open({ goal: 3, wo: mk(30) }, '2026-11-01T10:00:00');
+    const mk = (cdm) => [1, 8, 15, 22].map((n, i) => ({ id: 'c' + i, d: '2026-10-' + String(n).padStart(2, '0'), s: new Date(2026, 9, n, 18).getTime(), e: new Date(2026, 9, n, 19).getTime(), n: 'Push', cd: cdm ? { k: i % 2 ? 'run' : 'bike', m: cdm } : undefined, x: [{ id: 'bench', n: 'Bench press', sets: [{ w: 60 + i * 5, r: 8 }] }] }));
+    let o = await open({ goal: 3, wo: mk(45) }, '2026-11-01T10:00:00');
     await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
-    ok('a month with a good amount of cardio gets a card of its own, and it is read out', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 6 && /Cardio: 90 minutes over 3 sessions/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    ok('a month with a good amount of cardio gets a card of its own, and it is read out', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 6 && /Cardio: 180 minutes over 4 sessions/.test(document.querySelector('.lf-mw-sr').textContent); }));
     await o.c.close();
-    o = await open({ goal: 3, wo: mk(10) }, '2026-11-01T10:00:00');
+    o = await open({ goal: 3, wo: mk(30) }, '2026-11-01T10:00:00');
     await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
-    ok('a little cardio is not enough for a card: thirty minutes over three walks is skipped', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 5 && !/Cardio:/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    ok('a modest amount of cardio is not enough for a card: two hours over four sessions is skipped', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 5 && !/Cardio:/.test(document.querySelector('.lf-mw-sr').textContent); }));
+    await o.c.close();
+    o = await open({ goal: 3, wo: mk(0) }, '2026-11-01T10:00:00');
+    await o.page.waitForSelector('#lfMonthSum', { timeout: 9000 }).catch(() => {});
+    ok('no cardio at all: no cardio card and no mention of it', await o.page.evaluate(() => { const c = document.querySelector('#lfMonthSum canvas'); return c && +c.dataset.slides === 5 && !/ardio/.test(document.querySelector('.lf-mw-sr').textContent); }));
     await o.c.close();
   }
   {

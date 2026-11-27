@@ -6427,11 +6427,11 @@ function lfWrapData(m) {
   }); });
   var up = Object.keys(per).map(function (k) { var o = per[k]; o.dl = o.l.w - o.f.w; return o; }).filter(function (o) { return o.dl > 1e-9 && o.f !== o.l; }).sort(function (x, y) { return y.dl - x.dl; });
   var mu = Object.keys(d.mu).filter(function (x) { return x !== 'Cardio' && x !== 'Other' && d.mu[x] > 0; }).sort(function (x, y) { return d.mu[y] - d.mu[x]; }).slice(0, 6).map(function (x) { return [x, d.mu[x]]; });
-  /* CARDIO IS A CARD ONLY IF THERE WAS A GOOD AMOUNT OF IT: an hour and two sessions, so one ten-minute walk does not get a slide of its own */
+  /* CARDIO IS A CARD ONLY IF THERE WAS A GOOD AMOUNT OF IT: a REALLY good amount, three hours over at least four sessions, so a month with little or no cardio never gets the slide */
   var cdk = {}, cdn = 0, cdm = 0;
   ws.forEach(function (x) { if (x.cd && x.cd.m > 0) { cdn++; cdm += x.cd.m; cdk[x.cd.k] = (cdk[x.cd.k] || 0) + x.cd.m; } });
   var cdl = Object.keys(cdk).sort(function (x, y) { return cdk[y] - cdk[x]; }).slice(0, 4).map(function (x) { return [CARDIO_N[x] || x, cdk[x]]; });
-  var cardio = cdn >= 2 && cdm >= 60 ? { n: cdn, m: cdm, k: cdl } : null;
+  var cardio = cdn >= 4 && cdm >= 180 ? { n: cdn, m: cdm, k: cdl } : null;
   var w = { d: d, cardio: cardio, name: MON[m.getMonth()], year: m.getFullYear(), nDays: d.l.getDate(), off: (d.f.getDay() + 6) % 7, days: dys, trained: Object.keys(dys).length, avg: n ? tot / n : 0, tot: tot, lng: lng, up: up, mu: mu, heavy: heavy };
   var plan = [{ k: 'cal', dur: 6200 }];
   if (n) plan.push({ k: 'time', dur: 4800 });
