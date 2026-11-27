@@ -14199,9 +14199,11 @@ BD_COLL.push(['dys', 'Days tracked', '#ff7a1a', BD_DST.map(function (r) { return
   var home = {}; BD_COLL.forEach(function (c) { c[3].forEach(function (id) { home[id] = c; }); });
   BD_LAD.forEach(function (l) { var c = l[1].map(function (id) { return home[id]; }).filter(Boolean)[0]; if (!c) return; l[1].forEach(function (id) { if (!home[id] && c[3].indexOf(id) < 0) c[3].push(id); }); });
 })();
-/* THE SHELF FOLDS: every collection is a heading you press to open, shut until you do, and the ones you left open stay open. Two switches sit above them (only what you have unlocked; what friends see) and what you have equipped is the first thing on the screen, each with its own way off. */
-function lfBcolOpen() { try { return JSON.parse(localStorage.getItem('lift.bcol.v1') || '{}') || {}; } catch (e) { return {}; } }
-function lfBcolSet(id, on) { var o = lfBcolOpen(); if (on) o[id] = 1; else delete o[id]; try { localStorage.setItem('lift.bcol.v1', JSON.stringify(o)); } catch (e) {} }
+/* THE SHELF FOLDS: every collection is a heading you can press to put away, open until you do, and the ones you put away stay away. Two switches sit above them (only what you have unlocked; what friends see) and what you have equipped is the first thing on the screen, each with its own way off. */
+/* EVERY COLLECTION IS OPEN until you shut it, like the title and flair pickers: it is the ones you put away that are remembered, not the ones you opened, so a new collection arrives open and nothing is hidden behind a press. */
+function lfBcolShut() { try { return JSON.parse(localStorage.getItem('lift.bcolx.v1') || '{}') || {}; } catch (e) { return {}; } }
+function lfBcolSet(id, on) { var o = lfBcolShut(); if (on) delete o[id]; else o[id] = 1; try { localStorage.setItem('lift.bcolx.v1', JSON.stringify(o)); } catch (e) {} }
+try { localStorage.removeItem('lift.bcol.v1'); } catch (e) {}
 function lfOnlyGet() { try { return localStorage.getItem('lift.bonly.v1') === '1'; } catch (e) { return false; } }
 function lfOnlyBtn() {
   var row = el('<div class="lf-bshow"><span>Unlocked only</span><button type="button" class="lf-tgl rk-show" role="switch" aria-label="Show only the badges you have unlocked"><i></i></button></div>'), sb = $('button', row);
@@ -14229,11 +14231,11 @@ function lfBadgeCard() {
     }
     var cols = BD_COLL.map(function (c) { var xs = c[3].filter(function (id) { return byId[id]; }).map(function (id) { used[id] = 1; return byId[id]; }); return [c[0], c[1], c[2], xs]; });
     var left = all.filter(function (x) { return !used[x.b.id]; }); if (left.length) cols.push(['more', 'More', '#94a3b8', left]);
-    var openMap = lfBcolOpen(), only = lfOnlyGet();
+    var shutMap = lfBcolShut(), only = lfOnlyGet();
     cols.forEach(function (c) {
       var xs = only ? c[3].filter(function (x) { return x.d; }) : c[3];
       if (!xs.length) return;
-      var n = c[3].filter(function (x) { return x.d; }).length, isOpen = !!openMap[c[0]];
+      var n = c[3].filter(function (x) { return x.d; }).length, isOpen = !shutMap[c[0]];
       var hd = el('<div class="lf-bcol"><div class="lf-bcol-t"><h4><button type="button" class="lf-bcol-b"></button></h4><span class="lf-num"></span>' + IC.chev + '</div><i aria-hidden="true"><i></i></i></div>');
       hd.dataset.col = c[0]; hd.style.setProperty('--cc', c[2]);
       var tb = $('.lf-bcol-b', hd), g = el('<div class="lf-bdg"></div>'); g.id = 'lfBg' + c[0];

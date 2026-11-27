@@ -525,6 +525,22 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await c.close();
   }
 
+  /* ── THE BADGE SHELF IS OPEN: every collection is open to begin with, and only the ones you put away stay away ── */
+  {
+    const o = await open({ wo: [{ id: 'a', d: '2026-10-26', s: 1, e: 2, n: 'Push', x: [{ id: 'bench', n: 'Bench', sets: [{ w: 60, r: 8 }] }] }] });
+    const p = o.page;
+    await p.click('.lf-bar [data-v="you"]'); await settle(p);
+    await p.click('#lfBadges'); await settle(p);
+    const st = () => p.evaluate(() => [...[...document.querySelectorAll('.lf-sheet')].pop().querySelectorAll('.lf-bcol')].map((h) => ({ k: h.dataset.col, open: h.querySelector('.lf-bcol-b').getAttribute('aria-expanded') === 'true', shown: !document.getElementById('lfBg' + h.dataset.col).hidden })));
+    const a0 = await st();
+    ok('every collection on the badge shelf is open when you first see it, and its badges are showing', a0.length >= 10 && a0.every((x) => x.open && x.shown), a0.filter((x) => !x.open || !x.shown));
+    await p.evaluate(() => [...document.querySelectorAll('.lf-sheet')].pop().querySelector('.lf-bcol[data-col="vol"] .lf-bcol-b').click()); await p.waitForTimeout(200);
+    const a1 = await st();
+    ok('putting one away shuts just that one', a1.filter((x) => !x.open).map((x) => x.k).join() === 'vol' && a1.filter((x) => x.open).length === a0.length - 1, a1.filter((x) => !x.open));
+    ok('and it stays put away across a reload, while the rest are still open', await (async () => { await p.reload(); await p.waitForTimeout(700); await p.click('.lf-bar [data-v="you"]'); await settle(p); await p.click('#lfBadges'); await settle(p); const a2 = await st(); return a2.filter((x) => !x.open).map((x) => x.k).join() === 'vol'; })());
+    await o.c.close();
+  }
+
   ok('no page errors', errors.length === 0, errors.slice(0, 3));
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);
