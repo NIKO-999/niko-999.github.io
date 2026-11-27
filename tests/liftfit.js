@@ -24,7 +24,7 @@ const freeze = (at) => `(() => { const F = new Date('${at}').getTime(); const R 
 const focus = (rows) => rows.map((r) => ({ m: r[0], lo: r[1], hi: r[2] === undefined ? r[1] : r[2], p: 0 }));
 /* the program's own: every figure the day shows with the switch off */
 /* the program's own, in EFFECTIVE sets, the way the bars count them: each muscle's direct sets plus half of what other exercises give it (presses for triceps, rows for biceps, squats for glutes) */
-const BASE_TG = [['Quads', 17], ['Hamstrings', 16], ['Calves', 15], ['Glutes', 11], ['Chest', 16], ['Back', 16], ['Shoulders', 16], ['Triceps', 14], ['Biceps', 17], ['Abs', 11]];
+const BASE_TG = [['Quads', 17], ['Hamstrings', 16], ['Calves', 15], ['Glutes', 11], ['Chest', 16], ['Back', 16], ['Shoulders', 7], ['Triceps', 14], ['Biceps', 17], ['Abs', 11], ['Rear delts', 9]];
 /* which exercises of the seeded program are which muscle, by the names the days print */
 const HAM = ['Romanian deadlift', 'Seated leg curls', 'Lying leg curls'];
 const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench press', 'Pec deck'];
@@ -202,7 +202,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     const d = new Date('2026-10-30T10:00:00'), ymd = '2026-10-30';
     const sets = (n) => Array.from({ length: n }, () => ({ w: 20, r: 12 }));
     const wo = [{ id: 'h1', d: ymd, s: d.getTime(), e: d.getTime() + 3600000, n: 'Pull', x: [{ id: 'rdfly', n: 'Rear delt flyes', sets: sets(3) }, { id: 'facepull', n: 'Face pulls', sets: sets(1) }, { id: 'backext', n: '45-degree back extensions', sets: sets(1) }] }];
-    const o = await open({ wo, focus: focus(BASE_TG) });
+    const o = await open({ wo, focus: focus(BASE_TG.filter((r) => r[0] !== 'Rear delts')) });
     const bars = await o.page.evaluate(() => [...document.querySelectorAll('#lfLegs .lf-vr')].map((r) => ({ m: r.dataset.m, em: r.querySelector('em').textContent, aux: r.classList.contains('is-aux'), met: r.classList.contains('is-met') })));
     const rd = bars.filter((b) => b.m === 'Rear delts')[0], lb = bars.filter((b) => b.m === 'Lower back')[0];
     ok('rear delts join the targets as a bar of their own, and lower back is not a line on the list: it is a part of Back', rd && rd.aux && !lb, bars.map((b) => b.m));
@@ -494,7 +494,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     await c.addInitScript(freeze('2026-10-30T18:00:00'));
     await c.addInitScript(`try { localStorage.setItem('lift.v1', ${JSON.stringify(JSON.stringify({ unit: 'kg', goal: 3, tour: true, wkSum: '9999-12-31', wkDone: '9999-12-31', wo: [], prog: 'ul', xp: 'adv', zn: 1 }))}); } catch (e) {} window.__lfNoIntro = 1;`);
     const p = await c.newPage(); p.on('pageerror', (e) => errors.push(String(e)));
-    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolRange:lfVolRange,lfVolWeek:lfVolWeek,lfVolPlan:lfVolPlan,zVal:zVal,LF_REF:LF_REF,zRange:zRange};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
+    await p.route(/\/lift\/(index\.html)?$/, async (r) => { const fs = require('fs'), path = require('path'); let tx = fs.readFileSync(path.join(__dirname, '..', 'lift', 'index.html'), 'utf8'); const i = tx.lastIndexOf('})();'); tx = tx.slice(0, i) + 'window.__vv={S:S,lfVolAssess:lfVolAssess,lfVolRange:lfVolRange,lfVolWeek:lfVolWeek,lfVolPlan:lfVolPlan,zVal:zVal,LF_REF:LF_REF,zRange:zRange,lfRegion:lfRegion,lfRegionNow:lfRegionNow};' + tx.slice(i); r.fulfill({ body: tx, contentType: 'text/html' }); });
     await p.goto(`${BASE}/lift/`); await p.waitForTimeout(700);
     const asses = (m, v, o) => p.evaluate(([m, v, o]) => { const V = window.__vv; if (o.xp) V.S.xp = o.xp; const prog = V.lfVolWeek(); return V.lfVolAssess(m, v, Object.assign({ zn: 1, pri: false, prog }, o)); }, [m, v, o || {}]);
     const SCREEN = { Quads: 19, Hamstrings: 20, Calves: 20, Glutes: 19, Abs: 20, Chest: 19, Back: 20, Triceps: 19, Biceps: 19, 'Rear delts': 20, 'Lower back': 20 };
@@ -529,6 +529,31 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('the programme is worked out separately from the target and moves with it: more chest asked of the week gives the chest more sets', w.hi.d > w.lo.d && w.lo.d >= 0, w);
     ok('effective volume is direct plus half the indirect, once', Math.abs(w.hi.eff - (w.hi.d + w.hi.i * 0.5)) < 1e-9 && w.hi.i >= 0, w.hi);
     ok('and it leaves the saved targets alone while it works', await p.evaluate(() => { const V = window.__vv; const before = JSON.stringify(V.S.focus); V.lfVolWeek({ Chest: 3, Back: 3 }); return JSON.stringify(V.S.focus) === before; }));
+    /* ── REGIONAL BALANCE: related muscles read against their own ranges, one line, nothing changed ── */
+    const reg = (o) => p.evaluate((o) => { const r = window.__vv.lfRegion(o); return { msg: r.msg, kind: r.kind, over: r.issue && r.issue.over, under: r.issue && r.issue.under, detail: r.detail, balanced: r.balanced, issue: !!r.issue, n: r.all.length }; }, o);
+    const A = await reg({ v: { Quads: 20, Hamstrings: 12, Glutes: 5, Calves: 15 }, zn: 1, xp: 'some' });
+    ok('TEST A: quads 20, hamstrings 12, glutes 5, calves 15 reads as one lower-body finding: high quads, low glutes, and only those two', A.kind === 'pair' && A.over === 'Quads' && A.under === 'Glutes' && /quad/.test(A.msg) && /glute/.test(A.msg) && !/hamstring|calf|calves/i.test(A.msg), A);
+    const A2 = await reg({ v: { Quads: 12, Hamstrings: 10, Glutes: 10, Calves: 12 }, s: { Glutes: 2 }, zn: 1, xp: 'some' });
+    ok('TEST A: glutes the exercises do not deliver, against the target that was set, read as below target with direct work suggested', A2.kind === 'under' && A2.under === 'Glutes' && /Glutes below target\. Consider additional direct work\./.test(A2.msg) && /you aimed at/.test(A2.detail), A2);
+    const B = await reg({ v: { Chest: 20, Back: 10, 'Rear delts': 5 }, s: { 'Front delts': 18 }, ind: { 'Front delts': 6 }, zn: 1, xp: 'some' });
+    ok('TEST B: chest 20, back 10, front delts 18, rear delts 5 reads as front-delt overlap from pressing with the rear delts low, and counts the indirect work', B.kind === 'pair' && /front-delt overlap from pressing/i.test(B.msg) && /rear-delts low/.test(B.msg) && /indirect/.test(B.detail), B);
+    const C = await reg({ v: { Quads: 12, Hamstrings: 10, Glutes: 8, Calves: 12, Chest: 12, Back: 12, Shoulders: 9, 'Rear delts': 7, Biceps: 10, Triceps: 9 }, zn: 1, xp: 'some' });
+    ok('TEST C: muscles that are each inside their own range are not an imbalance because their set counts differ', !C.issue && C.n === 0 && C.balanced.indexOf('Lower') >= 0 && C.balanced.indexOf('Upper') >= 0, C);
+    const D1 = await reg({ days: { Quads: { d1: 12, d2: 2, d3: 2 }, Glutes: { d2: 4, d3: 4 } }, dn: { d1: 'Lower A', d2: 'Lower B', d3: 'Lower C' }, zn: 1, xp: 'some' });
+    const D2 = await reg({ days: { Quads: { d1: 6, d2: 5, d3: 5 }, Glutes: { d1: 3, d2: 3, d3: 3 } }, zn: 1, xp: 'some' });
+    ok('TEST D: three lower sessions with most of the quad work in one are told so, naming the session and another to move it to', D1.kind === 'session' && /Quad work sits in one session/.test(D1.msg) && /Lower A/.test(D1.detail), D1);
+    ok('TEST D: the same sets spread across the three sessions are left alone', !D2.issue, D2);
+    const D3 = await reg({ days: { Quads: { d1: 6, d2: 5, d3: 5 } }, hard: { d1: 3 }, dn: { d1: 'Lower A' }, zn: 1, xp: 'some' });
+    const D4 = await reg({ days: { Quads: { d1: 6, d2: 5, d3: 5 } }, hard: { d1: 1, d2: 1, d3: 1 }, zn: 1, xp: 'some' });
+    ok('TEST D: every demanding lower lift on one day is flagged, and one on each of the three is not', D3.kind === 'heavy' && !D4.issue, [D3, D4]);
+    ok('and the programme reports its sessions and parts alongside the totals', await p.evaluate(() => { const w = window.__vv.lfVolWeek(); return !!w.__days && !!w.__sub && !!w.__hard && !Object.keys(w).some((k) => k.indexOf('__') === 0); }));
+    /* custom targets are read, never replaced */
+    ok('TEST E: custom figures are judged as written and the saved targets are not touched', await p.evaluate(() => { const V = window.__vv, before = JSON.stringify(V.S.focus), r = V.lfRegionNow({ Quads: 22, Glutes: 3, Hamstrings: 9 }, V.lfVolWeek({ Quads: 22, Glutes: 3, Hamstrings: 9 }), 1, {}); return !!r.msg && JSON.stringify(V.S.focus) === before; }));
+    /* the mode and the experience move the answer */
+    const F1 = await reg({ v: { Quads: 14, Hamstrings: 10, Glutes: 1, Calves: 12 }, zn: 0, xp: 'some' }), F2 = await reg({ v: { Quads: 14, Hamstrings: 10, Glutes: 1, Calves: 12 }, zn: 2, xp: 'adv' });
+    ok('TEST F: the same figures in Maintain pair high quads with low glutes, and in Push for an experienced lifter the quads are fine and only the glutes are short', F1.kind === 'pair' && F2.kind === 'under' && F2.under === 'Glutes', [F1.msg, F2.msg]);
+    const F3 = await reg({ v: { Quads: 15, Hamstrings: 10, Glutes: 3, Calves: 12 }, zn: 1, xp: 'new' }), F4 = await reg({ v: { Quads: 15, Hamstrings: 10, Glutes: 3, Calves: 12 }, zn: 1, xp: 'adv' });
+    ok('TEST F: and experience moves it too: 15 quad sets are high for a beginner and fine for an experienced lifter', F3.kind === 'pair' && F4.kind === 'under', [F3.msg, F4.msg]);
     /* the screen: statuses are drawn from all that, live */
     const o2 = await open({ prog: 'ul', xp: 'adv', zn: 1, focus: Object.keys(SCREEN).map((m) => ({ m, lo: SCREEN[m], hi: SCREEN[m], p: 0 })) });
     const q = o2.page;
@@ -538,6 +563,7 @@ const CHEST = ['Incline dumbbell press', 'Cable chest flyes', 'Dumbbell bench pr
     ok('and each shows one short line, never a paragraph', rows.every((x) => x.t.length < 50) && await q.locator('#lfZnRows .lf-vnt').count() === rows.length);
     const move = async (m, v) => q.evaluate(([m, v]) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); const i = r.querySelector('input'); i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); }, [m, v]);
     const rowOf = (m) => q.evaluate((m) => { const r = [...document.querySelectorAll('#lfZnRows .lf-zr')].find((x) => x.querySelector('.lf-zr-l span').textContent === m); return { s: r.dataset.status, t: r.querySelector('.lf-vnt').textContent, zone: r.querySelector('.zo').style.width, eff: r.dataset.eff }; }, m);
+    ok('the regional line is one short line inside the existing volume check, or absent', await q.locator('#lfVolReg .lf-vnt').count() <= 1 && (await q.locator('#lfVolReg').textContent()).length < 110 && await q.locator('#lfZnRows .lf-vnt').count() === rows.length);
     const sumBefore = await q.textContent('#lfVolSay'), cb = await rowOf('Chest'), hb = await rowOf('Hamstrings');
     await move('Chest', 10); await q.waitForTimeout(150);
     const ca = await rowOf('Chest'), ha = await rowOf('Hamstrings');
